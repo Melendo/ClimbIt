@@ -14,21 +14,15 @@ ClimbIt es una aplicación web/móvil que permite a un usuario registrarse para 
 - Implementar un sistema de gamificación que incluya puntos, niveles y logros.
 - Proporcionar estadísticas detalladas sobre el progreso de los usuarios.
 
----
-
 ## 2. Guia de instalación
 
 Esta guía te muestra cómo poner en marcha el proyecto en tu máquina local.
-
----
 
 ### 2.1. Requisitos
 
 - [Node.js](https://nodejs.org/) (versión recomendada: >=18)
 - [npm](https://www.npmjs.com/) (viene con Node.js)
 - Git (para clonar el repositorio)
-
----
 
 ### 2.2. Instalación
 
