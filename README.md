@@ -27,20 +27,20 @@ Esta guía te muestra cómo poner en marcha el proyecto en tu máquina local.
 ### 2.2. Instalación
 
 1. **Clona el repositorio**
-- git clone https://github.com/tu-usuario/tu-proyecto.git
-- cd tu-proyecto
+`git clone https://github.com/tu-usuario/tu-proyecto.git`
+`cd tu-proyecto`
 
 2. Instala las dependencias
-- npm install
+`npm install`
 
 3. Configura variables de entorno
 
 4. Inicia el proyecto
-- npm start
+`npm start`
 
 5. Ejecutar en modo desarrollo
-- npm run dev
+`npm run dev`
 (Esto activa el hot reload y otras herramientas útiles para desarrollo)
 
 6. Ejecutar tests
-- npm test
+`npm test`
