@@ -1,0 +1,43 @@
+# Nombre del workflow, claro y descriptivo
+name: ClimbIt-CI
+
+# Disparador: Se ejecuta SOLO en Pull Requests a main y develop
+on:
+  pull_request:
+    branches:
+      - "main"
+      - "develop"
+
+jobs:
+  # Nombre del trabajo que aparecerá en los status checks de GitHub
+  test:
+    name: Run Jest Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        # Probamos en la versión de soporte a largo plazo (LTS) más reciente.
+        # Puedes añadir más si lo necesitas, ej: [18.x, 20.x]
+        node-version: [20.x]
+
+    steps:
+      # Paso 1: Descargar el código del repositorio
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Paso 2: Configurar el entorno de Node.js
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      # Paso 3: Instalar las dependencias de forma segura
+      - name: Install dependencies
+        run: npm ci
+
+      # Paso 4: Ejecutar los tests
+      # Usamos el script que también revisa la cobertura. Si los tests
+      # o la cobertura fallan, este paso fallará, y con él, todo el workflow.
+      - name: Run Jest tests with coverage
+        run: npm run test:coverage
