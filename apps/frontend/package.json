@@ -1,0 +1,18 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "live-server --port=8080 --no-browser",
+    "test": "echo 'No hay tests en frontend'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "",
+  "type": "commonjs",
+  "dependencies": {
+    "live-server": "^1.2.2",
+    "sequelize": "^1.2.1"
+  }
+}
