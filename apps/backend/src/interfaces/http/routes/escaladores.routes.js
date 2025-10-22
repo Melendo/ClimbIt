@@ -1,7 +1,10 @@
 const express = require('express');
-const { crearEscalador } = require('../controllers/escaladorController');
 const router = express.Router();
 
-router.post('/', crearEscalador);
+const { escaladorController } = require('../../../infrastructure/container');
+
+router.post('/', (req, res, next) => {
+  escaladorController.crear(req, res, next);
+});
 
 module.exports = router;

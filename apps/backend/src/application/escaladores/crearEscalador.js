@@ -1,10 +1,18 @@
-const Escalador = require('../../domain/escaladores/Escalador');
+// const Escalador = require('../../domain/escaladores/Escalador');
 
-function crearEscaladorUseCase(repository) {
-  return async function ({ nombre, edad, experiencia }) {
-    const escalador = new Escalador({ nombre, edad, experiencia });
-    return await repository.guardar(escalador);
-  };
+class CrearEscalador {
+  constructor(escaladorRepository) {
+    this.escaladorRepository = escaladorRepository;
+  }
+
+  async execute(data) {
+    const nuevoEscalador = data;
+    console.log('Ejecutando CrearEscalador con:', nuevoEscalador, '-usecase');
+    const escaladorCreado =
+      await this.escaladorRepository.crear(nuevoEscalador);
+
+    return escaladorCreado;
+  }
 }
 
-module.exports = crearEscaladorUseCase;
+module.exports = CrearEscalador;
