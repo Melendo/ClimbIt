@@ -1,39 +1,44 @@
-// --- 1. Importar Modelos (Infraestructura) ---
-const { DataTypes } = require('sequelize'); // 👈 ¡NECESITAS ESTO!
-const sequelize = require('./db/postgres/sequelize'); // 👈 ¡Y ESTO!
+// Contenedor de dependencias:
+// - Importa las fábricas/objetos de infraestructura (sequelize, modelos, repositorios)
+// - Crea instancias (repositorios, casos de uso, controladores)
+// - Exporta las instancias que usarán las rutas
 
-// --- 2. Importar la FÁBRICA de modelos ---
-const EscaladorModelFactory = require('./db/postgres/models/escaladorModel');
+// Importaciones de infraestructura
+const { DataTypes } = require('sequelize');
+const sequelize = require('./db/postgres/sequelize');
 
-// --- 3. LLAMAR a la fábrica para obtener el modelo real ---
-// eslint-disable-next-line new-cap
-const EscaladorModel = EscaladorModelFactory(sequelize, DataTypes);
-// --- 2. Importar Repositorios (Infraestructura) ---
+// Importar la fábrica del modelo Escalador (definición del modelo)
+const escaladorModelFactory = require('./db/postgres/models/escaladorModel');
+
+// Crear el modelo real a partir de la fábrica (inyección de sequelize y DataTypes)
+const EscaladorModel = escaladorModelFactory(sequelize, DataTypes);
+
+// Repositorios (implementación concreta que usa el modelo)
 const EscaladorRepositoryPostgres = require('./repositories/EscaladorRepositoryPostgres');
 
-// --- 3. Importar Casos de Uso (Aplicación) ---
+// Casos de uso (lógica de aplicación)
 const CrearEscalador = require('../application/escaladores/crearEscalador');
 
-// --- 4. Importar Controladores (Interfaces) ---
+// Controladores (interfaces HTTP)
 const EscaladorController = require('../interfaces/http/controllers/escaladorController');
 
-// --- 5. Instanciar y Componer (La Inyección) ---
+// --- Composición / Inyección de dependencias ---
 
-// a. Crear instancia del Repositorio, inyectando el Modelo
+// 1) Instancia del repositorio con el modelo específico
 const escaladorRepository = new EscaladorRepositoryPostgres(EscaladorModel);
 
-// b. Crear instancia del Caso de Uso, inyectando el Repositorio
+// 2) Instancia del caso de uso con el repositorio inyectado
 const crearEscaladorUseCase = new CrearEscalador(escaladorRepository);
 
-// c. Crear un objeto con los casos de uso para el controlador
+// 3) Agrupar los casos de uso que el controlador necesitará
 const escaladorUseCases = {
   crear: crearEscaladorUseCase,
 };
 
-// d. Crear instancia del Controlador, inyectando los Casos de Uso
+// 4) Instancia del controlador con los casos de uso inyectados
 const escaladorController = new EscaladorController(escaladorUseCases);
 
-// --- 6. Exportar las instancias que se usarán en las rutas ---
+// Exportar las instancias que serán consumidas por las rutas
 module.exports = {
   escaladorController,
 };

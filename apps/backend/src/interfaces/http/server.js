@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 
-let sequelize; // se asignará en `conectar()`
+const sequelize = require('../../infrastructure/db/postgres/sequelize');
 
 const app = express();
 
@@ -26,15 +26,13 @@ app.setupRoutes = setupRoutes;
 async function conectar() {
   try {
     // Cargamos las models aquí para inicializar Sequelize con la config
-    const db = require('../../infrastructure/db/postgres/models/');
-    sequelize = db.sequelize;
     await sequelize.authenticate();
-    console.log('Conexión a la base de datos establecida correctamente.');
+    console.info('Conexión a la base de datos establecida correctamente.');
 
     return sequelize;
   } catch (err) {
-    console.error('No se pudo conectar a la base de datos:', err);
-    throw err; // propaga el error para que el arrancador lo maneje
+    console.error('No se pudo conectar a la base de datos: connectionRefused');
+    throw err;
   }
 }
 

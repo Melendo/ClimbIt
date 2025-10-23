@@ -5,12 +5,36 @@ class Escalador {
    * @param {number} edad - La edad del escalador
    * @param {string} experiencia - El nivel de experiencia del escalador
    */
-  constructor(id, nombre, edad, experiencia) {
+  constructor(id, nombre, edad, experiencia = 'Principiante') {
     this.id = id;
     this.nombre = nombre;
     this.edad = edad;
+
+    if (!Escalador.EXPERIENCIAS.includes(experiencia)) {
+      throw new Error(
+        `experiencia inválida: "${experiencia}". Debe ser uno de: ${Escalador.EXPERIENCIAS.join(', ')}`
+      );
+    }
+
     this.experiencia = experiencia;
   }
+
+  /**
+   * Comprueba si un valor es una experiencia válida
+   * @param {string} valor
+   * @returns {boolean}
+   */
+  static esExperienciaValida(valor) {
+    return Escalador.EXPERIENCIAS.includes(valor);
+  }
 }
+
+// Definir la propiedad estática fuera de la clase para compatibilidad con parsers antiguos.
+Escalador.EXPERIENCIAS = Object.freeze([
+  'Principiante',
+  'Intermedio',
+  'Avanzado',
+  'Experto',
+]);
 
 module.exports = Escalador;

@@ -1,4 +1,4 @@
-// const Escalador = require('../../domain/escaladores/Escalador');
+const Escalador = require('../../domain/escaladores/Escalador');
 
 class CrearEscalador {
   constructor(escaladorRepository) {
@@ -6,12 +6,21 @@ class CrearEscalador {
   }
 
   async execute(data) {
-    const nuevoEscalador = data;
-    console.log('Ejecutando CrearEscalador con:', nuevoEscalador, '-usecase');
-    const escaladorCreado =
-      await this.escaladorRepository.crear(nuevoEscalador);
+    try {
+      const nuevoEscalador = new Escalador(
+        null,
+        data.nombre,
+        data.edad,
+        data.experiencia
+      );
 
-    return escaladorCreado;
+      const escaladorCreado =
+        await this.escaladorRepository.crear(nuevoEscalador);
+
+      return escaladorCreado;
+    } catch (error) {
+      throw new Error(`Error al crear el escalador: ${error.message}`);
+    }
   }
 }
 

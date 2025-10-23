@@ -1,27 +1,20 @@
 const { Sequelize } = require('sequelize');
+const configs = require('./config');
 
-// Aquí es donde lees las variables de entorno o el config.json
-// para obtener las credenciales.
-// Por simplicidad, las ponemos aquí, pero deberías usar process.env
-const config = {
-  database: process.env.POSTGRES_DB,
-  username: process.env.POSTGRES_USER || 'tu_usuario',
-  password: process.env.POSTGRES_PASSWORD || 'tu_contraseña',
-  host: process.env.POSTGRES_HOST || 'localhost',
-  dialect: 'postgres',
-};
+const env = process.env.NODE_ENV || 'development';
+const cfg = configs[env] || configs.development;
 
-// 1. CREAS LA INSTANCIA
-const sequelize = new Sequelize(
-  config.database,
-  config.username,
-  config.password,
-  {
-    host: config.host,
-    dialect: config.dialect,
-    logging: false, // (o console.log para ver queries)
-  }
-);
+let sequelize;
+if (cfg.use_env_variable && process.env[cfg.use_env_variable]) {
+  sequelize = new Sequelize(process.env[cfg.use_env_variable], {
+    dialect: cfg.dialect,
+    logging: cfg.logging,
+  });
+} else {
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: cfg.dialect || 'postgres',
+    logging: cfg.logging,
+  });
+}
 
-// 2. EXPORTAS LA INSTANCIA
 module.exports = sequelize;
