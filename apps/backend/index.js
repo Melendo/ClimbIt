@@ -5,8 +5,6 @@ async function start() {
   try {
     await app.conectar();
 
-    app.setupRoutes();
-
     app.listen(PORT, () => {
       console.log(`Servidor corriendo en el puerto ${PORT}.`);
     });

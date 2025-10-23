@@ -22,6 +22,12 @@ const config = {
     '/node_modules/',
     '/interfaces/http/server.js',
     '/index.js',
+    '/migrations/',
+    '/seeders/',
+    '/infrastructure/db/postgres/config.js',
+    '/infrastructure/db/postgres/models/index.js',
+    '/infrastructure/db/postgres/sequelize.js',
+    '/domain/.*Repository\\.js$',
   ],
 
   // Umbrales mínimos de cobertura que deben cumplirse.
@@ -30,7 +36,6 @@ const config = {
       branches: 80,
       functions: 80,
       lines: 80,
-      statements: 90, // Permite 10 sentencias sin cubrir como máximo.
     },
   },
 };

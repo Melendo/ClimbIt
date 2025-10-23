@@ -19,8 +19,6 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
   }
 
   async crear(escalador) {
-    console.log('Creando escalador con datos:', escalador, '-repository');
-
     const data = {
       nombre: escalador.nombre,
       edad: escalador.edad,

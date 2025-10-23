@@ -22,6 +22,9 @@ function setupRoutes() {
 
 app.setupRoutes = setupRoutes;
 
+// Llamamos a setupRoutes inmediatamente para configurar las rutas
+setupRoutes();
+
 // Conectar a la base de datos
 async function conectar() {
   try {

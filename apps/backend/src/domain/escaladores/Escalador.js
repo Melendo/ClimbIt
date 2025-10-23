@@ -15,17 +15,16 @@ class Escalador {
         `experiencia inválida: "${experiencia}". Debe ser uno de: ${Escalador.EXPERIENCIAS.join(', ')}`
       );
     }
+    if (edad <= 0 || !Number.isInteger(edad)) {
+      throw new Error(`edad inválida: "${edad}". Debe ser un entero positivo.`);
+    }
+    if (typeof nombre !== 'string' || nombre.trim() === '') {
+      throw new Error(
+        `nombre inválido: "${nombre}". Debe ser una cadena no vacía.`
+      );
+    }
 
     this.experiencia = experiencia;
-  }
-
-  /**
-   * Comprueba si un valor es una experiencia válida
-   * @param {string} valor
-   * @returns {boolean}
-   */
-  static esExperienciaValida(valor) {
-    return Escalador.EXPERIENCIAS.includes(valor);
   }
 }
 

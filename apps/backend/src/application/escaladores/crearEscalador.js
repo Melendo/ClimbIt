@@ -18,8 +18,9 @@ class CrearEscalador {
         await this.escaladorRepository.crear(nuevoEscalador);
 
       return escaladorCreado;
+      // eslint-disable-next-line no-unused-vars
     } catch (error) {
-      throw new Error(`Error al crear el escalador: ${error.message}`);
+      throw new Error(`Error al crear el escalador`);
     }
   }
 }
