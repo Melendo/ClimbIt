@@ -5,4 +5,4 @@ class EscaladorRepository {
   }
 }
 
-module.exports = EscaladorRepository;
+export default EscaladorRepository;

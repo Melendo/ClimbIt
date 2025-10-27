@@ -8,23 +8,24 @@ class Escalador {
   constructor(id, nombre, edad, experiencia = 'Principiante') {
     this.id = id;
     this.nombre = nombre;
-    this.edad = edad;
-
-    if (!Escalador.EXPERIENCIAS.includes(experiencia)) {
-      throw new Error(
-        `experiencia inválida: "${experiencia}". Debe ser uno de: ${Escalador.EXPERIENCIAS.join(', ')}`
-      );
-    }
-    if (edad <= 0 || !Number.isInteger(edad)) {
-      throw new Error(`edad inválida: "${edad}". Debe ser un entero positivo.`);
-    }
-    if (typeof nombre !== 'string' || nombre.trim() === '') {
-      throw new Error(
-        `nombre inválido: "${nombre}". Debe ser una cadena no vacía.`
-      );
-    }
-
+    this.edad = Number(edad);
     this.experiencia = experiencia;
+
+    if (!Escalador.EXPERIENCIAS.includes(this.experiencia)) {
+      throw new Error(
+        `experiencia inválida: "${this.experiencia}". Debe ser uno de: ${Escalador.EXPERIENCIAS.join(', ')}`
+      );
+    }
+    if (this.edad <= 0 || !Number.isInteger(this.edad)) {
+      throw new Error(
+        `edad inválida: "${this.edad}". Debe ser un entero positivo.`
+      );
+    }
+    if (typeof this.nombre !== 'string' || this.nombre.trim() === '') {
+      throw new Error(
+        `nombre inválido: "${this.nombre}". Debe ser una cadena no vacía.`
+      );
+    }
   }
 }
 
@@ -36,4 +37,4 @@ Escalador.EXPERIENCIAS = Object.freeze([
   'Experto',
 ]);
 
-module.exports = Escalador;
+export default Escalador;

@@ -5,4 +5,4 @@ class PistaRepository {
   }
 }
 
-module.exports = PistaRepository;
+export default PistaRepository;

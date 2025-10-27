@@ -1,5 +1,5 @@
-const { Sequelize } = require('sequelize');
-const configs = require('./config');
+import { Sequelize } from 'sequelize';
+import configs from './config.js';
 
 const env = process.env.NODE_ENV || 'development';
 const cfg = configs[env] || configs.development;
@@ -17,4 +17,4 @@ if (cfg.use_env_variable && process.env[cfg.use_env_variable]) {
   });
 }
 
-module.exports = sequelize;
+export default sequelize;

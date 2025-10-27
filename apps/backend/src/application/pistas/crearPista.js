@@ -1,4 +1,4 @@
-const Pista = require('../../domain/pistas/Pista');
+import Pista from '../../domain/pistas/Pista.js';
 
 class CrearPista {
   constructor(pistaRepository) {
@@ -19,4 +19,4 @@ class CrearPista {
   }
 }
 
-module.exports = CrearPista;
+export default CrearPista;

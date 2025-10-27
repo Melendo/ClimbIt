@@ -1,4 +1,5 @@
-const CrearPistaUseCase = require('../../../src/application/pistas/crearPista');
+import { jest } from '@jest/globals';
+import CrearPistaUseCase from '../../../src/application/pistas/crearPista.js';
 
 describe('crearPistaUseCase', () => {
   it('debería crear y guardar una pista correctamente', async () => {

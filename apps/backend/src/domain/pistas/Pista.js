@@ -22,4 +22,4 @@ class Pista {
   }
 }
 
-module.exports = Pista;
+export default Pista;

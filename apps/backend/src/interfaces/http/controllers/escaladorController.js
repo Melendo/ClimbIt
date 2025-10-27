@@ -20,4 +20,4 @@ class EscaladorController {
   }
 }
 
-module.exports = EscaladorController;
+export default EscaladorController;

@@ -19,4 +19,4 @@ class PistaController {
   }
 }
 
-module.exports = PistaController;
+export default PistaController;

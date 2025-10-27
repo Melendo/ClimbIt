@@ -1,10 +1,10 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
-const EscaladorRoutes = require('./escaladores.routes');
-const PistaRoutes = require('./pistas.routes');
-// Monta las rutas de escaladores bajo el prefijo /escaladores
+import EscaladorRoutes from './escaladoresRoutes.js';
+import PistaRoutes from './pistasRoutes.js';
+
 router.use('/escaladores', EscaladorRoutes);
 router.use('/pistas', PistaRoutes);
 
-module.exports = router;
+export default router;

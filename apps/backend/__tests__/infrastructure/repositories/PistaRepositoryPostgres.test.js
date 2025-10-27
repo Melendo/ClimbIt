@@ -1,5 +1,6 @@
-const PistaRepositoryPostgres = require('../../../src/infrastructure/repositories/PistaRepositoryPostgres');
-const Pista = require('../../../src/domain/pistas/Pista');
+import { jest } from '@jest/globals';
+import PistaRepositoryPostgres from '../../../src/infrastructure/repositories/pistaRepositoryPostgres.js';
+import Pista from '../../../src/domain/pistas/Pista.js';
 
 describe('PistaRepositoryPostgres', () => {
   let repository;
