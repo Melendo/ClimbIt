@@ -9,8 +9,4 @@ router.post('/', (req, res, next) => {
   escaladorController.crear(req, res, next);
 });
 
-router.get('/:id', (req, res, next) => {
-  escaladorController.obtenerPistaPorId(req, res, next);
-});
-
 export default router;
