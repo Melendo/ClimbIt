@@ -1,24 +1,40 @@
-const crearEscaladorUseCase = require('../../../src/application/escaladores/crearEscalador');
+const CrearEscaladorUseCase = require('../../../src/application/escaladores/crearEscalador');
 
 describe('crearEscaladorUseCase', () => {
   it('debería crear y guardar un escalador correctamente', async () => {
     const mockRepository = {
-      guardar: jest.fn(async (escalador) => ({
+      crear: jest.fn(async (escalador) => ({
         ...escalador,
         id: 1,
       })),
     };
 
-    const crearEscalador = crearEscaladorUseCase(mockRepository);
+    const crearEscalador = new CrearEscaladorUseCase(mockRepository);
 
-    const datos = { nombre: 'Juan', edad: 30, experiencia: 'intermedio' };
-    const resultado = await crearEscalador(datos);
+    const datos = { nombre: 'Juan', edad: 30, experiencia: 'Intermedio' };
+    const resultado = await crearEscalador.execute(datos);
 
     expect(resultado).toMatchObject({
       nombre: 'Juan',
       edad: 30,
-      experiencia: 'intermedio',
+      experiencia: 'Intermedio',
       id: 1,
     });
+  });
+
+  it('no debería crear y ni guardar un escalador por datos invalidos', async () => {
+    const mockRepository = {
+      crear: jest.fn(async (escalador) => ({
+        ...escalador,
+        id: 1,
+      })),
+    };
+
+    const crearEscalador = new CrearEscaladorUseCase(mockRepository);
+
+    const datos = { nombre: 'Juan', edad: 30, experiencia: 'intermedio' };
+    await expect(() => crearEscalador.execute(datos)).rejects.toThrow(
+      `Error al crear el escalador`
+    );
   });
 });

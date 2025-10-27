@@ -1,15 +1,23 @@
-const crearEscaladorUseCase = require('../../../application/escaladores/crearEscalador');
-const repository = require('../../../infrastructure/repositories/EscaladorRepositoryPostgres');
-
-const crearEscalador = async (req, res) => {
-  try {
-    const crear = crearEscaladorUseCase(repository);
-    console.log('Datos recibidos en el controlador:', req.body);
-    const nuevo = await crear(req.body);
-    res.status(201).json(nuevo);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+class EscaladorController {
+  constructor(escaladorUseCases) {
+    this.useCases = escaladorUseCases;
   }
-};
 
-module.exports = { crearEscalador };
+  async crear(req, res, next) {
+    try {
+      const { nombre, edad, experiencia } = req.body;
+
+      const nuevoEscalador = await this.useCases.crear.execute({
+        nombre,
+        edad,
+        experiencia,
+      });
+
+      res.status(201).json(nuevoEscalador);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+}
+
+module.exports = EscaladorController;

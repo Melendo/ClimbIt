@@ -1,11 +1,33 @@
-const pool = require('../db/postgres');
+const escaladorRepository = require('../../domain/escaladores/escaladorRepository');
+const Escalador = require('../../domain/escaladores/Escalador');
 
-module.exports = {
-  async guardar(escalador) {
-    const result = await pool.query(
-      'INSERT INTO escaladores (nombre, edad, experiencia) VALUES ($1, $2, $3) RETURNING *',
-      [escalador.nombre, escalador.edad, escalador.experiencia]
+class EscaladorRepositoryPostgres extends escaladorRepository {
+  constructor(escaladorModel) {
+    super();
+    this.EscaladorModel = escaladorModel;
+  }
+
+  // Método privado para mapear
+  _toDomain(escaladorModel) {
+    if (!escaladorModel) return null;
+    return new Escalador(
+      escaladorModel.id,
+      escaladorModel.nombre,
+      escaladorModel.edad,
+      escaladorModel.experiencia
     );
-    return result.rows[0];
-  },
-};
+  }
+
+  async crear(escalador) {
+    const data = {
+      nombre: escalador.nombre,
+      edad: escalador.edad,
+      experiencia: escalador.experiencia,
+    };
+    const escaladorModel = await this.EscaladorModel.create(data);
+
+    return this._toDomain(escaladorModel);
+  }
+}
+
+module.exports = EscaladorRepositoryPostgres;

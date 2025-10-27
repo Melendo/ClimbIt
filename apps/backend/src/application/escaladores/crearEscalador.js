@@ -1,10 +1,28 @@
 const Escalador = require('../../domain/escaladores/Escalador');
 
-function crearEscaladorUseCase(repository) {
-  return async function ({ nombre, edad, experiencia }) {
-    const escalador = new Escalador({ nombre, edad, experiencia });
-    return await repository.guardar(escalador);
-  };
+class CrearEscalador {
+  constructor(escaladorRepository) {
+    this.escaladorRepository = escaladorRepository;
+  }
+
+  async execute(data) {
+    try {
+      const nuevoEscalador = new Escalador(
+        null,
+        data.nombre,
+        data.edad,
+        data.experiencia
+      );
+
+      const escaladorCreado =
+        await this.escaladorRepository.crear(nuevoEscalador);
+
+      return escaladorCreado;
+      // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+      throw new Error(`Error al crear el escalador`);
+    }
+  }
 }
 
-module.exports = crearEscaladorUseCase;
+module.exports = CrearEscalador;

@@ -1,27 +1,32 @@
 const request = require('supertest');
 const app = require('../../../src/interfaces/http/server');
-const pool = require('../../../src/infrastructure/db/postgres');
+const db = require('../../../src/infrastructure/db/postgres/models');
 
 describe('E2E: Crear pista', () => {
+  // Datos para pruebas
+  const pistaTest = { nombre: 'E2E Test', dificultad: '6a' };
+
+  // Limpieza después de todas las pruebas
   afterAll(async () => {
-    await pool.query('DELETE FROM pistas WHERE nombre = $1', ['E2E']);
-    await pool.end();
+    await db.Pista.destroy({ where: { nombre: pistaTest.nombre } });
+    await db.sequelize.close();
   });
 
   it('debería crear una pista y devolverla', async () => {
-    const nuevaPista = { nombre: 'E2E', dificultad: 'intermedio' };
-
+    // Enviar solicitud para crear pista
     const response = await request(app)
       .post('/pistas')
-      .send(nuevaPista)
+      .send(pistaTest)
       .expect(201);
 
-    expect(response.body).toMatchObject(nuevaPista);
+    // Verificar respuesta de la API
+    expect(response.body).toMatchObject(pistaTest);
+    expect(response.body.id).toBeDefined();
 
-    const { rows } = await pool.query(
-      'SELECT * FROM pistas WHERE nombre = $1',
-      [nuevaPista.nombre]
-    );
-    expect(rows[0]).toMatchObject(nuevaPista);
+    // Verificar que se guardó en la base de datos usando Sequelize
+    const pistaGuardada = await db.Pista.findByPk(response.body.id);
+    expect(pistaGuardada).not.toBeNull();
+    expect(pistaGuardada.nombre).toBe(pistaTest.nombre);
+    expect(pistaGuardada.dificultad).toBe(pistaTest.dificultad);
   });
 });

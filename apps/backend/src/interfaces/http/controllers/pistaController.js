@@ -1,14 +1,22 @@
-const crearPistaUseCase = require('../../../application/pistas/crearPista');
-const repository = require('../../../infrastructure/repositories/PistaRepositoryPostgres');
-
-const crearPista = async (req, res) => {
-  try {
-    const crear = crearPistaUseCase(repository);
-    const nueva = await crear(req.body);
-    res.status(201).json(nueva);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+class PistaController {
+  constructor(pistaUseCases) {
+    this.useCases = pistaUseCases;
   }
-};
 
-module.exports = { crearPista };
+  async crear(req, res, next) {
+    try {
+      const { nombre, dificultad } = req.body;
+
+      const nuevaPista = await this.useCases.crear.execute({
+        nombre,
+        dificultad,
+      });
+
+      res.status(201).json(nuevaPista);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+}
+
+module.exports = PistaController;

@@ -1,7 +1,10 @@
 const express = require('express');
-const { crearPista } = require('../controllers/pistaController');
 const router = express.Router();
 
-router.post('/', crearPista);
+const { pistaController } = require('../../../infrastructure/container');
+
+router.post('/', (req, res, next) => {
+  pistaController.crear(req, res, next);
+});
 
 module.exports = router;
