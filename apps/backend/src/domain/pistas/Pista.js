@@ -2,7 +2,7 @@ class Pista {
   /**
    * @param {number|null} id - El ID único de la pista (null si es nueva)
    * @param {string} nombre - El nombre de la pista
-   * @param {number} dificultad - La dificultad de la pista
+   * @param {string} dificultad - La dificultad de la pista
    */
   constructor(id, nombre, dificultad) {
     this.id = id;
