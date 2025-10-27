@@ -10,9 +10,6 @@ class ObtenerPistaPorId {
       const pista = result
         ? new Pista(result.id, result.nombre, result.dificultad)
         : null;
-      if (!pista) {
-        throw new Error(`Pista con ID ${id} no encontrada`);
-      }
       return pista;
     } catch (error) {
       throw new Error(`Error al obtener la pista por ID: ${error.message}`);

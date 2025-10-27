@@ -22,6 +22,11 @@ class PistaRepositoryPostgres extends pistaRepository {
 
     return this._toDomain(pistaModel);
   }
+
+  async obtenerPorId(id) {
+    const pistaModel = await this.PistaModel.findByPk(id);
+    return pistaModel ? pistaModel.get() : null;
+  }
 }
 
 export default PistaRepositoryPostgres;

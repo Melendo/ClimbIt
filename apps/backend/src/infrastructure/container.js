@@ -13,6 +13,7 @@ import PistaRepositoryPostgres from './repositories/pistaRepositoryPostgres.js';
 // Casos de uso (lógica de aplicación)
 import CrearEscalador from '../application/escaladores/crearEscalador.js';
 import CrearPista from '../application/pistas/crearPista.js';
+import ObtenerPistaPorId from '../application/pistas/obtenerPistaPorId.js';
 
 // Controladores (interfaces HTTP)
 import EscaladorController from '../interfaces/http/controllers/escaladorController.js';
@@ -32,13 +33,14 @@ async function inicializarContainer() {
   // 2) Instancia del caso de uso con el repositorio inyectado
   const crearEscaladorUseCase = new CrearEscalador(escaladorRepository);
   const crearPistaUseCase = new CrearPista(pistaRepository);
-
+  const obtenerPistaPorIdUseCase = new ObtenerPistaPorId(pistaRepository);
   // 3) Agrupar los casos de uso que el controlador necesitará
   const escaladorUseCases = {
     crear: crearEscaladorUseCase,
   };
   const pistaUseCases = {
     crear: crearPistaUseCase,
+    obtenerPistaPorId: obtenerPistaPorIdUseCase,
   };
 
   // 4) Instancia del controlador con los casos de uso inyectados
