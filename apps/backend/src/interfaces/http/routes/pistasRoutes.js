@@ -5,7 +5,6 @@ const router = express.Router();
 const container = await containerPromise;
 const { pistaController } = container;
 
-// Las rutas específicas DEBEN ir antes de las rutas con parámetros
 router.post('/create', (req, res, next) => {
   pistaController.crear(req, res, next);
 });

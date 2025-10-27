@@ -5,7 +5,7 @@ const router = express.Router();
 const container = await containerPromise;
 const { escaladorController } = container;
 
-router.post('/', (req, res, next) => {
+router.post('/create', (req, res, next) => {
   escaladorController.crear(req, res, next);
 });
 
