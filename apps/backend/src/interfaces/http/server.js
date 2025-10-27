@@ -1,8 +1,13 @@
-const express = require('express');
-const path = require('path');
-const cors = require('cors');
+import express from 'express';
+import path from 'path';
+import cors from 'cors';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-const sequelize = require('../../infrastructure/db/postgres/sequelize');
+import sequelize from '../../infrastructure/db/postgres/sequelize.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 
@@ -15,8 +20,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '..', 'web', 'public')));
 
 // Rutas API: cargamos las rutas cuando se inicializa la app para evitar side-effects
-function setupRoutes() {
-  const mainRouter = require('./routes');
+async function setupRoutes() {
+  const mainRouterModule = await import('./routes/index.js');
+  const mainRouter = mainRouterModule.default;
   app.use('/', mainRouter);
 }
 
@@ -41,4 +47,4 @@ async function conectar() {
 
 app.conectar = conectar;
 
-module.exports = app;
+export default app;

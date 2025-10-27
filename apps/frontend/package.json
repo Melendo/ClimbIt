@@ -10,7 +10,7 @@
   "keywords": [],
   "author": "",
   "license": "",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "live-server": "^1.2.0",
     "sequelize": "^6.37.7"

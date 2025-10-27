@@ -1,5 +1,5 @@
-const escaladorRepository = require('../../domain/escaladores/escaladorRepository');
-const Escalador = require('../../domain/escaladores/Escalador');
+import escaladorRepository from '../../domain/escaladores/escaladorRepository.js';
+import Escalador from '../../domain/escaladores/Escalador.js';
 
 class EscaladorRepositoryPostgres extends escaladorRepository {
   constructor(escaladorModel) {
@@ -30,4 +30,4 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
   }
 }
 
-module.exports = EscaladorRepositoryPostgres;
+export default EscaladorRepositoryPostgres;

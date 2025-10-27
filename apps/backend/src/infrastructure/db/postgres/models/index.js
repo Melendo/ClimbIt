@@ -1,12 +1,18 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-const Sequelize = require('sequelize');
-const process = require('process');
-const basename = path.basename(__filename);
+import { readdirSync } from 'node:fs';
+import Sequelize from 'sequelize';
+import { DataTypes } from 'sequelize';
+import process from 'process';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+import configFile from '../config.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config.js')[env];
+const config = configFile[env];
 const db = {};
 
 let sequelize;
@@ -34,30 +40,50 @@ if (config && config.use_env_variable && process.env[config.use_env_variable]) {
   );
 }
 
-fs.readdirSync(__dirname)
-  .filter((file) => {
-    return (
-      file.indexOf('.') !== 0 &&
-      file !== basename &&
-      file.slice(-3) === '.js' &&
-      file.indexOf('.test.js') === -1
-    );
-  })
-  .forEach((file) => {
-    const model = require(path.join(__dirname, file))(
-      sequelize,
-      Sequelize.DataTypes
-    );
-    db[model.name] = model;
-  });
+/**
+ * Inicializa los modelos de sequelize de forma dinámica y asíncrona.
+ *
+ * @returns {Promise<Object>}
+ */
+async function inicializaModelos() {
+  const modelos = {};
 
-Object.keys(db).forEach((modelName) => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
+  try {
+    const archivos = readdirSync(__dirname);
+    const pathsModelos = archivos.filter(
+      (file) => file.toLowerCase().endsWith('model.js') && file !== 'index.js'
+    );
+
+    // Cargar todos los modelos dinámicamente
+    for (const pathModelo of pathsModelos) {
+      const { default: modelFactory } = await import(
+        fileURLToPath(new URL(pathModelo, import.meta.url))
+      );
+      const model = modelFactory(sequelize, DataTypes);
+      modelos[model.name] = model;
+    }
+
+    // Ejecutar asociaciones si existen
+    Object.values(modelos).forEach((modelo) => {
+      if (modelo.associate) {
+        modelo.associate(modelos);
+      }
+    });
+
+    return modelos;
+  } catch (error) {
+    console.error('Error al cargar modelos:', error);
+    throw error;
   }
-});
+}
 
-db.sequelize = sequelize;
-db.Sequelize = Sequelize;
+// Inicializar y exportar
+const inicializar = async () => {
+  const modelos = await inicializaModelos();
+  Object.assign(db, modelos);
+  db.sequelize = sequelize;
+  db.Sequelize = Sequelize;
+  return db;
+};
 
-module.exports = db;
+export default inicializar();

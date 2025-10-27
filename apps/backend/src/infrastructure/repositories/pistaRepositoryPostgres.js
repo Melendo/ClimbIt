@@ -1,5 +1,5 @@
-const pistaRepository = require('../../domain/pistas/pistaRepository');
-const Pista = require('../../domain/pistas/Pista');
+import pistaRepository from '../../domain/pistas/pistaRepository.js';
+import Pista from '../../domain/pistas/Pista.js';
 
 class PistaRepositoryPostgres extends pistaRepository {
   constructor(pistaModel) {
@@ -24,4 +24,4 @@ class PistaRepositoryPostgres extends pistaRepository {
   }
 }
 
-module.exports = PistaRepositoryPostgres;
+export default PistaRepositoryPostgres;

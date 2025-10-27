@@ -1,4 +1,4 @@
-const app = require('./src/interfaces/http/server');
+import app from './src/interfaces/http/server.js';
 const PORT = process.env.PORT || 3000;
 
 async function start() {

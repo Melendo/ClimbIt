@@ -1,6 +1,8 @@
-const request = require('supertest');
-const app = require('../../../src/interfaces/http/server');
-const db = require('../../../src/infrastructure/db/postgres/models');
+import request from 'supertest';
+import app from '../../../src/interfaces/http/server.js';
+import dbPromise from '../../../src/infrastructure/db/postgres/models/index.js';
+
+const db = await dbPromise;
 
 describe('E2E: Crear escalador', () => {
   // Datos para pruebas

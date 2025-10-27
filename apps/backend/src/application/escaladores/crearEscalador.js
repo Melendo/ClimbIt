@@ -1,4 +1,4 @@
-const Escalador = require('../../domain/escaladores/Escalador');
+import Escalador from '../../domain/escaladores/Escalador.js';
 
 class CrearEscalador {
   constructor(escaladorRepository) {
@@ -25,4 +25,4 @@ class CrearEscalador {
   }
 }
 
-module.exports = CrearEscalador;
+export default CrearEscalador;

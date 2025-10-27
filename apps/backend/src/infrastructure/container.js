@@ -4,53 +4,50 @@
 // - Exporta las instancias que usarán las rutas
 
 // Importaciones de infraestructura
-const { DataTypes } = require('sequelize');
-const sequelize = require('./db/postgres/sequelize');
-
-// Importar la fábrica de los modelos
-const escaladorModelFactory = require('./db/postgres/models/escaladorModel');
-const pistaModelFactory = require('./db/postgres/models/pistaModel');
-
-// Crear el modelo real a partir de la fábrica (inyección de sequelize y DataTypes)
-const EscaladorModel = escaladorModelFactory(sequelize, DataTypes);
-const PistaModel = pistaModelFactory(sequelize, DataTypes);
+import dbPromise from './db/postgres/models/index.js';
 
 // Repositorios (implementación concreta que usa el modelo)
-const EscaladorRepositoryPostgres = require('./repositories/EscaladorRepositoryPostgres');
-const PistaRepositoryPostgres = require('./repositories/PistaRepositoryPostgres');
+import EscaladorRepositoryPostgres from './repositories/escaladorRepositoryPostgres.js';
+import PistaRepositoryPostgres from './repositories/pistaRepositoryPostgres.js';
 
 // Casos de uso (lógica de aplicación)
-const CrearEscalador = require('../application/escaladores/crearEscalador');
-const CrearPista = require('../application/pistas/crearPista');
+import CrearEscalador from '../application/escaladores/crearEscalador.js';
+import CrearPista from '../application/pistas/crearPista.js';
 
 // Controladores (interfaces HTTP)
-const EscaladorController = require('../interfaces/http/controllers/escaladorController');
-const PistaController = require('../interfaces/http/controllers/pistaController');
+import EscaladorController from '../interfaces/http/controllers/escaladorController.js';
+import PistaController from '../interfaces/http/controllers/pistaController.js';
 
 // --- Composición / Inyección de dependencias ---
 
-// 1) Instancia del repositorio con el modelo específico
-const escaladorRepository = new EscaladorRepositoryPostgres(EscaladorModel);
-const pistaRepository = new PistaRepositoryPostgres(PistaModel);
+// Función asíncrona para inicializar el contenedor
+async function inicializarContainer() {
+  // Esperar a que se carguen los modelos
+  const db = await dbPromise;
 
-// 2) Instancia del caso de uso con el repositorio inyectado
-const crearEscaladorUseCase = new CrearEscalador(escaladorRepository);
-const crearPistaUseCase = new CrearPista(pistaRepository);
+  // 1) Instancia del repositorio con el modelo específico
+  const escaladorRepository = new EscaladorRepositoryPostgres(db.Escalador);
+  const pistaRepository = new PistaRepositoryPostgres(db.Pista);
 
-// 3) Agrupar los casos de uso que el controlador necesitará
-const escaladorUseCases = {
-  crear: crearEscaladorUseCase,
-};
-const pistaUseCases = {
-  crear: crearPistaUseCase,
-};
+  // 2) Instancia del caso de uso con el repositorio inyectado
+  const crearEscaladorUseCase = new CrearEscalador(escaladorRepository);
+  const crearPistaUseCase = new CrearPista(pistaRepository);
 
-// 4) Instancia del controlador con los casos de uso inyectados
-const escaladorController = new EscaladorController(escaladorUseCases);
-const pistaController = new PistaController(pistaUseCases);
+  // 3) Agrupar los casos de uso que el controlador necesitará
+  const escaladorUseCases = {
+    crear: crearEscaladorUseCase,
+  };
+  const pistaUseCases = {
+    crear: crearPistaUseCase,
+  };
 
-// Exportar las instancias que serán consumidas por las rutas
-module.exports = {
-  escaladorController,
-  pistaController,
-};
+  // 4) Instancia del controlador con los casos de uso inyectados
+  const escaladorController = new EscaladorController(escaladorUseCases);
+  const pistaController = new PistaController(pistaUseCases);
+
+  // Retornar las instancias que serán consumidas por las rutas
+  return { escaladorController, pistaController };
+}
+
+// Exportar la promesa del contenedor inicializado
+export default inicializarContainer();

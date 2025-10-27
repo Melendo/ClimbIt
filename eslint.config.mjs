@@ -30,8 +30,13 @@ export default [
     files: ['**/*.{js,mjs,cjs}'],
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
-      ecmaVersion: 2021,
+      ecmaVersion: 2022,
       sourceType: 'module',
+      parserOptions: {
+        ecmaFeatures: {
+          topLevelAwait: true,
+        },
+      },
     },
     // Combinamos las reglas de JS y Google
     rules: {

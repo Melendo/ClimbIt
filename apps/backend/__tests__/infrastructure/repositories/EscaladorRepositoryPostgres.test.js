@@ -1,5 +1,6 @@
-const EscaladorRepositoryPostgres = require('../../../src/infrastructure/repositories/EscaladorRepositoryPostgres');
-const Escalador = require('../../../src/domain/escaladores/Escalador');
+import { jest } from '@jest/globals';
+import EscaladorRepositoryPostgres from '../../../src/infrastructure/repositories/escaladorRepositoryPostgres.js';
+import Escalador from '../../../src/domain/escaladores/Escalador.js';
 
 describe('EscaladorRepositoryPostgres', () => {
   let repository;

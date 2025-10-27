@@ -5,6 +5,15 @@ const config = {
   // Indica a Jest que use el entorno de Node.js en lugar del navegador.
   testEnvironment: 'node',
 
+  // Inject globals like jest, describe, it, expect, etc.
+  injectGlobals: true,
+
+  // Module name mapper for ES modules
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
+  transform: {},
+
   // Usa el proveedor de cobertura 'v8' para una recolección más rápida y precisa.
   coverageProvider: 'v8',
 
@@ -40,4 +49,4 @@ const config = {
   },
 };
 
-module.exports = config;
+export default config;

@@ -1,7 +1,7 @@
 'use strict';
 
 /** @type {import('sequelize-cli').Migration} */
-module.exports = {
+export default {
   async up(queryInterface, Sequelize) {
     // Eliminar la columna 'name' de la tabla
     // Reemplaza 'nombre_de_la_tabla' por el nombre real de tu tabla
