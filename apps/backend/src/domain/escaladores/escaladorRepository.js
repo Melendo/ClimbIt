@@ -4,4 +4,5 @@ class EscaladorRepository {
     throw new Error('Método "crear" no implementado');
   }
 }
+
 export default EscaladorRepository;
