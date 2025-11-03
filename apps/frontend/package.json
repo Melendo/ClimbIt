@@ -12,7 +12,9 @@
   "license": "",
   "type": "module",
   "dependencies": {
-    "live-server": "^1.2.0",
-    "sequelize": "^6.37.7"
+    "bootstrap": "5.3.8"
+  },
+  "devDependencies": {
+    "live-server": "1.2.2"
   }
 }
