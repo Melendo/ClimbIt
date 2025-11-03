@@ -10,7 +10,6 @@ router.post('/create', (req, res, next) => {
 });
 
 router.get('/:id', (req, res, next) => {
-  console.log('Ruta GET /pistas/:id llamada con ID:', req.params.id);
   pistaController.obtenerPistaPorId(req, res, next);
 });
 
