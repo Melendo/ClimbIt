@@ -17,7 +17,7 @@ describe('E2E: Crear pista', () => {
   it('debería crear una pista y devolverla', async () => {
     // Enviar solicitud para crear pista
     const response = await request(app)
-      .post('/pistas')
+      .post('/pistas/create')
       .send(pistaTest)
       .expect(201);
 

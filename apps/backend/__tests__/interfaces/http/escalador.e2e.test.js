@@ -21,7 +21,7 @@ describe('E2E: Crear escalador', () => {
   it('debería crear un escalador y devolverlo', async () => {
     // Enviar solicitud para crear escalador
     const response = await request(app)
-      .post('/escaladores')
+      .post('/escaladores/create')
       .send(escaladorTest)
       .expect(201);
 
