@@ -10,14 +10,10 @@ class Pista {
     this.dificultad = dificultad;
 
     if (typeof nombre !== 'string' || nombre.trim() === '') {
-      throw new Error(
-        `nombre inválido: "${nombre}". Debe ser una cadena no vacía.`
-      );
+      throw new Error(`nombre inválido: Debe ser una cadena no vacía.`);
     }
     if (typeof dificultad !== 'string' || dificultad.trim() === '') {
-      throw new Error(
-        `dificultad inválida: "${dificultad}". Debe ser una cadena no vacía.`
-      );
+      throw new Error(`dificultad inválida: Debe ser una cadena no vacía.`);
     }
   }
 }
