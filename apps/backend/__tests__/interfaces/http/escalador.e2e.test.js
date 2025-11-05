@@ -36,4 +36,15 @@ describe('E2E: Crear escalador', () => {
     expect(escaladorGuardado.edad).toBe(escaladorTest.edad);
     expect(escaladorGuardado.experiencia).toBe(escaladorTest.experiencia);
   });
+
+  it('debería manejar errores al crear un escalador con datos inválidos', async () => {
+    // Enviar solicitud con datos inválidos (edad negativa)
+    const response = await request(app)
+      .post('/escaladores/create')
+      .send({ nombre: 'Inválido', edad: -5, experiencia: 'Básico' })
+      .expect(500);
+
+    // Verificar respuesta de la API
+    expect(response.body).toHaveProperty('error');
+  });
 });

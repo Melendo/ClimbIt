@@ -10,12 +10,16 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
   // Método privado para mapear
   _toDomain(escaladorModel) {
     if (!escaladorModel) return null;
-    return new Escalador(
-      escaladorModel.id,
-      escaladorModel.nombre,
-      escaladorModel.edad,
-      escaladorModel.experiencia
-    );
+    try {
+      return new Escalador(
+        escaladorModel.id,
+        escaladorModel.nombre,
+        escaladorModel.edad,
+        escaladorModel.experiencia
+      );
+    } catch (error) {
+      throw new Error(error.message);
+    }
   }
 
   async crear(escalador) {

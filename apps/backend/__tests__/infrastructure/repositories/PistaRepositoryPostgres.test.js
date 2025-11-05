@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+import { describe, jest } from '@jest/globals';
 import PistaRepositoryPostgres from '../../../src/infrastructure/repositories/pistaRepositoryPostgres.js';
 import Pista from '../../../src/domain/pistas/Pista.js';
 
@@ -19,6 +19,43 @@ describe('PistaRepositoryPostgres', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('_toDomain', () => {
+    it('debería mapear correctamente un modelo de Sequelize a una entidad Pista', () => {
+      // Arrange
+      const modeloSequelize = {
+        id: 1,
+        nombre: 'El Muro',
+        dificultad: '6a',
+      };
+
+      // Act
+      const resultado = repository._toDomain(modeloSequelize);
+
+      // Assert
+      expect(resultado).toBeInstanceOf(Pista);
+      expect(resultado.id).toBe(1);
+      expect(resultado.nombre).toBe('El Muro');
+      expect(resultado.dificultad).toBe('6a');
+    });
+
+    it('debería retornar null si el modelo es null', () => {
+      const resultado = repository._toDomain(null);
+      expect(resultado).toBeNull();
+    });
+
+    it('debería manejar errores al mapear un modelo inválido', () => {
+      const modeloInvalido = {
+        id: 1,
+        nombre: '', // Nombre inválido
+        dificultad: '6a',
+      };
+
+      expect(() => repository._toDomain(modeloInvalido)).toThrow(
+        'nombre inválido: Debe ser una cadena no vacía.'
+      );
+    });
   });
 
   describe('crear', () => {
