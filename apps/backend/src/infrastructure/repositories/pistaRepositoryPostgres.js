@@ -25,7 +25,7 @@ class PistaRepositoryPostgres extends pistaRepository {
 
   async obtenerPorId(id) {
     const pistaModel = await this.PistaModel.findByPk(id);
-    return pistaModel ? pistaModel.get() : null;
+    return pistaModel ? this._toDomain(pistaModel) : null;
   }
 }
 
