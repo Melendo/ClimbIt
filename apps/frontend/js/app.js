@@ -6,6 +6,7 @@ import {
   renderCrearEscalador,
   renderCrearPista,
   renderHome,
+  renderInfoPista,
 } from './ui.js';
 
 // Router principal
@@ -20,6 +21,8 @@ async function handleNavigation() {
       renderCrearEscalador();
     } else if (hash === '#crearPista') {
       renderCrearPista();
+    } else if (hash === '#infoPista') {
+      renderInfoPista();
     } else {
       showError('Página no encontrada');
     }
