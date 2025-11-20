@@ -85,66 +85,88 @@ export function renderCrearPista() {
     </form></div>`;
 }
 
-export function renderInfoPista() {
-mainContainer.innerHTML = `<div class="bg-light">
+export async function renderInfoPista(pista) {
+  try {
+    let data = pista;
+
+    // Si nos han pasado un Response, parsearlo a JSON
+    if (pista && typeof pista.json === 'function') {
+      data = await pista.json().catch(() => {
+        throw new Error('Respuesta no válida: JSON esperado');
+      });
+    }
+
+    // Asegurar que tenemos un objeto con los campos esperados
+    const { id, nombre, dificultad } = data || {};
+    if (id == null || nombre == null || dificultad == null) {
+      throw new Error('Datos de pista incompletos');
+    }
+
+    mainContainer.innerHTML = `<div class="bg-light">
     <nav class="bg-primary text-white shadow p-3 d-flex align-items-center justify-content-between">
-        <div class="d-flex align-items-center">
-            <span class="material-icons align-middle me-2">arrow_back</span>
-            <span class="fs-5 fw-medium">Pista X</span>
-        </div>
-        <div>
-            <span class="material-icons align-middle me-3">search</span>
-            <span class="material-icons align-middle me-3">edit</span>
-            <span class="material-icons align-middle">more_vert</span>
-        </div>
+      <div class="d-flex align-items-center">
+        <span class="material-icons align-middle me-2">arrow_back</span>
+        <span class="fs-5 fw-medium">Pista: ${nombre}</span>
+      </div>
+      <div>
+        <span class="material-icons align-middle me-3">search</span>
+        <span class="material-icons align-middle me-3">edit</span>
+        <span class="material-icons align-middle">more_vert</span>
+      </div>
     </nav>
 
     <div class="container mt-4 p-3">
-
-        <div class="row">
-            <div class="col-md-5 mb-4">
-
-                <div class="card h-100 shadow-sm rounded-3">
-                    <div class="card-body">
-                        <h5 class="card-title mb-3">Dificultad</h5>
-                        <p class="text-muted">Aquí podrías añadir un selector de dificultad.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-5 mb-4">
-                <div class="card h-100 shadow-sm rounded-3">
-                    <div class="card-body">
-                        <h5 class="card-title mb-3">Estado</h5>
-                        <div class="d-flex justify-content-center align-items-center h-75">
-
-                            <span class="material-icons align-middle text-success display-3">check_circle</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-2 mb-4">
-                <div class="d-grid gap-2">
-                    <button class="btn btn-outline-primary text-start">
-                        <span class="material-icons align-middle me-2">flash_on</span> Flash
-                    </button>
-                    <button class="btn btn-outline-success text-start">
-                        <span class="material-icons align-middle me-2">check_circle</span> Hecha
-                    </button>
-                    <button class="btn btn-outline-info text-start">
-                        <span class="material-icons align-middle me-2">assignment</span> Proyecto
-                    </button>
-                    <button class="btn btn-outline-secondary text-start">
-                        <span class="material-icons align-middle me-2">do_not_disturb_on</span> Nada
-                    </button>
-                </div>
-            </div>
+      <div class="mb-4">
+        <div class="card h-100 shadow-sm rounded-3">
+          <div class="card-body">
+          <h5 class="card-title mb-3">
+              <span>Nombre</span>
+              -
+              <span>${nombre}</span>
+            </h5>
+            <h5 class="card-title mb-3">
+              <span>Dificultad</span>
+              -
+              <span>${dificultad}</span>
+            </h5>
+          </div>
         </div>
+      </div>
+
+      <div class="mb-4">
+        <div class="card h-100 shadow-sm rounded-3">
+          <div class="card-body">
+            <h5 class="card-title mb-3">
+              <span>Estado</span>
+              -
+              <span class="material-icons align-middle text-success display-3">check_circle</span>
+            </h5>
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        <div class="row gap-2">
+          <button class="col btn btn-outline-primary text-start">
+            <span class="material-icons align-middle me-2">flash_on</span> Flash
+          </button>
+          <button class="col btn btn-outline-success text-start">
+            <span class="material-icons align-middle me-2">check_circle</span> Hecha
+          </button>
+          <button class="col btn btn-outline-info text-start">
+            <span class="material-icons align-middle me-2">assignment</span> Proyecto
+          </button>
+          <button class="col btn btn-outline-warning text-start">
+            <span class="material-icons align-middle me-2">do_not_disturb_on</span> Nada
+          </button>
+        </div>
+      </div>
     </div>
-
-
-</div>`;
+  </div>`;
+  } catch (err) {
+    // Mostrar error amigable
+    showError(err.message || 'Error al mostrar la pista');
+  }
 }
 
 
