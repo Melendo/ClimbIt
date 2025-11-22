@@ -8,7 +8,6 @@ class CrearPista {
   async execute(data) {
     try {
       const nuevaPista = new Pista(null, data.nombre, data.dificultad);
-      console.log('Datos de la nueva pista:', nuevaPista);
       const pistaCreada = await this.pistaRepository.crear(nuevaPista);
 
       return pistaCreada;

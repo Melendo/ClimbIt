@@ -13,18 +13,14 @@ class Escalador {
 
     if (!Escalador.EXPERIENCIAS.includes(this.experiencia)) {
       throw new Error(
-        `experiencia inválida: "${this.experiencia}". Debe ser uno de: ${Escalador.EXPERIENCIAS.join(', ')}`
+        `experiencia inválida: Debe ser uno de: ${Escalador.EXPERIENCIAS.join(', ')}`
       );
     }
     if (this.edad <= 0 || !Number.isInteger(this.edad)) {
-      throw new Error(
-        `edad inválida: "${this.edad}". Debe ser un entero positivo.`
-      );
+      throw new Error(`edad inválida: Debe ser un entero positivo.`);
     }
     if (typeof this.nombre !== 'string' || this.nombre.trim() === '') {
-      throw new Error(
-        `nombre inválido: "${this.nombre}". Debe ser una cadena no vacía.`
-      );
+      throw new Error(`nombre inválido: Debe ser una cadena no vacía.`);
     }
   }
 }

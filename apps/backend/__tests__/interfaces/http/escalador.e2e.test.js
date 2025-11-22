@@ -21,7 +21,7 @@ describe('E2E: Crear escalador', () => {
   it('debería crear un escalador y devolverlo', async () => {
     // Enviar solicitud para crear escalador
     const response = await request(app)
-      .post('/escaladores')
+      .post('/escaladores/create')
       .send(escaladorTest)
       .expect(201);
 
@@ -35,5 +35,16 @@ describe('E2E: Crear escalador', () => {
     expect(escaladorGuardado.nombre).toBe(escaladorTest.nombre);
     expect(escaladorGuardado.edad).toBe(escaladorTest.edad);
     expect(escaladorGuardado.experiencia).toBe(escaladorTest.experiencia);
+  });
+
+  it('debería manejar errores al crear un escalador con datos inválidos', async () => {
+    // Enviar solicitud con datos inválidos (edad negativa)
+    const response = await request(app)
+      .post('/escaladores/create')
+      .send({ nombre: 'Inválido', edad: -5, experiencia: 'Básico' })
+      .expect(500);
+
+    // Verificar respuesta de la API
+    expect(response.body).toHaveProperty('error');
   });
 });

@@ -20,6 +20,45 @@ describe('EscaladorRepositoryPostgres', () => {
     jest.clearAllMocks();
   });
 
+  describe('_toDomain', () => {
+    it('debería mapear correctamente un modelo de Sequelize a una entidad Escalador', () => {
+      // Arrange
+      const modeloSequelize = {
+        id: 1,
+        nombre: 'Pedro',
+        edad: 28,
+        experiencia: 'Avanzado',
+      };
+
+      // Act
+      const resultado = repository._toDomain(modeloSequelize);
+
+      // Assert
+      expect(resultado).toBeInstanceOf(Escalador);
+      expect(resultado.id).toBe(1);
+      expect(resultado.nombre).toBe('Pedro');
+      expect(resultado.edad).toBe(28);
+      expect(resultado.experiencia).toBe('Avanzado');
+    });
+
+    it('debería retornar null si el modelo es null', () => {
+      const resultado = repository._toDomain(null);
+      expect(resultado).toBeNull();
+    });
+
+    it('debería manejar errores al mapear un modelo inválido', () => {
+      const modeloInvalido = {
+        id: 1,
+        nombre: '', // Nombre inválido
+        edad: 28,
+        experiencia: 'Avanzado',
+      };
+
+      expect(() => repository._toDomain(modeloInvalido)).toThrow(
+        'nombre inválido: Debe ser una cadena no vacía.'
+      );
+    });
+  });
   describe('crear', () => {
     it('debería guardar un escalador usando Sequelize', async () => {
       // Arrange

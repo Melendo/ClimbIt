@@ -10,7 +10,11 @@ class PistaRepositoryPostgres extends pistaRepository {
   // Método privado para mapear
   _toDomain(pistaModel) {
     if (!pistaModel) return null;
-    return new Pista(pistaModel.id, pistaModel.nombre, pistaModel.dificultad);
+    try {
+      return new Pista(pistaModel.id, pistaModel.nombre, pistaModel.dificultad);
+    } catch (error) {
+      throw new Error(error.message);
+    }
   }
 
   async crear(pista) {
@@ -21,6 +25,11 @@ class PistaRepositoryPostgres extends pistaRepository {
     const pistaModel = await this.PistaModel.create(data);
 
     return this._toDomain(pistaModel);
+  }
+
+  async obtenerPorId(id) {
+    const pistaModel = await this.PistaModel.findByPk(id);
+    return pistaModel ? this._toDomain(pistaModel) : null;
   }
 }
 

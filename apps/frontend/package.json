@@ -5,14 +5,17 @@
   "main": "index.js",
   "scripts": {
     "start": "live-server --port=8080 --no-browser",
-    "test": "echo 'No hay tests en frontend'"
+    "test": "echo 'No hay tests en frontend'",
+    "build-css": "sass scss/main.scss css/main.css --style compressed",
+    "watch-css": "sass --watch scss/main.scss:css/main.css"
   },
   "keywords": [],
   "author": "",
   "license": "",
   "type": "module",
   "dependencies": {
-    "bootstrap": "5.3.8"
+    "bootstrap": "5.3.8",
+    "sass": "1.93.3"
   },
   "devDependencies": {
     "live-server": "1.2.2"
