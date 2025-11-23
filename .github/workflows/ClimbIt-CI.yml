@@ -14,6 +14,21 @@ jobs:
     name: Run Jest Tests
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     strategy:
       matrix:
         # Probamos en la versión de soporte a largo plazo (LTS) más reciente.
@@ -36,8 +51,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Paso 4: Ejecutar los tests
+      # Paso 4: Ejecutar migraciones
+      - name: Run Migrations
+        run: npm run db:migrate -w apps/backend
+        env:
+          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
+
+      # Paso 5: Ejecutar los tests
       # Usamos el script que también revisa la cobertura. Si los tests
       # o la cobertura fallan, este paso fallará, y con él, todo el workflow.
       - name: Run Jest tests with coverage
         run: npm run test:coverage
+        env:
+          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
