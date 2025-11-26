@@ -26,7 +26,7 @@ async function handleNavigation() {
       if (id) {
         showLoading();
         try {
-          const res = await fetch(`http://localhost:3000/pistas/${id}`);
+          const res = await fetch(`/pistas/${id}`);
           if (!res.ok) {
             throw new Error(`Error al obtener pista: ${res.status} ${res.statusText}`);
           }
