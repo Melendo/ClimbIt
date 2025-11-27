@@ -1,12 +1,10 @@
 // scss/main.scss
 
-// 1. Personaliza las variables de Bootstrap ANTES de importarlo
-$primary: #8e44ad; // Un morado
-$secondary: #2ecc71; // Un verde
-$border-radius: 0;
-$font-family-base:
-  'Montserrat', sans-serif; // (Asegúrate de importar esta fuente)
-
-// 2. Importa Bootstrap completo (incluye funciones, variables y todo lo demás)
+// 1. Personaliza las variables de Bootstrap al importarlo con @use
 // En un monorepo con workspaces, Bootstrap está en el node_modules raíz
-@import '../../../node_modules/bootstrap/scss/bootstrap';
+@use '../../../node_modules/bootstrap/scss/bootstrap' with (
+  $primary: #8e44ad,
+  $secondary: #2ecc71,
+  $border-radius: 0,
+  $font-family-base: ('Montserrat', sans-serif)
+);

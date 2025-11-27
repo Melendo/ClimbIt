@@ -1,0 +1,66 @@
+services:
+  # Servicio de Base de Datos (PostgreSQL)
+  db:
+    image: postgres:15
+    container_name: climbit_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - climbit-network
+
+  # Servicio de Administración de Base de Datos (pgAdmin)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: climbit_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - climbit-network
+
+  # Servicio Backend (Node.js)
+  backend:
+    build: ./apps/backend
+    container_name: climbit_backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      # Conexión a la DB usando el nombre del servicio 'db'
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    depends_on:
+      - db
+    networks:
+      - climbit-network
+
+  # Servicio Frontend (Nginx)
+  frontend:
+    build: ./apps/frontend
+    container_name: climbit_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - climbit-network
+
+volumes:
+  pgdata:
+
+networks:
+  climbit-network:
+    driver: bridge

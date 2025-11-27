@@ -17,7 +17,7 @@ export function renderCrearEscalador() {
 
     <div class="container">
     <h1>Nuevo Escalador</h1>
-    <form action="http://localhost:3000/escaladores/create" method="POST">
+    <form action="/escaladores/create" method="POST">
       <div class="mb-3">
         <label for="nombre" class="form-label">Nombre</label>
         <input
@@ -62,7 +62,7 @@ export function renderCrearPista() {
   mainContainer.innerHTML = `
   <div class="container">  
   <h1>Nueva Pista</h1>
-    <form action="http://localhost:3000/pistas/create" method="POST">
+    <form action="/pistas/create" method="POST">
       <div class="mb-3">
         <label for="nombre" class="form-label">Nombre</label>
         <input
