@@ -1,0 +1,27 @@
+name: Deploy to RaspPi
+
+on:
+  push:
+    branches:
+      - pruebaCD
+
+jobs:
+  deploy:
+    runs-on: self-hosted # Esto busca tu Raspberry Pi
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create .env file
+        run: |
+          # Crea el archivo .env en la raíz usando el secreto de GitHub
+          echo "${{ secrets.ENV_FILE_PRODUCTION }}" > .env
+
+      - name: Stop current containers
+        run: docker compose down || true
+
+      - name: Build and Start containers
+        run: docker compose up --build -d
+
+      - name: Clean up unused images
+        run: docker image prune -f
