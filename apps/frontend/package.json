@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start":"vite",
+    "start": "vite",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
@@ -15,7 +15,8 @@
   "license": "",
   "type": "module",
   "dependencies": {
-    "bootstrap": "5.3.8"
+    "bootstrap": "5.3.8",
+    "sass": "^1.94.2"
   },
   "devDependencies": {
     "vite": "7.2.4"

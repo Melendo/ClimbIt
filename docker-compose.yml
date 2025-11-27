@@ -40,7 +40,7 @@ services:
     environment:
       PORT: 3000
       # Conexión a la DB usando el nombre del servicio 'db'
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      DATABASE_URL: ${DATABASE_URL}
     depends_on:
       - db
     networks:

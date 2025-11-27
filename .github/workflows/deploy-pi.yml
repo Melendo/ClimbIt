@@ -3,7 +3,7 @@ name: Deploy to RaspPi
 on:
   push:
     branches:
-      - pruebaCD
+      - develop
 
 jobs:
   deploy:
