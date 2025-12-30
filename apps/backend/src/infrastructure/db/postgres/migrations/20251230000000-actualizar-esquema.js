@@ -198,6 +198,11 @@ export default {
     await queryInterface.renameColumn('Escaladores', 'IDEscalador', 'id');
     await queryInterface.addColumn('Escaladores', 'nombre', { type: Sequelize.STRING });
     await queryInterface.addColumn('Escaladores', 'edad', { type: Sequelize.INTEGER });
+    
+    // Recrear el tipo ENUM antes de añadir la columna que lo usa
+    await queryInterface.sequelize.query(
+      `CREATE TYPE "enum_Escaladores_experiencia" AS ENUM ('Principiante', 'Intermedio', 'Avanzado', 'Experto');`
+    );
     await queryInterface.addColumn('Escaladores', 'experiencia', {
       // eslint-disable-next-line new-cap
       type: Sequelize.ENUM(
