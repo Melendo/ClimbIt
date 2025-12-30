@@ -19,39 +19,34 @@ export function renderCrearEscalador() {
     <h1>Nuevo Escalador</h1>
     <form action="/escaladores/create" method="POST">
       <div class="mb-3">
-        <label for="nombre" class="form-label">Nombre</label>
+        <label for="correo" class="form-label">Correo</label>
+        <input
+          type="email"
+          class="form-control"
+          name="correo"
+          id="correo"
+          required
+        />
+      </div>
+      <div class="mb-3">
+        <label for="contrasena" class="form-label">Contraseña</label>
+        <input
+          type="password"
+          class="form-control"
+          name="contrasena"
+          id="contrasena"
+          required
+        />
+      </div>
+      <div class="mb-3">
+        <label for="apodo" class="form-label">Apodo</label>
         <input
           type="text"
           class="form-control"
-          name="nombre"
-          id="nombre"
+          name="apodo"
+          id="apodo"
           required
         />
-      </div>
-      <div class="mb-3">
-        <label for="edad" class="form-label">Edad</label>
-        <input
-          type="number"
-          class="form-control"
-          name="edad"
-          id="edad"
-          required
-        />
-      </div>
-      <div class="mb-3">
-        <label for="experiencia" class="form-label">Experiencia</label>
-        <select
-          name="experiencia"
-          id="experiencia"
-          class="form-select"
-          required
-        >
-          <option value="" disabled selected>Seleccione una opción</option>
-          <option value="Principiante">Principiante</option>
-          <option value="Intermedio">Intermedio</option>
-          <option value="Avanzado">Avanzado</option>
-          <option value="Experto">Experto</option>
-        </select>
       </div>
       <button type="submit" class="btn btn-primary">Crear</button>
     </form></div>`;
@@ -63,6 +58,16 @@ export function renderCrearPista() {
   <div class="container">  
   <h1>Nueva Pista</h1>
     <form action="/pistas/create" method="POST">
+      <div class="mb-3">
+        <label for="idZona" class="form-label">ID Zona</label>
+        <input
+          type="number"
+          class="form-control"
+          name="idZona"
+          id="idZona"
+          required
+        />
+      </div>
       <div class="mb-3">
         <label for="nombre" class="form-label">Nombre</label>
         <input
@@ -88,7 +93,6 @@ export function renderCrearPista() {
 export async function renderInfoPista(pista) {
   try {
     let data = pista;
-
     // Si nos han pasado un Response, parsearlo a JSON
     if (pista && typeof pista.json === 'function') {
       data = await pista.json().catch(() => {
@@ -97,8 +101,8 @@ export async function renderInfoPista(pista) {
     }
 
     // Asegurar que tenemos un objeto con los campos esperados
-    const { id, nombre, dificultad } = data || {};
-    if (id == null || nombre == null || dificultad == null) {
+    const { id, idZona, nombre, dificultad } = data || {};
+    if (id == null || idZona == null || nombre == null || dificultad == null) {
       throw new Error('Datos de pista incompletos');
     }
 
@@ -123,6 +127,11 @@ export async function renderInfoPista(pista) {
               <span>Nombre</span>
               -
               <span>${nombre}</span>
+            </h5>
+            <h5 class="card-title mb-3">
+              <span>Zona</span>
+              -
+              <span>${idZona}</span>
             </h5>
             <h5 class="card-title mb-3">
               <span>Dificultad</span>
