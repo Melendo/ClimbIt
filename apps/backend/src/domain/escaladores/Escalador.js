@@ -14,6 +14,11 @@ class Escalador {
     if (typeof this.correo !== 'string' || this.correo.trim() === '') {
       throw new Error(`correo inválido: Debe ser una cadena no vacía.`);
     }
+    const correoNormalizado = this.correo.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(correoNormalizado)) {
+      throw new Error(`correo inválido: Debe tener un formato de correo electrónico válido.`);
+    }
     if (typeof this.contrasena !== 'string' || this.contrasena.trim() === '') {
       throw new Error(`contraseña inválida: Debe ser una cadena no vacía.`);
     }
