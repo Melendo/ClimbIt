@@ -2,53 +2,52 @@
 import { Model } from 'sequelize';
 
 export default (sequelize, DataTypes) => {
-  class Pista extends Model {
+  class Zona extends Model {
     static associate(models) {
-      Pista.belongsTo(models.Zona, {
-        foreignKey: 'idZona',
-        as: 'zona',
+      Zona.belongsTo(models.Rocodromo, {
+        foreignKey: 'idRoco',
+        as: 'rocodromo',
       });
-      Pista.belongsToMany(models.Escalador, {
-        through: models.EscalaPista,
-        foreignKey: 'idPista',
-        as: 'escaladores',
+      Zona.hasMany(models.Pista, {
+        foreignKey: 'idZona',
+        as: 'pistas',
       });
     }
   }
-  Pista.init(
+  Zona.init(
     {
       id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
-        field: 'IDPista',
+        field: 'IDZona',
       },
-      idZona: {
+      idRoco: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: 'IDZona',
+        field: 'IDRoco',
         references: {
-          model: 'Zonas',
-          key: 'IDZona',
+          model: 'Rocodromos',
+          key: 'IDRoco',
         },
       },
-      nombre: {
+      tipo: {
         type: DataTypes.STRING,
         allowNull: false,
-        field: 'Nombre',
+        field: 'Tipo',
       },
-      dificultad: {
+      mapa: {
         type: DataTypes.STRING,
         allowNull: true,
-        field: 'Dificultad',
+        field: 'Mapa',
       },
     },
     {
       sequelize,
-      modelName: 'Pista',
-      tableName: 'Pistas',
+      modelName: 'Zona',
+      tableName: 'Zonas',
     }
   );
-  return Pista;
+  return Zona;
 };
