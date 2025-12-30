@@ -1,6 +1,6 @@
 import request from 'supertest';
-import app from '../../../src/interfaces/http/server.js';
-import dbPromise from '../../../src/infrastructure/db/postgres/models/index.js';
+import app from '../../src/interfaces/http/server.js';
+import dbPromise from '../../src/infrastructure/db/postgres/models/index.js';
 
 const db = await dbPromise;
 

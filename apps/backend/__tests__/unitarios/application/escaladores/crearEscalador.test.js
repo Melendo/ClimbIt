@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import CrearEscaladorUseCase from '../../../src/application/escaladores/crearEscalador.js';
+import CrearEscaladorUseCase from '../../../../src/application/escaladores/crearEscalador.js';
 
 describe('crearEscaladorUseCase', () => {
   it('debería crear y guardar un escalador correctamente', async () => {

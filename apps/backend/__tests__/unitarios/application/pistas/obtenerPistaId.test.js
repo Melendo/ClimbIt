@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import ObtenerPistaPorId from '../../../src/application/pistas/obtenerPistaPorId.js';
+import ObtenerPistaPorId from '../../../../src/application/pistas/obtenerPistaPorId.js';
 
 describe('obtenerPistaPorIdUseCase', () => {
   it('debería obtener una pista por su ID correctamente', async () => {

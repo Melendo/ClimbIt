@@ -1,4 +1,4 @@
-import Pista from '../../../src/domain/pistas/Pista.js';
+import Pista from '../../../../src/domain/pistas/Pista.js';
 
 describe('Pista (Entidad de dominio)', () => {
   describe('Creación exitosa', () => {

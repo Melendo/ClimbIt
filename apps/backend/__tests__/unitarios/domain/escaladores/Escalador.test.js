@@ -1,4 +1,4 @@
-import Escalador from '../../../src/domain/escaladores/Escalador.js';
+import Escalador from '../../../../src/domain/escaladores/Escalador.js';
 
 describe('Escalador (Entidad de dominio)', () => {
   describe('Creación exitosa', () => {
