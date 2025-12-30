@@ -35,7 +35,7 @@ export default (sequelize, DataTypes) => {
       contrasena: {
         type: DataTypes.STRING,
         allowNull: false,
-        field: 'Contraseña',
+        field: 'Contrasena',
       },
       apodo: {
         type: DataTypes.STRING,

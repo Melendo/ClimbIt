@@ -13,7 +13,7 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         primaryKey: true,
         allowNull: false,
-        field: 'IDRocódromo',
+        field: 'IDRocodromo',
         references: {
           model: 'Rocodromos',
           key: 'IDRoco',

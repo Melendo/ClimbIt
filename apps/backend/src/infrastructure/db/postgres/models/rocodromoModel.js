@@ -32,7 +32,7 @@ export default (sequelize, DataTypes) => {
       ubicacion: {
         type: DataTypes.STRING,
         allowNull: false,
-        field: 'Ubicación',
+        field: 'Ubicacion',
       },
       mapa: {
         type: DataTypes.STRING, // Assuming URL or path to image

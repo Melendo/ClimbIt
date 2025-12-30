@@ -18,7 +18,7 @@ export default {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      Ubicación: {
+      Ubicacion: {
         type: Sequelize.STRING,
         allowNull: false,
       },
@@ -93,7 +93,7 @@ export default {
       unique: true,
     });
 
-    await queryInterface.addColumn('Escaladores', 'Contraseña', {
+    await queryInterface.addColumn('Escaladores', 'Contrasena', {
       type: Sequelize.STRING,
       allowNull: false,
     });
@@ -127,7 +127,7 @@ export default {
 
     // 5. Crear tabla Suscripciones
     await queryInterface.createTable('Suscripciones', {
-      IDRocódromo: {
+      IDRocodromo: {
         type: Sequelize.INTEGER,
         allowNull: false,
         primaryKey: true,
@@ -193,7 +193,7 @@ export default {
     
     // Para Escaladores, sería complejo restaurar los datos perdidos, así que solo revertimos estructura básica
     await queryInterface.removeColumn('Escaladores', 'Correo');
-    await queryInterface.removeColumn('Escaladores', 'Contraseña');
+    await queryInterface.removeColumn('Escaladores', 'Contrasena');
     await queryInterface.removeColumn('Escaladores', 'Apodo');
     await queryInterface.renameColumn('Escaladores', 'IDEscalador', 'id');
     await queryInterface.addColumn('Escaladores', 'nombre', { type: Sequelize.STRING });
