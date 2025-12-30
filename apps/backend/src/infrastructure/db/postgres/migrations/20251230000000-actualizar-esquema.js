@@ -198,6 +198,16 @@ export default {
     await queryInterface.renameColumn('Escaladores', 'IDEscalador', 'id');
     await queryInterface.addColumn('Escaladores', 'nombre', { type: Sequelize.STRING });
     await queryInterface.addColumn('Escaladores', 'edad', { type: Sequelize.INTEGER });
+    await queryInterface.addColumn('Escaladores', 'experiencia', {
+      // eslint-disable-next-line new-cap
+      type: Sequelize.ENUM(
+        'Principiante',
+        'Intermedio',
+        'Avanzado',
+        'Experto'
+      ),
+      allowNull: true,
+    });
     
     await queryInterface.dropTable('Zonas');
     await queryInterface.dropTable('Rocodromos');
