@@ -11,7 +11,12 @@ class PistaRepositoryPostgres extends pistaRepository {
   _toDomain(pistaModel) {
     if (!pistaModel) return null;
     try {
-      return new Pista(pistaModel.id, pistaModel.nombre, pistaModel.dificultad);
+      return new Pista(
+        pistaModel.id,
+        pistaModel.idZona,
+        pistaModel.nombre,
+        pistaModel.dificultad
+      );
     } catch (error) {
       throw new Error(error.message);
     }
@@ -19,6 +24,7 @@ class PistaRepositoryPostgres extends pistaRepository {
 
   async crear(pista) {
     const data = {
+      idZona: pista.idZona,
       nombre: pista.nombre,
       dificultad: pista.dificultad,
     };

@@ -5,90 +5,39 @@ describe('Escalador (Entidad de dominio)', () => {
     it('debería crear un escalador con los datos correctos', () => {
       const datos = {
         id: null,
-        nombre: 'Ana',
-        edad: 28,
-        experiencia: 'Avanzado',
+        correo: 'ana@example.com',
+        contrasena: 'secret',
+        apodo: 'AnaClimb',
       };
       const escalador = new Escalador(
         datos.id,
-        datos.nombre,
-        datos.edad,
-        datos.experiencia
+        datos.correo,
+        datos.contrasena,
+        datos.apodo
       );
 
-      expect(escalador.nombre).toBe('Ana');
-      expect(escalador.edad).toBe(28);
-      expect(escalador.experiencia).toBe('Avanzado');
-    });
-
-    it('debería crear un escalador con experiencia por defecto (Principiante)', () => {
-      const escalador = new Escalador(1, 'Pedro', 30);
-      expect(escalador.experiencia).toBe('Principiante');
+      expect(escalador.correo).toBe('ana@example.com');
+      expect(escalador.contrasena).toBe('secret');
+      expect(escalador.apodo).toBe('AnaClimb');
     });
   });
 
-  describe('Validaciones de experiencia', () => {
-    it('no debería crear un escalador con nivel de experiencia inválido', () => {
-      expect(() => new Escalador(null, 'Ana', 28, 'avanzado')).toThrow(
-        `experiencia inválida: Debe ser uno de: ${Escalador.EXPERIENCIAS.join(', ')}`
+  describe('Validaciones', () => {
+    it('no debería crear un escalador con correo vacío', () => {
+      expect(() => new Escalador(null, '', 'pass', 'apodo')).toThrow(
+        `correo inválido: Debe ser una cadena no vacía.`
       );
     });
 
-    it('no debería crear un escalador con experiencia vacía', () => {
-      expect(() => new Escalador(null, 'Ana', 28, '')).toThrow(
-        `experiencia inválida: Debe ser uno de: ${Escalador.EXPERIENCIAS.join(', ')}`
-      );
-    });
-  });
-
-  describe('Validaciones de edad', () => {
-    it('no debería crear un escalador con edad negativa', () => {
-      expect(() => new Escalador(null, 'Ana', -5, 'Avanzado')).toThrow(
-        'edad inválida: Debe ser un entero positivo.'
+    it('no debería crear un escalador con contraseña vacía', () => {
+      expect(() => new Escalador(null, 'email', '', 'apodo')).toThrow(
+        `contraseña inválida: Debe ser una cadena no vacía.`
       );
     });
 
-    it('no debería crear un escalador con edad cero', () => {
-      expect(() => new Escalador(null, 'Ana', 0, 'Avanzado')).toThrow(
-        'edad inválida: Debe ser un entero positivo.'
-      );
-    });
-
-    it('no debería crear un escalador con edad decimal', () => {
-      expect(() => new Escalador(null, 'Ana', 28.5, 'Avanzado')).toThrow(
-        'edad inválida: Debe ser un entero positivo.'
-      );
-    });
-
-    it('no debería crear un escalador con edad no numérica', () => {
-      expect(
-        () => new Escalador(null, 'Ana', 'veintiocho', 'Avanzado')
-      ).toThrow('edad inválida: Debe ser un entero positivo.');
-    });
-  });
-
-  describe('Validaciones de nombre', () => {
-    it('no debería crear un escalador con nombre vacío', () => {
-      expect(() => new Escalador(null, '', 28, 'Avanzado')).toThrow(
-        'nombre inválido: Debe ser una cadena no vacía.'
-      );
-    });
-
-    it('no debería crear un escalador con nombre solo espacios', () => {
-      expect(() => new Escalador(null, '   ', 28, 'Avanzado')).toThrow(
-        'nombre inválido: Debe ser una cadena no vacía.'
-      );
-    });
-
-    it('no debería crear un escalador con nombre no string', () => {
-      expect(() => new Escalador(null, 123, 28, 'Avanzado')).toThrow(
-        'nombre inválido: Debe ser una cadena no vacía.'
-      );
-    });
-
-    it('no debería crear un escalador con nombre undefined', () => {
-      expect(() => new Escalador(null, undefined, 28, 'Avanzado')).toThrow(
-        'nombre inválido: Debe ser una cadena no vacía.'
+    it('no debería crear un escalador con apodo vacío', () => {
+      expect(() => new Escalador(null, 'email', 'pass', '')).toThrow(
+        `apodo inválido: Debe ser una cadena no vacía.`
       );
     });
   });

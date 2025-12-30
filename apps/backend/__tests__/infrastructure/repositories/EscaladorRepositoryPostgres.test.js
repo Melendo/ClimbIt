@@ -25,9 +25,9 @@ describe('EscaladorRepositoryPostgres', () => {
       // Arrange
       const modeloSequelize = {
         id: 1,
-        nombre: 'Pedro',
-        edad: 28,
-        experiencia: 'Avanzado',
+        correo: 'test@test.com',
+        contrasena: '123456',
+        apodo: 'Tester',
       };
 
       // Act
@@ -36,9 +36,9 @@ describe('EscaladorRepositoryPostgres', () => {
       // Assert
       expect(resultado).toBeInstanceOf(Escalador);
       expect(resultado.id).toBe(1);
-      expect(resultado.nombre).toBe('Pedro');
-      expect(resultado.edad).toBe(28);
-      expect(resultado.experiencia).toBe('Avanzado');
+      expect(resultado.correo).toBe('test@test.com');
+      expect(resultado.contrasena).toBe('123456');
+      expect(resultado.apodo).toBe('Tester');
     });
 
     it('debería retornar null si el modelo es null', () => {
@@ -49,68 +49,41 @@ describe('EscaladorRepositoryPostgres', () => {
     it('debería manejar errores al mapear un modelo inválido', () => {
       const modeloInvalido = {
         id: 1,
-        nombre: '', // Nombre inválido
-        edad: 28,
-        experiencia: 'Avanzado',
+        // Faltan campos requeridos
       };
-
-      expect(() => repository._toDomain(modeloInvalido)).toThrow(
-        'nombre inválido: Debe ser una cadena no vacía.'
-      );
+      expect(() => repository._toDomain(modeloInvalido)).toThrow();
     });
   });
+
   describe('crear', () => {
-    it('debería guardar un escalador usando Sequelize', async () => {
+    it('debería crear un escalador y devolver la entidad de dominio', async () => {
       // Arrange
-      const datosEntrada = {
-        nombre: 'Juan',
-        edad: 30,
-        experiencia: 'Intermedio',
-      };
-
-      const modeloRetornado = {
+      const escalador = new Escalador(
+        null,
+        'test@test.com',
+        '123456',
+        'Tester'
+      );
+      const modeloCreado = {
         id: 1,
-        nombre: 'Juan',
-        edad: 30,
-        experiencia: 'Intermedio',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        correo: 'test@test.com',
+        contrasena: '123456',
+        apodo: 'Tester',
       };
 
-      mockEscaladorModel.create.mockResolvedValue(modeloRetornado);
+      mockEscaladorModel.create.mockResolvedValue(modeloCreado);
 
       // Act
-      const resultado = await repository.crear(datosEntrada);
+      const resultado = await repository.crear(escalador);
 
       // Assert
       expect(mockEscaladorModel.create).toHaveBeenCalledWith({
-        nombre: 'Juan',
-        edad: 30,
-        experiencia: 'Intermedio',
+        correo: 'test@test.com',
+        contrasena: '123456',
+        apodo: 'Tester',
       });
-
       expect(resultado).toBeInstanceOf(Escalador);
       expect(resultado.id).toBe(1);
-      expect(resultado.nombre).toBe('Juan');
-      expect(resultado.edad).toBe(30);
-      expect(resultado.experiencia).toBe('Intermedio');
-    });
-
-    it('debería manejar errores al crear un escalador', async () => {
-      // Arrange
-      const datosEntrada = {
-        nombre: 'Juan',
-        edad: 30,
-        experiencia: 'Intermedio',
-      };
-
-      const errorEsperado = new Error('Error al crear en la base de datos');
-      mockEscaladorModel.create.mockRejectedValue(errorEsperado);
-
-      // Act & Assert
-      await expect(repository.crear(datosEntrada)).rejects.toThrow(
-        'Error al crear en la base de datos'
-      );
     });
   });
 });

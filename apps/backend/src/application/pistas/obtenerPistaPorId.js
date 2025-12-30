@@ -8,7 +8,7 @@ class ObtenerPistaPorId {
     try {
       const result = await this.pistaRepository.obtenerPorId(id);
       const pista = result
-        ? new Pista(result.id, result.nombre, result.dificultad)
+        ? new Pista(result.id, result.idZona, result.nombre, result.dificultad)
         : null;
       return pista;
     } catch (error) {

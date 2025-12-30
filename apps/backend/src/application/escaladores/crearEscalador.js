@@ -9,18 +9,18 @@ class CrearEscalador {
     try {
       const nuevoEscalador = new Escalador(
         null,
-        data.nombre,
-        data.edad,
-        data.experiencia
+        data.correo,
+        data.contrasena,
+        data.apodo
       );
 
       const escaladorCreado =
         await this.escaladorRepository.crear(nuevoEscalador);
 
       return escaladorCreado;
-      // eslint-disable-next-line no-unused-vars
+       
     } catch (error) {
-      throw new Error(`Error al crear el escalador`);
+      throw new Error(`Error al crear el escalador: ${error.message}`);
     }
   }
 }

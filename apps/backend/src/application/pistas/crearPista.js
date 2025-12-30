@@ -7,13 +7,18 @@ class CrearPista {
 
   async execute(data) {
     try {
-      const nuevaPista = new Pista(null, data.nombre, data.dificultad);
+      const nuevaPista = new Pista(
+        null,
+        data.idZona,
+        data.nombre,
+        data.dificultad
+      );
       const pistaCreada = await this.pistaRepository.crear(nuevaPista);
 
       return pistaCreada;
-      // eslint-disable-next-line no-unused-vars
+       
     } catch (error) {
-      throw new Error(`Error al crear la pista`);
+      throw new Error(`Error al crear la pista: ${error.message}`);
     }
   }
 }

@@ -6,6 +6,7 @@ describe('obtenerPistaPorIdUseCase', () => {
     const mockRepository = {
       obtenerPorId: jest.fn(async (id) => ({
         id,
+        idZona: 1,
         nombre: 'Ex1',
         dificultad: '3a',
       })),
@@ -18,6 +19,7 @@ describe('obtenerPistaPorIdUseCase', () => {
 
     expect(resultado).toMatchObject({
       id: 1,
+      idZona: 1,
       nombre: 'Ex1',
       dificultad: '3a',
     });

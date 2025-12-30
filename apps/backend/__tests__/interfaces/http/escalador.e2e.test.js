@@ -7,14 +7,14 @@ const db = await dbPromise;
 describe('E2E: Crear escalador', () => {
   // Datos para pruebas
   const escaladorTest = {
-    nombre: 'E2E Test',
-    edad: 25,
-    experiencia: 'Avanzado',
+    correo: 'e2e@test.com',
+    contrasena: '123456',
+    apodo: 'E2ETester',
   };
 
   // Limpieza después de todas las pruebas
   afterAll(async () => {
-    await db.Escalador.destroy({ where: { nombre: escaladorTest.nombre } });
+    await db.Escalador.destroy({ where: { correo: escaladorTest.correo } });
     await db.sequelize.close();
   });
 
@@ -32,16 +32,16 @@ describe('E2E: Crear escalador', () => {
     // Verificar que se guardó en la base de datos
     const escaladorGuardado = await db.Escalador.findByPk(response.body.id);
     expect(escaladorGuardado).not.toBeNull();
-    expect(escaladorGuardado.nombre).toBe(escaladorTest.nombre);
-    expect(escaladorGuardado.edad).toBe(escaladorTest.edad);
-    expect(escaladorGuardado.experiencia).toBe(escaladorTest.experiencia);
+    expect(escaladorGuardado.correo).toBe(escaladorTest.correo);
+    expect(escaladorGuardado.contrasena).toBe(escaladorTest.contrasena);
+    expect(escaladorGuardado.apodo).toBe(escaladorTest.apodo);
   });
 
   it('debería manejar errores al crear un escalador con datos inválidos', async () => {
-    // Enviar solicitud con datos inválidos (edad negativa)
+    // Enviar solicitud con datos inválidos (correo vacío)
     const response = await request(app)
       .post('/escaladores/create')
-      .send({ nombre: 'Inválido', edad: -5, experiencia: 'Básico' })
+      .send({ correo: '', contrasena: '123', apodo: 'Test' })
       .expect(500);
 
     // Verificar respuesta de la API

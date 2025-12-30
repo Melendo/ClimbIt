@@ -5,17 +5,42 @@ import dbPromise from '../../../src/infrastructure/db/postgres/models/index.js';
 const db = await dbPromise;
 
 describe('E2E: Pistas', () => {
+  let rocodromo;
+  let zona;
+
+  beforeAll(async () => {
+    // Crear datos necesarios para las pruebas
+    rocodromo = await db.Rocodromo.create({
+      nombre: 'Roco Test',
+      ubicacion: 'Test Location',
+    });
+    zona = await db.Zona.create({
+      idRoco: rocodromo.id,
+      tipo: 'Bloque',
+    });
+  });
+
   afterAll(async () => {
+    if (zona) await zona.destroy();
+    if (rocodromo) await rocodromo.destroy();
     await db.sequelize.close();
   });
 
   describe('E2E: Crear pista', () => {
     // Datos para pruebas
-    const pistaTest = { nombre: 'E2E Test', dificultad: '6a' };
+    let pistaTest;
+
+    beforeEach(() => {
+      pistaTest = {
+        idZona: zona.id,
+        nombre: 'E2E Test',
+        dificultad: '6a',
+      };
+    });
 
     // Limpieza después de todas las pruebas
     afterAll(async () => {
-      await db.Pista.destroy({ where: { nombre: pistaTest.nombre } });
+      await db.Pista.destroy({ where: { nombre: 'E2E Test' } });
     });
 
     it('debería crear una pista y devolverla', async () => {
@@ -32,6 +57,7 @@ describe('E2E: Pistas', () => {
       // Verificar que se guardó en la base de datos usando Sequelize
       const pistaGuardada = await db.Pista.findByPk(response.body.id);
       expect(pistaGuardada).not.toBeNull();
+      expect(pistaGuardada.idZona).toBe(pistaTest.idZona);
       expect(pistaGuardada.nombre).toBe(pistaTest.nombre);
       expect(pistaGuardada.dificultad).toBe(pistaTest.dificultad);
     });
@@ -40,7 +66,7 @@ describe('E2E: Pistas', () => {
       // Enviar solicitud con datos inválidos (nombre vacío)
       const response = await request(app)
         .post('/pistas/create')
-        .send({ nombre: '', dificultad: '6a' })
+        .send({ idZona: zona.id, nombre: '', dificultad: '6a' })
         .expect(500);
 
       // Verificar respuesta de la API
@@ -50,18 +76,25 @@ describe('E2E: Pistas', () => {
 
   describe('E2E: Obtener pista', () => {
     // Datos para pruebas
-    const pistaTest = { nombre: 'E2E Test', dificultad: '6a' };
+    let pistaTest;
     let pistaCreadaId;
 
     // Crear pista antes de las pruebas
     beforeAll(async () => {
+      pistaTest = {
+        idZona: zona.id,
+        nombre: 'E2E Test',
+        dificultad: '6a',
+      };
       const pistaCreada = await db.Pista.create(pistaTest);
       pistaCreadaId = pistaCreada.id;
     });
 
     // Limpieza después de todas las pruebas
     afterAll(async () => {
-      await db.Pista.destroy({ where: { id: pistaCreadaId } });
+      if (pistaCreadaId) {
+        await db.Pista.destroy({ where: { id: pistaCreadaId } });
+      }
     });
 
     it('debería obtener una pista por ID', async () => {

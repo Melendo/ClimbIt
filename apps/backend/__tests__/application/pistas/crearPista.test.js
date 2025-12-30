@@ -12,10 +12,11 @@ describe('crearPistaUseCase', () => {
 
     const crearPista = new CrearPistaUseCase(mockRepository);
 
-    const datos = { nombre: 'Ex1', dificultad: '3a' };
+    const datos = { idZona: 1, nombre: 'Ex1', dificultad: '3a' };
     const resultado = await crearPista.execute(datos);
 
     expect(resultado).toMatchObject({
+      idZona: 1,
       nombre: 'Ex1',
       dificultad: '3a',
       id: 1,

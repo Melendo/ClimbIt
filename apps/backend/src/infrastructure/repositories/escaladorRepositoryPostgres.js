@@ -13,9 +13,9 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
     try {
       return new Escalador(
         escaladorModel.id,
-        escaladorModel.nombre,
-        escaladorModel.edad,
-        escaladorModel.experiencia
+        escaladorModel.correo,
+        escaladorModel.contrasena,
+        escaladorModel.apodo
       );
     } catch (error) {
       throw new Error(error.message);
@@ -24,9 +24,9 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
 
   async crear(escalador) {
     const data = {
-      nombre: escalador.nombre,
-      edad: escalador.edad,
-      experiencia: escalador.experiencia,
+      correo: escalador.correo,
+      contrasena: escalador.contrasena,
+      apodo: escalador.apodo,
     };
     const escaladorModel = await this.EscaladorModel.create(data);
 
