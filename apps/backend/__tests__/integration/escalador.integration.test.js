@@ -26,14 +26,16 @@ describe('E2E: Crear escalador', () => {
       .expect(201);
 
     // Verificar respuesta de la API
-    expect(response.body).toMatchObject(escaladorTest);
+    const escaladorEsperado = { ...escaladorTest };
+    delete escaladorEsperado.contrasena;
+    expect(response.body).toMatchObject(escaladorEsperado);
     expect(response.body.id).toBeDefined();
 
     // Verificar que se guardó en la base de datos
     const escaladorGuardado = await db.Escalador.findByPk(response.body.id);
     expect(escaladorGuardado).not.toBeNull();
     expect(escaladorGuardado.correo).toBe(escaladorTest.correo);
-    expect(escaladorGuardado.contrasena).toBe(escaladorTest.contrasena);
+    expect(escaladorGuardado.contrasena).not.toBe(escaladorTest.contrasena); // La contraseña debe estar hasheada
     expect(escaladorGuardado.apodo).toBe(escaladorTest.apodo);
   });
 
