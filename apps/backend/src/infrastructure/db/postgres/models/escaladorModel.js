@@ -2,7 +2,20 @@
 import { Model } from 'sequelize';
 
 export default (sequelize, DataTypes) => {
-  class Escalador extends Model {}
+  class Escalador extends Model {
+    static associate(models) {
+      Escalador.belongsToMany(models.Rocodromo, {
+        through: models.Suscripcion,
+        foreignKey: 'idEscalador',
+        as: 'rocodromos',
+      });
+      Escalador.belongsToMany(models.Pista, {
+        through: models.EscalaPista,
+        foreignKey: 'idEscalador',
+        as: 'pistasEscaladas',
+      });
+    }
+  }
 
   Escalador.init(
     {
@@ -11,25 +24,23 @@ export default (sequelize, DataTypes) => {
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
+        field: 'IDEscalador',
       },
-      nombre: {
+      correo: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
+        field: 'Correo',
       },
-      edad: {
-        type: DataTypes.INTEGER,
+      contrasena: {
+        type: DataTypes.STRING,
         allowNull: false,
+        field: 'Contrasena',
       },
-      experiencia: {
-        /* eslint-disable new-cap */
-        type: DataTypes.ENUM(
-          'Principiante',
-          'Intermedio',
-          'Avanzado',
-          'Experto'
-        ),
-        /* eslint-enable new-cap */
-        allowNull: true,
+      apodo: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        field: 'Apodo',
       },
     },
     {

@@ -1,11 +1,12 @@
 import { jest } from '@jest/globals';
-import ObtenerPistaPorId from '../../../src/application/pistas/obtenerPistaPorId.js';
+import ObtenerPistaPorId from '../../../../src/application/pistas/obtenerPistaPorId.js';
 
 describe('obtenerPistaPorIdUseCase', () => {
   it('debería obtener una pista por su ID correctamente', async () => {
     const mockRepository = {
       obtenerPorId: jest.fn(async (id) => ({
         id,
+        idZona: 1,
         nombre: 'Ex1',
         dificultad: '3a',
       })),
@@ -18,6 +19,7 @@ describe('obtenerPistaPorIdUseCase', () => {
 
     expect(resultado).toMatchObject({
       id: 1,
+      idZona: 1,
       nombre: 'Ex1',
       dificultad: '3a',
     });

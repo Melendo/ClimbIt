@@ -5,9 +5,10 @@ class PistaController {
 
   async crear(req, res, next) {
     try {
-      const { nombre, dificultad } = req.body;
+      const { idZona, nombre, dificultad } = req.body;
 
       const nuevaPista = await this.useCases.crear.execute({
+        idZona,
         nombre,
         dificultad,
       });

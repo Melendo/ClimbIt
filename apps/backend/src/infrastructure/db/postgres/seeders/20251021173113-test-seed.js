@@ -7,9 +7,11 @@ export default {
       'Escaladores',
       [
         {
-          nombre: 'John Doe',
-          edad: 15,
-          experiencia: 'Intermedio',
+          Correo: 'john@example.com',
+          Contrasena: '123456',
+          Apodo: 'JohnDoe',
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       ],
       {}
@@ -20,7 +22,7 @@ export default {
     await queryInterface.bulkDelete(
       'Escaladores',
       {
-        nombre: 'John Doe',
+        Correo: 'john@example.com',
       },
       {}
     );

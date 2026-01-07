@@ -32,7 +32,7 @@ async function inicializarContainer() {
 
   // 2) Instancia del caso de uso con el repositorio inyectado
   const crearEscaladorUseCase = new CrearEscalador(escaladorRepository);
-  const crearPistaUseCase = new CrearPista(pistaRepository);
+  const crearPistaUseCase = new CrearPista(pistaRepository, db.Zona);
   const obtenerPistaPorIdUseCase = new ObtenerPistaPorId(pistaRepository);
   // 3) Agrupar los casos de uso que el controlador necesitará
   const escaladorUseCases = {

@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import CrearEscaladorUseCase from '../../../src/application/escaladores/crearEscalador.js';
+import CrearEscaladorUseCase from '../../../../src/application/escaladores/crearEscalador.js';
 
 describe('crearEscaladorUseCase', () => {
   it('debería crear y guardar un escalador correctamente', async () => {
@@ -12,13 +12,17 @@ describe('crearEscaladorUseCase', () => {
 
     const crearEscalador = new CrearEscaladorUseCase(mockRepository);
 
-    const datos = { nombre: 'Juan', edad: 30, experiencia: 'Intermedio' };
+    const datos = {
+      correo: 'juan@example.com',
+      contrasena: '123456',
+      apodo: 'JuanClimb',
+    };
     const resultado = await crearEscalador.execute(datos);
 
     expect(resultado).toMatchObject({
-      nombre: 'Juan',
-      edad: 30,
-      experiencia: 'Intermedio',
+      correo: 'juan@example.com',
+      contrasena: '123456',
+      apodo: 'JuanClimb',
       id: 1,
     });
   });
@@ -33,7 +37,7 @@ describe('crearEscaladorUseCase', () => {
 
     const crearEscalador = new CrearEscaladorUseCase(mockRepository);
 
-    const datos = { nombre: 'Juan', edad: 30, experiencia: 'intermedio' };
+    const datos = { correo: '', contrasena: '123', apodo: 'Juan' };
     await expect(() => crearEscalador.execute(datos)).rejects.toThrow(
       `Error al crear el escalador`
     );
