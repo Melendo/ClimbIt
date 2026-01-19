@@ -7,6 +7,7 @@ import {
   renderCrearPista,
   renderHome,
   renderInfoPista,
+  renderPistasZona,
 } from './ui.js';
 
 // Router principal
@@ -38,8 +39,24 @@ async function handleNavigation() {
       } else {
         showError('Página no encontrada');
       }
+    } else if (hash.startsWith('#mapaZona')) {
+      const id = obtenerParametroDesdeHash('id');
+      if (id) {
+        showLoading();
+        try {
+          const res = await fetch(`/zonas/pistas/${id}`);
+          if (!res.ok) {
+            throw new Error(`Error al obtener pistas de la zona: ${res.status} ${res.statusText}`);
+          }
+          const pistas = await res.json();
+          renderPistasZona(pistas);
+        } catch (err) {
+          showError(`Error al obtener o procesar las pistas de la zona: ${err.message}`);
+        }     
+      } else {
+        showError('ID de zona no válido o no proporcionado');
+      }
     }
-
   } catch (err) {
     showError(err.message || 'Error desconocido');
   }

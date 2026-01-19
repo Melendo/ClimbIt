@@ -21,6 +21,10 @@ export default defineConfig({
         target: 'http://localhost:3000',
         changeOrigin: true,
       },
+      '/zonas': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
     },
   },
   // Configuración para la construcción del proyecto
