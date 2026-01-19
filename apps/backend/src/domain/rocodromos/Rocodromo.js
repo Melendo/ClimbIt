@@ -9,7 +9,7 @@ class Rocodromo {
     this.nombre = nombre;
     this.ubicacion = ubicacion;
 
-    if (typeof id !== 'number' || id == null) {
+    if (id !== null && typeof id !== 'number') {
       throw new Error(`id inválido: Debe ser un número o null.`);
     }
     if (typeof nombre !== 'string' || nombre.trim() === '') {
