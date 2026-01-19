@@ -5,9 +5,7 @@ class ObtenerPistasZona {
 
   async execute(id) {
     try {
-      const result = await this.zonaRepository.obtenerPistasDeZona(id);
-      const pistas = result ? result : null;
-      return pistas;
+      return await this.zonaRepository.obtenerPistasDeZona(id);
     } catch (error) {
       throw new Error(`Error al obtener la zona por ID: ${error.message}`);
     }
