@@ -1,7 +1,7 @@
-import zonaRepository from '../../domain/zonas/zonaRepository.js';
+import ZonaRepository from '../../domain/zonas/zonaRepository.js';
 import Zona from '../../domain/zonas/Zona.js';
 
-class ZonaRepositoryPostgres extends zonaRepository {
+class ZonaRepositoryPostgres extends ZonaRepository {
   constructor(zonaModel) {
     super();
     this.ZonaModel = zonaModel;
