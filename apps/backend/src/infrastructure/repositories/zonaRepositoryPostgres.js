@@ -14,7 +14,7 @@ class ZonaRepositoryPostgres extends zonaRepository {
       return new Zona(
         zonaModel.id,
         zonaModel.idRoco,
-        zonaModel.nombre,
+        zonaModel.tipo,
       );
     } catch (error) {
       throw new Error(error.message);
