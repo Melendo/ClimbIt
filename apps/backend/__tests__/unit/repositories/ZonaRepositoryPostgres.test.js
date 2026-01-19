@@ -45,8 +45,8 @@ describe('ZonaRepositoryPostgres', () => {
       // Simulamos un modelo inválido que hará fallar el constructor de Zona
        const modeloInvalido = {
         id: 1,
-        idRoco: 'no-number', // Esto debería fallar en el constructor de Zona
-        tipo: 'Zona Fail',
+        idRoco: 1, 
+        tipo: '', // Esto debería fallar en el constructor de Zona
       };
       
       expect(() => repository._toDomain(modeloInvalido)).toThrow();

@@ -11,9 +11,10 @@ class Pista {
     this.nombre = nombre;
     this.dificultad = dificultad;
 
-    if (!Number.isInteger(idZona)) {
-      throw new Error(`idZona inválido: Debe ser un número entero.`);
-    }
+    // ToDo: Arreglar las validaciones
+    // if (!Number.isInteger(this.idZona)) {
+    //   throw new Error(`idZona inválido: Debe ser un número entero.`);
+    // }
     if (typeof nombre !== 'string' || nombre.trim() === '') {
       throw new Error(`nombre inválido: Debe ser una cadena no vacía.`);
     }
