@@ -8,6 +8,7 @@ import {
   renderHome,
   renderInfoPista,
   renderPistasZona,
+  renderZonasRocodromo,
 } from './ui.js';
 
 // Router principal
@@ -55,6 +56,23 @@ async function handleNavigation() {
         }     
       } else {
         showError('ID de zona no válido o no proporcionado');
+      }
+    }else if (hash.startsWith('#mapaRocodromo')) {
+      const id = obtenerParametroDesdeHash('id');
+      if (id) {
+        showLoading();
+        try {
+          const res = await fetch(`/rocodromos/zonas/${id}`);
+          if (!res.ok) {
+            throw new Error(`Error al obtener zonas del rocódromo: ${res.status} ${res.statusText}`);
+          }
+          const zonas = await res.json();
+          renderZonasRocodromo(zonas);
+        } catch (err) {
+          showError(`Error al obtener o procesar las zonas del rocódromo: ${err.message}`);
+        }     
+      } else {
+        showError('ID de rocódromo no válido o no proporcionado');
       }
     }
   } catch (err) {
