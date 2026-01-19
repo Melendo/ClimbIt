@@ -9,9 +9,10 @@ class Zona {
     this.idRoco = idRoco;
     this.tipo = tipo;
 
-    if (!Number.isInteger(idRoco)) {
-      throw new Error(`idRoco inválido: Debe ser un número entero.`);
-    }
+    // ToDo: Arreglar las validaciones
+    // if (!Number.isInteger(idRoco)) {
+    //   throw new Error(`idRoco inválido: Debe ser un número entero.`);
+    // }
     if (typeof tipo !== 'string' || tipo.trim() === '') {
       throw new Error(`tipo inválido: Debe ser una cadena no vacía.`);
     }
