@@ -46,12 +46,12 @@ async function handleNavigation() {
         try {
           const res = await fetch(`/zonas/pistas/${id}`);
           if (!res.ok) {
-            throw new Error(`Error al obtener pista: ${res.status} ${res.statusText}`);
+            throw new Error(`Error al obtener pistas de la zona: ${res.status} ${res.statusText}`);
           }
           const pistas = await res.json();
           renderPistasZona(pistas);
         } catch (err) {
-          showError(`Error al obtener o procesar la pista: ${err.message}`);
+          showError(`Error al obtener o procesar las pistas de la zona: ${err.message}`);
         }     
       } else {
         showError('ID de zona no válido o no proporcionado');
