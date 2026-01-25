@@ -10,7 +10,6 @@ describe('E2E: Rocodromos', () => {
   const zonasCreadas = [];
 
   beforeAll(async () => {
-    // Crear datos necesarios para las pruebas
     rocodromoConZonas = await db.Rocodromo.create({
       nombre: 'Roco Con Zonas Integration',
       ubicacion: 'Test Location 1',
@@ -21,7 +20,6 @@ describe('E2E: Rocodromos', () => {
       ubicacion: 'Test Location 2',
     });
 
-    // Crear algunas zonas para el rocódromo
     zonasCreadas.push(await db.Zona.create({
       idRoco: rocodromoConZonas.id,
       tipo: 'Zona Boulder',
@@ -34,7 +32,6 @@ describe('E2E: Rocodromos', () => {
   });
 
   afterAll(async () => {
-    // Limpieza
     for (const zona of zonasCreadas) {
       if (zona) await zona.destroy();
     }
@@ -53,7 +50,6 @@ describe('E2E: Rocodromos', () => {
       expect(response.body).toBeInstanceOf(Array);
       expect(response.body).toHaveLength(2);
       
-      // Verificar contenido
       const tipos = response.body.map(z => z.tipo);
       expect(tipos).toContain('Zona Boulder');
       expect(tipos).toContain('Zona Cuerda');
@@ -69,7 +65,6 @@ describe('E2E: Rocodromos', () => {
     });
 
     it('debería retornar 404 para un rocódromo que no existe', async () => {
-      // Usamos un ID muy alto para asegurar que no existe
       const fakeId = 9999999;
       const response = await request(app)
         .get(`/rocodromos/zonas/${fakeId}`)
