@@ -87,5 +87,22 @@ describe('E2E: Zonas', () => {
       expect(response.body).toHaveProperty('error');
       expect(response.body.error).toMatch(/no encontrada/);
     });
+
+    it('debería retornar 422 si el id no es entero positivo', async () => {
+      const resNonInt = await request(app)
+        .get(`/zonas/pistas/xyz`)
+        .expect(422);
+      expect(resNonInt.body).toHaveProperty('status', 'invalid_request');
+      expect(Array.isArray(resNonInt.body.errors)).toBe(true);
+      const fieldsNonInt = resNonInt.body.errors.map((e) => e.field);
+      expect(fieldsNonInt).toContain('id');
+
+      const resZero = await request(app)
+        .get(`/zonas/pistas/0`)
+        .expect(422);
+      expect(resZero.body).toHaveProperty('status', 'invalid_request');
+      const fieldsZero = resZero.body.errors.map((e) => e.field);
+      expect(fieldsZero).toContain('id');
+    });
   });
 });
