@@ -67,10 +67,13 @@ describe('E2E: Pistas', () => {
       const response = await request(app)
         .post('/pistas/create')
         .send({ idZona: zona.id, nombre: '', dificultad: '6a' })
-        .expect(500);
+        .expect(422);
 
-      // Verificar respuesta de la API
-      expect(response.body).toHaveProperty('error');
+      // Verificar respuesta de la API (formato de express-validator)
+      expect(response.body).toHaveProperty('status', 'invalid_request');
+      expect(Array.isArray(response.body.errors)).toBe(true);
+      const fields = response.body.errors.map((e) => e.field);
+      expect(fields).toContain('nombre');
     });
   });
 

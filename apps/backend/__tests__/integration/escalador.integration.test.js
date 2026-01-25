@@ -44,9 +44,12 @@ describe('E2E: Crear escalador', () => {
     const response = await request(app)
       .post('/escaladores/create')
       .send({ correo: '', contrasena: '123', apodo: 'Test' })
-      .expect(500);
+      .expect(422);
 
-    // Verificar respuesta de la API
-    expect(response.body).toHaveProperty('error');
+    // Verificar respuesta de la API (formato de express-validator)
+    expect(response.body).toHaveProperty('status', 'invalid_request');
+    expect(Array.isArray(response.body.errors)).toBe(true);
+    const fields = response.body.errors.map((e) => e.field);
+    expect(fields).toContain('correo');
   });
 });
