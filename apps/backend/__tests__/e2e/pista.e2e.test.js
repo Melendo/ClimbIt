@@ -9,7 +9,6 @@ describe('E2E: Pistas', () => {
   let zona;
 
   beforeAll(async () => {
-    // Crear datos necesarios para las pruebas
     rocodromo = await db.Rocodromo.create({
       nombre: 'Roco Test',
       ubicacion: 'Test Location',
@@ -27,7 +26,6 @@ describe('E2E: Pistas', () => {
   });
 
   describe('E2E: Crear pista', () => {
-    // Datos para pruebas
     let pistaTest;
 
     beforeEach(() => {
@@ -38,23 +36,19 @@ describe('E2E: Pistas', () => {
       };
     });
 
-    // Limpieza después de todas las pruebas
     afterAll(async () => {
       await db.Pista.destroy({ where: { nombre: 'E2E Test' } });
     });
 
     it('debería crear una pista y devolverla', async () => {
-      // Enviar solicitud para crear pista
       const response = await request(app)
         .post('/pistas/create')
         .send(pistaTest)
         .expect(201);
 
-      // Verificar respuesta de la API
       expect(response.body).toMatchObject(pistaTest);
       expect(response.body.id).toBeDefined();
 
-      // Verificar que se guardó en la base de datos usando Sequelize
       const pistaGuardada = await db.Pista.findByPk(response.body.id);
       expect(pistaGuardada).not.toBeNull();
       expect(pistaGuardada.idZona).toBe(pistaTest.idZona);
@@ -63,23 +57,22 @@ describe('E2E: Pistas', () => {
     });
 
     it('debería manejar errores al crear una pista con datos inválidos', async () => {
-      // Enviar solicitud con datos inválidos (nombre vacío)
       const response = await request(app)
         .post('/pistas/create')
         .send({ idZona: zona.id, nombre: '', dificultad: '6a' })
-        .expect(500);
+        .expect(422);
 
-      // Verificar respuesta de la API
-      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('status', 'invalid_request');
+      expect(Array.isArray(response.body.errors)).toBe(true);
+      const fields = response.body.errors.map((e) => e.field);
+      expect(fields).toContain('nombre');
     });
   });
 
   describe('E2E: Obtener pista', () => {
-    // Datos para pruebas
     let pistaTest;
     let pistaCreadaId;
 
-    // Crear pista antes de las pruebas
     beforeAll(async () => {
       pistaTest = {
         idZona: zona.id,
@@ -90,7 +83,6 @@ describe('E2E: Pistas', () => {
       pistaCreadaId = pistaCreada.id;
     });
 
-    // Limpieza después de todas las pruebas
     afterAll(async () => {
       if (pistaCreadaId) {
         await db.Pista.destroy({ where: { id: pistaCreadaId } });
@@ -98,12 +90,10 @@ describe('E2E: Pistas', () => {
     });
 
     it('debería obtener una pista por ID', async () => {
-      // Enviar solicitud para obtener pista
       const response = await request(app)
         .get(`/pistas/${pistaCreadaId}`)
         .expect(200);
 
-      // Verificar respuesta de la API
       expect(response.body).toMatchObject(pistaTest);
       expect(response.body.id).toBe(pistaCreadaId);
     });
@@ -111,12 +101,10 @@ describe('E2E: Pistas', () => {
     it('debería devolver 404 si la pista no existe', async () => {
       const idInexistente = 999999;
 
-      // Enviar solicitud para obtener pista inexistente
       const response = await request(app)
         .get(`/pistas/${idInexistente}`)
         .expect(404);
 
-      // Verificar respuesta de la API
       expect(response.body).toHaveProperty(
         'error',
         `Pista con ID ${idInexistente} no encontrada`
