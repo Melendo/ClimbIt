@@ -30,7 +30,7 @@ export default [
     files: ['**/*.{js,mjs,cjs}'],
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
-      ecmaVersion: 2022,
+      ecmaVersion: 'latest',
       sourceType: 'module',
       parserOptions: {
         ecmaFeatures: {
