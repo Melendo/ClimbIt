@@ -1,9 +1,8 @@
-import { comparePassword } from '../helpers/hashPasswordService.js';
-import { generateToken } from '../helpers/tokenService.js';
-
 class AutenticarEscalador {
-  constructor(escaladorRepository) {
+  constructor(escaladorRepository, passwordService, tokenService) {
     this.escaladorRepository = escaladorRepository;
+    this.passwordService = passwordService;
+    this.tokenService = tokenService;
   }
 
   async execute(data) {
@@ -14,14 +13,14 @@ class AutenticarEscalador {
         throw new Error('Escalador no encontrado');
       }
 
-      const passwordMatch = await comparePassword(
+      const passwordMatch = await this.passwordService.compare(
         data.contrasena,
         escaladorExistente.contrasena
       );
       if (!passwordMatch) {
         throw new Error('Contraseña incorrecta');
       }
-      const token = generateToken({ correo: escaladorExistente.correo });
+      const token = this.tokenService.crear({ correo: escaladorExistente.correo });
       return { token };
     } catch (error) {
       throw new Error(`Error al autenticar al escalador: ${error.message}`);

@@ -1,13 +1,14 @@
 import Escalador from '../../domain/escaladores/Escalador.js';
-import { hashPassword } from '../helpers/hashPasswordService.js';
+
 class CrearEscalador {
-  constructor(escaladorRepository) {
+  constructor(escaladorRepository, passwordService) {
     this.escaladorRepository = escaladorRepository;
+    this.passwordService = passwordService;
   }
 
   async execute(data) {
     try {
-      const hashedPassword = await hashPassword(data.contrasena);
+      const hashedPassword = await this.passwordService.hash(data.contrasena);
       const nuevoEscalador = new Escalador(
         null,
         data.correo,

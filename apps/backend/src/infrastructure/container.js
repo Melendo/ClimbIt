@@ -12,6 +12,10 @@ import PistaRepositoryPostgres from './repositories/pistaRepositoryPostgres.js';
 import ZonaRepositoryPostgres from './repositories/zonaRepositoryPostgres.js';
 import RocodromoRepositoryPostgres from './repositories/rocodromoRepositoryPostgres.js';
 
+// Servicios de infra (Seguridad etc)
+import passwordService from './security/passwordService.js';
+import tokenService from './security/tokenService.js';
+
 // Casos de uso (lógica de aplicación)
 import CrearEscalador from '../application/escaladores/crearEscalador.js';
 import AutenticarEscalador from '../application/escaladores/autenticarEscalador.js';
@@ -40,8 +44,15 @@ async function inicializarContainer() {
   const rocodromoRepository = new RocodromoRepositoryPostgres(db.Rocodromo);
 
   // 2) Instancia del caso de uso con el repositorio inyectado
-  const crearEscaladorUseCase = new CrearEscalador(escaladorRepository);
-  const autenticarEscaladorUseCase = new AutenticarEscalador(escaladorRepository);
+  const crearEscaladorUseCase = new CrearEscalador(
+    escaladorRepository,
+    passwordService
+  );
+  const autenticarEscaladorUseCase = new AutenticarEscalador(
+    escaladorRepository,
+    passwordService,
+    tokenService
+  );
   const crearPistaUseCase = new CrearPista(pistaRepository, db.Zona);
   const obtenerPistaPorIdUseCase = new ObtenerPistaPorId(pistaRepository);
   const obtenerPistasDeZonaUseCase = new ObtenerPistasDeZona(zonaRepository);
