@@ -4,6 +4,7 @@ import { crearEscaladorCmd } from '../modules/escalador/escaladorController.js';
 import { crearPistaCmd, infoPistaCmd } from '../modules/pista/pistaController.js';
 import { mapaRocodromoCmd, listaRocodromosCmd } from '../modules/rocodromo/rocodromoController.js';
 import { homeCmd } from '../modules/home/homeController.js';
+import { perfilCmd } from '../modules/perfil/perfilController.js';
 import { error404Cmd } from '../modules/error/errorController.js';
 
 // Funcion para obtener parametros desde el hash de la URL despues del '?'
@@ -42,6 +43,9 @@ export async function handleNavigation() {
         else if (hash.startsWith('#mapaRocodromo')) {
             const id = obtenerParametroDesdeHash('id');
             await mapaRocodromoCmd(mainContainer, id);
+        }
+        else if (hash === '#perfil') {
+            perfilCmd(mainContainer);
         }
         else {
             error404Cmd(mainContainer);
