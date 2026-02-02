@@ -1,6 +1,7 @@
 import express from 'express';
 import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
+import verifyTokenMiddleware from '../middlewares/verifyToken.js';
 
 import escalaDificultadJSON from '../../../domain/sharedObjects/escalaDificultadFrancesa.json' with { type: 'json' };
 const GRADOS_FRANCESES = escalaDificultadJSON.escala_francesa_escalada.grados;
@@ -35,9 +36,15 @@ const obtenerPistaPorIdValidators = [
     .withMessage('id debe ser un entero positivo'),
 ];
 
-router.post('/create', crearPistaValidators, validate, (req, res, next) => {
-  pistaController.crear(req, res, next);
-});
+router.post(
+  '/create',
+  verifyTokenMiddleware,
+  crearPistaValidators,
+  validate,
+  (req, res, next) => {
+    pistaController.crear(req, res, next);
+  }
+);
 
 router.get('/:id', obtenerPistaPorIdValidators, validate, (req, res, next) => {
   pistaController.obtenerPistaPorId(req, res, next);
