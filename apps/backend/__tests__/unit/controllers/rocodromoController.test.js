@@ -60,4 +60,34 @@ describe('Unit: RocodromoController', () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.body).toEqual({ error: 'falló' });
   });
+
+  it('obtenerRocodromos: 200 devuelve lista', async () => {
+    const mockRocodromos = [{ id: 1, nombre: 'Roco1' }];
+    const useCases = {
+      obtenerRocodromos: { execute: jest.fn().mockResolvedValue(mockRocodromos) },
+    };
+    const controller = new RocodromoController(useCases);
+    const req = {};
+    const res = createResMock();
+
+    await controller.obtenerRocodromos(req, res, () => {});
+
+    expect(useCases.obtenerRocodromos.execute).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.body).toEqual(mockRocodromos);
+  });
+
+  it('obtenerRocodromos: 500 ante errores', async () => {
+    const useCases = {
+      obtenerRocodromos: { execute: jest.fn().mockRejectedValue(new Error('falló')) },
+    };
+    const controller = new RocodromoController(useCases);
+    const req = {};
+    const res = createResMock();
+
+    await controller.obtenerRocodromos(req, res, () => {});
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.body).toEqual({ error: 'falló' });
+  });
 });

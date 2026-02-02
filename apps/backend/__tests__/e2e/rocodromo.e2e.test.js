@@ -1,6 +1,7 @@
 import request from 'supertest';
 import app from '../../src/interfaces/http/server.js';
 import dbPromise from '../../src/infrastructure/db/postgres/models/index.js';
+import tokenService from '../../src/infrastructure/security/tokenService.js';
 
 const db = await dbPromise;
 
@@ -8,8 +9,11 @@ describe('E2E: Rocodromos', () => {
   let rocodromoConZonas;
   let rocodromoSinZonas;
   const zonasCreadas = [];
+  let token;
 
   beforeAll(async () => {
+    token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'admin' });
+    
     rocodromoConZonas = await db.Rocodromo.create({
       nombre: 'Roco Con Zonas Integration',
       ubicacion: 'Test Location 1',
@@ -89,6 +93,28 @@ describe('E2E: Rocodromos', () => {
       expect(resZero.body).toHaveProperty('status', 'invalid_request');
       const fieldsZero = resZero.body.errors.map((e) => e.field);
       expect(fieldsZero).toContain('id');
+    });
+  });
+
+  describe('GET /rocodromos/', () => {
+    it('debería retornar 401 si no se envia token', async () => {
+      await request(app)
+        .get('/rocodromos/')
+        .expect(401);
+    });
+
+    it('debería obtener todos los rocódromos con token valido', async () => {
+      const response = await request(app)
+        .get('/rocodromos/')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(response.body).toBeInstanceOf(Array);
+      expect(response.body.length).toBeGreaterThanOrEqual(2);
+      
+      const nombres = response.body.map(r => r.nombre);
+      expect(nombres).toContain('Roco Con Zonas Integration');
+      expect(nombres).toContain('Roco Sin Zonas Integration');
     });
   });
 });

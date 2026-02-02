@@ -19,6 +19,15 @@ class RocodromoController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  async obtenerRocodromos(req, res, next) {
+    try {
+      const rocodromos = await this.useCases.obtenerRocodromos.execute();
+      res.status(200).json(rocodromos);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 export default RocodromoController;

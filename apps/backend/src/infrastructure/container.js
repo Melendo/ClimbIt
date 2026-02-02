@@ -23,6 +23,7 @@ import CrearPista from '../application/pistas/crearPista.js';
 import ObtenerPistaPorId from '../application/pistas/obtenerPistaPorId.js';
 import ObtenerPistasDeZona from '../application/zonas/obtenerPistasZona.js';
 import ObtenerZonasRocodromo from '../application/rocodromos/obtenerZonasRocodromo.js';
+import ObtenerRocodromos from '../application/rocodromos/obtenerRocodromos.js';
 
 // Controladores (interfaces HTTP)
 import EscaladorController from '../interfaces/http/controllers/escaladorController.js';
@@ -59,6 +60,9 @@ async function inicializarContainer() {
   const obtenerZonasRocodromoUseCase = new ObtenerZonasRocodromo(
     rocodromoRepository
   );
+  const obtenerRocodromosUseCase = new ObtenerRocodromos(
+    rocodromoRepository
+  );
   // 3) Agrupar los casos de uso que el controlador necesitará
   const escaladorUseCases = {
     crear: crearEscaladorUseCase,
@@ -73,6 +77,7 @@ async function inicializarContainer() {
   };
   const rocodromoUseCases = {
     obtenerZonasRocodromo: obtenerZonasRocodromoUseCase,
+    obtenerRocodromos: obtenerRocodromosUseCase,
   };
 
   // 4) Instancia del controlador con los casos de uso inyectados

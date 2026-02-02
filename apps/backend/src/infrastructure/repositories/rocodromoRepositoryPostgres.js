@@ -43,6 +43,16 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
     }
   }
 
+  async obtenerRocodromos() {
+    try {
+      const rocodromosData = await this.RocodromoModel.findAll();
+
+      return rocodromosData.map((rocodromo) => this._toDomain(rocodromo));
+    } catch (error) {
+      throw new Error(`Error al obtener los rocodromos: ${error.message}`);
+    }
+  }
+
 }
 
 export default RocodromoRepositoryPostgres;
