@@ -42,12 +42,14 @@ export function renderCrearEscalador(container, callbacks) {
       <button type="submit" class="btn btn-primary">Crear</button>
     </form></div>`;
 
+    // Referencias a elementos del formulario
     const form = document.getElementById('form-crear-escalador');
     const alertBox = document.getElementById('form-alert');
     const correoInput = document.getElementById('correo');
     const contrasenaInput = document.getElementById('contrasena');
     const apodoInput = document.getElementById('apodo');
 
+    // Limpieza de errores al modificar los campos
     [correoInput, contrasenaInput, apodoInput].forEach((el) => {
         el.addEventListener('input', () => {
              clearFieldError(el);
@@ -55,6 +57,7 @@ export function renderCrearEscalador(container, callbacks) {
         });
     });
 
+    // Manejo del envio del formulario
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         clearFormAlert(alertBox);

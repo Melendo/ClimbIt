@@ -1,5 +1,6 @@
 import { showError, showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
 
+// Escala de grados (falta traerla con peticion al backend)
 const GRADOS_FRANCESES = [
     '3',
     '4',
@@ -10,6 +11,7 @@ const GRADOS_FRANCESES = [
     '9a', '9a+', '9b', '9b+', '9c', '9c+',
 ];
 
+// Vista para la creación y visualización de pistas
 export function renderCrearPista(container, callbacks) {
     container.innerHTML = `
   <div class="container">  
@@ -57,7 +59,7 @@ export function renderCrearPista(container, callbacks) {
       <button type="submit" class="btn btn-primary">Crear</button>
     </form></div>`;
 
-    // Rellenar opciones de dificultad según escala francesa
+    // Referencias a elementos del formulario
     const dificultadSelect = document.getElementById('dificultad');
     const form = document.getElementById('form-crear-pista');
     const idRocodromoInput = document.getElementById('idRocodromo');
@@ -192,6 +194,7 @@ export function renderCrearPista(container, callbacks) {
     });
 }
 
+// Vista para la información de una pista
 export async function renderInfoPista(container, pista) {
     try {
         let data = pista;

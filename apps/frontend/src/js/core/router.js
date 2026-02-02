@@ -1,10 +1,13 @@
+// Importamos los controladores de los diferentes modulos y las funciones de UI
 import { mainContainer, showLoading, showError } from './ui.js';
 import { crearEscaladorCmd } from '../modules/escalador/escaladorController.js';
 import { crearPistaCmd, infoPistaCmd } from '../modules/pista/pistaController.js';
 import { mapaZonaCmd } from '../modules/zona/zonaController.js';
 import { mapaRocodromoCmd } from '../modules/rocodromo/rocodromoController.js';
 import { homeCmd } from '../modules/home/homeController.js';
+import { error404Cmd } from '../modules/error/errorController.js';
 
+// Funcion para obtener parametros desde el hash de la URL despues del '?'
 function obtenerParametroDesdeHash(nombre) {
     const hash = window.location.hash;
     const indexInterrogacion = hash.indexOf('?');
@@ -14,6 +17,7 @@ function obtenerParametroDesdeHash(nombre) {
     return urlParams.get(nombre);
 }
 
+// Manejador de navegacion basado en el '#' de la URL
 export async function handleNavigation() {
     const hash = window.location.hash || '#home';
 
@@ -31,11 +35,7 @@ export async function handleNavigation() {
         }
         else if (hash.startsWith('#infoPista')) {
             const id = obtenerParametroDesdeHash('id');
-            if (id) {
-                await infoPistaCmd(mainContainer, id);
-            } else {
-                showError('Página no encontrada');
-            }
+            await infoPistaCmd(mainContainer, id);
         }
         else if (hash.startsWith('#mapaZona')) {
             const id = obtenerParametroDesdeHash('id');
@@ -46,8 +46,7 @@ export async function handleNavigation() {
             await mapaRocodromoCmd(mainContainer, id);
         }
         else {
-            // Habria que crear una pagina 404
-            homeCmd(mainContainer);
+            error404Cmd(mainContainer);
         }
     }
     catch (err) {
@@ -55,6 +54,7 @@ export async function handleNavigation() {
     }
 }
 
+// Inicializa el router para escuchar cambios en el hash de la URL
 export function initRouter() {
     window.addEventListener('hashchange', handleNavigation);
     handleNavigation();

@@ -1,6 +1,7 @@
 import { renderCrearEscalador } from './escaladorView.js';
 import { fetchClient } from '../../core/client.js';
 
+// Controlador para la vista de crear un nuevo escalador
 export function crearEscaladorCmd(container) {
     const callbacks = {
         createEscalador: async (data) => {

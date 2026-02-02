@@ -2,6 +2,7 @@ import { renderCrearPista, renderInfoPista } from './pistaView.js';
 import { fetchClient } from '../../core/client.js';
 import { showError, showLoading } from '../../core/ui.js';
 
+// Controlador para la vista de crear una nueva pista
 export function crearPistaCmd(container) {
     const callbacks = {
         getZonas: async (idRocodromo) => {
@@ -35,15 +36,12 @@ export function crearPistaCmd(container) {
     renderCrearPista(container, callbacks);
 }
 
+// Controlador para la vista de información de una pista
 export async function infoPistaCmd(container, id) {
     if (id) {
         showLoading();
         try {
             const res = await fetchClient(`/pistas/${id}`);
-            //   if (!res.ok) {
-            //     throw new Error(`Error al obtener pista: ${res.status} ${res.statusText}`);
-            //   }
-            // fetchClient already throws error if not ok
             const pista = await res.json();
             renderInfoPista(container, pista);
         } catch (err) {

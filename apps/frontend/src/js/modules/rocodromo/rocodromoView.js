@@ -1,5 +1,6 @@
 import { showError } from '../../core/ui.js';
 
+// Vista para mostrar las zonas de un rocódromo
 export function renderZonasRocodromo(container, zonas) {
     try {
         if (!Array.isArray(zonas)) {

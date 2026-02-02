@@ -2,6 +2,7 @@ import { renderZonasRocodromo } from './rocodromoView.js';
 import { fetchClient } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
 
+// Controlador para la vista de mapa de un rocódromo
 export async function mapaRocodromoCmd(container, id) {
     if (id) {
         showLoading();

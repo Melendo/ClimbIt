@@ -1,3 +1,4 @@
+// Centralizacion de las peticiones fetch con manejo de errores
 export async function fetchClient(url, options = {}) {
 
     const response = await fetch(url, options);
