@@ -14,6 +14,7 @@ import RocodromoRepositoryPostgres from './repositories/rocodromoRepositoryPostg
 
 // Casos de uso (lógica de aplicación)
 import CrearEscalador from '../application/escaladores/crearEscalador.js';
+import AutenticarEscalador from '../application/escaladores/autenticarEscalador.js';
 import CrearPista from '../application/pistas/crearPista.js';
 import ObtenerPistaPorId from '../application/pistas/obtenerPistaPorId.js';
 import ObtenerPistasDeZona from '../application/zonas/obtenerPistasZona.js';
@@ -40,6 +41,7 @@ async function inicializarContainer() {
 
   // 2) Instancia del caso de uso con el repositorio inyectado
   const crearEscaladorUseCase = new CrearEscalador(escaladorRepository);
+  const autenticarEscaladorUseCase = new AutenticarEscalador(escaladorRepository);
   const crearPistaUseCase = new CrearPista(pistaRepository, db.Zona);
   const obtenerPistaPorIdUseCase = new ObtenerPistaPorId(pistaRepository);
   const obtenerPistasDeZonaUseCase = new ObtenerPistasDeZona(zonaRepository);
@@ -49,6 +51,7 @@ async function inicializarContainer() {
   // 3) Agrupar los casos de uso que el controlador necesitará
   const escaladorUseCases = {
     crear: crearEscaladorUseCase,
+    autenticar: autenticarEscaladorUseCase,
   };
   const pistaUseCases = {
     crear: crearPistaUseCase,

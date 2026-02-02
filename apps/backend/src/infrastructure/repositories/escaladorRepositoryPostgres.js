@@ -33,6 +33,13 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
 
     return this._toDomain(escaladorModel);
   }
+
+  async encontrarPorCorreo(correo) {
+    const escaladorModel = await this.EscaladorModel.findOne({
+      where: { correo },
+    });
+    return this._toDomain(escaladorModel);
+  }
 }
 
 export default EscaladorRepositoryPostgres;

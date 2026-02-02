@@ -1,13 +1,7 @@
 import express from 'express';
-import path from 'path';
 import cors from 'cors';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 
 import sequelize from '../../infrastructure/db/postgres/sequelize.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 const app = express();
 
@@ -15,9 +9,6 @@ const app = express();
 app.use(cors()); // Tuve que "configurar" CORS para permitir peticiones desde el frontend (ToDo: Configurar bien CORS)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Servir archivos estáticos si los hay
-app.use(express.static(path.join(__dirname, '..', 'web', 'public')));
 
 // Rutas API: cargamos las rutas cuando se inicializa la app para evitar side-effects
 async function setupRoutes() {

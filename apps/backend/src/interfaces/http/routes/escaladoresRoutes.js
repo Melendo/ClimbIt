@@ -17,4 +17,16 @@ router.post('/create', crearEscaladorValidators, validate, (req, res, next) => {
   escaladorController.crear(req, res, next);
 });
 
+const autenticarEscaladorValidators = [
+  body('correo').isString().trim().notEmpty().isEmail().withMessage('correo debe ser un email válido'),
+  body('contrasena').isString().trim().notEmpty().withMessage('contrasena es requerida'),
+];  
+router.post('/auth',
+  autenticarEscaladorValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.autenticar(req, res, next);
+  }
+);
+
 export default router;

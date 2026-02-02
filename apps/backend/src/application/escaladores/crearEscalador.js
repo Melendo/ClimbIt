@@ -1,6 +1,5 @@
 import Escalador from '../../domain/escaladores/Escalador.js';
-import bcrypt from 'bcrypt';
-
+import { hashPassword } from '../helpers/hashPasswordService.js';
 class CrearEscalador {
   constructor(escaladorRepository) {
     this.escaladorRepository = escaladorRepository;
@@ -8,8 +7,7 @@ class CrearEscalador {
 
   async execute(data) {
     try {
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(data.contrasena, saltRounds);
+      const hashedPassword = await hashPassword(data.contrasena);
       const nuevoEscalador = new Escalador(
         null,
         data.correo,
