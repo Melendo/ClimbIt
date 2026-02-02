@@ -1,5 +1,4 @@
 import { renderCrearPista, renderInfoPista } from './pistaView.js';
-import './pista.css';
 import { fetchClient } from '../../core/client.js';
 import { showError, showLoading } from '../../core/ui.js';
 

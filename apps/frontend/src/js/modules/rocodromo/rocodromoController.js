@@ -1,5 +1,4 @@
 import { renderZonasRocodromo } from './rocodromoView.js';
-import './rocodromo.css';
 import { fetchClient } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
 

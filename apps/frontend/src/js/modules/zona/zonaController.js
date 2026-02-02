@@ -1,5 +1,4 @@
 import { renderPistasZona } from './zonaView.js';
-import './zona.css';
 import { fetchClient } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
 
