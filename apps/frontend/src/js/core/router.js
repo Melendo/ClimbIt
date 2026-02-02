@@ -3,16 +3,7 @@ import { crearEscaladorCmd } from '../modules/escalador/escaladorController.js';
 import { crearPistaCmd, infoPistaCmd } from '../modules/pista/pistaController.js';
 import { mapaZonaCmd } from '../modules/zona/zonaController.js';
 import { mapaRocodromoCmd } from '../modules/rocodromo/rocodromoController.js';
-
-function renderHome() {
-    mainContainer.innerHTML = `
-    <div class="container"><div class="text-center my-5">
-      <h1>Bienvenido a ClimbIt</h1>
-      <p class="lead">Tu aplicación para gestionar escaladores y pistas de escalada.</p>
-      <a href="#crearEscalador" class="btn btn-primary mx-2">Crear Escalador</a>
-      <a href="#crearPista" class="btn btn-secondary mx-2">Crear Pista</a>
-    </div></div>`;
-}
+import { homeCmd } from '../modules/home/homeController.js';
 
 function obtenerParametroDesdeHash(nombre) {
     const hash = window.location.hash;
@@ -30,7 +21,7 @@ export async function handleNavigation() {
 
     try {
         if (hash === '#home' || hash === '') {
-            renderHome();
+            homeCmd(mainContainer);
         }
         else if (hash === '#crearEscalador') {
             crearEscaladorCmd(mainContainer);
@@ -56,7 +47,7 @@ export async function handleNavigation() {
         }
         else {
             // Habria que crear una pagina 404
-            renderHome();
+            homeCmd(mainContainer);
         }
     }
     catch (err) {
