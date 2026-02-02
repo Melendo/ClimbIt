@@ -2,7 +2,6 @@
 import { mainContainer, showLoading, showError } from './ui.js';
 import { crearEscaladorCmd } from '../modules/escalador/escaladorController.js';
 import { crearPistaCmd, infoPistaCmd } from '../modules/pista/pistaController.js';
-import { mapaZonaCmd } from '../modules/zona/zonaController.js';
 import { mapaRocodromoCmd } from '../modules/rocodromo/rocodromoController.js';
 import { homeCmd } from '../modules/home/homeController.js';
 import { error404Cmd } from '../modules/error/errorController.js';
@@ -36,10 +35,6 @@ export async function handleNavigation() {
         else if (hash.startsWith('#infoPista')) {
             const id = obtenerParametroDesdeHash('id');
             await infoPistaCmd(mainContainer, id);
-        }
-        else if (hash.startsWith('#mapaZona')) {
-            const id = obtenerParametroDesdeHash('id');
-            await mapaZonaCmd(mainContainer, id);
         }
         else if (hash.startsWith('#mapaRocodromo')) {
             const id = obtenerParametroDesdeHash('id');

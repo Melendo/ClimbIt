@@ -1,6 +1,94 @@
 import { showError } from '../../core/ui.js';
+import { renderNavbar } from '../../components/navbar.js';
 
-// Vista para mostrar las zonas de un rocódromo
+// Vista para mostrar el mapa de un rocódromo con sus zonas y pistas
+export function renderMapaRocodromo(container, data) {
+    try {
+        const { rocodromo, zonas } = data;
+        const nombreRocodromo = rocodromo?.nombre || 'Rocódromo';
+
+        // Generar cards de zonas con sus pistas
+        let zonasHTML = '';
+        
+        if (!Array.isArray(zonas) || zonas.length === 0) {
+            zonasHTML = `
+              <div class="col-12">
+                <div class="alert alert-info">No hay zonas disponibles en este rocódromo.</div>
+              </div>`;
+        } else {
+            zonasHTML = zonas.flatMap(zona => {
+                if (!zona.pistas || zona.pistas.length === 0) {
+                    return [`
+                      <div class="col-6 col-md-4">
+                        <div class="zona-card position-relative rounded overflow-hidden" style="aspect-ratio: 1;">
+                          <img src="/assets/placeholder.jpg" alt="Zona ${zona.id}" class="w-100 h-100" style="object-fit: cover;">
+                          <div class="zona-card-overlay position-absolute bottom-0 start-0 end-0 p-2 text-white">
+                            <small class="d-block fw-medium">Zona ${zona.tipo || zona.id}</small>
+                            <small class="text-white-50">Sin pistas</small>
+                          </div>
+                        </div>
+                      </div>
+                    `];
+                }
+                return zona.pistas.map(pista => `
+                  <div class="col-6 col-md-4">
+                    <a href="#infoPista?id=${pista.id}" class="text-decoration-none">
+                      <div class="zona-card position-relative rounded overflow-hidden" style="aspect-ratio: 1;">
+                        <img src="/assets/placeholder.jpg" alt="${pista.nombre}" class="w-100 h-100" style="object-fit: cover;">
+                        <div class="zona-card-overlay position-absolute bottom-0 start-0 end-0 p-2 text-white">
+                          <small class="d-block fw-medium">${zona.tipo || 'Zona ' + zona.id}</small>
+                          <div class="d-flex align-items-center gap-1">
+                            <span class="badge bg-primary">${pista.dificultad}</span>
+                            <small class="text-truncate">${pista.nombre}</small>
+                          </div>
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+                `);
+            }).join('');
+        }
+
+        container.innerHTML = `
+      <div class="card shadow-sm d-flex flex-column">
+        
+        <!-- Cabecera: Icono + Nombre del rocódromo -->
+        <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
+          <a href="#" onclick="history.back(); return false;" class="text-dark">
+            <span class="material-icons align-middle">arrow_back</span>
+          </a>
+          <img src="/assets/rocodromoDefecto.jpg" alt="Icono rocódromo" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+          <span class="fw-medium">${nombreRocodromo}</span>
+        </div>
+
+        <!-- Mapa del rocódromo -->
+        <div class="mapa-rocodromo" style="height: 200px; overflow: hidden;">
+          <img 
+            src="/assets/mapaDefecto.jpg" 
+            alt="Mapa del rocódromo ${nombreRocodromo}" 
+            class="w-100 h-100" 
+            style="object-fit: cover;"
+          />
+        </div>
+
+        <!-- Grid de zonas/pistas (scrollable) -->
+        <div class="card-body flex-grow-1 overflow-auto" style="max-height: calc(100vh - 350px);">
+          <div class="row g-2">
+            ${zonasHTML}
+          </div>
+        </div>
+
+        <!-- Menú de navegación inferior -->
+        ${renderNavbar()}
+
+      </div>
+    `;
+    } catch (err) {
+        showError(err.message || 'Error al mostrar el rocódromo');
+    }
+}
+
+// Vista legacy para mostrar las zonas de un rocódromo (lista simple)
 export function renderZonasRocodromo(container, zonas) {
     try {
         if (!Array.isArray(zonas)) {

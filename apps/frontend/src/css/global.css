@@ -59,3 +59,36 @@ body {
 .estado-btn:focus {
   text-decoration: none !important;
 }
+
+/* ========================================
+   Cards de zonas/pistas en mapa rocódromo
+   ======================================== */
+.zona-card {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.zona-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.zona-card-overlay {
+  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+}
+
+/* ========================================
+   Menú de navegación inferior
+   ======================================== */
+.nav-link-bottom {
+  text-decoration: none !important;
+  transition: color 0.2s ease;
+}
+
+.nav-link-bottom:hover {
+  color: var(--bs-primary) !important;
+}
+
+.nav-link-bottom.active {
+  color: var(--bs-primary) !important;
+}
