@@ -2,45 +2,53 @@ import { showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '.
 
 export function renderCrearEscalador(container, callbacks) {
     container.innerHTML = `
-    <div class="container">
-    <h1>Nuevo Escalador</h1>
-    <form id="form-crear-escalador" novalidate>
-      <div class="mb-3">
-        <label for="correo" class="form-label">Correo</label>
-        <input
-          type="email"
-          class="form-control"
-          name="correo"
-          id="correo"
-          required
-        />
-        <div class="invalid-feedback"></div>
+    <div class="card shadow-sm">
+      <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
+        <a href="#" onclick="history.back(); return false;" class="text-dark">
+          <span class="material-icons align-middle">arrow_back</span>
+        </a>
+        <span class="fw-medium">Nuevo Escalador</span>
       </div>
-      <div class="mb-3">
-        <label for="contrasena" class="form-label">Contraseña</label>
-        <input
-          type="password"
-          class="form-control"
-          name="contrasena"
-          id="contrasena"
-          required
-        />
-        <div class="invalid-feedback"></div>
+      <div class="card-body">
+        <form id="form-crear-escalador" novalidate>
+          <div class="mb-3">
+            <label for="correo" class="form-label">Correo</label>
+            <input
+              type="email"
+              class="form-control"
+              name="correo"
+              id="correo"
+              required
+            />
+            <div class="invalid-feedback"></div>
+          </div>
+          <div class="mb-3">
+            <label for="contrasena" class="form-label">Contraseña</label>
+            <input
+              type="password"
+              class="form-control"
+              name="contrasena"
+              id="contrasena"
+              required
+            />
+            <div class="invalid-feedback"></div>
+          </div>
+          <div class="mb-3">
+            <label for="apodo" class="form-label">Apodo</label>
+            <input
+              type="text"
+              class="form-control"
+              name="apodo"
+              id="apodo"
+              required
+            />
+            <div class="invalid-feedback"></div>
+          </div>
+          <div id="form-alert" class="alert d-none" role="alert"></div>
+          <button type="submit" class="btn btn-primary w-100">Crear</button>
+        </form>
       </div>
-      <div class="mb-3">
-        <label for="apodo" class="form-label">Apodo</label>
-        <input
-          type="text"
-          class="form-control"
-          name="apodo"
-          id="apodo"
-          required
-        />
-        <div class="invalid-feedback"></div>
-      </div>
-      <div id="form-alert" class="alert d-none" role="alert"></div>
-      <button type="submit" class="btn btn-primary">Crear</button>
-    </form></div>`;
+    </div>`;
 
     // Referencias a elementos del formulario
     const form = document.getElementById('form-crear-escalador');

@@ -1,12 +1,16 @@
-export const mainContainer = document.getElementById('app-container');
+// Contenedor principal donde se renderiza el contenido
+const appContainer = document.getElementById('app-container');
+export const mainContainer = appContainer.querySelector('.app-content') || appContainer;
 
 export function showLoading() {
     if (mainContainer) {
         mainContainer.innerHTML = `
-        <div class="d-flex justify-content-center my-5">
+        <div class="card shadow-sm">
+          <div class="card-body d-flex justify-content-center py-5">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Cargando...</span>
             </div>
+          </div>
         </div>`;
     }
 }
@@ -14,8 +18,12 @@ export function showLoading() {
 export function showError(message) {
     if (mainContainer) {
         mainContainer.innerHTML = `
-        <div class="alert alert-danger" role="alert">
-            <strong>Error:</strong> ${message}
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <div class="alert alert-danger mb-0" role="alert">
+                <strong>Error:</strong> ${message}
+            </div>
+          </div>
         </div>`;
     }
 }
