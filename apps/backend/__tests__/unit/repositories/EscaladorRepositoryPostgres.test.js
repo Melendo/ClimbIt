@@ -1,7 +1,6 @@
 import { jest } from '@jest/globals';
 import EscaladorRepositoryPostgres from '../../../src/infrastructure/repositories/escaladorRepositoryPostgres.js';
 import Escalador from '../../../src/domain/escaladores/Escalador.js';
-import bcrypt from 'bcrypt';
 
 describe('EscaladorRepositoryPostgres', () => {
   let repository;
@@ -57,41 +56,34 @@ describe('EscaladorRepositoryPostgres', () => {
   });
 
   describe('crear', () => {
-    it('debería crear un escalador con contraseña hasheada y devolver la entidad de dominio', async () => {
+    it('debería crear un escalador y devolver la entidad de dominio', async () => {
       // Arrange
       const escalador = new Escalador(
         null,
         'test@test.com',
-        '123456',
+        'hashedpassword',
         'Tester'
       );
-      const hashedPassword = '$2b$10$hashedpassword123456789';
       const modeloCreado = {
         id: 1,
         correo: 'test@test.com',
-        contrasena: hashedPassword,
+        contrasena: 'hashedpassword',
         apodo: 'Tester',
       };
 
-      // Spy on bcrypt.hash
-      const hashSpy = jest.spyOn(bcrypt, 'hash').mockResolvedValue(hashedPassword);
       mockEscaladorModel.create.mockResolvedValue(modeloCreado);
 
       // Act
       const resultado = await repository.crear(escalador);
 
       // Assert
-      expect(hashSpy).toHaveBeenCalledWith('123456', 10);
       expect(mockEscaladorModel.create).toHaveBeenCalledWith({
         correo: 'test@test.com',
-        contrasena: hashedPassword,
+        contrasena: 'hashedpassword',
         apodo: 'Tester',
       });
       expect(resultado).toBeInstanceOf(Escalador);
       expect(resultado.id).toBe(1);
-      
-      // Restore the spy
-      hashSpy.mockRestore();
     });
   });
 });

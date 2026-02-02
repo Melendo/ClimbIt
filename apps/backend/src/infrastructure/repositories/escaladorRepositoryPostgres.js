@@ -1,6 +1,5 @@
 import escaladorRepository from '../../domain/escaladores/escaladorRepository.js';
 import Escalador from '../../domain/escaladores/Escalador.js';
-import bcrypt from 'bcrypt';
 
 class EscaladorRepositoryPostgres extends escaladorRepository {
   constructor(escaladorModel) {
@@ -24,13 +23,10 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
   }
 
   async crear(escalador) {
-    // Hash the password before storing it
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(escalador.contrasena, saltRounds);
-    
+   
     const data = {
       correo: escalador.correo,
-      contrasena: hashedPassword,
+      contrasena: escalador.contrasena,
       apodo: escalador.apodo,
     };
     const escaladorModel = await this.EscaladorModel.create(data);

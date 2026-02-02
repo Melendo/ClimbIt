@@ -1,8 +1,10 @@
 import { jest } from '@jest/globals';
+import bcrypt from 'bcrypt';
 import CrearEscaladorUseCase from '../../../../src/application/escaladores/crearEscalador.js';
 
 describe('crearEscaladorUseCase', () => {
   it('debería crear y guardar un escalador correctamente', async () => {
+    jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashed_123456');
     const mockRepository = {
       crear: jest.fn(async (escalador) => ({
         ...escalador,
@@ -21,7 +23,7 @@ describe('crearEscaladorUseCase', () => {
 
     expect(resultado).toMatchObject({
       correo: 'juan@example.com',
-      contrasena: '123456',
+      contrasena: 'hashed_123456',
       apodo: 'JuanClimb',
       id: 1,
     });
