@@ -1,6 +1,58 @@
 import { showError } from '../../core/ui.js';
 import { renderNavbar } from '../../components/navbar.js';
 
+// Vista para mostrar la lista de todos los rocódromos
+export function renderListaRocodromos(container, rocodromos) {
+    try {
+        let rocodromosHTML = '';
+
+        if (!Array.isArray(rocodromos) || rocodromos.length === 0) {
+            rocodromosHTML = `
+              <div class="col-12">
+                <div class="alert alert-info">No hay rocódromos disponibles.</div>
+              </div>`;
+        } else {
+            rocodromosHTML = rocodromos.map(rocodromo => `
+              <div class="col-6 col-md-4">
+                <a href="#mapaRocodromo?id=${rocodromo.id}" class="text-decoration-none">
+                  <div class="zona-card position-relative rounded overflow-hidden" style="aspect-ratio: 1;">
+                    <img src="/assets/rocodromoDefecto.jpg" alt="${rocodromo.nombre}" class="w-100 h-100" style="object-fit: cover;">
+                    <div class="zona-card-overlay position-absolute bottom-0 start-0 end-0 p-2 text-white">
+                      <small class="d-block fw-medium">${rocodromo.nombre}</small>
+                      <small class="text-white-50">${rocodromo.direccion || 'Sin dirección'}</small>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            `).join('');
+        }
+
+        container.innerHTML = `
+      <div class="card shadow-sm d-flex flex-column" style="min-height: 100vh;">
+        
+        <!-- Cabecera: Nombre de la app -->
+        <div class="card-header bg-primary text-white d-flex align-items-center justify-content-center py-3">
+          <span class="fw-bold fs-5">ClimbIt</span>
+        </div>
+
+        <!-- Grid de rocódromos (scrollable) -->
+        <div class="card-body flex-grow-1 overflow-auto">
+          <h6 class="text-muted mb-3">Rocódromos disponibles</h6>
+          <div class="row g-2">
+            ${rocodromosHTML}
+          </div>
+        </div>
+
+        <!-- Menú de navegación inferior -->
+        ${renderNavbar()}
+
+      </div>
+    `;
+    } catch (err) {
+        showError(err.message || 'Error al mostrar la lista de rocódromos');
+    }
+}
+
 // Vista para mostrar el mapa de un rocódromo con sus zonas y pistas
 export function renderMapaRocodromo(container, data) {
     try {

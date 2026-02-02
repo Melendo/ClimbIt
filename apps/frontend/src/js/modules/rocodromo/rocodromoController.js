@@ -1,6 +1,21 @@
-import { renderMapaRocodromo } from './rocodromoView.js';
+import { renderMapaRocodromo, renderListaRocodromos } from './rocodromoView.js';
 import { fetchClient } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
+
+// Controlador para la vista de lista de rocódromos
+export async function listaRocodromosCmd(container) {
+    showLoading();
+
+    try {
+        const response = await fetchClient('/rocodromos');
+        const rocodromos = await response.json();
+        renderListaRocodromos(container, rocodromos);
+    } catch (err) {
+        console.warn('Error al obtener rocódromos:', err.message);
+        // Mostrar vista con lista vacía si hay error
+        renderListaRocodromos(container, []);
+    }
+}
 
 // Controlador para la vista de mapa de un rocódromo
 export async function mapaRocodromoCmd(container, id) {
