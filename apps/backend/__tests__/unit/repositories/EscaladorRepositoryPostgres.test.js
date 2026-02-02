@@ -1,7 +1,6 @@
 import { jest } from '@jest/globals';
 import EscaladorRepositoryPostgres from '../../../src/infrastructure/repositories/escaladorRepositoryPostgres.js';
 import Escalador from '../../../src/domain/escaladores/Escalador.js';
-import bcrypt from 'bcrypt';
 
 describe('EscaladorRepositoryPostgres', () => {
   let repository;
@@ -11,6 +10,7 @@ describe('EscaladorRepositoryPostgres', () => {
     // Mock del modelo de Sequelize
     mockEscaladorModel = {
       create: jest.fn(),
+      findOne: jest.fn(),
     };
 
     // Instanciamos el repositorio con el modelo mockeado
@@ -57,41 +57,63 @@ describe('EscaladorRepositoryPostgres', () => {
   });
 
   describe('crear', () => {
-    it('debería crear un escalador con contraseña hasheada y devolver la entidad de dominio', async () => {
+    it('debería crear un escalador y devolver la entidad de dominio', async () => {
       // Arrange
       const escalador = new Escalador(
         null,
         'test@test.com',
-        '123456',
+        'hashedpassword',
         'Tester'
       );
-      const hashedPassword = '$2b$10$hashedpassword123456789';
       const modeloCreado = {
         id: 1,
         correo: 'test@test.com',
-        contrasena: hashedPassword,
+        contrasena: 'hashedpassword',
         apodo: 'Tester',
       };
 
-      // Spy on bcrypt.hash
-      const hashSpy = jest.spyOn(bcrypt, 'hash').mockResolvedValue(hashedPassword);
       mockEscaladorModel.create.mockResolvedValue(modeloCreado);
 
       // Act
       const resultado = await repository.crear(escalador);
 
       // Assert
-      expect(hashSpy).toHaveBeenCalledWith('123456', 10);
       expect(mockEscaladorModel.create).toHaveBeenCalledWith({
         correo: 'test@test.com',
-        contrasena: hashedPassword,
+        contrasena: 'hashedpassword',
         apodo: 'Tester',
       });
       expect(resultado).toBeInstanceOf(Escalador);
       expect(resultado.id).toBe(1);
-      
-      // Restore the spy
-      hashSpy.mockRestore();
+    });
+  });
+  describe('obtener por correo', () => {
+    it('debería encontrar un escalador y devolver la entidad de dominio', async () => {
+      // Arrange
+      const escalador = new Escalador(
+        null,
+        'test@test.com',
+        'hashedpassword',
+        'Tester'
+      );
+      const modeloEncontrado = {
+        id: 1,
+        correo: 'test@test.com',
+        contrasena: 'hashedpassword',
+        apodo: 'Tester',
+      };
+
+      mockEscaladorModel.findOne.mockResolvedValue(modeloEncontrado);
+
+      // Act
+      const resultado = await repository.encontrarPorCorreo(escalador.correo);
+
+      // Assert
+      expect(mockEscaladorModel.findOne).toHaveBeenCalledWith({
+        where: { correo: 'test@test.com' },
+      });
+      expect(resultado).toBeInstanceOf(Escalador);
+      expect(resultado.id).toBe(1);
     });
   });
 });

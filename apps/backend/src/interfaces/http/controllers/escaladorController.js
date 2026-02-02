@@ -18,6 +18,21 @@ class EscaladorController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  async autenticar(req, res, next) {
+    try {
+      const { correo, contrasena } = req.body;
+
+      const resultado = await this.useCases.autenticar.execute({
+        correo,
+        contrasena,
+      });
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      res.status(401).json({ error: error.message });
+    }
+  }
 }
 
 export default EscaladorController;

@@ -46,4 +46,39 @@ describe('Unit: EscaladorController', () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.body).toEqual({ error: 'falló' });
   });
+
+  describe('autenticar', () => {
+    it('responde 200 con el token si las credenciales son correctas', async () => {
+        const useCases = {
+            autenticar: { execute: jest.fn().mockResolvedValue({ token: 'fake_token_jwt' }) }
+        };
+        const controller = new EscaladorController(useCases);
+        const req = { body: { correo: 'test@example.com', contrasena: '123456' } };
+        const res = createResMock();
+
+        await controller.autenticar(req, res, () => {});
+
+        expect(useCases.autenticar.execute).toHaveBeenCalledWith({ 
+            correo: 'test@example.com', 
+            contrasena: '123456' 
+        });
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.body).toEqual({ token: 'fake_token_jwt' });
+    });
+
+    it('responde 401 si el caso de uso lanza un error (credenciales inválidas)', async () => {
+        const errorMessage = 'Credenciales inválidas';
+        const useCases = {
+            autenticar: { execute: jest.fn().mockRejectedValue(new Error(errorMessage)) }
+        };
+        const controller = new EscaladorController(useCases);
+        const req = { body: { correo: 'test@example.com', contrasena: 'wrong' } };
+        const res = createResMock();
+
+        await controller.autenticar(req, res, () => {});
+
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.body).toEqual({ error: errorMessage });
+    });
+  });
 });
