@@ -6,6 +6,7 @@ import { mapaRocodromoCmd, listaRocodromosCmd } from '../modules/rocodromo/rocod
 import { homeCmd } from '../modules/home/homeController.js';
 import { perfilCmd } from '../modules/perfil/perfilController.js';
 import { error404Cmd } from '../modules/error/errorController.js';
+import { loginCmd } from '../modules/autenticacion/authController.js';
 
 // Funcion para obtener parametros desde el hash de la URL despues del '?'
 function obtenerParametroDesdeHash(nombre) {
@@ -26,6 +27,9 @@ export async function handleNavigation() {
     try {
         if (hash === '#home' || hash === '') {
             homeCmd(mainContainer);
+        }
+        else if (hash === '#login') {
+            loginCmd(mainContainer);
         }
         else if (hash === '#crearEscalador') {
             crearEscaladorCmd(mainContainer);
