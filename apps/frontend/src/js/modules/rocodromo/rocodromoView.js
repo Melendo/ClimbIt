@@ -30,9 +30,10 @@ export function renderListaRocodromos(container, rocodromos) {
         container.innerHTML = `
       <div class="card shadow-sm d-flex flex-column" style="min-height: 100vh;">
         
-        <!-- Cabecera: Nombre de la app -->
-        <div class="card-header bg-primary text-white d-flex align-items-center justify-content-center py-3">
-          <span class="fw-bold fs-5">ClimbIt</span>
+        <!-- Cabecera: Logo de la app -->
+        <div class="card-header bg-white d-flex align-items-center justify-content-center gap-2 py-3">
+          <span class="material-icons text-primary" style="font-size: 32px;">terrain</span>
+          <span class="fw-bold" style="font-size: 1.5rem;">ClimbIt</span>
         </div>
 
         <!-- Grid de rocódromos (scrollable) -->
