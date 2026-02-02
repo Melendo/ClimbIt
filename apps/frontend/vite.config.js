@@ -1,12 +1,18 @@
 import { defineConfig } from 'vite';
+import path from 'path';
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
   // Configuración para preprocesadores CSS
   css: {
     preprocessorOptions: {
       scss: {
         quietDeps: true,
-        api: 'modern-compiler', 
+        api: 'modern-compiler',
       },
     },
   },
