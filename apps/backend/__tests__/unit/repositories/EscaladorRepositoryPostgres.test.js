@@ -10,6 +10,7 @@ describe('EscaladorRepositoryPostgres', () => {
     // Mock del modelo de Sequelize
     mockEscaladorModel = {
       create: jest.fn(),
+      findOne: jest.fn(),
     };
 
     // Instanciamos el repositorio con el modelo mockeado
@@ -81,6 +82,35 @@ describe('EscaladorRepositoryPostgres', () => {
         correo: 'test@test.com',
         contrasena: 'hashedpassword',
         apodo: 'Tester',
+      });
+      expect(resultado).toBeInstanceOf(Escalador);
+      expect(resultado.id).toBe(1);
+    });
+  });
+  describe('obtener por correo', () => {
+    it('debería encontrar un escalador y devolver la entidad de dominio', async () => {
+      // Arrange
+      const escalador = new Escalador(
+        null,
+        'test@test.com',
+        'hashedpassword',
+        'Tester'
+      );
+      const modeloEncontrado = {
+        id: 1,
+        correo: 'test@test.com',
+        contrasena: 'hashedpassword',
+        apodo: 'Tester',
+      };
+
+      mockEscaladorModel.findOne.mockResolvedValue(modeloEncontrado);
+
+      // Act
+      const resultado = await repository.encontrarPorCorreo(escalador.correo);
+
+      // Assert
+      expect(mockEscaladorModel.findOne).toHaveBeenCalledWith({
+        where: { correo: 'test@test.com' },
       });
       expect(resultado).toBeInstanceOf(Escalador);
       expect(resultado.id).toBe(1);

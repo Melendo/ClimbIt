@@ -1,10 +1,14 @@
 import { jest } from '@jest/globals';
-import bcrypt from 'bcrypt';
 import CrearEscaladorUseCase from '../../../../src/application/escaladores/crearEscalador.js';
 
 describe('crearEscaladorUseCase', () => {
   it('debería crear y guardar un escalador correctamente', async () => {
-    jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashed_123456');
+    // jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashed_123456'); // Eliminamos dependencia directa de bcrypt
+
+    const mockPasswordService = {
+      hash: jest.fn().mockResolvedValue('hashed_123456'),
+    };
+
     const mockRepository = {
       crear: jest.fn(async (escalador) => ({
         ...escalador,
@@ -12,7 +16,10 @@ describe('crearEscaladorUseCase', () => {
       })),
     };
 
-    const crearEscalador = new CrearEscaladorUseCase(mockRepository);
+    const crearEscalador = new CrearEscaladorUseCase(
+      mockRepository,
+      mockPasswordService
+    );
 
     const datos = {
       correo: 'juan@example.com',
@@ -21,6 +28,7 @@ describe('crearEscaladorUseCase', () => {
     };
     const resultado = await crearEscalador.execute(datos);
 
+    expect(mockPasswordService.hash).toHaveBeenCalledWith('123456'); // Verificamos que se llamó al hash
     expect(resultado).toMatchObject({
       correo: 'juan@example.com',
       contrasena: 'hashed_123456',
@@ -30,6 +38,10 @@ describe('crearEscaladorUseCase', () => {
   });
 
   it('no debería crear y ni guardar un escalador por datos invalidos', async () => {
+    const mockPasswordService = {
+        hash: jest.fn().mockResolvedValue('hashed_123'),
+    };
+    
     const mockRepository = {
       crear: jest.fn(async (escalador) => ({
         ...escalador,
@@ -37,7 +49,10 @@ describe('crearEscaladorUseCase', () => {
       })),
     };
 
-    const crearEscalador = new CrearEscaladorUseCase(mockRepository);
+    const crearEscalador = new CrearEscaladorUseCase(
+        mockRepository,
+        mockPasswordService
+    );
 
     const datos = { correo: '', contrasena: '123', apodo: 'Juan' };
     await expect(() => crearEscalador.execute(datos)).rejects.toThrow(
