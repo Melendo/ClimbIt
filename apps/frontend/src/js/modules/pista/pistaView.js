@@ -1,4 +1,4 @@
-import { showError } from '../../core/ui.js';
+import { showError, showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
 
 const GRADOS_FRANCESES = [
     '3',
@@ -69,33 +69,6 @@ export function renderCrearPista(container, callbacks) {
         .map((grado) => `<option value="${grado}">${grado}</option>`)
         .join('');
 
-    // Funciones para agregar o quitar errores de validación en campos
-    function setFieldError(input, msg) {
-        input.classList.add('is-invalid');
-        const feedback = input.parentElement.querySelector('.invalid-feedback');
-        if (feedback) {
-            feedback.textContent = msg || 'Campo inválido';
-        }
-    }
-    function clearFieldError(input) {
-        input.classList.remove('is-invalid');
-        const feedback = input.parentElement.querySelector('.invalid-feedback');
-        if (feedback) {
-            feedback.textContent = '';
-        }
-    }
-
-    // Funciones para mostrar y limpiar alertas del formulario
-    function showFormAlert(type, message) {
-        alertBox.className = `alert alert-${type}`;
-        alertBox.textContent = message;
-    }
-
-    function clearFormAlert() {
-        alertBox.className = 'alert d-none';
-        alertBox.textContent = '';
-    }
-
     // Validación de campos del formulario
     function validateFields(values) {
         const errors = {};
@@ -123,11 +96,11 @@ export function renderCrearPista(container, callbacks) {
     [idRocodromoInput, idZonaInput, nombreInput, dificultadSelect].forEach((el) => {
         el.addEventListener('input', () => {
             clearFieldError(el);
-            clearFormAlert();
+            clearFormAlert(alertBox);
         });
         el.addEventListener('change', () => {
             clearFieldError(el);
-            clearFormAlert();
+            clearFormAlert(alertBox);
         });
     });
 
@@ -146,13 +119,13 @@ export function renderCrearPista(container, callbacks) {
             try {
                 zonas = await callbacks.getZonas(id);
             } catch (err) {
-                showFormAlert('danger', `No se pudieron cargar las zonas: ${err.message}`);
+                showFormAlert(alertBox, 'danger', `No se pudieron cargar las zonas: ${err.message}`);
                 return;
             }
             if (!Array.isArray(zonas) || zonas.length === 0) {
                 idZonaInput.innerHTML = `<option value="">No hay zonas disponibles</option>`;
                 idZonaInput.setAttribute('disabled', 'disabled');
-                showFormAlert('warning', 'Este rocódromo no tiene zonas disponibles.');
+                showFormAlert(alertBox, 'warning', 'Este rocódromo no tiene zonas disponibles.');
                 return;
             }
 
@@ -161,7 +134,7 @@ export function renderCrearPista(container, callbacks) {
                 .join('');
             idZonaInput.removeAttribute('disabled');
         } catch (err) {
-            showFormAlert('danger', `Error cargando zonas: ${err.message}`);
+            showFormAlert(alertBox, 'danger', `Error cargando zonas: ${err.message}`);
         }
     }
 
@@ -172,7 +145,7 @@ export function renderCrearPista(container, callbacks) {
     // Manejo del envío del formulario
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        clearFormAlert();
+        clearFormAlert(alertBox);
         [idZonaInput, nombreInput, dificultadSelect].forEach(clearFieldError);
 
         const values = {
@@ -188,7 +161,7 @@ export function renderCrearPista(container, callbacks) {
             if (errors.idZona) setFieldError(idZonaInput, errors.idZona);
             if (errors.nombre) setFieldError(nombreInput, errors.nombre);
             if (errors.dificultad) setFieldError(dificultadSelect, errors.dificultad);
-            showFormAlert('danger', 'Por favor, corrige los campos marcados.');
+            showFormAlert(alertBox, 'danger', 'Por favor, corrige los campos marcados.');
             return;
         }
 
@@ -199,7 +172,7 @@ export function renderCrearPista(container, callbacks) {
                 dificultad: values.dificultad,
             });
 
-            showFormAlert('success', 'Pista creada correctamente.');
+            showFormAlert(alertBox, 'success', 'Pista creada correctamente.');
             window.location.hash = `#infoPista?id=${pista.id}`;
 
         } catch (err) {
@@ -211,10 +184,10 @@ export function renderCrearPista(container, callbacks) {
                     if (field === 'nombre') setFieldError(nombreInput, msg);
                     if (field === 'dificultad') setFieldError(dificultadSelect, msg);
                 });
-                showFormAlert('danger', 'Solicitud inválida. Revisa los campos.');
+                showFormAlert(alertBox, 'danger', 'Solicitud inválida. Revisa los campos.');
                 return;
             }
-            showFormAlert('danger', `Error al crear pista: ${err.message}`);
+            showFormAlert(alertBox, 'danger', `Error al crear pista: ${err.message}`);
         }
     });
 }
