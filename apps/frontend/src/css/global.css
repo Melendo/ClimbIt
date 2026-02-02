@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap');
+
+:root {
+  --bs-font-sans-serif: 'Montserrat', sans-serif;
+  --app-max-width: 400px;
+}
+
+body {
+  font-family: var(--bs-font-sans-serif);
+}
+
+/* Contenedor principal de la app (vertical) */
+#app-container.app-vertical-layout {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* Contenido centrado con ancho máximo */
+#app-container.app-vertical-layout > .app-content {
+  width: 100%;
+  max-width: var(--app-max-width);
+}
+
+/* En móvil: contenido a pantalla completa */
+@media (max-width: 576px) {
+  #app-container.app-vertical-layout {
+    padding: 0;
+  }
+  
+  #app-container.app-vertical-layout > .app-content {
+    max-width: 100%;
+  }
+  
+  /* Cards a pantalla completa en móvil */
+  #app-container.app-vertical-layout .card {
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    min-height: 100vh;
+  }
+  
+  #app-container.app-vertical-layout .card .card-header,
+  #app-container.app-vertical-layout .card .card-footer {
+    border-radius: 0 !important;
+  }
+}
+
+/* ========================================
+   Estilos específicos de componentes
+   ======================================== */
+
+/* Estilos para botones de estado en vista de pista */
+.estado-btn {
+  text-decoration: none !important;
+}
+.estado-btn:hover,
+.estado-btn:focus {
+  text-decoration: none !important;
+}
+
+/* ========================================
+   Cards de zonas/pistas en mapa rocódromo
+   ======================================== */
+.zona-card {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.zona-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.zona-card-overlay {
+  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+}
+
+/* ========================================
+   Menú de navegación inferior
+   ======================================== */
+.nav-link-bottom {
+  text-decoration: none !important;
+  transition: color 0.2s ease;
+}
+
+.nav-link-bottom:hover {
+  color: var(--bs-primary) !important;
+}
+
+.nav-link-bottom.active {
+  color: var(--bs-primary) !important;
+}
