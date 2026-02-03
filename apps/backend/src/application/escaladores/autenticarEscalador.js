@@ -10,7 +10,7 @@ class AutenticarEscalador {
       const escaladorExistente =
         await this.escaladorRepository.encontrarPorCorreo(data.correo);
       if (!escaladorExistente) {
-        throw new Error('Escalador no encontrado');
+        throw new Error('Escalador no registrado');
       }
 
       const passwordMatch = await this.passwordService.compare(
@@ -20,7 +20,7 @@ class AutenticarEscalador {
       if (!passwordMatch) {
         throw new Error('Contraseña incorrecta');
       }
-      const token = this.tokenService.crear({ correo: escaladorExistente.correo });
+      const token = this.tokenService.crear({ correo: escaladorExistente.correo, apodo: escaladorExistente.apodo });
       return { token };
     } catch (error) {
       throw new Error(`Error al autenticar al escalador: ${error.message}`);

@@ -1,9 +1,10 @@
 import Escalador from '../../domain/escaladores/Escalador.js';
 
 class CrearEscalador {
-  constructor(escaladorRepository, passwordService) {
+  constructor(escaladorRepository, passwordService, tokenService) {
     this.escaladorRepository = escaladorRepository;
     this.passwordService = passwordService;
+    this.tokenService = tokenService;
   }
 
   async execute(data) {
@@ -19,8 +20,9 @@ class CrearEscalador {
       const escaladorCreado =
         await this.escaladorRepository.crear(nuevoEscalador);
 
-      return escaladorCreado;
-       
+      const token = this.tokenService.crear({ correo: escaladorCreado.correo, apodo: escaladorCreado.apodo });
+
+      return token;
     } catch (error) {
       throw new Error(`Error al crear el escalador: ${error.message}`);
     }

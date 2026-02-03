@@ -18,9 +18,9 @@ function createResMock() {
 }
 
 describe('Unit: EscaladorController', () => {
-  it('crear: responde 201 con el escalador creado', async () => {
+  it('crear: responde 201 con el token del escalador creado', async () => {
     const useCases = {
-      crear: { execute: jest.fn().mockResolvedValue({ id: 1, correo: 'a@b.com', apodo: 'Tester' }) },
+      crear: { execute: jest.fn().mockResolvedValue('fake_jwt_token') },
     };
     const controller = new EscaladorController(useCases);
     const req = { body: { correo: 'a@b.com', contrasena: '123', apodo: 'Tester' } };
@@ -30,7 +30,7 @@ describe('Unit: EscaladorController', () => {
 
     expect(useCases.crear.execute).toHaveBeenCalledWith({ correo: 'a@b.com', contrasena: '123', apodo: 'Tester' });
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.body).toEqual({ id: 1, correo: 'a@b.com', apodo: 'Tester' });
+    expect(res.body).toEqual('fake_jwt_token');
   });
 
   it('crear: responde 500 ante errores', async () => {
