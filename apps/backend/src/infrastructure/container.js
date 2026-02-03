@@ -47,7 +47,8 @@ async function inicializarContainer() {
   // 2) Instancia del caso de uso con el repositorio inyectado
   const crearEscaladorUseCase = new CrearEscalador(
     escaladorRepository,
-    passwordService
+    passwordService,
+    tokenService
   );
   const autenticarEscaladorUseCase = new AutenticarEscalador(
     escaladorRepository,
@@ -60,9 +61,7 @@ async function inicializarContainer() {
   const obtenerZonasRocodromoUseCase = new ObtenerZonasRocodromo(
     rocodromoRepository
   );
-  const obtenerRocodromosUseCase = new ObtenerRocodromos(
-    rocodromoRepository
-  );
+  const obtenerRocodromosUseCase = new ObtenerRocodromos(rocodromoRepository);
   // 3) Agrupar los casos de uso que el controlador necesitará
   const escaladorUseCases = {
     crear: crearEscaladorUseCase,

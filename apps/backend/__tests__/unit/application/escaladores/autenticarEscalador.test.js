@@ -48,7 +48,7 @@ describe('AutenticarEscaladorUseCase', () => {
         datosEntrada.contrasena,
         escaladorEncontrado.contrasena
     );
-    expect(mockTokenService.crear).toHaveBeenCalledWith({ correo: escaladorEncontrado.correo });
+    expect(mockTokenService.crear).toHaveBeenCalledWith({ correo: escaladorEncontrado.correo, apodo: escaladorEncontrado.apodo });
     expect(resultado).toEqual({ token: 'fake_jwt_token' });
   });
 
@@ -57,7 +57,7 @@ describe('AutenticarEscaladorUseCase', () => {
 
     await expect(
       autenticarEscalador.execute({ correo: 'noexiste@example.com', contrasena: '123' })
-    ).rejects.toThrow('Escalador no encontrado');
+    ).rejects.toThrow('Escalador no registrado');
   });
 
   it('debería lanzar un error si la contraseña es incorrecta', async () => {

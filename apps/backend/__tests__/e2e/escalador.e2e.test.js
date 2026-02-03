@@ -16,18 +16,15 @@ describe('E2E: Crear escalador', () => {
     await db.sequelize.close();
   });
 
-  it('debería crear un escalador y devolverlo', async () => {
+  it('debería crear un escalador y devolver un token', async () => {
     const response = await request(app)
       .post('/escaladores/create')
       .send(escaladorTest)
       .expect(201);
 
-    const escaladorEsperado = { ...escaladorTest };
-    delete escaladorEsperado.contrasena;
-    expect(response.body).toMatchObject(escaladorEsperado);
-    expect(response.body.id).toBeDefined();
+    expect(response.body).toEqual(expect.any(String)); // Esperamos un token JWT (string)
 
-    const escaladorGuardado = await db.Escalador.findByPk(response.body.id);
+    const escaladorGuardado = await db.Escalador.findOne({ where: { correo: escaladorTest.correo } });
     expect(escaladorGuardado).not.toBeNull();
     expect(escaladorGuardado.correo).toBe(escaladorTest.correo);
     expect(escaladorGuardado.contrasena).not.toBe(escaladorTest.contrasena);
