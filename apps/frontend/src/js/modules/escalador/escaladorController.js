@@ -1,4 +1,5 @@
 import { renderPerfil } from './escaladorView.js';
+import { removeToken } from '../../core/client.js';
 
 // Controlador para la vista de perfil del usuario
 export function perfilCmd(container) {
@@ -14,5 +15,12 @@ export function perfilCmd(container) {
     // const response = await fetchClient('/escaladores/me');
     // const escalador = await response.json();
 
-    renderPerfil(container, escaladorMock);
+    const callbacks = {
+        onLogout: () => {
+            removeToken();
+            window.location.hash = '#home';
+        }
+    };
+
+    renderPerfil(container, escaladorMock, callbacks);
 }

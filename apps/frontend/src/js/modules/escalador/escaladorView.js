@@ -1,7 +1,7 @@
 import { renderNavbar } from '../../components/navbar.js';
 
 // Vista del perfil del escalador
-export function renderPerfil(container, escalador) {
+export function renderPerfil(container, escalador, callbacks) {
     const { correo, apodo, fotoPerfil } = escalador;
 
     container.innerHTML = `
@@ -62,7 +62,7 @@ export function renderPerfil(container, escalador) {
             </div>
             <span class="material-icons text-muted">chevron_right</span>
           </li>
-          <li class="list-group-item d-flex justify-content-between align-items-center px-0 text-danger" style="cursor: pointer;">
+          <li class="list-group-item d-flex justify-content-between align-items-center px-0 text-danger" style="cursor: pointer;" id="logout-btn">
             <div class="d-flex align-items-center gap-2">
               <span class="material-icons">logout</span>
               <span>Cerrar sesión</span>
@@ -78,4 +78,10 @@ export function renderPerfil(container, escalador) {
 
     </div>
     `;
+
+    // Evento para cerrar sesión
+    const logoutBtn = container.querySelector('#logout-btn');
+    logoutBtn.addEventListener('click', () => {
+        callbacks.onLogout();
+    });
 }
