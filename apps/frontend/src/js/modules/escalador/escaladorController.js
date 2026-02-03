@@ -1,28 +1,26 @@
-import { renderCrearEscalador } from './escaladorView.js';
-import { fetchClient } from '../../core/client.js';
+import { renderPerfil } from './escaladorView.js';
+import { removeToken } from '../../core/client.js';
 
-// Controlador para la vista de crear un nuevo escalador
-export function crearEscaladorCmd(container) {
+// Controlador para la vista de perfil del usuario
+export function perfilCmd(container) {
+    // Datos mockeados del escalador (John Doe)
+    const escaladorMock = {
+        id: 1,
+        correo: 'john.doe@example.com',
+        apodo: 'John Doe',
+        fotoPerfil: '/assets/johnDoe.png'
+    };
+
+    // TODO: En el futuro, obtener datos del endpoint del backend
+    // const response = await fetchClient('/escaladores/me');
+    // const escalador = await response.json();
+
     const callbacks = {
-        createEscalador: async (data) => {
-            try {
-                const res = await fetchClient('/escaladores/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
-                });
-                return await res.json();
-            } catch (error) {
-                if (error.response && error.response.status === 422) {
-                    const body = await error.response.json();
-                    const validationErr = new Error('Error de validación');
-                    validationErr.status = 422;
-                    validationErr.errors = body.errors;
-                    throw validationErr;
-                }
-                throw error;
-            }
+        onLogout: () => {
+            removeToken();
+            window.location.hash = '#home';
         }
     };
-    renderCrearEscalador(container, callbacks);
+
+    renderPerfil(container, escaladorMock, callbacks);
 }

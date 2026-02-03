@@ -1,99 +1,87 @@
-import { showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
+import { renderNavbar } from '../../components/navbar.js';
 
-export function renderCrearEscalador(container, callbacks) {
+// Vista del perfil del escalador
+export function renderPerfil(container, escalador, callbacks) {
+    const { correo, apodo, fotoPerfil } = escalador;
+
     container.innerHTML = `
-    <div class="card shadow-sm">
-      <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
-        <a href="#" onclick="history.back(); return false;" class="text-dark">
-          <span class="material-icons align-middle">arrow_back</span>
-        </a>
-        <span class="fw-medium">Nuevo Escalador</span>
+    <div class="card shadow-sm d-flex flex-column" style="min-height: 100vh;">
+
+      <!-- Cabecera -->
+      <div class="card-header bg-white d-flex align-items-center justify-content-center gap-2 py-3">
+        <span class="material-icons text-primary" style="font-size: 32px;">terrain</span>
+        <span class="fw-bold" style="font-size: 1.5rem;">ClimbIt</span>
       </div>
-      <div class="card-body">
-        <form id="form-crear-escalador" novalidate>
-          <div class="mb-3">
-            <label for="correo" class="form-label">Correo</label>
-            <input
-              type="email"
-              class="form-control"
-              name="correo"
-              id="correo"
-              required
-            />
-            <div class="invalid-feedback"></div>
-          </div>
-          <div class="mb-3">
-            <label for="contrasena" class="form-label">Contraseña</label>
-            <input
-              type="password"
-              class="form-control"
-              name="contrasena"
-              id="contrasena"
-              required
-            />
-            <div class="invalid-feedback"></div>
-          </div>
-          <div class="mb-3">
-            <label for="apodo" class="form-label">Apodo</label>
-            <input
-              type="text"
-              class="form-control"
-              name="apodo"
-              id="apodo"
-              required
-            />
-            <div class="invalid-feedback"></div>
-          </div>
-          <div id="form-alert" class="alert d-none" role="alert"></div>
-          <button type="submit" class="btn btn-primary w-100">Crear</button>
-        </form>
+
+      <!-- Contenido del perfil -->
+      <div class="card-body flex-grow-1 overflow-auto">
+        
+        <!-- Sección de información del perfil -->
+        <div class="text-center mb-4">
+          <img 
+            src="${fotoPerfil}" 
+            alt="Foto de perfil" 
+            class="rounded-circle mb-3" 
+            style="width: 100px; height: 100px; object-fit: cover;"
+          />
+          <h5 class="fw-bold mb-1">${apodo}</h5>
+          <p class="text-muted mb-0">${correo}</p>
+        </div>
+
+        <hr>
+
+        <!-- Sección de ajustes de cuenta -->
+        <h6 class="text-muted mb-3">Ajustes de cuenta</h6>
+        
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+            <div class="d-flex align-items-center gap-2">
+              <span class="material-icons text-muted">person</span>
+              <span>Editar perfil</span>
+            </div>
+            <span class="material-icons text-muted">chevron_right</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+            <div class="d-flex align-items-center gap-2">
+              <span class="material-icons text-muted">lock</span>
+              <span>Cambiar contraseña</span>
+            </div>
+            <span class="material-icons text-muted">chevron_right</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+            <div class="d-flex align-items-center gap-2">
+              <span class="material-icons text-muted">notifications</span>
+              <span>Notificaciones</span>
+            </div>
+            <span class="material-icons text-muted">chevron_right</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+            <div class="d-flex align-items-center gap-2">
+              <span class="material-icons text-muted">help</span>
+              <span>Ayuda</span>
+            </div>
+            <span class="material-icons text-muted">chevron_right</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center px-0 text-danger" style="cursor: pointer;" id="logout-btn">
+            <div class="d-flex align-items-center gap-2">
+              <span class="material-icons">logout</span>
+              <span>Cerrar sesión</span>
+            </div>
+            <span class="material-icons">chevron_right</span>
+          </li>
+        </ul>
+
       </div>
-    </div>`;
 
-    // Referencias a elementos del formulario
-    const form = document.getElementById('form-crear-escalador');
-    const alertBox = document.getElementById('form-alert');
-    const correoInput = document.getElementById('correo');
-    const contrasenaInput = document.getElementById('contrasena');
-    const apodoInput = document.getElementById('apodo');
+      <!-- Menú de navegación inferior -->
+      ${renderNavbar()}
 
-    // Limpieza de errores al modificar los campos
-    [correoInput, contrasenaInput, apodoInput].forEach((el) => {
-        el.addEventListener('input', () => {
-             clearFieldError(el);
-             clearFormAlert(alertBox);
-        });
-    });
+    </div>
+    `;
 
-    // Manejo del envio del formulario
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        clearFormAlert(alertBox);
-        [correoInput, contrasenaInput, apodoInput].forEach(clearFieldError);
-
-        const data = {
-            correo: correoInput.value,
-            contrasena: contrasenaInput.value,
-            apodo: apodoInput.value
-        };
-
-        try {
-            await callbacks.createEscalador(data);
-            showFormAlert(alertBox, 'success', 'Escalador creado correctamente.');
-            form.reset();
-        } catch (err) {
-            if (err.status === 422 && Array.isArray(err.errors)) {
-                 err.errors.forEach((e) => {
-                    const field = e.field;
-                    const msg = e.msg || 'Valor inválido';
-                    if (field === 'correo') setFieldError(correoInput, msg);
-                    if (field === 'contrasena') setFieldError(contrasenaInput, msg);
-                    if (field === 'apodo') setFieldError(apodoInput, msg);
-                });
-                showFormAlert(alertBox, 'danger', 'Solicitud inválida. Revisa los campos.');
-            } else {
-                 showFormAlert(alertBox, 'danger', `Error al crear escalador: ${err.message}`);
-            }
-        }
+    // Evento para cerrar sesión
+    const logoutBtn = container.querySelector('#logout-btn');
+    logoutBtn.addEventListener('click', () => {
+        callbacks.onLogout();
     });
 }
