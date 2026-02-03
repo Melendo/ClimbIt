@@ -1,12 +1,11 @@
 // Importamos los controladores de los diferentes modulos y las funciones de UI
 import { mainContainer, showLoading, showError } from './ui.js';
-import { crearEscaladorCmd } from '../modules/escalador/escaladorController.js';
+import { perfilCmd } from '../modules/escalador/escaladorController.js';
 import { crearPistaCmd, infoPistaCmd } from '../modules/pista/pistaController.js';
 import { mapaRocodromoCmd, listaRocodromosCmd } from '../modules/rocodromo/rocodromoController.js';
 import { homeCmd } from '../modules/home/homeController.js';
-import { perfilCmd } from '../modules/perfil/perfilController.js';
 import { error404Cmd } from '../modules/error/errorController.js';
-import { loginCmd } from '../modules/autenticacion/authController.js';
+import { loginCmd, registroCmd } from '../modules/autenticacion/authController.js';
 
 // Funcion para obtener parametros desde el hash de la URL despues del '?'
 function obtenerParametroDesdeHash(nombre) {
@@ -31,8 +30,8 @@ export async function handleNavigation() {
         else if (hash === '#login') {
             loginCmd(mainContainer);
         }
-        else if (hash === '#crearEscalador') {
-            crearEscaladorCmd(mainContainer);
+        else if (hash === '#registro') {
+            registroCmd(mainContainer);
         }
         else if (hash === '#crearPista') {
             crearPistaCmd(mainContainer);
