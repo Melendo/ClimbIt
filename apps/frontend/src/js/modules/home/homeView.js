@@ -14,7 +14,7 @@ export function renderHomeView() {
             <span class="material-icons align-middle me-2">login</span>
             Iniciar sesión
           </a>
-          <a href="#crearEscalador" class="btn btn-outline-primary btn-lg">
+          <a href="#registro" class="btn btn-outline-primary btn-lg">
             <span class="material-icons align-middle me-2">person_add</span>
             Registrarse
           </a>

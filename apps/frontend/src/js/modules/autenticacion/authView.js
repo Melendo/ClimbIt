@@ -135,6 +135,41 @@ export function renderLoginPassword(container, email, callbacks) {
 
 // ===================== VISTAS DE REGISTRO =====================
 
+// Componente de barra de progreso para el registro
+function renderRegistroProgress(currentStep) {
+    const steps = [
+        { num: 1, label: 'Email' },
+        { num: 2, label: 'Contraseña' },
+        { num: 3, label: 'Apodo' }
+    ];
+    
+    const progressPercent = ((currentStep) / steps.length) * 100;
+    
+    return `
+      <div class="registro-progress-container">
+        <div class="registro-progress-wrapper">
+          <div class="registro-progress">
+            <div class="registro-progress-bar" style="width: ${progressPercent}%"></div>
+          </div>
+          <div class="registro-steps">
+            ${steps.map(step => {
+                let stepClass = '';
+                if (step.num < currentStep) stepClass = 'completed';
+                else if (step.num === currentStep) stepClass = 'active';
+                
+                return `
+                  <div class="registro-step ${stepClass}">
+                    <div class="registro-step-dot"></div>
+                    <span>${step.label}</span>
+                  </div>
+                `;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+}
+
 // Vista registro paso 1: Pedir email
 export function renderRegistroEmail(container, callbacks) {
     container.innerHTML = `
@@ -145,7 +180,7 @@ export function renderRegistroEmail(container, callbacks) {
           </a>
           <span class="fw-medium">Crear cuenta</span>
         </div>
-        <div class="card-body flex-grow-1 d-flex flex-column justify-content-center px-4">
+        <div class="card-body flex-grow-1 d-flex flex-column justify-content-center px-4" style="padding-bottom: 100px;">
           <div class="text-center mb-4">
             <span class="material-icons text-primary mb-2" style="font-size: 48px;">email</span>
             <h5 class="fw-bold">¿Cuál es tu email?</h5>
@@ -173,6 +208,8 @@ export function renderRegistroEmail(container, callbacks) {
             </p>
           </form>
         </div>
+        
+        ${renderRegistroProgress(1)}
       </div>
     `;
 
@@ -196,7 +233,7 @@ export function renderRegistroPassword(container, email, callbacks) {
           </a>
           <span class="fw-medium">Crear cuenta</span>
         </div>
-        <div class="card-body flex-grow-1 d-flex flex-column justify-content-center px-4">
+        <div class="card-body flex-grow-1 d-flex flex-column justify-content-center px-4" style="padding-bottom: 100px;">
           <div class="text-center mb-4">
             <span class="material-icons text-primary mb-2" style="font-size: 48px;">lock</span>
             <h5 class="fw-bold">Crea tu contraseña</h5>
@@ -230,6 +267,8 @@ export function renderRegistroPassword(container, email, callbacks) {
             </div>
           </form>
         </div>
+        
+        ${renderRegistroProgress(2)}
       </div>
     `;
 
@@ -293,7 +332,7 @@ export function renderRegistroApodo(container, email, callbacks) {
           </a>
           <span class="fw-medium">Crear cuenta</span>
         </div>
-        <div class="card-body flex-grow-1 d-flex flex-column justify-content-center px-4">
+        <div class="card-body flex-grow-1 d-flex flex-column justify-content-center px-4" style="padding-bottom: 100px;">
           <div class="text-center mb-4">
             <span class="material-icons text-primary mb-2" style="font-size: 48px;">person</span>
             <h5 class="fw-bold">¿Cómo te llamamos?</h5>
@@ -317,6 +356,8 @@ export function renderRegistroApodo(container, email, callbacks) {
             </div>
           </form>
         </div>
+        
+        ${renderRegistroProgress(3)}
       </div>
     `;
 

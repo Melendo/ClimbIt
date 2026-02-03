@@ -125,8 +125,16 @@ function registroApodoCmd(container) {
                 throw new Error(data.message || 'Error al crear la cuenta');
             }
 
-            // Cuenta creada con éxito, redirigir al login
-            window.location.hash = '#login';
+            const data = await res.json();
+
+            // Guardar el token JWT
+            if (data.token) {
+                saveToken(data.token);
+                // Redirigir al listado de rocódromos
+                window.location.hash = '#listaRocodromos';
+            } else {
+                throw new Error('No se recibió el token de autenticación');
+            }
         }
     };
 
