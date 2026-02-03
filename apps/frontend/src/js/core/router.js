@@ -1,11 +1,15 @@
 // Importamos los controladores de los diferentes modulos y las funciones de UI
 import { mainContainer, showLoading, showError } from './ui.js';
+import { isAuthenticated } from './client.js';
 import { perfilCmd } from '../modules/escalador/escaladorController.js';
 import { crearPistaCmd, infoPistaCmd } from '../modules/pista/pistaController.js';
 import { mapaRocodromoCmd, listaRocodromosCmd } from '../modules/rocodromo/rocodromoController.js';
 import { homeCmd } from '../modules/home/homeController.js';
 import { error404Cmd } from '../modules/error/errorController.js';
 import { loginCmd, registroCmd } from '../modules/autenticacion/authController.js';
+
+// Rutas públicas que no requieren autenticación
+const PUBLIC_ROUTES = ['#home', '#login', '#registro', ''];
 
 // Funcion para obtener parametros desde el hash de la URL despues del '?'
 function obtenerParametroDesdeHash(nombre) {
@@ -17,9 +21,22 @@ function obtenerParametroDesdeHash(nombre) {
     return urlParams.get(nombre);
 }
 
+// Obtener la ruta base sin parámetros
+function getBaseRoute(hash) {
+    const indexInterrogacion = hash.indexOf('?');
+    return indexInterrogacion === -1 ? hash : hash.substring(0, indexInterrogacion);
+}
+
 // Manejador de navegacion basado en el '#' de la URL
 export async function handleNavigation() {
     const hash = window.location.hash || '#home';
+    const baseRoute = getBaseRoute(hash);
+
+    // Verificar autenticación para rutas protegidas
+    if (!PUBLIC_ROUTES.includes(baseRoute) && !isAuthenticated()) {
+        window.location.hash = '#login';
+        return;
+    }
 
     showLoading();
 
