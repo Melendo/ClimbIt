@@ -139,5 +139,17 @@ describe('E2E: Escalador', () => {
 
       expect(response.body).toHaveProperty('error');
     });
+
+    it('debería retornar 500 si el escalador ya está suscrito al rocódromo', async () => {
+      // Intentar suscribirse nuevamente al mismo rocódromo
+      const response = await request(app)
+        .post('/escaladores/suscribirse')
+        .set('Authorization', `Bearer ${tokenSuscripcion}`)
+        .send({ idRocodromo: rocodromoTest.id })
+        .expect(500);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.error).toContain('ya está suscrito');
+    });
   });
 });

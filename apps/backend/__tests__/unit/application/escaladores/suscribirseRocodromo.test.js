@@ -9,6 +9,7 @@ describe('SuscribirseRocodromoUseCase', () => {
   beforeEach(() => {
     mockEscaladorRepository = {
       suscribirse: jest.fn(),
+      estaSuscrito: jest.fn(),
     };
     mockRocodromoRepository = {
       encontrarPorId: jest.fn(),
@@ -33,11 +34,16 @@ describe('SuscribirseRocodromoUseCase', () => {
     };
 
     mockRocodromoRepository.encontrarPorId.mockResolvedValue(rocodromoEncontrado);
+    mockEscaladorRepository.estaSuscrito.mockResolvedValue(false);
     mockEscaladorRepository.suscribirse.mockResolvedValue();
 
     const resultado = await suscribirseRocodromo.execute(datosEntrada);
 
     expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(datosEntrada.idRocodromo);
+    expect(mockEscaladorRepository.estaSuscrito).toHaveBeenCalledWith(
+      datosEntrada.escaladorApodo,
+      datosEntrada.idRocodromo
+    );
     expect(mockEscaladorRepository.suscribirse).toHaveBeenCalledWith(
       datosEntrada.escaladorApodo,
       rocodromoEncontrado
@@ -60,6 +66,35 @@ describe('SuscribirseRocodromoUseCase', () => {
     ).rejects.toThrow('Error al suscribirse al rocódromo: Rocódromo con ID 999 no encontrado');
 
     expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(datosEntrada.idRocodromo);
+    expect(mockEscaladorRepository.estaSuscrito).not.toHaveBeenCalled();
+    expect(mockEscaladorRepository.suscribirse).not.toHaveBeenCalled();
+  });
+
+  it('debería lanzar un error si el escalador ya está suscrito al rocódromo', async () => {
+    const datosEntrada = {
+      escaladorApodo: 'TestClimber',
+      idRocodromo: 1,
+    };
+
+    const rocodromoEncontrado = {
+      id: 1,
+      nombre: 'Boulder Central',
+      ciudad: 'Madrid',
+      direccion: 'Calle Test 123',
+    };
+
+    mockRocodromoRepository.encontrarPorId.mockResolvedValue(rocodromoEncontrado);
+    mockEscaladorRepository.estaSuscrito.mockResolvedValue(true);
+
+    await expect(
+      suscribirseRocodromo.execute(datosEntrada)
+    ).rejects.toThrow('Error al suscribirse al rocódromo: El escalador TestClimber ya está suscrito al rocódromo Boulder Central');
+
+    expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(datosEntrada.idRocodromo);
+    expect(mockEscaladorRepository.estaSuscrito).toHaveBeenCalledWith(
+      datosEntrada.escaladorApodo,
+      datosEntrada.idRocodromo
+    );
     expect(mockEscaladorRepository.suscribirse).not.toHaveBeenCalled();
   });
 
@@ -77,6 +112,7 @@ describe('SuscribirseRocodromoUseCase', () => {
     };
 
     mockRocodromoRepository.encontrarPorId.mockResolvedValue(rocodromoEncontrado);
+    mockEscaladorRepository.estaSuscrito.mockResolvedValue(false);
     mockEscaladorRepository.suscribirse.mockRejectedValue(
       new Error('Error al guardar la suscripción')
     );
@@ -86,6 +122,10 @@ describe('SuscribirseRocodromoUseCase', () => {
     ).rejects.toThrow('Error al suscribirse al rocódromo: Error al guardar la suscripción');
 
     expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(datosEntrada.idRocodromo);
+    expect(mockEscaladorRepository.estaSuscrito).toHaveBeenCalledWith(
+      datosEntrada.escaladorApodo,
+      datosEntrada.idRocodromo
+    );
     expect(mockEscaladorRepository.suscribirse).toHaveBeenCalledWith(
       datosEntrada.escaladorApodo,
       rocodromoEncontrado

@@ -188,4 +188,75 @@ describe('EscaladorRepositoryPostgres', () => {
       ).rejects.toThrow('Error al suscribirse al rocódromo: Error de base de datos');
     });
   });
+
+  describe('estaSuscrito', () => {
+    it('debería retornar true si el escalador está suscrito al rocódromo', async () => {
+      // Arrange
+      const escaladorApodo = 'TestClimber';
+      const idRocodromo = 1;
+
+      const mockEscaladorInstance = {
+        id: 1,
+        apodo: escaladorApodo,
+        getRocodromos: jest.fn().mockResolvedValue([{ id: 1, nombre: 'Boulder Central' }]),
+      };
+
+      mockEscaladorModel.findOne.mockResolvedValue(mockEscaladorInstance);
+
+      // Act
+      const resultado = await repository.estaSuscrito(escaladorApodo, idRocodromo);
+
+      // Assert
+      expect(mockEscaladorModel.findOne).toHaveBeenCalledWith({
+        where: { apodo: escaladorApodo },
+      });
+      expect(mockEscaladorInstance.getRocodromos).toHaveBeenCalledWith({
+        where: { id: idRocodromo },
+      });
+      expect(resultado).toBe(true);
+    });
+
+    it('debería retornar false si el escalador no está suscrito al rocódromo', async () => {
+      // Arrange
+      const escaladorApodo = 'TestClimber';
+      const idRocodromo = 1;
+
+      const mockEscaladorInstance = {
+        id: 1,
+        apodo: escaladorApodo,
+        getRocodromos: jest.fn().mockResolvedValue([]),
+      };
+
+      mockEscaladorModel.findOne.mockResolvedValue(mockEscaladorInstance);
+
+      // Act
+      const resultado = await repository.estaSuscrito(escaladorApodo, idRocodromo);
+
+      // Assert
+      expect(mockEscaladorModel.findOne).toHaveBeenCalledWith({
+        where: { apodo: escaladorApodo },
+      });
+      expect(mockEscaladorInstance.getRocodromos).toHaveBeenCalledWith({
+        where: { id: idRocodromo },
+      });
+      expect(resultado).toBe(false);
+    });
+
+    it('debería lanzar un error si el escalador no existe', async () => {
+      // Arrange
+      const escaladorApodo = 'NoExiste';
+      const idRocodromo = 1;
+
+      mockEscaladorModel.findOne.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        repository.estaSuscrito(escaladorApodo, idRocodromo)
+      ).rejects.toThrow('Error al verificar suscripción: Escalador con apodo NoExiste no encontrado');
+
+      expect(mockEscaladorModel.findOne).toHaveBeenCalledWith({
+        where: { apodo: escaladorApodo },
+      });
+    });
+  });
 });
