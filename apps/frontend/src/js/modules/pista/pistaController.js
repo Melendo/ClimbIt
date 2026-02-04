@@ -12,12 +12,12 @@ const GRADOS_FRANCESES = [
     '9a', '9a+', '9b', '9b+', '9c', '9c+',
 ];
 
-// Iconos de estado para la vista de pista
-const ESTADO_ICONS = {
-    'flash': '<span class="material-icons text-warning" style="font-size: 48px;">flash_on</span>',
-    'completado': '<span class="material-icons text-success" style="font-size: 48px;">check</span>',
-    'en-progreso': '<span class="material-icons text-info" style="font-size: 48px;">hexagon</span>',
-    'nada': '<span class="material-icons text-secondary" style="font-size: 48px;">radio_button_unchecked</span>'
+// Configuración de estados para la vista de pista
+const ESTADOS_CONFIG = {
+    'flash': { icon: 'bolt', color: '#d97706', bg: '#fef3c7', texto: 'Flash' },
+    'completado': { icon: 'done', color: '#16a34a', bg: '#dcfce7', texto: 'Completado' },
+    'en-progreso': { icon: 'sync', color: '#2563eb', bg: '#dbeafe', texto: 'En proyecto' },
+    'nada': { icon: 'remove', color: '#6b7280', bg: '#e5e7eb', texto: 'Sin registrar' }
 };
 
 // Validación de campos del formulario
@@ -154,7 +154,9 @@ export async function infoPistaCmd(container, id) {
 
         const callbacks = {
             onEstadoChange: (estado, estadoElement) => {
-                estadoElement.innerHTML = ESTADO_ICONS[estado] || ESTADO_ICONS['nada'];
+                const config = ESTADOS_CONFIG[estado] || ESTADOS_CONFIG['nada'];
+                estadoElement.style.background = config.bg;
+                estadoElement.innerHTML = `<span class="material-icons" style="color: ${config.color}; font-size: 28px;">${config.icon}</span>`;
                 // TODO: En el futuro, guardar el estado en el backend
             }
         };

@@ -116,74 +116,165 @@ export function renderInfoPista(container, pista, callbacks) {
     const { nombre, dificultad } = pista || {};
 
     container.innerHTML = `
-<div class="card shadow-sm">
+<div class="d-flex flex-column" style="min-height: 100vh; background: #f8f9fa;">
   
-  <!-- Cabecera: Color + Nombre -->
-  <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
-    <a href="#" onclick="history.back(); return false;" class="text-dark">
-      <span class="material-icons align-middle">arrow_back</span>
-    </a>
-    <span class="fw-medium">${nombre || 'Sin nombre'}</span>
-  </div>
-
-  <!-- Imagen de la pista -->
-  <div class="card-img-container" style="height: 300px; overflow: hidden;">
+  <!-- Imagen hero con overlay -->
+  <div class="position-relative" style="height: 45vh; min-height: 280px;">
     <img 
       src="/assets/placeholder.jpg" 
       alt="Imagen de la pista ${nombre || ''}" 
       class="w-100 h-100" 
       style="object-fit: cover;"
     />
+    <div class="position-absolute top-0 start-0 end-0 bottom-0" style="background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 30%, transparent 60%, rgba(0,0,0,0.5) 100%);"></div>
+    
+    <!-- Botón volver -->
+    <a href="#" onclick="history.back(); return false;" class="position-absolute top-0 start-0 m-3 text-white d-flex align-items-center justify-content-center rounded-circle" style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); backdrop-filter: blur(4px);">
+      <span class="material-icons">arrow_back</span>
+    </a>
+    
+    <!-- Info sobre la imagen -->
+    <div class="position-absolute bottom-0 start-0 end-0 p-4 text-white">
+      <span class="badge mb-2" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); font-size: 0.9rem; padding: 6px 12px;">${dificultad || '-'}</span>
+      <h1 class="fs-4 fw-semibold mb-0">${nombre || 'Sin nombre'}</h1>
+    </div>
   </div>
 
-  <!-- Info: Nivel y Estado -->
-  <div class="card-body">
-    <div class="row text-center">
-      <div class="col-6">
-        <p class="text-muted mb-1">Nivel</p>
-        <p class="fs-2 fw-bold text-primary mb-0">${dificultad || '-'}</p>
-      </div>
-      <div class="col-6">
-        <p class="text-muted mb-1">Estado</p>
-        <div class="estado-icon fs-1" id="estado-actual">
-          <span class="material-icons text-secondary" style="font-size: 48px;">radio_button_unchecked</span>
+  <!-- Contenido principal -->
+  <div class="flex-grow-1 d-flex flex-column">
+    
+    <!-- Estado actual -->
+    <div class="bg-white px-4 py-4 border-bottom">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <p class="text-muted small mb-1 text-uppercase" style="letter-spacing: 0.5px;">Tu progreso</p>
+          <p class="mb-0 fw-medium" id="estado-texto">Sin registrar</p>
+        </div>
+        <div id="estado-actual" class="d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: #e5e7eb;">
+          <span class="material-icons" style="color: #6b7280; font-size: 28px;">remove</span>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Botones de acción -->
-  <div class="card-footer bg-white border-top py-3">
-    <div class="d-flex justify-content-around text-center">
-      <button class="btn btn-link text-warning p-2 estado-btn d-flex flex-column align-items-center" data-estado="flash" title="Flash">
-        <span class="material-icons" style="font-size: 32px;">flash_on</span>
-        <small>Flash</small>
-      </button>
-      <button class="btn btn-link text-success p-2 estado-btn d-flex flex-column align-items-center" data-estado="completado" title="Completado">
-        <span class="material-icons" style="font-size: 32px;">check</span>
-        <small>Completado</small>
-      </button>
-      <button class="btn btn-link text-info p-2 estado-btn d-flex flex-column align-items-center" data-estado="en-progreso" title="En progreso">
-        <span class="material-icons" style="font-size: 32px;">hexagon</span>
-        <small>Proyecto</small>
-      </button>
-      <button class="btn btn-link text-secondary p-2 estado-btn d-flex flex-column align-items-center" data-estado="nada" title="Desmarcar">
-        <span class="material-icons" style="font-size: 32px;">close</span>
-        <small>Desmarcar</small>
-      </button>
+    <!-- Acciones -->
+    <div class="bg-white mt-2 px-4 py-3">
+      <p class="text-muted small mb-3 text-uppercase" style="letter-spacing: 0.5px;">Marcar como</p>
+      <div class="row g-2">
+        
+        <div class="col-6">
+          <button class="btn estado-btn d-flex flex-column align-items-center justify-content-center gap-2 w-100 py-3 rounded-3 border-0 position-relative" data-estado="flash" style="background: #fffbeb;">
+            <span class="material-icons info-btn position-absolute" data-tooltip="Completado al primer intento" style="top: 8px; right: 8px; font-size: 16px; color: #d97706; cursor: pointer;">info_outline</span>
+            <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: #fef3c7;">
+              <span class="material-icons" style="color: #d97706; font-size: 28px;">bolt</span>
+            </div>
+            <span class="fw-medium">Flash</span>
+          </button>
+        </div>
+
+        <div class="col-6">
+          <button class="btn estado-btn d-flex flex-column align-items-center justify-content-center gap-2 w-100 py-3 rounded-3 border-0 position-relative" data-estado="completado" style="background: #f0fdf4;">
+            <span class="material-icons info-btn position-absolute" data-tooltip="Has superado la vía" style="top: 8px; right: 8px; font-size: 16px; color: #16a34a; cursor: pointer;">info_outline</span>
+            <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: #dcfce7;">
+              <span class="material-icons" style="color: #16a34a; font-size: 28px;">done</span>
+            </div>
+            <span class="fw-medium">Completado</span>
+          </button>
+        </div>
+
+        <div class="col-6">
+          <button class="btn estado-btn d-flex flex-column align-items-center justify-content-center gap-2 w-100 py-3 rounded-3 border-0 position-relative" data-estado="en-progreso" style="background: #eff6ff;">
+            <span class="material-icons info-btn position-absolute" data-tooltip="Trabajando en esta vía" style="top: 8px; right: 8px; font-size: 16px; color: #2563eb; cursor: pointer;">info_outline</span>
+            <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: #dbeafe;">
+              <span class="material-icons" style="color: #2563eb; font-size: 28px;">sync</span>
+            </div>
+            <span class="fw-medium">Proyecto</span>
+          </button>
+        </div>
+
+        <div class="col-6">
+          <button class="btn estado-btn d-flex flex-column align-items-center justify-content-center gap-2 w-100 py-3 rounded-3 border-0 position-relative" data-estado="nada" style="background: #f3f4f6;">
+            <span class="material-icons info-btn position-absolute" data-tooltip="Quitar registro" style="top: 8px; right: 8px; font-size: 16px; color: #6b7280; cursor: pointer;">info_outline</span>
+            <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: #e5e7eb;">
+              <span class="material-icons" style="color: #6b7280; font-size: 28px;">remove</span>
+            </div>
+            <span class="fw-medium">Desmarcar</span>
+          </button>
+        </div>
+
+      </div>
     </div>
-  </div>
 
+  </div>
 </div>`;
 
     // Configurar eventos para los botones de estado
     const estadoActual = container.querySelector('#estado-actual');
+    const estadoTexto = container.querySelector('#estado-texto');
     const estadoBtns = container.querySelectorAll('.estado-btn');
 
+    const estadosTexto = {
+        'flash': 'Flash',
+        'completado': 'Completado',
+        'en-progreso': 'Proyecto',
+        'nada': 'Sin registrar'
+    };
+
     estadoBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            // Ignorar si se hizo clic en el icono de info
+            if (e.target.classList.contains('info-btn')) return;
+            
             const estado = btn.dataset.estado;
+            
+            // Actualizar texto del estado
+            estadoTexto.textContent = estadosTexto[estado] || 'Sin registrar';
+            
+            // Delegar actualización visual del icono al controlador
             callbacks.onEstadoChange(estado, estadoActual);
+        });
+    });
+
+    // Tooltips para los iconos de información
+    const infoBtns = container.querySelectorAll('.info-btn');
+    let activeTooltip = null;
+
+    infoBtns.forEach(infoBtn => {
+        infoBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            // Cerrar tooltip activo si existe
+            if (activeTooltip) {
+                activeTooltip.remove();
+                activeTooltip = null;
+            }
+
+            // Crear tooltip
+            const tooltip = document.createElement('div');
+            tooltip.className = 'position-absolute px-3 py-2 rounded-3 shadow-sm';
+            tooltip.style.cssText = 'background: #1f2937; color: white; font-size: 0.8rem; z-index: 1000; top: 30px; right: 0; white-space: nowrap; animation: fadeIn 0.15s ease;';
+            tooltip.textContent = infoBtn.dataset.tooltip;
+            
+            infoBtn.parentElement.appendChild(tooltip);
+            activeTooltip = tooltip;
+
+            // Cerrar al hacer clic fuera
+            setTimeout(() => {
+                document.addEventListener('click', function closeTooltip() {
+                    if (activeTooltip) {
+                        activeTooltip.remove();
+                        activeTooltip = null;
+                    }
+                    document.removeEventListener('click', closeTooltip);
+                }, { once: true });
+            }, 10);
+
+            // Auto-cerrar después de 3 segundos
+            setTimeout(() => {
+                if (activeTooltip === tooltip) {
+                    tooltip.remove();
+                    activeTooltip = null;
+                }
+            }, 3000);
         });
     });
 }
