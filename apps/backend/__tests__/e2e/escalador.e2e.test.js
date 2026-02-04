@@ -76,13 +76,13 @@ describe('E2E: Escalador', () => {
     it('debería manejar errores al crear un escalador con datos inválidos', async () => {
       const response = await request(app)
         .post('/escaladores/create')
-        .send({ correo: '', contrasena: '123', apodo: 'Test' })
+        .send({ correo: 'test@test.com', contrasena: '123', apodo: '!!!invalid!!!' })
         .expect(422);
 
       expect(response.body).toHaveProperty('status', 'invalid_request');
       expect(Array.isArray(response.body.errors)).toBe(true);
       const fields = response.body.errors.map((e) => e.field);
-      expect(fields).toContain('correo');
+      expect(fields).toContain('apodo');
     });
   });
 
