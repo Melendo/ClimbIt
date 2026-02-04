@@ -20,10 +20,14 @@ import tokenService from './security/tokenService.js';
 import CrearEscalador from '../application/escaladores/crearEscalador.js';
 import AutenticarEscalador from '../application/escaladores/autenticarEscalador.js';
 import SuscribirseRocodromo from '../application/escaladores/suscribirseRocodromo.js';
+import DesuscribirseRocodromo from '../application/escaladores/desuscribirseRocodromo.js';
+
 import CrearPista from '../application/pistas/crearPista.js';
 import ObtenerPistaPorId from '../application/pistas/obtenerPistaPorId.js';
 import ObtenerPistasDeZona from '../application/zonas/obtenerPistasZona.js';
+
 import ObtenerZonasRocodromo from '../application/rocodromos/obtenerZonasRocodromo.js';
+
 import ObtenerRocodromos from '../application/rocodromos/obtenerRocodromos.js';
 
 // Controladores (interfaces HTTP)
@@ -60,18 +64,27 @@ async function inicializarContainer() {
     escaladorRepository,
     rocodromoRepository
   );
+  const desuscribirseRocodromoUseCase = new DesuscribirseRocodromo(
+    escaladorRepository,
+    rocodromoRepository
+  );
+
   const crearPistaUseCase = new CrearPista(pistaRepository, db.Zona);
   const obtenerPistaPorIdUseCase = new ObtenerPistaPorId(pistaRepository);
+  
   const obtenerPistasDeZonaUseCase = new ObtenerPistasDeZona(zonaRepository);
+
   const obtenerZonasRocodromoUseCase = new ObtenerZonasRocodromo(
     rocodromoRepository
   );
   const obtenerRocodromosUseCase = new ObtenerRocodromos(rocodromoRepository);
-  // 3) Agrupar los casos de uso que el controlador necesitará
+
+  // 3) Instancia del caso de uso con el repositorio inyectado
   const escaladorUseCases = {
     crear: crearEscaladorUseCase,
     autenticar: autenticarEscaladorUseCase,
     suscribirseRocodromo: suscribirseRocodromoUseCase,
+    desuscribirseRocodromo: desuscribirseRocodromoUseCase,
   };
   const pistaUseCases = {
     crear: crearPistaUseCase,

@@ -12,6 +12,10 @@ class EscaladorRepository {
     throw new Error('Método "suscribirse" no implementado');
   }
 
+  async desuscribirse(escaladorApodo, idRocodromo) {
+    throw new Error('Método "desuscribirse" no implementado');
+  }
+
   async estaSuscrito(escaladorApodo, idRocodromo) {
     throw new Error('Método "estaSuscrito" no implementado');
   }

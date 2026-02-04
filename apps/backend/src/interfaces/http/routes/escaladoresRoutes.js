@@ -33,5 +33,9 @@ router.post('/auth',
 router.post("/suscribirse", verifyToken, (req, res, next) => {
   escaladorController.suscribirse(req, res, next);
 });
+  
+router.post("/desuscribirse", verifyToken, (req, res, next) => {
+  escaladorController.desuscribirse(req, res, next);
+});
 
 export default router;

@@ -130,4 +130,53 @@ describe('Unit: EscaladorController', () => {
       expect(res.body).toEqual({ error: errorMessage });
     });
   });
+
+  describe('desuscribirse', () => {
+    it('responde 200 con mensaje de éxito cuando la desuscripción es exitosa', async () => {
+      const useCases = {
+        desuscribirseRocodromo: { 
+          execute: jest.fn().mockResolvedValue({ 
+            mensaje: 'Escalador TestClimber desuscrito del rocódromo Boulder Central exitosamente.' 
+          }) 
+        }
+      };
+      const controller = new EscaladorController(useCases);
+      const req = { 
+        user: { apodo: 'TestClimber' },
+        body: { idRocodromo: 1 } 
+      };
+      const res = createResMock();
+
+      await controller.desuscribirse(req, res, () => {});
+
+      expect(useCases.desuscribirseRocodromo.execute).toHaveBeenCalledWith({ 
+        escaladorApodo: 'TestClimber', 
+        idRocodromo: 1 
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.body).toEqual({ 
+        mensaje: 'Escalador TestClimber desuscrito del rocódromo Boulder Central exitosamente.' 
+      });
+    });
+
+    it('responde 500 si el caso de uso lanza un error', async () => {
+      const errorMessage = 'Error al desuscribirse del rocódromo: El escalador TestClimber no está suscrito al rocódromo con ID 1';
+      const useCases = {
+        desuscribirseRocodromo: { 
+          execute: jest.fn().mockRejectedValue(new Error(errorMessage)) 
+        }
+      };
+      const controller = new EscaladorController(useCases);
+      const req = { 
+        user: { apodo: 'TestClimber' },
+        body: { idRocodromo: 1 } 
+      };
+      const res = createResMock();
+
+      await controller.desuscribirse(req, res, () => {});
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.body).toEqual({ error: errorMessage });
+    });
+  });
 });

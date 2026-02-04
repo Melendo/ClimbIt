@@ -259,4 +259,65 @@ describe('EscaladorRepositoryPostgres', () => {
       });
     });
   });
+
+  describe('desuscribirse', () => {
+    it('debería desuscribir un escalador de un rocódromo exitosamente', async () => {
+      // Arrange
+      const escaladorApodo = 'TestClimber';
+      const idRocodromo = 1;
+
+      const mockEscaladorInstance = {
+        id: 1,
+        apodo: escaladorApodo,
+        removeRocodromo: jest.fn().mockResolvedValue(true),
+      };
+
+      mockEscaladorModel.findOne.mockResolvedValue(mockEscaladorInstance);
+
+      // Act
+      await repository.desuscribirse(escaladorApodo, idRocodromo);
+
+      // Assert
+      expect(mockEscaladorModel.findOne).toHaveBeenCalledWith({
+        where: { apodo: escaladorApodo },
+      });
+      expect(mockEscaladorInstance.removeRocodromo).toHaveBeenCalledWith(idRocodromo);
+    });
+
+    it('debería lanzar un error si el escalador no existe', async () => {
+      // Arrange
+      const escaladorApodo = 'NoExiste';
+      const idRocodromo = 1;
+
+      mockEscaladorModel.findOne.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        repository.desuscribirse(escaladorApodo, idRocodromo)
+      ).rejects.toThrow('Error al desuscribirse del rocódromo: Escalador con apodo NoExiste no encontrado');
+
+      expect(mockEscaladorModel.findOne).toHaveBeenCalledWith({
+        where: { apodo: escaladorApodo },
+      });
+    });
+
+    it('debería lanzar un error si falla la desasociación', async () => {
+      // Arrange
+      const escaladorApodo = 'TestClimber';
+      const idRocodromo = 1;
+
+      const mockEscaladorInstance = {
+        id: 1,
+        apodo: escaladorApodo,
+        removeRocodromo: jest.fn().mockRejectedValue(new Error('Error de base de datos')),
+      };
+
+      mockEscaladorModel.findOne.mockResolvedValue(mockEscaladorInstance);
+
+      // Act & Assert
+      await expect(
+        repository.desuscribirse(escaladorApodo, idRocodromo)
+      ).rejects.toThrow('Error al desuscribirse del rocódromo: Error de base de datos');
+    });
+  });
 });

@@ -152,4 +152,70 @@ describe('E2E: Escalador', () => {
       expect(response.body.error).toContain('ya está suscrito');
     });
   });
+
+  describe('Desuscribirse de rocódromo', () => {
+    it('debería desuscribir un escalador de un rocódromo exitosamente', async () => {
+      const response = await request(app)
+        .post('/escaladores/desuscribirse')
+        .set('Authorization', `Bearer ${tokenSuscripcion}`)
+        .send({ idRocodromo: rocodromoTest.id })
+        .expect(200);
+
+      expect(response.body).toHaveProperty('mensaje');
+      expect(response.body.mensaje).toContain('desuscrito del rocódromo');
+      expect(response.body.mensaje).toContain(escaladorSuscripcion.apodo);
+      expect(response.body.mensaje).toContain(rocodromoTest.nombre);
+
+      // Verificar que la desuscripción se eliminó de la base de datos
+      const escaladorActualizado = await db.Escalador.findByPk(escaladorSuscripcion.id);
+      const rocodromos = await escaladorActualizado.getRocodromos();
+      
+      expect(rocodromos).toHaveLength(0);
+    });
+
+    it('debería retornar 401 si no se proporciona token de autenticación', async () => {
+      const response = await request(app)
+        .post('/escaladores/desuscribirse')
+        .send({ idRocodromo: rocodromoTest.id })
+        .expect(401);
+
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toContain('Acceso denegado');
+    });
+
+    it('debería retornar 500 si el rocódromo no existe', async () => {
+      const fakeIdRocodromo = 999999;
+      
+      const response = await request(app)
+        .post('/escaladores/desuscribirse')
+        .set('Authorization', `Bearer ${tokenSuscripcion}`)
+        .send({ idRocodromo: fakeIdRocodromo })
+        .expect(500);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.error).toContain('no encontrado');
+    });
+
+    it('debería retornar 500 si el escalador no está suscrito al rocódromo', async () => {
+      // El escalador ya fue desuscrito en el primer test, intentar desuscribirse nuevamente
+      const response = await request(app)
+        .post('/escaladores/desuscribirse')
+        .set('Authorization', `Bearer ${tokenSuscripcion}`)
+        .send({ idRocodromo: rocodromoTest.id })
+        .expect(500);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.error).toContain('no está suscrito');
+    });
+
+    it('debería manejar errores al desuscribirse con datos inválidos', async () => {
+      const response = await request(app)
+        .post('/escaladores/desuscribirse')
+        .set('Authorization', `Bearer ${tokenSuscripcion}`)
+        .send({ idRocodromo: 'invalid' })
+        .expect(500);
+
+      expect(response.body).toHaveProperty('error');
+    });
+  });
 });
