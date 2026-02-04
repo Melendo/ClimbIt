@@ -1,26 +1,48 @@
 import express from 'express';
 import { param } from 'express-validator';
 import validate from '../middlewares/validate.js';
-import containerPromise from '../../../infrastructure/container.js';
 import verifyTokenMiddleware from '../middlewares/verifyToken.js';
+import containerPromise from '../../../infrastructure/container.js';
 
 const router = express.Router();
 const container = await containerPromise;
 const { rocodromoController } = container;
 
+/**
+ * GET /rocodromos
+ * Obtiene la lista de todos los rocodromos disponibles
+ * 
+ * Requiere: Token JWT válido en header Authorization
+ * 
+ * Respuesta esperada: @return {Array} Array de rocodromos con sus detalles:
+ *   - id: identificador único
+ *   - nombre: nombre del rocodromo
+ *   - direccion: dirección física
+ */
 router.get('/', verifyTokenMiddleware, (req, res, next) => {
   rocodromoController.obtenerRocodromos(req, res, next);
 });
 
+/**
+ * GET /rocodromos/zonas/:id
+ * Obtiene todas las zonas que pertenecen a un rocodromo específico
+ * 
+ * Parámetros esperados (URL Path):
+ * - id (@param {number} , requerido): ID del rocodromo (entero positivo)
+ * 
+ * Requiere: Token JWT válido en header Authorization
+ * 
+ * Respuesta esperada: @return {Array} Array de zonas con sus pistas asociadas
+ */
 const obtenerZonasRocodromoValidators = [
   param('id')
     .toInt()
     .isInt({ min: 1 })
-    .withMessage('id debe ser un entero positivo'),
+    .withMessage('El id del rocodromo debe ser un entero positivo'),
 ];
 
 router.get(
-  '/zonas/:id',
+  '/zonas/:id',verifyTokenMiddleware,
   obtenerZonasRocodromoValidators,
   validate,
   (req, res, next) => {
