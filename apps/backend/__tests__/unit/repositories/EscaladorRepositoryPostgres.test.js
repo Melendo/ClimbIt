@@ -116,4 +116,76 @@ describe('EscaladorRepositoryPostgres', () => {
       expect(resultado.id).toBe(1);
     });
   });
+
+  describe('suscribirse', () => {
+    it('debería suscribir un escalador a un rocódromo exitosamente', async () => {
+      // Arrange
+      const escaladorApodo = 'TestClimber';
+      const rocodromo = {
+        id: 1,
+        nombre: 'Boulder Central',
+        ciudad: 'Madrid',
+        direccion: 'Calle Test 123',
+      };
+
+      const mockEscaladorInstance = {
+        id: 1,
+        apodo: escaladorApodo,
+        addRocodromo: jest.fn().mockResolvedValue(true),
+      };
+
+      mockEscaladorModel.findOne.mockResolvedValue(mockEscaladorInstance);
+
+      // Act
+      await repository.suscribirse(escaladorApodo, rocodromo);
+
+      // Assert
+      expect(mockEscaladorModel.findOne).toHaveBeenCalledWith({
+        where: { apodo: escaladorApodo },
+      });
+      expect(mockEscaladorInstance.addRocodromo).toHaveBeenCalledWith(rocodromo.id);
+    });
+
+    it('debería lanzar un error si el escalador no existe', async () => {
+      // Arrange
+      const escaladorApodo = 'NoExiste';
+      const rocodromo = {
+        id: 1,
+        nombre: 'Boulder Central',
+      };
+
+      mockEscaladorModel.findOne.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        repository.suscribirse(escaladorApodo, rocodromo)
+      ).rejects.toThrow('Error al suscribirse al rocódromo: Escalador con apodo NoExiste no encontrado');
+
+      expect(mockEscaladorModel.findOne).toHaveBeenCalledWith({
+        where: { apodo: escaladorApodo },
+      });
+    });
+
+    it('debería lanzar un error si falla la asociación', async () => {
+      // Arrange
+      const escaladorApodo = 'TestClimber';
+      const rocodromo = {
+        id: 1,
+        nombre: 'Boulder Central',
+      };
+
+      const mockEscaladorInstance = {
+        id: 1,
+        apodo: escaladorApodo,
+        addRocodromo: jest.fn().mockRejectedValue(new Error('Error de base de datos')),
+      };
+
+      mockEscaladorModel.findOne.mockResolvedValue(mockEscaladorInstance);
+
+      // Act & Assert
+      await expect(
+        repository.suscribirse(escaladorApodo, rocodromo)
+      ).rejects.toThrow('Error al suscribirse al rocódromo: Error de base de datos');
+    });
+  });
 });

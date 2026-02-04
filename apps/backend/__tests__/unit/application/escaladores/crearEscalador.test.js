@@ -39,7 +39,7 @@ describe('crearEscaladorUseCase', () => {
       correo: 'juan@example.com',
       apodo: 'JuanClimb',
     });
-    expect(resultado).toBe('token_jwt_simulado');
+    expect(resultado).toEqual({ token: 'token_jwt_simulado' });
   });
 
   it('no debería crear y ni guardar un escalador por datos invalidos', async () => {

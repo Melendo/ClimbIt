@@ -81,4 +81,53 @@ describe('Unit: EscaladorController', () => {
         expect(res.body).toEqual({ error: errorMessage });
     });
   });
+
+  describe('suscribirse', () => {
+    it('responde 200 con mensaje de éxito cuando la suscripción es exitosa', async () => {
+      const useCases = {
+        suscribirseRocodromo: { 
+          execute: jest.fn().mockResolvedValue({ 
+            mensaje: 'Escalador TestClimber suscrito al rocódromo Boulder Central exitosamente.' 
+          }) 
+        }
+      };
+      const controller = new EscaladorController(useCases);
+      const req = { 
+        user: { apodo: 'TestClimber' },
+        body: { idRocodromo: 1 } 
+      };
+      const res = createResMock();
+
+      await controller.suscribirse(req, res, () => {});
+
+      expect(useCases.suscribirseRocodromo.execute).toHaveBeenCalledWith({ 
+        escaladorApodo: 'TestClimber', 
+        idRocodromo: 1 
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.body).toEqual({ 
+        mensaje: 'Escalador TestClimber suscrito al rocódromo Boulder Central exitosamente.' 
+      });
+    });
+
+    it('responde 500 si el caso de uso lanza un error', async () => {
+      const errorMessage = 'Error al suscribirse al rocódromo: Rocódromo con ID 999 no encontrado';
+      const useCases = {
+        suscribirseRocodromo: { 
+          execute: jest.fn().mockRejectedValue(new Error(errorMessage)) 
+        }
+      };
+      const controller = new EscaladorController(useCases);
+      const req = { 
+        user: { apodo: 'TestClimber' },
+        body: { idRocodromo: 999 } 
+      };
+      const res = createResMock();
+
+      await controller.suscribirse(req, res, () => {});
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.body).toEqual({ error: errorMessage });
+    });
+  });
 });
