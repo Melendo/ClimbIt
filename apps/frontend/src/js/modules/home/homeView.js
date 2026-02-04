@@ -1,5 +1,6 @@
-export function renderHomeView() {
-    return `
+// Vista de la página principal (home)
+export function renderHomeView(container, callbacks) {
+    container.innerHTML = `
     <div class="card shadow-sm d-flex flex-column" style="min-height: 100vh;">
 
       <!-- Contenido principal centrado -->
@@ -10,7 +11,7 @@ export function renderHomeView() {
         
         <!-- Botones de registro e inicio de sesión -->
         <div class="d-grid gap-3 w-100 px-4" style="max-width: 300px;">
-          <a href="#login" class="btn btn-primary btn-lg">
+          <a href="#login" class="btn btn-primary btn-lg" id="login-btn">
             <span class="material-icons align-middle me-2">login</span>
             Iniciar sesión
           </a>
@@ -22,4 +23,13 @@ export function renderHomeView() {
       </div>
 
     </div>`;
+
+    // Evento para el botón de login
+    const loginBtn = container.querySelector('#login-btn');
+    loginBtn.addEventListener('click', (e) => {
+        if (callbacks.isAuthenticated()) {
+            e.preventDefault();
+            callbacks.onAlreadyAuthenticated();
+        }
+    });
 }

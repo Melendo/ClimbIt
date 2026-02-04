@@ -1,4 +1,4 @@
-import { showError, showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
+import { showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
 
 // Escala de grados (falta traerla con peticion al backend)
 const GRADOS_FRANCESES = [
@@ -203,100 +203,85 @@ export function renderCrearPista(container, callbacks) {
 }
 
 // Vista para la información de una pista
-export async function renderInfoPista(container, pista) {
-    try {
-        let data = pista;
-        if (pista && typeof pista.json === 'function') {
-            data = await pista.json().catch(() => {
-                throw new Error('Respuesta no válida: JSON esperado');
-            });
-        }
+export function renderInfoPista(container, pista) {
+    const { nombre, dificultad } = pista || {};
 
-        const { id, idZona, nombre, dificultad } = data || {};
-        if (id == null || idZona == null || nombre == null || dificultad == null) {
-            throw new Error('Datos de pista incompletos');
-        }
+    container.innerHTML = `
+<div class="card shadow-sm">
+  
+  <!-- Cabecera: Color + Nombre -->
+  <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
+    <a href="#" onclick="history.back(); return false;" class="text-dark">
+      <span class="material-icons align-middle">arrow_back</span>
+    </a>
+    <span class="fw-medium">${nombre || 'Sin nombre'}</span>
+  </div>
 
-        container.innerHTML = `
-    <div class="card shadow-sm">
-      
-      <!-- Cabecera: Color + Nombre -->
-      <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
-        <a href="#" onclick="history.back(); return false;" class="text-dark">
-          <span class="material-icons align-middle">arrow_back</span>
-        </a>
-        <span class="fw-medium">${nombre}</span>
+  <!-- Imagen de la pista -->
+  <div class="card-img-container" style="height: 300px; overflow: hidden;">
+    <img 
+      src="/assets/placeholder.jpg" 
+      alt="Imagen de la pista ${nombre || ''}" 
+      class="w-100 h-100" 
+      style="object-fit: cover;"
+    />
+  </div>
+
+  <!-- Info: Nivel y Estado -->
+  <div class="card-body">
+    <div class="row text-center">
+      <div class="col-6">
+        <p class="text-muted mb-1">Nivel</p>
+        <p class="fs-2 fw-bold text-primary mb-0">${dificultad || '-'}</p>
       </div>
-
-      <!-- Imagen de la pista -->
-      <div class="card-img-container" style="height: 300px; overflow: hidden;">
-        <img 
-          src="/assets/placeholder.jpg" 
-          alt="Imagen de la pista ${nombre}" 
-          class="w-100 h-100" 
-          style="object-fit: cover;"
-        />
-      </div>
-
-      <!-- Info: Nivel y Estado -->
-      <div class="card-body">
-        <div class="row text-center">
-          <div class="col-6">
-            <p class="text-muted mb-1">Nivel</p>
-            <p class="fs-2 fw-bold text-primary mb-0">${dificultad}</p>
-          </div>
-          <div class="col-6">
-            <p class="text-muted mb-1">Estado</p>
-            <div class="estado-icon fs-1" id="estado-actual">
-              <span class="material-icons text-secondary" style="font-size: 48px;">radio_button_unchecked</span>
-            </div>
-          </div>
+      <div class="col-6">
+        <p class="text-muted mb-1">Estado</p>
+        <div class="estado-icon fs-1" id="estado-actual">
+          <span class="material-icons text-secondary" style="font-size: 48px;">radio_button_unchecked</span>
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- Botones de acción -->
-      <div class="card-footer bg-white border-top py-3">
-        <div class="d-flex justify-content-around text-center">
-          <button class="btn btn-link text-warning p-2 estado-btn d-flex flex-column align-items-center" data-estado="flash" title="Flash">
-            <span class="material-icons" style="font-size: 32px;">flash_on</span>
-            <small>Flash</small>
-          </button>
-          <button class="btn btn-link text-success p-2 estado-btn d-flex flex-column align-items-center" data-estado="completado" title="Completado">
-            <span class="material-icons" style="font-size: 32px;">check</span>
-            <small>Completado</small>
-          </button>
-          <button class="btn btn-link text-info p-2 estado-btn d-flex flex-column align-items-center" data-estado="en-progreso" title="En progreso">
-            <span class="material-icons" style="font-size: 32px;">hexagon</span>
-            <small>Proyecto</small>
-          </button>
-          <button class="btn btn-link text-secondary p-2 estado-btn d-flex flex-column align-items-center" data-estado="nada" title="Desmarcar">
-            <span class="material-icons" style="font-size: 32px;">close</span>
-            <small>Desmarcar</small>
-          </button>
-        </div>
-      </div>
+  <!-- Botones de acción -->
+  <div class="card-footer bg-white border-top py-3">
+    <div class="d-flex justify-content-around text-center">
+      <button class="btn btn-link text-warning p-2 estado-btn d-flex flex-column align-items-center" data-estado="flash" title="Flash">
+        <span class="material-icons" style="font-size: 32px;">flash_on</span>
+        <small>Flash</small>
+      </button>
+      <button class="btn btn-link text-success p-2 estado-btn d-flex flex-column align-items-center" data-estado="completado" title="Completado">
+        <span class="material-icons" style="font-size: 32px;">check</span>
+        <small>Completado</small>
+      </button>
+      <button class="btn btn-link text-info p-2 estado-btn d-flex flex-column align-items-center" data-estado="en-progreso" title="En progreso">
+        <span class="material-icons" style="font-size: 32px;">hexagon</span>
+        <small>Proyecto</small>
+      </button>
+      <button class="btn btn-link text-secondary p-2 estado-btn d-flex flex-column align-items-center" data-estado="nada" title="Desmarcar">
+        <span class="material-icons" style="font-size: 32px;">close</span>
+        <small>Desmarcar</small>
+      </button>
+    </div>
+  </div>
 
-    </div>`;
+</div>`;
 
-        // Configurar eventos para los botones de estado
-        const estadoActual = document.getElementById('estado-actual');
-        const estadoBtns = document.querySelectorAll('.estado-btn');
+    // Configurar eventos para los botones de estado
+    const estadoActual = container.querySelector('#estado-actual');
+    const estadoBtns = container.querySelectorAll('.estado-btn');
 
-        const estadoIcons = {
-            'flash': '<span class="material-icons text-warning" style="font-size: 48px;">flash_on</span>',
-            'completado': '<span class="material-icons text-success" style="font-size: 48px;">check</span>',
-            'en-progreso': '<span class="material-icons text-info" style="font-size: 48px;">hexagon</span>',
-            'nada': '<span class="material-icons text-secondary" style="font-size: 48px;">radio_button_unchecked</span>'
-        };
+    const estadoIcons = {
+        'flash': '<span class="material-icons text-warning" style="font-size: 48px;">flash_on</span>',
+        'completado': '<span class="material-icons text-success" style="font-size: 48px;">check</span>',
+        'en-progreso': '<span class="material-icons text-info" style="font-size: 48px;">hexagon</span>',
+        'nada': '<span class="material-icons text-secondary" style="font-size: 48px;">radio_button_unchecked</span>'
+    };
 
-        estadoBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const estado = btn.dataset.estado;
-                estadoActual.innerHTML = estadoIcons[estado] || estadoIcons['nada'];
-            });
+    estadoBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const estado = btn.dataset.estado;
+            estadoActual.innerHTML = estadoIcons[estado] || estadoIcons['nada'];
         });
-
-    } catch (err) {
-        showError(err.message || 'Error al mostrar la pista');
-    }
+    });
 }
