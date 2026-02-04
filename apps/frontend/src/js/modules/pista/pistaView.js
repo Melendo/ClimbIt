@@ -1,5 +1,3 @@
-import { showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
-
 // Escala de grados (falta traerla con peticion al backend)
 const GRADOS_FRANCESES = [
     '3',
@@ -11,7 +9,7 @@ const GRADOS_FRANCESES = [
     '9a', '9a+', '9b', '9b+', '9c', '9c+',
 ];
 
-// Vista para la creación y visualización de pistas
+// Vista para la creación de pistas
 export function renderCrearPista(container, callbacks) {
     container.innerHTML = `
   <div class="card shadow-sm">
@@ -22,7 +20,7 @@ export function renderCrearPista(container, callbacks) {
       <span class="fw-medium">Nueva Pista</span>
     </div>
     <div class="card-body">
-      <form id="form-crear-pista" action="/pistas/create" method="POST" novalidate>
+      <form id="form-crear-pista" novalidate>
         <div class="mb-3">
           <label for="idRocodromo" class="form-label">ID Rocódromo</label>
           <input
@@ -68,142 +66,53 @@ export function renderCrearPista(container, callbacks) {
   </div>`;
 
     // Referencias a elementos del formulario
-    const dificultadSelect = document.getElementById('dificultad');
-    const form = document.getElementById('form-crear-pista');
-    const idRocodromoInput = document.getElementById('idRocodromo');
-    const idZonaInput = document.getElementById('idZona');
-    const nombreInput = document.getElementById('nombre');
-    const alertBox = document.getElementById('form-alert');
+    const form = container.querySelector('#form-crear-pista');
+    const idRocodromoInput = container.querySelector('#idRocodromo');
+    const idZonaInput = container.querySelector('#idZona');
+    const nombreInput = container.querySelector('#nombre');
+    const dificultadSelect = container.querySelector('#dificultad');
+    const alertBox = container.querySelector('#form-alert');
 
+    // Poblar select de dificultades
     dificultadSelect.innerHTML = GRADOS_FRANCESES
         .map((grado) => `<option value="${grado}">${grado}</option>`)
         .join('');
 
-    // Validación de campos del formulario
-    function validateFields(values) {
-        const errors = {};
-        const idRocoNum = Number(values.idRocodromo);
-        if (!Number.isInteger(idRocoNum) || idRocoNum < 1) {
-            errors.idRocodromo = 'idRocodromo debe ser un entero positivo';
-        }
-        const idZonaNum = Number(values.idZona);
-        if (!Number.isInteger(idZonaNum) || idZonaNum < 1) {
-            errors.idZona = 'idZona debe ser un entero positivo';
-        }
-        const nombre = (values.nombre || '').trim();
-        if (!nombre) {
-            errors.nombre = 'nombre es requerido';
-        }
-        const dificultad = (values.dificultad || '').trim();
-        if (!GRADOS_FRANCESES.includes(dificultad)) {
-            errors.dificultad = `dificultad debe ser uno de: ${GRADOS_FRANCESES.join(', ')}`;
-        }
-        return errors;
-    }
-
-    
-    // Recorrremos los campos para limpiar errores al modificar su valor
+    // Limpiar errores al modificar campos
     [idRocodromoInput, idZonaInput, nombreInput, dificultadSelect].forEach((el) => {
-        el.addEventListener('input', () => {
-            clearFieldError(el);
-            clearFormAlert(alertBox);
-        });
-        el.addEventListener('change', () => {
-            clearFieldError(el);
-            clearFormAlert(alertBox);
-        });
+        el.addEventListener('input', () => callbacks.onFieldChange(el, alertBox));
+        el.addEventListener('change', () => callbacks.onFieldChange(el, alertBox));
     });
 
-    // Cargar zonas al seleccionar un rocódromo
-    async function cargarZonasParaRocodromo(idRoco) {
-        const id = Number(idRoco);
-        if (!Number.isInteger(id) || id < 1) {
-            setFieldError(idRocodromoInput, 'idRocodromo debe ser un entero positivo');
-            return;
-        }
-        try {
-            idZonaInput.innerHTML = '';
-            idZonaInput.setAttribute('disabled', 'disabled');
+    // Cargar zonas al cambiar el rocódromo
+    idRocodromoInput.addEventListener('blur', () => {
+        callbacks.onRocodromoChange(idRocodromoInput, idZonaInput, alertBox);
+    });
+    idRocodromoInput.addEventListener('change', () => {
+        callbacks.onRocodromoChange(idRocodromoInput, idZonaInput, alertBox);
+    });
 
-            let zonas;
-            try {
-                zonas = await callbacks.getZonas(id);
-            } catch (err) {
-                showFormAlert(alertBox, 'danger', `No se pudieron cargar las zonas: ${err.message}`);
-                return;
-            }
-            if (!Array.isArray(zonas) || zonas.length === 0) {
-                idZonaInput.innerHTML = `<option value="">No hay zonas disponibles</option>`;
-                idZonaInput.setAttribute('disabled', 'disabled');
-                showFormAlert(alertBox, 'warning', 'Este rocódromo no tiene zonas disponibles.');
-                return;
-            }
-
-            idZonaInput.innerHTML = zonas
-                .map((z) => `<option value="${z.id}">Zona ${z.id} - ${z.tipo || 'N/D'}</option>`)
-                .join('');
-            idZonaInput.removeAttribute('disabled');
-        } catch (err) {
-            showFormAlert(alertBox, 'danger', `Error cargando zonas: ${err.message}`);
-        }
-    }
-
-    // Eventos para cargar zonas al cambiar el rocódromo
-    idRocodromoInput.addEventListener('blur', () => cargarZonasParaRocodromo(idRocodromoInput.value));
-    idRocodromoInput.addEventListener('change', () => cargarZonasParaRocodromo(idRocodromoInput.value));
-
-    // Manejo del envío del formulario
-    form.addEventListener('submit', async (e) => {
+    // Envío del formulario
+    form.addEventListener('submit', (e) => {
         e.preventDefault();
-        clearFormAlert(alertBox);
-        [idZonaInput, nombreInput, dificultadSelect].forEach(clearFieldError);
-
         const values = {
             idRocodromo: idRocodromoInput.value,
             idZona: idZonaInput.value,
             nombre: nombreInput.value,
             dificultad: dificultadSelect.value,
         };
-
-        const errors = validateFields(values);
-        if (Object.keys(errors).length > 0) {
-            if (errors.idRocodromo) setFieldError(idRocodromoInput, errors.idRocodromo);
-            if (errors.idZona) setFieldError(idZonaInput, errors.idZona);
-            if (errors.nombre) setFieldError(nombreInput, errors.nombre);
-            if (errors.dificultad) setFieldError(dificultadSelect, errors.dificultad);
-            showFormAlert(alertBox, 'danger', 'Por favor, corrige los campos marcados.');
-            return;
-        }
-
-        try {
-            const pista = await callbacks.createPista({
-                idZona: Number(values.idZona),
-                nombre: values.nombre.trim(),
-                dificultad: values.dificultad,
-            });
-
-            showFormAlert(alertBox, 'success', 'Pista creada correctamente.');
-            window.location.hash = `#infoPista?id=${pista.id}`;
-
-        } catch (err) {
-            if (err.status === 422 && Array.isArray(err.errors)) {
-                err.errors.forEach((e) => {
-                    const field = e.field;
-                    const msg = e.msg || 'Valor inválido';
-                    if (field === 'idZona') setFieldError(idZonaInput, msg);
-                    if (field === 'nombre') setFieldError(nombreInput, msg);
-                    if (field === 'dificultad') setFieldError(dificultadSelect, msg);
-                });
-                showFormAlert(alertBox, 'danger', 'Solicitud inválida. Revisa los campos.');
-                return;
-            }
-            showFormAlert(alertBox, 'danger', `Error al crear pista: ${err.message}`);
-        }
+        callbacks.onSubmit(values, {
+            idRocodromoInput,
+            idZonaInput,
+            nombreInput,
+            dificultadSelect,
+            alertBox
+        });
     });
 }
 
 // Vista para la información de una pista
-export function renderInfoPista(container, pista) {
+export function renderInfoPista(container, pista, callbacks) {
     const { nombre, dificultad } = pista || {};
 
     container.innerHTML = `
@@ -271,17 +180,10 @@ export function renderInfoPista(container, pista) {
     const estadoActual = container.querySelector('#estado-actual');
     const estadoBtns = container.querySelectorAll('.estado-btn');
 
-    const estadoIcons = {
-        'flash': '<span class="material-icons text-warning" style="font-size: 48px;">flash_on</span>',
-        'completado': '<span class="material-icons text-success" style="font-size: 48px;">check</span>',
-        'en-progreso': '<span class="material-icons text-info" style="font-size: 48px;">hexagon</span>',
-        'nada': '<span class="material-icons text-secondary" style="font-size: 48px;">radio_button_unchecked</span>'
-    };
-
     estadoBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const estado = btn.dataset.estado;
-            estadoActual.innerHTML = estadoIcons[estado] || estadoIcons['nada'];
+            callbacks.onEstadoChange(estado, estadoActual);
         });
     });
 }
