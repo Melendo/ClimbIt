@@ -58,6 +58,23 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
     }
   }
 
+  async desuscribirse(escaladorApodo, idRocodromo) {
+    try {
+      const escaladorModel = await this.EscaladorModel.findOne({
+        where: { apodo: escaladorApodo },
+      });
+
+      if (!escaladorModel) {
+        throw new Error(`Escalador con apodo ${escaladorApodo} no encontrado`);
+      }
+
+      await escaladorModel.removeRocodromo(idRocodromo);
+
+    } catch (error) {
+      throw new Error(`Error al desuscribirse del rocódromo: ${error.message}`);
+    }
+  }
+
   async estaSuscrito(escaladorApodo, idRocodromo) {
     try {
       const escaladorModel = await this.EscaladorModel.findOne({
