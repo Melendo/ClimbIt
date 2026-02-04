@@ -25,6 +25,7 @@ import DesuscribirseRocodromo from '../application/escaladores/desuscribirseRoco
 import CrearPista from '../application/pistas/crearPista.js';
 import ObtenerPistaPorId from '../application/pistas/obtenerPistaPorId.js';
 import ObtenerPistasDeZona from '../application/zonas/obtenerPistasZona.js';
+import CambiarEstadoPista from '../application/pistas/cambiarEstadoPista.js';
 
 import ObtenerZonasRocodromo from '../application/rocodromos/obtenerZonasRocodromo.js';
 
@@ -71,7 +72,10 @@ async function inicializarContainer() {
 
   const crearPistaUseCase = new CrearPista(pistaRepository, db.Zona);
   const obtenerPistaPorIdUseCase = new ObtenerPistaPorId(pistaRepository);
-  
+  const cambiarEstadoPistaUseCase = new CambiarEstadoPista(
+    pistaRepository,
+    escaladorRepository
+  );
   const obtenerPistasDeZonaUseCase = new ObtenerPistasDeZona(zonaRepository);
 
   const obtenerZonasRocodromoUseCase = new ObtenerZonasRocodromo(
@@ -89,6 +93,7 @@ async function inicializarContainer() {
   const pistaUseCases = {
     crear: crearPistaUseCase,
     obtenerPistaPorId: obtenerPistaPorIdUseCase,
+    cambiarEstado: cambiarEstadoPistaUseCase,
   };
   const zonaUseCases = {
     obtenerPistasDeZona: obtenerPistasDeZonaUseCase,

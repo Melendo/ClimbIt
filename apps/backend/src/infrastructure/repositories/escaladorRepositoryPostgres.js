@@ -23,7 +23,6 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
   }
 
   async crear(escalador) {
-   
     const data = {
       correo: escalador.correo,
       contrasena: escalador.contrasena,
@@ -40,6 +39,12 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
     });
     return this._toDomain(escaladorModel);
   }
+  async encontrarPorApodo(apodo) {
+    const escaladorModel = await this.EscaladorModel.findOne({
+      where: { apodo },
+    });
+    return this._toDomain(escaladorModel);
+  }
 
   async suscribirse(escaladorApodo, rocodromo) {
     try {
@@ -52,7 +57,6 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
       }
 
       await escaladorModel.addRocodromo(rocodromo.id);
-
     } catch (error) {
       throw new Error(`Error al suscribirse al rocódromo: ${error.message}`);
     }
@@ -69,7 +73,6 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
       }
 
       await escaladorModel.removeRocodromo(idRocodromo);
-
     } catch (error) {
       throw new Error(`Error al desuscribirse del rocódromo: ${error.message}`);
     }
