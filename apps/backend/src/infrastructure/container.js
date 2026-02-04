@@ -21,6 +21,7 @@ import CrearEscalador from '../application/escaladores/crearEscalador.js';
 import AutenticarEscalador from '../application/escaladores/autenticarEscalador.js';
 import SuscribirseRocodromo from '../application/escaladores/suscribirseRocodromo.js';
 import DesuscribirseRocodromo from '../application/escaladores/desuscribirseRocodromo.js';
+import ObtenerRocodromosSuscritos from '../application/escaladores/obtenerRocodromosSuscritos.js';
 
 import CrearPista from '../application/pistas/crearPista.js';
 import ObtenerPistaPorId from '../application/pistas/obtenerPistaPorId.js';
@@ -70,6 +71,9 @@ async function inicializarContainer() {
     escaladorRepository,
     rocodromoRepository
   );
+  const obtenerRocodromosSuscritosUseCase = new ObtenerRocodromosSuscritos(
+    escaladorRepository
+  );
 
   const crearPistaUseCase = new CrearPista(pistaRepository, db.Zona);
   const obtenerPistaPorIdUseCase = new ObtenerPistaPorId(pistaRepository);
@@ -83,7 +87,9 @@ async function inicializarContainer() {
     rocodromoRepository
   );
   const obtenerRocodromosUseCase = new ObtenerRocodromos(rocodromoRepository);
-  const obtenerInformacionRocodromoUseCase = new ObtenerInformacionRocodromo(rocodromoRepository);
+  const obtenerInformacionRocodromoUseCase = new ObtenerInformacionRocodromo(
+    rocodromoRepository
+  );
 
   // 3) Instancia del caso de uso con el repositorio inyectado
   const escaladorUseCases = {
@@ -91,6 +97,7 @@ async function inicializarContainer() {
     autenticar: autenticarEscaladorUseCase,
     suscribirseRocodromo: suscribirseRocodromoUseCase,
     desuscribirseRocodromo: desuscribirseRocodromoUseCase,
+    obtenerRocodromosSuscritos: obtenerRocodromosSuscritosUseCase,
   };
   const pistaUseCases = {
     crear: crearPistaUseCase,

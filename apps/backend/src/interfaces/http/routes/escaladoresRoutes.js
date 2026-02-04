@@ -24,8 +24,8 @@ const crearEscaladorValidators = [
     .trim()
     // .isEmail()
     .normalizeEmail(),
-    // .isLength({ min: 5, max: 255 })
-    // .withMessage('correo debe tener entre 5 y 255 caracteres'),
+  // .isLength({ min: 5, max: 255 })
+  // .withMessage('correo debe tener entre 5 y 255 caracteres'),
   body('contrasena')
     .isString()
     .trim()
@@ -140,5 +140,9 @@ router.post(
     escaladorController.desuscribirse(req, res, next);
   }
 );
+
+router.get('/mis-rocodromos', verifyToken, (req, res, next) => {
+  escaladorController.obtenerRocodromosSuscritos(req, res, next);
+});
 
 export default router;

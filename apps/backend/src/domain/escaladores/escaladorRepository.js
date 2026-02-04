@@ -19,5 +19,9 @@ class EscaladorRepository {
   async estaSuscrito(escaladorApodo, idRocodromo) {
     throw new Error('Método "estaSuscrito" no implementado');
   }
+
+  async obtenerRocodromosSuscritos(escaladorId) {
+    throw new Error('Método "obtenerRocodromosSuscritos" no implementado');
+  }
 }
 export default EscaladorRepository;

@@ -34,6 +34,7 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
   }
 
   async encontrarPorCorreo(correo) {
+    console.log('Buscando escalador por correo:', correo);
     const escaladorModel = await this.EscaladorModel.findOne({
       where: { correo },
     });
@@ -95,6 +96,21 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
       return rocodromos.length > 0;
     } catch (error) {
       throw new Error(`Error al verificar suscripción: ${error.message}`);
+    }
+  }
+
+  async obtenerRocodromosSuscritos(escaladorId) {
+    try {
+      const escaladorModel = await this.EscaladorModel.findByPk(escaladorId);
+
+      if (!escaladorModel) {
+        throw new Error(`Escalador con ID ${escaladorId} no encontrado`);
+      }
+
+      const rocodromos = await escaladorModel.getRocodromos();
+      return rocodromos;
+    } catch (error) {
+      throw new Error(`Error al obtener rocódromos suscritos: ${error.message}`);
     }
   }
 }
