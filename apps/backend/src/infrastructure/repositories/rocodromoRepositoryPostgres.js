@@ -53,6 +53,16 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
     }
   }
 
+  async encontrarPorId(idRocodromo) {
+    try {
+      const rocodromoData = await this.RocodromoModel.findByPk(idRocodromo);
+
+      return this._toDomain(rocodromoData);
+    } catch (error) {
+      throw new Error(`Error al encontrar el rocódromo por ID: ${error.message}`);
+    }
+  }
+
 }
 
 export default RocodromoRepositoryPostgres;

@@ -19,6 +19,7 @@ import tokenService from './security/tokenService.js';
 // Casos de uso (lógica de aplicación)
 import CrearEscalador from '../application/escaladores/crearEscalador.js';
 import AutenticarEscalador from '../application/escaladores/autenticarEscalador.js';
+import SuscribirseRocodromo from '../application/escaladores/suscribirseRocodromo.js';
 import CrearPista from '../application/pistas/crearPista.js';
 import ObtenerPistaPorId from '../application/pistas/obtenerPistaPorId.js';
 import ObtenerPistasDeZona from '../application/zonas/obtenerPistasZona.js';
@@ -55,6 +56,10 @@ async function inicializarContainer() {
     passwordService,
     tokenService
   );
+  const suscribirseRocodromoUseCase = new SuscribirseRocodromo(
+    escaladorRepository,
+    rocodromoRepository
+  );
   const crearPistaUseCase = new CrearPista(pistaRepository, db.Zona);
   const obtenerPistaPorIdUseCase = new ObtenerPistaPorId(pistaRepository);
   const obtenerPistasDeZonaUseCase = new ObtenerPistasDeZona(zonaRepository);
@@ -66,6 +71,7 @@ async function inicializarContainer() {
   const escaladorUseCases = {
     crear: crearEscaladorUseCase,
     autenticar: autenticarEscaladorUseCase,
+    suscribirseRocodromo: suscribirseRocodromoUseCase,
   };
   const pistaUseCases = {
     crear: crearPistaUseCase,

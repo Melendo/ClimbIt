@@ -1,6 +1,7 @@
 import express from 'express';
 import { body } from 'express-validator';
 import validate from '../middlewares/validate.js';
+import verifyToken from '../middlewares/verifyToken.js';
 import containerPromise from '../../../infrastructure/container.js';
 
 const router = express.Router();
@@ -28,5 +29,9 @@ router.post('/auth',
     escaladorController.autenticar(req, res, next);
   }
 );
+
+router.post("/suscribirse", verifyToken, (req, res, next) => {
+  escaladorController.suscribirse(req, res, next);
+});
 
 export default router;

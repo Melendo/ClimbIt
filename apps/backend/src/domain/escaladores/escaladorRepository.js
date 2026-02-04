@@ -7,5 +7,13 @@ class EscaladorRepository {
   async encontrarPorCorreo(correo) {
     throw new Error('Método "encontrarPorCorreo" no implementado');
   }
+
+  async suscribirse(escaladorApodo, rocodromo) {
+    throw new Error('Método "suscribirse" no implementado');
+  }
+
+  async estaSuscrito(escaladorApodo, idRocodromo) {
+    throw new Error('Método "estaSuscrito" no implementado');
+  }
 }
 export default EscaladorRepository;
