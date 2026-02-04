@@ -260,20 +260,22 @@ export function renderRegistroPassword(container, email, callbacks) {
           </div>
           
           <form id="registro-password-form">
-            <div class="mb-3 position-relative">
-              <input type="password" class="form-control form-control-lg" id="password" 
-                     placeholder="Contraseña" required autofocus>
-              <span class="material-icons position-absolute top-50 end-0 translate-middle-y me-3 text-muted" 
-                    style="cursor: pointer;" id="toggle-password">visibility</span>
-              <div class="invalid-feedback"></div>
+            <div class="mb-3">
+              <div class="position-relative">
+                <input type="password" class="form-control form-control-lg" id="password" 
+                       placeholder="Contraseña" required autofocus style="padding-right: 48px;">
+                <span class="material-icons position-absolute top-50 end-0 translate-middle-y me-3 text-muted" 
+                      style="cursor: pointer;" id="toggle-password">visibility</span>
+              </div>
             </div>
             
-            <div class="mb-3 position-relative">
-              <input type="password" class="form-control form-control-lg" id="password-confirm" 
-                     placeholder="Repetir contraseña" required>
-              <span class="material-icons position-absolute top-50 end-0 translate-middle-y me-3 text-muted" 
-                    style="cursor: pointer;" id="toggle-password-confirm">visibility</span>
-              <div class="invalid-feedback"></div>
+            <div class="mb-3">
+              <div class="position-relative">
+                <input type="password" class="form-control form-control-lg" id="password-confirm" 
+                       placeholder="Repetir contraseña" required style="padding-right: 48px;">
+                <span class="material-icons position-absolute top-50 end-0 translate-middle-y me-3 text-muted" 
+                      style="cursor: pointer;" id="toggle-password-confirm">visibility</span>
+              </div>
             </div>
             
             <div class="alert d-none" role="alert" id="alert-box"></div>
@@ -325,19 +327,33 @@ export function renderRegistroPassword(container, email, callbacks) {
         const password = passwordInput.value;
         const passwordConfirm = passwordConfirmInput.value;
 
+        // Validar longitud mínima de contraseña
+        if (password.length < 4) {
+            alertBox.className = 'alert alert-danger';
+            alertBox.textContent = 'La contraseña debe tener al menos 4 caracteres';
+            return;
+        }
+
         // Validar que las contraseñas coincidan
         if (password !== passwordConfirm) {
             alertBox.className = 'alert alert-danger';
             alertBox.textContent = 'Las contraseñas no coinciden';
-            passwordConfirmInput.classList.add('is-invalid');
             return;
         }
 
         // Limpiar errores
         alertBox.className = 'alert d-none';
-        passwordConfirmInput.classList.remove('is-invalid');
 
         callbacks.onPasswordSubmit(password);
+    });
+
+    // Limpiar errores al escribir
+    passwordInput.addEventListener('input', () => {
+        alertBox.className = 'alert d-none';
+    });
+
+    passwordConfirmInput.addEventListener('input', () => {
+        alertBox.className = 'alert d-none';
     });
 }
 
@@ -361,7 +377,8 @@ export function renderRegistroApodo(container, email, callbacks) {
           <form id="registro-apodo-form">
             <div class="mb-3">
               <input type="text" class="form-control form-control-lg" id="apodo" 
-                     placeholder="Tu apodo" required autofocus>
+                     placeholder="Tu apodo" required autofocus maxlength="20">
+              <small class="text-muted">Máximo 20 caracteres</small>
               <div class="invalid-feedback"></div>
             </div>
             
@@ -400,6 +417,21 @@ export function renderRegistroApodo(container, email, callbacks) {
         if (!apodo) {
             alertBox.className = 'alert alert-danger';
             alertBox.textContent = 'El apodo es obligatorio';
+            apodoInput.classList.add('is-invalid');
+            return;
+        }
+
+        if (apodo.length > 15) {
+            alertBox.className = 'alert alert-danger';
+            alertBox.textContent = 'El apodo no puede superar los 15 caracteres';
+            apodoInput.classList.add('is-invalid');
+            return;
+        }
+
+        if (apodo.length < 2) {
+            alertBox.className = 'alert alert-danger';
+            alertBox.textContent = 'El apodo debe tener al menos 2 caracteres';
+            apodoInput.classList.add('is-invalid');
             return;
         }
 
@@ -424,5 +456,11 @@ export function renderRegistroApodo(container, email, callbacks) {
                 <span class="material-icons align-middle ms-1">check</span>
             `;
         }
+    });
+
+    // Limpiar error al escribir
+    apodoInput.addEventListener('input', () => {
+        apodoInput.classList.remove('is-invalid');
+        alertBox.className = 'alert d-none';
     });
 }
