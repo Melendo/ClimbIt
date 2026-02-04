@@ -1,5 +1,26 @@
 import { isValidEmail } from '../../core/ui.js';
 
+// Helper para configurar validación de email en formularios
+function setupEmailFormValidation(form, emailInput, alertBox, onValidEmail) {
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = emailInput.value.trim();
+        
+        if (!isValidEmail(email)) {
+            alertBox.className = 'alert alert-danger';
+            alertBox.textContent = 'El email debe tener el formato correcto (ej: usuario@dominio.com)';
+            return;
+        }
+        
+        alertBox.className = 'alert d-none';
+        onValidEmail(email);
+    });
+
+    emailInput.addEventListener('input', () => {
+        alertBox.className = 'alert d-none';
+    });
+}
+
 // Vista paso 1: Pedir email
 export function renderLoginEmail(container, callbacks) {
     container.innerHTML = `
@@ -19,7 +40,7 @@ export function renderLoginEmail(container, callbacks) {
           
           <form id="login-email-form">
             <div class="mb-3">
-              <input type="email" class="form-control form-control-lg" id="email" 
+              <input class="form-control form-control-lg" id="email" 
                      placeholder="tu@email.com" required autofocus>
               <div class="invalid-feedback"></div>
             </div>
@@ -38,13 +59,10 @@ export function renderLoginEmail(container, callbacks) {
     `;
 
     const form = container.querySelector('#login-email-form');
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const email = container.querySelector('#email').value.trim();
-        if (email) {
-            callbacks.onEmailSubmit(email);
-        }
-    });
+    const emailInput = container.querySelector('#email');
+    const alertBox = container.querySelector('#alert-box');
+
+    setupEmailFormValidation(form, emailInput, alertBox, callbacks.onEmailSubmit);
 }
 
 // Vista paso 2: Pedir contraseña
@@ -120,10 +138,12 @@ export function renderLoginPassword(container, email, callbacks) {
 
         try {
             await callbacks.onPasswordSubmit(password);
-        } catch (error) {
+        } 
+        // eslint-disable-next-line no-unused-vars
+        catch (error) {
             // Mostrar error
             alertBox.className = 'alert alert-danger';
-            alertBox.textContent = error.message || 'Error al iniciar sesión';
+            alertBox.textContent = 'El usuario y la contraseña no coinciden';
             
             // Rehabilitar botón
             submitBtn.disabled = false;
@@ -189,7 +209,7 @@ export function renderRegistroEmail(container, callbacks) {
           
           <form id="registro-email-form">
             <div class="mb-3">
-              <input type="email" class="form-control form-control-lg" id="email" 
+              <input class="form-control form-control-lg" id="email" 
                      placeholder="tu@email.com" required autofocus>
             </div>
             
@@ -216,30 +236,7 @@ export function renderRegistroEmail(container, callbacks) {
     const emailInput = container.querySelector('#email');
     const alertBox = container.querySelector('#alert-box');
 
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const email = emailInput.value.trim();
-        
-        // Validar formato de email
-        if (!isValidEmail(email)) {
-            emailInput.classList.add('is-invalid');
-            alertBox.className = 'alert alert-danger';
-            alertBox.textContent = 'El email debe tener el formato correcto (ej: usuario@dominio.com)';
-            return;
-        }
-        
-        // Limpiar errores
-        emailInput.classList.remove('is-invalid');
-        alertBox.className = 'alert d-none';
-        
-        callbacks.onEmailSubmit(email);
-    });
-
-    // Limpiar error al escribir
-    emailInput.addEventListener('input', () => {
-        emailInput.classList.remove('is-invalid');
-        alertBox.className = 'alert d-none';
-    });
+    setupEmailFormValidation(form, emailInput, alertBox, callbacks.onEmailSubmit);
 }
 
 // Vista registro paso 2: Pedir contraseña
