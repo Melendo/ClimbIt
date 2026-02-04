@@ -97,7 +97,7 @@ export function renderMapaRocodromo(container, data) {
     }
 
     container.innerHTML = `
-  <div class="card shadow-sm d-flex flex-column">
+  <div class="card shadow-sm d-flex flex-column" style="min-height: 100vh;">
     
     <!-- Cabecera: Icono + Nombre del rocódromo -->
     <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
