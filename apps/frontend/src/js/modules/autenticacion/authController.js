@@ -106,7 +106,7 @@ function registroApodoCmd(container) {
         },
         onApodoSubmit: async (apodo) => {
             // Enviar petición de registro
-            const res = await fetchClient('/escaladores/create', {
+            const res = await fetchClient('escaladores/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

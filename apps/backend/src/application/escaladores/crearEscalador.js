@@ -22,7 +22,7 @@ class CrearEscalador {
 
       const token = this.tokenService.crear({ correo: escaladorCreado.correo, apodo: escaladorCreado.apodo });
 
-      return token;
+      return { token };
     } catch (error) {
       throw new Error(`Error al crear el escalador: ${error.message}`);
     }
