@@ -37,9 +37,7 @@ class EscaladorController {
   async suscribirse(req, res, next) {
     try {
       const escaladorApodo = req.user.apodo; // Asumiendo que el middleware verifyToken añade escaladorId al req
-      console.log(`Escalador autenticado: ${escaladorApodo}`);
       const { idRocodromo } = req.body;
-      console.log(`Datos del rocódromo recibidos: ${JSON.stringify(idRocodromo)}`);
       const resultado = await this.useCases.suscribirseRocodromo.execute({
         escaladorApodo,
         idRocodromo,

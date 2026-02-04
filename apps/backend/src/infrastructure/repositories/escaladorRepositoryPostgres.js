@@ -57,6 +57,26 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
       throw new Error(`Error al suscribirse al rocódromo: ${error.message}`);
     }
   }
+
+  async estaSuscrito(escaladorApodo, idRocodromo) {
+    try {
+      const escaladorModel = await this.EscaladorModel.findOne({
+        where: { apodo: escaladorApodo },
+      });
+
+      if (!escaladorModel) {
+        throw new Error(`Escalador con apodo ${escaladorApodo} no encontrado`);
+      }
+
+      const rocodromos = await escaladorModel.getRocodromos({
+        where: { id: idRocodromo },
+      });
+
+      return rocodromos.length > 0;
+    } catch (error) {
+      throw new Error(`Error al verificar suscripción: ${error.message}`);
+    }
+  }
 }
 
 export default EscaladorRepositoryPostgres;
