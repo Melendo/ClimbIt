@@ -35,6 +35,24 @@ class PistaController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  async cambiarEstado(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { estado } = req.body;
+      const escaladorApodo = req.user.apodo;
+
+      const resultado = await this.useCases.cambiarEstado.execute({
+        idPista: id,
+        nuevoEstado: estado,
+        escaladorApodo,
+      });
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 export default PistaController;

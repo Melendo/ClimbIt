@@ -50,4 +50,11 @@ router.get('/:id', obtenerPistaPorIdValidators, validate, (req, res, next) => {
   pistaController.obtenerPistaPorId(req, res, next);
 });
 
+router.post(
+  '/cambiar-estado/:id',
+  verifyTokenMiddleware,(req, res, next) => {
+    pistaController.cambiarEstado(req, res, next);
+  }
+);
+
 export default router;

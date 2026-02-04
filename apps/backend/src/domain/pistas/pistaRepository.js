@@ -7,6 +7,10 @@ class PistaRepository {
   async obtenerPorId(id) {
     throw new Error('Método "obtenerPorId" no implementado');
   }
+
+  async cambiarEstado(id, nuevoEstado) {
+    throw new Error('Método "cambiarEstado" no implementado');
+  }
 }
 
 export default PistaRepository;

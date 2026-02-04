@@ -75,4 +75,56 @@ describe('Unit: PistaController', () => {
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.body).toEqual({ error: 'Pista con ID 999 no encontrada' });
   });
+
+  describe('cambiarEstado', () => {
+    it('responde 200 con mensaje de éxito cuando el cambio de estado es exitoso', async () => {
+      const useCases = {
+        cambiarEstado: { 
+          execute: jest.fn().mockResolvedValue({ 
+            mensaje: 'Estado de la pista con ID 1 cambiado a completado exitosamente.' 
+          }) 
+        }
+      };
+      const controller = new PistaController(useCases);
+      const req = { 
+        params: { id: '1' },
+        body: { estado: 'completado' },
+        user: { apodo: 'TestClimber' }
+      };
+      const res = createResMock();
+
+      await controller.cambiarEstado(req, res, () => {});
+
+      expect(useCases.cambiarEstado.execute).toHaveBeenCalledWith({ 
+        idPista: '1', 
+        nuevoEstado: 'completado',
+        escaladorApodo: 'TestClimber'
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.body).toEqual({ 
+        mensaje: 'Estado de la pista con ID 1 cambiado a completado exitosamente.' 
+      });
+    });
+
+    it('responde 500 si el caso de uso lanza un error', async () => {
+      const errorMessage = 'Error al cambiar el estado de la pista: Pista con ID 999 no encontrada';
+      const useCases = {
+        cambiarEstado: { 
+          execute: jest.fn().mockRejectedValue(new Error(errorMessage)) 
+        }
+      };
+      const controller = new PistaController(useCases);
+      const req = { 
+        params: { id: '999' },
+        body: { estado: 'completado' },
+        user: { apodo: 'TestClimber' }
+      };
+      const res = createResMock();
+
+      await controller.cambiarEstado(req, res, () => {});
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.body).toEqual({ error: errorMessage });
+    });
+  });
 });

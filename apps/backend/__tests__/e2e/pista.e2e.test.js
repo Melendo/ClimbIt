@@ -172,4 +172,111 @@ describe('E2E: Pistas', () => {
       );
     });
   });
+
+  describe('E2E: Cambiar estado de pista', () => {
+    let pistaTest;
+    let escaladorTest;
+    let token;
+
+    beforeAll(async () => {
+      // Crear escalador de prueba
+      escaladorTest = await db.Escalador.create({
+        correo: 'cambiarestado@test.com',
+        contrasena: 'hashedPassword123',
+        apodo: 'CambiaEstadoTester',
+      });
+
+      // Crear pista de prueba
+      pistaTest = await db.Pista.create({
+        idZona: zona.id,
+        nombre: 'Pista Cambiar Estado',
+        dificultad: '6b',
+      });
+
+      // Generar token de autenticación
+      token = tokenService.crear({ 
+        correo: escaladorTest.correo, 
+        apodo: escaladorTest.apodo 
+      });
+    });
+
+    afterAll(async () => {
+      // Limpiar asociaciones y registros creados
+      if (escaladorTest && pistaTest) {
+        try {
+          await escaladorTest.removePista(pistaTest.id);
+        } catch (error) {
+          // Ignorar si ya fue eliminado
+          error
+        }
+      }
+      if (pistaTest) await pistaTest.destroy();
+      if (escaladorTest) await escaladorTest.destroy();
+    });
+
+    it('debería cambiar el estado de una pista exitosamente', async () => {
+      const response = await request(app)
+        .post(`/pistas/cambiar-estado/${pistaTest.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ estado: 'completado' })
+        .expect(200);
+
+      expect(response.body).toHaveProperty('mensaje');
+      expect(response.body.mensaje).toContain('Estado de la pista');
+      expect(response.body.mensaje).toContain('completado');
+
+      // Verificar que el estado se guardó en la base de datos
+      const pistaActualizada = await db.Pista.findByPk(pistaTest.id);
+      const escaladores = await pistaActualizada.getEscaladores({ 
+        where: { id: escaladorTest.id } 
+      });
+      
+      expect(escaladores).toHaveLength(1);
+      expect(escaladores[0].EscalaPista.estado).toBe('completado');
+    });
+
+    it('debería actualizar el estado si ya existe una relación', async () => {
+      // El estado ya fue creado en el test anterior con 'completado'
+      const response = await request(app)
+        .post(`/pistas/cambiar-estado/${pistaTest.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ estado: 'intentado' })
+        .expect(200);
+
+      expect(response.body).toHaveProperty('mensaje');
+      expect(response.body.mensaje).toContain('intentado');
+
+      // Verificar que el estado se actualizó
+      const pistaActualizada = await db.Pista.findByPk(pistaTest.id);
+      const escaladores = await pistaActualizada.getEscaladores({ 
+        where: { id: escaladorTest.id } 
+      });
+      
+      expect(escaladores).toHaveLength(1);
+      expect(escaladores[0].EscalaPista.estado).toBe('intentado');
+    });
+
+    it('debería retornar 401 si no se proporciona token de autenticación', async () => {
+      const response = await request(app)
+        .post(`/pistas/cambiar-estado/${pistaTest.id}`)
+        .send({ estado: 'completado' })
+        .expect(401);
+
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toContain('Acceso denegado');
+    });
+
+    it('debería retornar 500 si la pista no existe', async () => {
+      const fakeIdPista = 999999;
+      
+      const response = await request(app)
+        .post(`/pistas/cambiar-estado/${fakeIdPista}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ estado: 'completado' })
+        .expect(500);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.error).toContain('no encontrada');
+    });
+  });
 });
