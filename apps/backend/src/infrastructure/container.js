@@ -24,12 +24,13 @@ import DesuscribirseRocodromo from '../application/escaladores/desuscribirseRoco
 
 import CrearPista from '../application/pistas/crearPista.js';
 import ObtenerPistaPorId from '../application/pistas/obtenerPistaPorId.js';
-import ObtenerPistasDeZona from '../application/zonas/obtenerPistasZona.js';
 import CambiarEstadoPista from '../application/pistas/cambiarEstadoPista.js';
 
-import ObtenerZonasRocodromo from '../application/rocodromos/obtenerZonasRocodromo.js';
+import ObtenerPistasDeZona from '../application/zonas/obtenerPistasZona.js';
 
+import ObtenerZonasRocodromo from '../application/rocodromos/obtenerZonasRocodromo.js';
 import ObtenerRocodromos from '../application/rocodromos/obtenerRocodromos.js';
+import ObtenerInformacionRocodromo from '../application/rocodromos/obtenerInformacionRocodromo.js';
 
 // Controladores (interfaces HTTP)
 import EscaladorController from '../interfaces/http/controllers/escaladorController.js';
@@ -82,6 +83,7 @@ async function inicializarContainer() {
     rocodromoRepository
   );
   const obtenerRocodromosUseCase = new ObtenerRocodromos(rocodromoRepository);
+  const obtenerInformacionRocodromoUseCase = new ObtenerInformacionRocodromo(rocodromoRepository);
 
   // 3) Instancia del caso de uso con el repositorio inyectado
   const escaladorUseCases = {
@@ -101,6 +103,7 @@ async function inicializarContainer() {
   const rocodromoUseCases = {
     obtenerZonasRocodromo: obtenerZonasRocodromoUseCase,
     obtenerRocodromos: obtenerRocodromosUseCase,
+    obtenerInformacion: obtenerInformacionRocodromoUseCase,
   };
 
   // 4) Instancia del controlador con los casos de uso inyectados
