@@ -8,7 +8,7 @@ const db = await dbPromise;
 describe('E2E: Escalador', () => {
   const escaladorTest = {
     correo: 'e2e@test.com',
-    contrasena: '123456',
+    contrasena: 'Password123',
     apodo: 'E2ETester',
   };
 
@@ -76,13 +76,13 @@ describe('E2E: Escalador', () => {
     it('debería manejar errores al crear un escalador con datos inválidos', async () => {
       const response = await request(app)
         .post('/escaladores/create')
-        .send({ correo: '', contrasena: '123', apodo: 'Test' })
+        .send({ correo: 'test@test.com', contrasena: '123', apodo: '!!!invalid!!!' })
         .expect(422);
 
       expect(response.body).toHaveProperty('status', 'invalid_request');
       expect(Array.isArray(response.body.errors)).toBe(true);
       const fields = response.body.errors.map((e) => e.field);
-      expect(fields).toContain('correo');
+      expect(fields).toContain('apodo');
     });
   });
 
@@ -135,9 +135,9 @@ describe('E2E: Escalador', () => {
         .post('/escaladores/suscribirse')
         .set('Authorization', `Bearer ${tokenSuscripcion}`)
         .send({ idRocodromo: 'invalid' })
-        .expect(500);
+        .expect(422);
 
-      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('status', 'invalid_request');
     });
 
     it('debería retornar 500 si el escalador ya está suscrito al rocódromo', async () => {
@@ -213,9 +213,9 @@ describe('E2E: Escalador', () => {
         .post('/escaladores/desuscribirse')
         .set('Authorization', `Bearer ${tokenSuscripcion}`)
         .send({ idRocodromo: 'invalid' })
-        .expect(500);
+        .expect(422);
 
-      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('status', 'invalid_request');
     });
   });
 });

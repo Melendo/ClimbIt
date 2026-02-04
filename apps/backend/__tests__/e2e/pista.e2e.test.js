@@ -133,6 +133,7 @@ describe('E2E: Pistas', () => {
   describe('E2E: Obtener pista', () => {
     let pistaTest;
     let pistaCreadaId;
+    let token;
 
     beforeAll(async () => {
       pistaTest = {
@@ -142,6 +143,7 @@ describe('E2E: Pistas', () => {
       };
       const pistaCreada = await db.Pista.create(pistaTest);
       pistaCreadaId = pistaCreada.id;
+      token = tokenService.crear({ id: 1, correo: 'test@e2e.com', role: 'admin' });
     });
 
     afterAll(async () => {
@@ -153,6 +155,7 @@ describe('E2E: Pistas', () => {
     it('debería obtener una pista por ID', async () => {
       const response = await request(app)
         .get(`/pistas/${pistaCreadaId}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
       expect(response.body).toMatchObject(pistaTest);
@@ -164,6 +167,7 @@ describe('E2E: Pistas', () => {
 
       const response = await request(app)
         .get(`/pistas/${idInexistente}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(404);
 
       expect(response.body).toHaveProperty(
@@ -218,12 +222,12 @@ describe('E2E: Pistas', () => {
       const response = await request(app)
         .post(`/pistas/cambiar-estado/${pistaTest.id}`)
         .set('Authorization', `Bearer ${token}`)
-        .send({ estado: 'completado' })
+        .send({ estado: 'Completado' })
         .expect(200);
 
       expect(response.body).toHaveProperty('mensaje');
       expect(response.body.mensaje).toContain('Estado de la pista');
-      expect(response.body.mensaje).toContain('completado');
+      expect(response.body.mensaje).toContain('Completado');
 
       // Verificar que el estado se guardó en la base de datos
       const pistaActualizada = await db.Pista.findByPk(pistaTest.id);
@@ -232,19 +236,19 @@ describe('E2E: Pistas', () => {
       });
       
       expect(escaladores).toHaveLength(1);
-      expect(escaladores[0].EscalaPista.estado).toBe('completado');
+      expect(escaladores[0].EscalaPista.estado).toBe('Completado');
     });
 
     it('debería actualizar el estado si ya existe una relación', async () => {
-      // El estado ya fue creado en el test anterior con 'completado'
+      // El estado ya fue creado en el test anterior con 'Completado'
       const response = await request(app)
         .post(`/pistas/cambiar-estado/${pistaTest.id}`)
         .set('Authorization', `Bearer ${token}`)
-        .send({ estado: 'intentado' })
+        .send({ estado: 'Flash' })
         .expect(200);
 
       expect(response.body).toHaveProperty('mensaje');
-      expect(response.body.mensaje).toContain('intentado');
+      expect(response.body.mensaje).toContain('Flash');
 
       // Verificar que el estado se actualizó
       const pistaActualizada = await db.Pista.findByPk(pistaTest.id);
@@ -253,7 +257,7 @@ describe('E2E: Pistas', () => {
       });
       
       expect(escaladores).toHaveLength(1);
-      expect(escaladores[0].EscalaPista.estado).toBe('intentado');
+      expect(escaladores[0].EscalaPista.estado).toBe('Flash');
     });
 
     it('debería retornar 401 si no se proporciona token de autenticación', async () => {
@@ -272,7 +276,7 @@ describe('E2E: Pistas', () => {
       const response = await request(app)
         .post(`/pistas/cambiar-estado/${fakeIdPista}`)
         .set('Authorization', `Bearer ${token}`)
-        .send({ estado: 'completado' })
+        .send({ estado: 'Completado' })
         .expect(500);
 
       expect(response.body).toHaveProperty('error');

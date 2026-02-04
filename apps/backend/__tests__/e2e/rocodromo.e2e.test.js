@@ -49,6 +49,7 @@ describe('E2E: Rocodromos', () => {
     it('debería obtener la lista de zonas para un rocódromo existente con zonas', async () => {
       const response = await request(app)
         .get(`/rocodromos/zonas/${rocodromoConZonas.id}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
       expect(response.body).toBeInstanceOf(Array);
@@ -62,6 +63,7 @@ describe('E2E: Rocodromos', () => {
     it('debería obtener una lista vacía para un rocódromo existente sin zonas', async () => {
       const response = await request(app)
         .get(`/rocodromos/zonas/${rocodromoSinZonas.id}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
       expect(response.body).toBeInstanceOf(Array);
@@ -72,6 +74,7 @@ describe('E2E: Rocodromos', () => {
       const fakeId = 9999999;
       const response = await request(app)
         .get(`/rocodromos/zonas/${fakeId}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(404);
 
       expect(response.body).toHaveProperty('error');
@@ -81,6 +84,7 @@ describe('E2E: Rocodromos', () => {
     it('debería retornar 422 si el id no es entero positivo', async () => {
       const resNonInt = await request(app)
         .get(`/rocodromos/zonas/abc`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(422);
       expect(resNonInt.body).toHaveProperty('status', 'invalid_request');
       expect(Array.isArray(resNonInt.body.errors)).toBe(true);
@@ -89,6 +93,7 @@ describe('E2E: Rocodromos', () => {
 
       const resZero = await request(app)
         .get(`/rocodromos/zonas/0`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(422);
       expect(resZero.body).toHaveProperty('status', 'invalid_request');
       const fieldsZero = resZero.body.errors.map((e) => e.field);
