@@ -39,13 +39,12 @@ class PistaRepositoryPostgres extends pistaRepository {
   }
 
   async cambiarEstado(idPista, idEscalador, nuevoEstado) {
-    console.log(idPista, " + ", idEscalador, " + ", nuevoEstado)
     const pistaModel = await this.PistaModel.findByPk(idPista);
     if (!pistaModel) {
       throw new Error(`Pista con ID ${idPista} no encontrada`);
     }
 
-    pistaModel.addEscaladores(idEscalador, { through: { estado: nuevoEstado } });
+    await pistaModel.addEscaladores(idEscalador, { through: { estado: nuevoEstado } });
   }
 }
 

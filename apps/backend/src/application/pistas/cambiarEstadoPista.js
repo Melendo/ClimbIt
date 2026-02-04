@@ -5,7 +5,6 @@ class CambiarEstadoPista {
   }
     async execute({ idPista, nuevoEstado, escaladorApodo }) { 
         try {
-            console.log(idPista)
             const pista = await this.pistaRepository.obtenerPorId(idPista);
             if (!pista) {
                 throw new Error(`Pista con ID ${idPista} no encontrada`);

@@ -5,7 +5,6 @@ class SuscribirseRocodromo {
     }
     async execute({ escaladorApodo, idRocodromo }) {
         try {
-            console.log(`Iniciando suscripción del escalador ${escaladorApodo} al rocódromo ID ${idRocodromo}`);
             const rocodromoEncontrado = await this.rocodromoRepository.encontrarPorId(idRocodromo);
             if (!rocodromoEncontrado) {
                 throw new Error(`Rocódromo con ID ${idRocodromo} no encontrado`);

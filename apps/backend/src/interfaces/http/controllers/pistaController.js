@@ -39,7 +39,6 @@ class PistaController {
   async cambiarEstado(req, res, next) {
     try {
       const { id } = req.params;
-      console.log(id)
       const { estado } = req.body;
       const escaladorApodo = req.user.apodo;
 
