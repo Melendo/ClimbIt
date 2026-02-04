@@ -1,5 +1,14 @@
 import { renderHomeView } from './homeView.js';
+import { isAuthenticated } from '../../core/client.js';
 
+// Controlador para la vista de home
 export function homeCmd(container) {
-    container.innerHTML = renderHomeView();
+    const callbacks = {
+        isAuthenticated: () => isAuthenticated(),
+        onAlreadyAuthenticated: () => {
+            window.location.hash = '#listaRocodromos';
+        }
+    };
+
+    renderHomeView(container, callbacks);
 }

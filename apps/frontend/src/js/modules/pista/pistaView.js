@@ -1,5 +1,3 @@
-import { showError, showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
-
 // Escala de grados (falta traerla con peticion al backend)
 const GRADOS_FRANCESES = [
     '3',
@@ -11,7 +9,7 @@ const GRADOS_FRANCESES = [
     '9a', '9a+', '9b', '9b+', '9c', '9c+',
 ];
 
-// Vista para la creación y visualización de pistas
+// Vista para la creación de pistas
 export function renderCrearPista(container, callbacks) {
     container.innerHTML = `
   <div class="card shadow-sm">
@@ -22,7 +20,7 @@ export function renderCrearPista(container, callbacks) {
       <span class="fw-medium">Nueva Pista</span>
     </div>
     <div class="card-body">
-      <form id="form-crear-pista" action="/pistas/create" method="POST" novalidate>
+      <form id="form-crear-pista" novalidate>
         <div class="mb-3">
           <label for="idRocodromo" class="form-label">ID Rocódromo</label>
           <input
@@ -68,235 +66,215 @@ export function renderCrearPista(container, callbacks) {
   </div>`;
 
     // Referencias a elementos del formulario
-    const dificultadSelect = document.getElementById('dificultad');
-    const form = document.getElementById('form-crear-pista');
-    const idRocodromoInput = document.getElementById('idRocodromo');
-    const idZonaInput = document.getElementById('idZona');
-    const nombreInput = document.getElementById('nombre');
-    const alertBox = document.getElementById('form-alert');
+    const form = container.querySelector('#form-crear-pista');
+    const idRocodromoInput = container.querySelector('#idRocodromo');
+    const idZonaInput = container.querySelector('#idZona');
+    const nombreInput = container.querySelector('#nombre');
+    const dificultadSelect = container.querySelector('#dificultad');
+    const alertBox = container.querySelector('#form-alert');
 
+    // Poblar select de dificultades
     dificultadSelect.innerHTML = GRADOS_FRANCESES
         .map((grado) => `<option value="${grado}">${grado}</option>`)
         .join('');
 
-    // Validación de campos del formulario
-    function validateFields(values) {
-        const errors = {};
-        const idRocoNum = Number(values.idRocodromo);
-        if (!Number.isInteger(idRocoNum) || idRocoNum < 1) {
-            errors.idRocodromo = 'idRocodromo debe ser un entero positivo';
-        }
-        const idZonaNum = Number(values.idZona);
-        if (!Number.isInteger(idZonaNum) || idZonaNum < 1) {
-            errors.idZona = 'idZona debe ser un entero positivo';
-        }
-        const nombre = (values.nombre || '').trim();
-        if (!nombre) {
-            errors.nombre = 'nombre es requerido';
-        }
-        const dificultad = (values.dificultad || '').trim();
-        if (!GRADOS_FRANCESES.includes(dificultad)) {
-            errors.dificultad = `dificultad debe ser uno de: ${GRADOS_FRANCESES.join(', ')}`;
-        }
-        return errors;
-    }
-
-    
-    // Recorrremos los campos para limpiar errores al modificar su valor
+    // Limpiar errores al modificar campos
     [idRocodromoInput, idZonaInput, nombreInput, dificultadSelect].forEach((el) => {
-        el.addEventListener('input', () => {
-            clearFieldError(el);
-            clearFormAlert(alertBox);
-        });
-        el.addEventListener('change', () => {
-            clearFieldError(el);
-            clearFormAlert(alertBox);
-        });
+        el.addEventListener('input', () => callbacks.onFieldChange(el, alertBox));
+        el.addEventListener('change', () => callbacks.onFieldChange(el, alertBox));
     });
 
-    // Cargar zonas al seleccionar un rocódromo
-    async function cargarZonasParaRocodromo(idRoco) {
-        const id = Number(idRoco);
-        if (!Number.isInteger(id) || id < 1) {
-            setFieldError(idRocodromoInput, 'idRocodromo debe ser un entero positivo');
-            return;
-        }
-        try {
-            idZonaInput.innerHTML = '';
-            idZonaInput.setAttribute('disabled', 'disabled');
+    // Cargar zonas al cambiar el rocódromo
+    idRocodromoInput.addEventListener('blur', () => {
+        callbacks.onRocodromoChange(idRocodromoInput, idZonaInput, alertBox);
+    });
+    idRocodromoInput.addEventListener('change', () => {
+        callbacks.onRocodromoChange(idRocodromoInput, idZonaInput, alertBox);
+    });
 
-            let zonas;
-            try {
-                zonas = await callbacks.getZonas(id);
-            } catch (err) {
-                showFormAlert(alertBox, 'danger', `No se pudieron cargar las zonas: ${err.message}`);
-                return;
-            }
-            if (!Array.isArray(zonas) || zonas.length === 0) {
-                idZonaInput.innerHTML = `<option value="">No hay zonas disponibles</option>`;
-                idZonaInput.setAttribute('disabled', 'disabled');
-                showFormAlert(alertBox, 'warning', 'Este rocódromo no tiene zonas disponibles.');
-                return;
-            }
-
-            idZonaInput.innerHTML = zonas
-                .map((z) => `<option value="${z.id}">Zona ${z.id} - ${z.tipo || 'N/D'}</option>`)
-                .join('');
-            idZonaInput.removeAttribute('disabled');
-        } catch (err) {
-            showFormAlert(alertBox, 'danger', `Error cargando zonas: ${err.message}`);
-        }
-    }
-
-    // Eventos para cargar zonas al cambiar el rocódromo
-    idRocodromoInput.addEventListener('blur', () => cargarZonasParaRocodromo(idRocodromoInput.value));
-    idRocodromoInput.addEventListener('change', () => cargarZonasParaRocodromo(idRocodromoInput.value));
-
-    // Manejo del envío del formulario
-    form.addEventListener('submit', async (e) => {
+    // Envío del formulario
+    form.addEventListener('submit', (e) => {
         e.preventDefault();
-        clearFormAlert(alertBox);
-        [idZonaInput, nombreInput, dificultadSelect].forEach(clearFieldError);
-
         const values = {
             idRocodromo: idRocodromoInput.value,
             idZona: idZonaInput.value,
             nombre: nombreInput.value,
             dificultad: dificultadSelect.value,
         };
-
-        const errors = validateFields(values);
-        if (Object.keys(errors).length > 0) {
-            if (errors.idRocodromo) setFieldError(idRocodromoInput, errors.idRocodromo);
-            if (errors.idZona) setFieldError(idZonaInput, errors.idZona);
-            if (errors.nombre) setFieldError(nombreInput, errors.nombre);
-            if (errors.dificultad) setFieldError(dificultadSelect, errors.dificultad);
-            showFormAlert(alertBox, 'danger', 'Por favor, corrige los campos marcados.');
-            return;
-        }
-
-        try {
-            const pista = await callbacks.createPista({
-                idZona: Number(values.idZona),
-                nombre: values.nombre.trim(),
-                dificultad: values.dificultad,
-            });
-
-            showFormAlert(alertBox, 'success', 'Pista creada correctamente.');
-            window.location.hash = `#infoPista?id=${pista.id}`;
-
-        } catch (err) {
-            if (err.status === 422 && Array.isArray(err.errors)) {
-                err.errors.forEach((e) => {
-                    const field = e.field;
-                    const msg = e.msg || 'Valor inválido';
-                    if (field === 'idZona') setFieldError(idZonaInput, msg);
-                    if (field === 'nombre') setFieldError(nombreInput, msg);
-                    if (field === 'dificultad') setFieldError(dificultadSelect, msg);
-                });
-                showFormAlert(alertBox, 'danger', 'Solicitud inválida. Revisa los campos.');
-                return;
-            }
-            showFormAlert(alertBox, 'danger', `Error al crear pista: ${err.message}`);
-        }
+        callbacks.onSubmit(values, {
+            idRocodromoInput,
+            idZonaInput,
+            nombreInput,
+            dificultadSelect,
+            alertBox
+        });
     });
 }
 
 // Vista para la información de una pista
-export async function renderInfoPista(container, pista) {
-    try {
-        let data = pista;
-        if (pista && typeof pista.json === 'function') {
-            data = await pista.json().catch(() => {
-                throw new Error('Respuesta no válida: JSON esperado');
-            });
-        }
+export function renderInfoPista(container, pista, callbacks) {
+    const { nombre, dificultad } = pista || {};
 
-        const { id, idZona, nombre, dificultad } = data || {};
-        if (id == null || idZona == null || nombre == null || dificultad == null) {
-            throw new Error('Datos de pista incompletos');
-        }
+    container.innerHTML = `
+<div class="d-flex flex-column" style="min-height: 100vh; background: #f8f9fa;">
+  
+  <!-- Imagen hero con overlay -->
+  <div class="position-relative" style="height: 45vh; min-height: 280px;">
+    <img 
+      src="/assets/placeholder.jpg" 
+      alt="Imagen de la pista ${nombre || ''}" 
+      class="w-100 h-100" 
+      style="object-fit: cover;"
+    />
+    <div class="position-absolute top-0 start-0 end-0 bottom-0" style="background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 30%, transparent 60%, rgba(0,0,0,0.5) 100%);"></div>
+    
+    <!-- Botón volver -->
+    <a href="#" onclick="history.back(); return false;" class="position-absolute top-0 start-0 m-3 text-white d-flex align-items-center justify-content-center rounded-circle" style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); backdrop-filter: blur(4px);">
+      <span class="material-icons">arrow_back</span>
+    </a>
+    
+    <!-- Info sobre la imagen -->
+    <div class="position-absolute bottom-0 start-0 end-0 p-4 text-white">
+      <span class="badge mb-2" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); font-size: 0.9rem; padding: 6px 12px;">${dificultad || '-'}</span>
+      <h1 class="fs-4 fw-semibold mb-0">${nombre || 'Sin nombre'}</h1>
+    </div>
+  </div>
 
-        container.innerHTML = `
-    <div class="card shadow-sm">
-      
-      <!-- Cabecera: Color + Nombre -->
-      <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
-        <a href="#" onclick="history.back(); return false;" class="text-dark">
-          <span class="material-icons align-middle">arrow_back</span>
-        </a>
-        <span class="fw-medium">${nombre}</span>
+  <!-- Contenido principal -->
+  <div class="flex-grow-1 d-flex flex-column">
+    
+    <!-- Estado actual -->
+    <div class="bg-white px-4 py-4 border-bottom">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <p class="text-muted small mb-1 text-uppercase" style="letter-spacing: 0.5px;">Tu progreso</p>
+          <p class="mb-0 fw-medium" id="estado-texto">Sin registrar</p>
+        </div>
+        <div id="estado-actual" class="d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: #e5e7eb;">
+          <span class="material-icons" style="color: #6b7280; font-size: 28px;">remove</span>
+        </div>
       </div>
+    </div>
 
-      <!-- Imagen de la pista -->
-      <div class="card-img-container" style="height: 300px; overflow: hidden;">
-        <img 
-          src="/assets/placeholder.jpg" 
-          alt="Imagen de la pista ${nombre}" 
-          class="w-100 h-100" 
-          style="object-fit: cover;"
-        />
-      </div>
-
-      <!-- Info: Nivel y Estado -->
-      <div class="card-body">
-        <div class="row text-center">
-          <div class="col-6">
-            <p class="text-muted mb-1">Nivel</p>
-            <p class="fs-2 fw-bold text-primary mb-0">${dificultad}</p>
-          </div>
-          <div class="col-6">
-            <p class="text-muted mb-1">Estado</p>
-            <div class="estado-icon fs-1" id="estado-actual">
-              <span class="material-icons text-secondary" style="font-size: 48px;">radio_button_unchecked</span>
+    <!-- Acciones -->
+    <div class="bg-white mt-2 px-4 py-3">
+      <p class="text-muted small mb-3 text-uppercase" style="letter-spacing: 0.5px;">Marcar como</p>
+      <div class="row g-2">
+        
+        <div class="col-6">
+          <button class="btn estado-btn d-flex flex-column align-items-center justify-content-center gap-2 w-100 py-3 rounded-3 border-0 position-relative" data-estado="flash" style="background: #fffbeb;">
+            <span class="material-icons info-btn position-absolute" data-tooltip="Completado al primer intento" style="top: 8px; right: 8px; font-size: 16px; color: #d97706; cursor: pointer;">info_outline</span>
+            <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: #fef3c7;">
+              <span class="material-icons" style="color: #d97706; font-size: 28px;">bolt</span>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Botones de acción -->
-      <div class="card-footer bg-white border-top py-3">
-        <div class="d-flex justify-content-around text-center">
-          <button class="btn btn-link text-warning p-2 estado-btn d-flex flex-column align-items-center" data-estado="flash" title="Flash">
-            <span class="material-icons" style="font-size: 32px;">flash_on</span>
-            <small>Flash</small>
-          </button>
-          <button class="btn btn-link text-success p-2 estado-btn d-flex flex-column align-items-center" data-estado="completado" title="Completado">
-            <span class="material-icons" style="font-size: 32px;">check</span>
-            <small>Completado</small>
-          </button>
-          <button class="btn btn-link text-info p-2 estado-btn d-flex flex-column align-items-center" data-estado="en-progreso" title="En progreso">
-            <span class="material-icons" style="font-size: 32px;">hexagon</span>
-            <small>Proyecto</small>
-          </button>
-          <button class="btn btn-link text-secondary p-2 estado-btn d-flex flex-column align-items-center" data-estado="nada" title="Desmarcar">
-            <span class="material-icons" style="font-size: 32px;">close</span>
-            <small>Desmarcar</small>
+            <span class="fw-medium">Flash</span>
           </button>
         </div>
+
+        <div class="col-6">
+          <button class="btn estado-btn d-flex flex-column align-items-center justify-content-center gap-2 w-100 py-3 rounded-3 border-0 position-relative" data-estado="completado" style="background: #f0fdf4;">
+            <span class="material-icons info-btn position-absolute" data-tooltip="Has superado la vía" style="top: 8px; right: 8px; font-size: 16px; color: #16a34a; cursor: pointer;">info_outline</span>
+            <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: #dcfce7;">
+              <span class="material-icons" style="color: #16a34a; font-size: 28px;">done</span>
+            </div>
+            <span class="fw-medium">Completado</span>
+          </button>
+        </div>
+
+        <div class="col-6">
+          <button class="btn estado-btn d-flex flex-column align-items-center justify-content-center gap-2 w-100 py-3 rounded-3 border-0 position-relative" data-estado="en-progreso" style="background: #eff6ff;">
+            <span class="material-icons info-btn position-absolute" data-tooltip="Trabajando en esta vía" style="top: 8px; right: 8px; font-size: 16px; color: #2563eb; cursor: pointer;">info_outline</span>
+            <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: #dbeafe;">
+              <span class="material-icons" style="color: #2563eb; font-size: 28px;">sync</span>
+            </div>
+            <span class="fw-medium">Proyecto</span>
+          </button>
+        </div>
+
+        <div class="col-6">
+          <button class="btn estado-btn d-flex flex-column align-items-center justify-content-center gap-2 w-100 py-3 rounded-3 border-0 position-relative" data-estado="nada" style="background: #f3f4f6;">
+            <span class="material-icons info-btn position-absolute" data-tooltip="Quitar registro" style="top: 8px; right: 8px; font-size: 16px; color: #6b7280; cursor: pointer;">info_outline</span>
+            <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: #e5e7eb;">
+              <span class="material-icons" style="color: #6b7280; font-size: 28px;">remove</span>
+            </div>
+            <span class="fw-medium">Desmarcar</span>
+          </button>
+        </div>
+
       </div>
+    </div>
 
-    </div>`;
+  </div>
+</div>`;
 
-        // Configurar eventos para los botones de estado
-        const estadoActual = document.getElementById('estado-actual');
-        const estadoBtns = document.querySelectorAll('.estado-btn');
+    // Configurar eventos para los botones de estado
+    const estadoActual = container.querySelector('#estado-actual');
+    const estadoTexto = container.querySelector('#estado-texto');
+    const estadoBtns = container.querySelectorAll('.estado-btn');
 
-        const estadoIcons = {
-            'flash': '<span class="material-icons text-warning" style="font-size: 48px;">flash_on</span>',
-            'completado': '<span class="material-icons text-success" style="font-size: 48px;">check</span>',
-            'en-progreso': '<span class="material-icons text-info" style="font-size: 48px;">hexagon</span>',
-            'nada': '<span class="material-icons text-secondary" style="font-size: 48px;">radio_button_unchecked</span>'
-        };
+    const estadosTexto = {
+        'flash': 'Flash',
+        'completado': 'Completado',
+        'en-progreso': 'Proyecto',
+        'nada': 'Sin registrar'
+    };
 
-        estadoBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const estado = btn.dataset.estado;
-                estadoActual.innerHTML = estadoIcons[estado] || estadoIcons['nada'];
-            });
+    estadoBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // Ignorar si se hizo clic en el icono de info
+            if (e.target.classList.contains('info-btn')) return;
+            
+            const estado = btn.dataset.estado;
+            
+            // Actualizar texto del estado
+            estadoTexto.textContent = estadosTexto[estado] || 'Sin registrar';
+            
+            // Delegar actualización visual del icono al controlador
+            callbacks.onEstadoChange(estado, estadoActual);
         });
+    });
 
-    } catch (err) {
-        showError(err.message || 'Error al mostrar la pista');
-    }
+    // Tooltips para los iconos de información
+    const infoBtns = container.querySelectorAll('.info-btn');
+    let activeTooltip = null;
+
+    infoBtns.forEach(infoBtn => {
+        infoBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            // Cerrar tooltip activo si existe
+            if (activeTooltip) {
+                activeTooltip.remove();
+                activeTooltip = null;
+            }
+
+            // Crear tooltip
+            const tooltip = document.createElement('div');
+            tooltip.className = 'position-absolute px-3 py-2 rounded-3 shadow-sm';
+            tooltip.style.cssText = 'background: #1f2937; color: white; font-size: 0.8rem; z-index: 1000; top: 30px; right: 0; white-space: nowrap; animation: fadeIn 0.15s ease;';
+            tooltip.textContent = infoBtn.dataset.tooltip;
+            
+            infoBtn.parentElement.appendChild(tooltip);
+            activeTooltip = tooltip;
+
+            // Cerrar al hacer clic fuera
+            setTimeout(() => {
+                document.addEventListener('click', function closeTooltip() {
+                    if (activeTooltip) {
+                        activeTooltip.remove();
+                        activeTooltip = null;
+                    }
+                    document.removeEventListener('click', closeTooltip);
+                }, { once: true });
+            }, 10);
+
+            // Auto-cerrar después de 3 segundos
+            setTimeout(() => {
+                if (activeTooltip === tooltip) {
+                    tooltip.remove();
+                    activeTooltip = null;
+                }
+            }, 3000);
+        });
+    });
 }

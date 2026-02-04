@@ -40,6 +40,11 @@ function loginPasswordCmd(container) {
                 })
             });
 
+            // Si la respuesta no es exitosa, mostrar error
+            if (!res.ok) {
+                throw new Error('El correo o la contraseña no son correctos');
+            }
+
             const data = await res.json();
 
             // Guardar el token
@@ -48,7 +53,7 @@ function loginPasswordCmd(container) {
                 // Redirigir al listado de rocódromos
                 window.location.hash = '#listaRocodromos';
             } else {
-                throw new Error('No se recibió el token de autenticación');
+                throw new Error('El correo o la contraseña no son correctos');
             }
         }
     };
