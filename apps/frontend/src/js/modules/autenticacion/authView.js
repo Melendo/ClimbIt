@@ -1,3 +1,5 @@
+import { isValidEmail } from '../../core/ui.js';
+
 // Vista paso 1: Pedir email
 export function renderLoginEmail(container, callbacks) {
     container.innerHTML = `
@@ -133,8 +135,6 @@ export function renderLoginPassword(container, email, callbacks) {
     });
 }
 
-// ===================== VISTAS DE REGISTRO =====================
-
 // Componente de barra de progreso para el registro
 function renderRegistroProgress(currentStep) {
     const steps = [
@@ -191,7 +191,6 @@ export function renderRegistroEmail(container, callbacks) {
             <div class="mb-3">
               <input type="email" class="form-control form-control-lg" id="email" 
                      placeholder="tu@email.com" required autofocus>
-              <div class="invalid-feedback"></div>
             </div>
             
             <div class="alert d-none" role="alert" id="alert-box"></div>
@@ -214,12 +213,32 @@ export function renderRegistroEmail(container, callbacks) {
     `;
 
     const form = container.querySelector('#registro-email-form');
+    const emailInput = container.querySelector('#email');
+    const alertBox = container.querySelector('#alert-box');
+
     form.addEventListener('submit', (e) => {
         e.preventDefault();
-        const email = container.querySelector('#email').value.trim();
-        if (email) {
-            callbacks.onEmailSubmit(email);
+        const email = emailInput.value.trim();
+        
+        // Validar formato de email
+        if (!isValidEmail(email)) {
+            emailInput.classList.add('is-invalid');
+            alertBox.className = 'alert alert-danger';
+            alertBox.textContent = 'El email debe tener el formato correcto (ej: usuario@dominio.com)';
+            return;
         }
+        
+        // Limpiar errores
+        emailInput.classList.remove('is-invalid');
+        alertBox.className = 'alert d-none';
+        
+        callbacks.onEmailSubmit(email);
+    });
+
+    // Limpiar error al escribir
+    emailInput.addEventListener('input', () => {
+        emailInput.classList.remove('is-invalid');
+        alertBox.className = 'alert d-none';
     });
 }
 

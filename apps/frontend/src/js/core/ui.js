@@ -72,3 +72,35 @@ export function clearFieldError(input) {
         feedback.textContent = '';
     }
 }
+/**
+ * Valida que un email tenga formato correcto (texto@texto.texto) y longitud válida
+ * @param {string} email - Email a validar
+ * @param {number} maxLength - Longitud máxima (por defecto 254, estándar RFC 5321)
+ * @returns {boolean} - true si el formato es válido
+ */
+export function isValidEmail(email, maxLength = 254) {
+    if (!email || email.length > maxLength) {
+        return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+/**
+ * Valida que una contraseña cumpla requisitos mínimos
+ * @param {string} password - Contraseña a validar
+ * @param {number} minLength - Longitud mínima (por defecto 6)
+ * @returns {boolean} - true si cumple los requisitos
+ */
+export function isValidPassword(password, minLength = 6) {
+    return password && password.length >= minLength;
+}
+
+/**
+ * Valida que un campo no esté vacío
+ * @param {string} value - Valor a validar
+ * @returns {boolean} - true si no está vacío
+ */
+export function isNotEmpty(value) {
+    return value && value.trim().length > 0;
+}
