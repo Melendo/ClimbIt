@@ -229,8 +229,8 @@ export function renderInfoPista(container, pista, callbacks) {
             // Actualizar texto del estado
             estadoTexto.textContent = estadosTexto[estado] || 'Sin registrar';
             
-            // Delegar actualización visual del icono al controlador
-            callbacks.onEstadoChange(estado, estadoActual);
+            // Delegar actualización visual del icono y llamada API al controlador
+            callbacks.onEstadoChange(estado, estadoActual, estadoTexto);
         });
     });
 

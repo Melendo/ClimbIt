@@ -20,6 +20,14 @@ const ESTADOS_CONFIG = {
     'nada': { icon: 'remove', color: '#6b7280', bg: '#e5e7eb', texto: 'Sin registrar' }
 };
 
+// Mapeo de estados del frontend a estados del backend
+const ESTADOS_BACKEND = {
+    'flash': 'Flash',
+    'completado': 'Completado',
+    'en-progreso': 'Proyecto',
+    'nada': 'S/N'
+};
+
 // Validación de campos del formulario
 function validateFields(values) {
     const errors = {};
@@ -153,11 +161,28 @@ export async function infoPistaCmd(container, id) {
         const pista = await res.json();
 
         const callbacks = {
-            onEstadoChange: (estado, estadoElement) => {
+            onEstadoChange: async (estado, estadoElement, estadoTextoElement) => {
                 const config = ESTADOS_CONFIG[estado] || ESTADOS_CONFIG['nada'];
+                const estadoBackend = ESTADOS_BACKEND[estado] || 'S/N';
+
+                // Actualizar UI inmediatamente para mejor UX
                 estadoElement.style.background = config.bg;
                 estadoElement.innerHTML = `<span class="material-icons" style="color: ${config.color}; font-size: 28px;">${config.icon}</span>`;
-                // TODO: En el futuro, guardar el estado en el backend
+
+                try {
+                    await fetchClient(`/pistas/cambiar-estado/${pista.id}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ estado: estadoBackend })
+                    });
+                } catch (err) {
+                    // Revertir UI en caso de error
+                    const prevConfig = ESTADOS_CONFIG['nada'];
+                    estadoElement.style.background = prevConfig.bg;
+                    estadoElement.innerHTML = `<span class="material-icons" style="color: ${prevConfig.color}; font-size: 28px;">${prevConfig.icon}</span>`;
+                    estadoTextoElement.textContent = 'Sin registrar';
+                    showError(`Error al cambiar estado: ${err.message}`);
+                }
             }
         };
 
