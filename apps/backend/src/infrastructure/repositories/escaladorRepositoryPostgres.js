@@ -1,5 +1,6 @@
 import escaladorRepository from '../../domain/escaladores/escaladorRepository.js';
 import Escalador from '../../domain/escaladores/Escalador.js';
+import Rocodromo from '../../domain/rocodromos/Rocodromo.js';
 
 class EscaladorRepositoryPostgres extends escaladorRepository {
   constructor(escaladorModel) {
@@ -40,6 +41,7 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
     });
     return this._toDomain(escaladorModel);
   }
+
   async encontrarPorApodo(apodo) {
     const escaladorModel = await this.EscaladorModel.findOne({
       where: { apodo },
@@ -108,7 +110,15 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
       }
 
       const rocodromos = await escaladorModel.getRocodromos();
-      return rocodromos;
+      const rocodromosDomain = rocodromos.map(rocodromoModel => {
+        return new Rocodromo(
+          rocodromoModel.id,
+          rocodromoModel.nombre,
+          rocodromoModel.ubicacion,
+          rocodromoModel.descripcion
+        );
+      });
+      return rocodromosDomain;
     } catch (error) {
       throw new Error(`Error al obtener rocódromos suscritos: ${error.message}`);
     }

@@ -1,5 +1,5 @@
 class ObtenerRocodromosSuscritos {
-  constructor({ escaladorRepository }) {
+  constructor(escaladorRepository) {
     this.escaladorRepository = escaladorRepository;
   }
 
@@ -8,7 +8,8 @@ class ObtenerRocodromosSuscritos {
     if (!escalador) {
       throw new Error('Escalador no encontrado');
     }
-    const rocodromosSuscritos = await this.escaladorRepository.obtenerRocodromosSuscritos(escalador.id);
+    const rocodromosSuscritos =
+      await this.escaladorRepository.obtenerRocodromosSuscritos(escalador.id);
     return rocodromosSuscritos;
   }
 }

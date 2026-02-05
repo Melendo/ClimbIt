@@ -68,9 +68,8 @@ class EscaladorController {
     try {
       const apodo = req.user.apodo; // Asumiendo que el middleware verifyToken añade escaladorCorreo al req
 
-      const rocodromos = await this.useCases.obtenerRocodromosSuscritos.execute(
-        { apodo, }
-      );
+      const rocodromos =
+        await this.useCases.obtenerRocodromosSuscritos.execute(apodo);
 
       res.status(200).json(rocodromos);
     } catch (error) {
