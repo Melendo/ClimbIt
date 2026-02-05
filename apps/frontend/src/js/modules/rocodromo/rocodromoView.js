@@ -22,7 +22,6 @@ export function renderMisRocodromos(container, rocodromos) {
                 <img src="/assets/rocodromoDefecto.jpg" alt="${rocodromo.nombre}" class="w-100 h-100" style="object-fit: cover;">
                 <div class="zona-card-overlay position-absolute bottom-0 start-0 end-0 p-2 text-white">
                   <small class="d-block fw-medium">${rocodromo.nombre}</small>
-                  <small class="text-white-50">${rocodromo.direccion || 'Sin dirección'}</small>
                 </div>
               </a>
               <button class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 btn-desuscribirse" 

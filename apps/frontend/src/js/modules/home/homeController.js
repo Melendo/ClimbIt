@@ -6,7 +6,7 @@ export function homeCmd(container) {
     const callbacks = {
         isAuthenticated: () => isAuthenticated(),
         onAlreadyAuthenticated: () => {
-            window.location.hash = '#listaRocodromos';
+            window.location.hash = '#login';
         }
     };
 

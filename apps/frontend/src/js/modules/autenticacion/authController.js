@@ -51,7 +51,7 @@ function loginPasswordCmd(container) {
             if (data.token) {
                 saveToken(data.token);
                 // Redirigir al listado de rocódromos
-                window.location.hash = '#listaRocodromos';
+                window.location.hash = '#misRocodromos';
             } else {
                 throw new Error('El correo o la contraseña no son correctos');
             }
@@ -136,7 +136,7 @@ function registroApodoCmd(container) {
             if (data.token) {
                 saveToken(data.token);
                 // Redirigir al listado de rocódromos
-                window.location.hash = '#listaRocodromos';
+                window.location.hash = '#misRocodromos';
             } else {
                 throw new Error('No se recibió el token de autenticación');
             }
