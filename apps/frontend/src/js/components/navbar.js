@@ -7,7 +7,7 @@ export function renderNavbar() {
               <span class="material-icons" style="font-size: 24px;">groups</span>
               <small>Social</small>
             </div>
-            <a href="#listaRocodromos" class="nav-link-bottom text-muted d-flex flex-column align-items-center p-2 flex-fill text-decoration-none">
+            <a href="#misRocodromos" class="nav-link-bottom text-muted d-flex flex-column align-items-center p-2 flex-fill text-decoration-none">
               <span class="material-icons" style="font-size: 24px;">favorite</span>
               <small>Mis Rocódromos</small>
             </a>

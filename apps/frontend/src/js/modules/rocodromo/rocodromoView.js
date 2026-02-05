@@ -1,28 +1,47 @@
 import { renderNavbar } from '../../components/navbar.js';
+import { showConfirmModal } from '../../components/modal.js';
 
-// Vista para mostrar la lista de todos los rocódromos
-export function renderListaRocodromos(container, rocodromos) {
+// Vista para mostrar "Mis Rocódromos" (rocódromos suscritos del usuario)
+export function renderMisRocodromos(container, rocodromos) {
     let rocodromosHTML = '';
 
     if (!Array.isArray(rocodromos) || rocodromos.length === 0) {
         rocodromosHTML = `
-          <div class="col-12">
-            <div class="alert alert-info">No hay rocódromos disponibles.</div>
+          <div class="col-12 d-flex flex-column align-items-center justify-content-start pt-3">
+            <div class="alert alert-info text-center mb-3">No estás suscrito a ningún rocódromo.</div>
+            <a href="#buscarRocodromos" class="btn btn-primary">
+              <span class="material-icons align-middle me-1">search</span>
+              Buscar rocódromos
+            </a>
           </div>`;
     } else {
         rocodromosHTML = rocodromos.map(rocodromo => `
           <div class="col-6 col-md-4">
-            <a href="#mapaRocodromo?id=${rocodromo.id}" class="text-decoration-none">
-              <div class="zona-card position-relative rounded overflow-hidden" style="aspect-ratio: 1;">
+            <div class="zona-card position-relative rounded overflow-hidden" style="aspect-ratio: 1;">
+              <a href="#mapaRocodromo?id=${rocodromo.id}" class="text-decoration-none">
                 <img src="/assets/rocodromoDefecto.jpg" alt="${rocodromo.nombre}" class="w-100 h-100" style="object-fit: cover;">
                 <div class="zona-card-overlay position-absolute bottom-0 start-0 end-0 p-2 text-white">
                   <small class="d-block fw-medium">${rocodromo.nombre}</small>
                   <small class="text-white-50">${rocodromo.direccion || 'Sin dirección'}</small>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 btn-desuscribirse" 
+                      data-id="${rocodromo.id}" 
+                      title="Desuscribirse">
+                <span class="material-icons" style="font-size: 16px;">favorite</span>
+              </button>
+            </div>
           </div>
         `).join('');
+        
+        // Añadir botón de buscar rocódromos al final
+        rocodromosHTML += `
+          <div class="col-12 d-flex justify-content-center mt-3">
+            <a href="#buscarRocodromos" class="btn btn-outline-primary">
+              <span class="material-icons align-middle me-1">search</span>
+              Buscar más rocódromos
+            </a>
+          </div>`;
     }
 
     container.innerHTML = `
@@ -36,7 +55,7 @@ export function renderListaRocodromos(container, rocodromos) {
 
     <!-- Grid de rocódromos (scrollable) -->
     <div class="card-body flex-grow-1 overflow-auto">
-      <h6 class="text-muted mb-3">Rocódromos disponibles</h6>
+      <h6 class="text-muted mb-3">Mis rocódromos</h6>
       <div class="row g-2">
         ${rocodromosHTML}
       </div>
@@ -47,6 +66,109 @@ export function renderListaRocodromos(container, rocodromos) {
 
   </div>
 `;
+
+    // Añadir event listeners para los botones de desuscribirse
+    container.querySelectorAll('.btn-desuscribirse').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const idRocodromo = parseInt(btn.dataset.id);
+            const confirmed = await showConfirmModal({
+                title: 'Desuscribirse del rocódromo',
+                message: '¿Estás seguro de que deseas desuscribirte de este rocódromo?',
+                confirmText: 'Desuscribirse',
+                cancelText: 'Cancelar',
+                confirmClass: 'btn-danger'
+            });
+            if (confirmed) {
+                await window.desuscribirseRocodromo(idRocodromo);
+            }
+        });
+    });
+}
+
+// Vista para buscar rocódromos (todos los disponibles, sin navbar)
+export function renderBuscarRocodromos(container, rocodromos, suscritosIds = []) {
+    let rocodromosHTML = '';
+
+    if (!Array.isArray(rocodromos) || rocodromos.length === 0) {
+        rocodromosHTML = `
+          <div class="col-12">
+            <div class="alert alert-info">No hay rocódromos disponibles.</div>
+          </div>`;
+    } else {
+        rocodromosHTML = rocodromos.map(rocodromo => {
+            const estaSuscrito = suscritosIds.includes(rocodromo.id);
+            return `
+          <div class="col-6 col-md-4">
+            <div class="zona-card position-relative rounded overflow-hidden" style="aspect-ratio: 1;">
+              <a href="#mapaRocodromo?id=${rocodromo.id}" class="text-decoration-none">
+                <img src="/assets/rocodromoDefecto.jpg" alt="${rocodromo.nombre}" class="w-100 h-100" style="object-fit: cover;">
+                <div class="zona-card-overlay position-absolute bottom-0 start-0 end-0 p-2 text-white">
+                  <small class="d-block fw-medium">${rocodromo.nombre}</small>
+                </div>
+              </a>
+              <button class="btn ${estaSuscrito ? 'btn-danger btn-desuscribirse' : 'btn-outline-light btn-suscribirse'} btn-sm position-absolute top-0 end-0 m-1" 
+                      data-id="${rocodromo.id}" 
+                      title="${estaSuscrito ? 'Desuscribirse' : 'Suscribirse'}">
+                <span class="material-icons" style="font-size: 16px;">${estaSuscrito ? 'favorite' : 'favorite_border'}</span>
+              </button>
+            </div>
+          </div>
+        `;
+        }).join('');
+    }
+
+    container.innerHTML = `
+  <div class="card shadow-sm d-flex flex-column" style="min-height: 100vh;">
+    
+    <!-- Cabecera: Botón volver + Título -->
+    <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
+      <a href="#" onclick="history.back(); return false;" class="text-dark">
+        <span class="material-icons align-middle">arrow_back</span>
+      </a>
+      <span class="fw-medium">Buscar rocódromos</span>
+    </div>
+
+    <!-- Grid de rocódromos (scrollable) -->
+    <div class="card-body flex-grow-1 overflow-auto">
+      <h6 class="text-muted mb-3">Rocódromos disponibles</h6>
+      <div class="row g-2">
+        ${rocodromosHTML}
+      </div>
+    </div>
+
+  </div>
+`;
+
+    // Añadir event listeners para los botones de suscribirse
+    container.querySelectorAll('.btn-suscribirse').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const idRocodromo = parseInt(btn.dataset.id);
+            await window.suscribirseRocodromo(idRocodromo);
+        });
+    });
+
+    // Añadir event listeners para los botones de desuscribirse
+    container.querySelectorAll('.btn-desuscribirse').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const idRocodromo = parseInt(btn.dataset.id);
+            const confirmed = await showConfirmModal({
+                title: 'Desuscribirse del rocódromo',
+                message: '¿Estás seguro de que deseas desuscribirte de este rocódromo?',
+                confirmText: 'Desuscribirse',
+                cancelText: 'Cancelar',
+                confirmClass: 'btn-danger'
+            });
+            if (confirmed) {
+                await window.desuscribirseRocodromo(idRocodromo);
+            }
+        });
+    });
 }
 
 // Vista para mostrar el mapa de un rocódromo con sus zonas y pistas
