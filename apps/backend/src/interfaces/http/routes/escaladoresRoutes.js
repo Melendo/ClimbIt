@@ -145,4 +145,8 @@ router.get('/mis-rocodromos', verifyToken, (req, res, next) => {
   escaladorController.obtenerRocodromosSuscritos(req, res, next);
 });
 
+router.get('/perfil', verifyToken, (req, res, next) => {
+  escaladorController.obtenerPerfil(req, res, next);
+});
+
 export default router;

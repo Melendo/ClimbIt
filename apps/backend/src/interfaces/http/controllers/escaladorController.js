@@ -34,6 +34,18 @@ class EscaladorController {
     }
   }
 
+  async obtenerPerfil(req, res, next) {
+    try {
+      const apodo = req.user.apodo; // Asumiendo que el middleware verifyToken añade escaladorCorreo al req
+
+      const perfilEscalador = await this.useCases.obtenerPerfil.execute(apodo);
+
+      res.status(200).json(perfilEscalador);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   async suscribirse(req, res, next) {
     try {
       const escaladorApodo = req.user.apodo; // Asumiendo que el middleware verifyToken añade escaladorId al req
