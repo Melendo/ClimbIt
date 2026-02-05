@@ -63,6 +63,19 @@ class EscaladorController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  async obtenerRocodromosSuscritos(req, res, next) {
+    try {
+      const apodo = req.user.apodo; // Asumiendo que el middleware verifyToken añade escaladorCorreo al req
+
+      const rocodromos =
+        await this.useCases.obtenerRocodromosSuscritos.execute(apodo);
+
+      res.status(200).json(rocodromos);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 export default EscaladorController;

@@ -1,5 +1,6 @@
 import escaladorRepository from '../../domain/escaladores/escaladorRepository.js';
 import Escalador from '../../domain/escaladores/Escalador.js';
+import Rocodromo from '../../domain/rocodromos/Rocodromo.js';
 
 class EscaladorRepositoryPostgres extends escaladorRepository {
   constructor(escaladorModel) {
@@ -34,11 +35,13 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
   }
 
   async encontrarPorCorreo(correo) {
+    console.log('Buscando escalador por correo:', correo);
     const escaladorModel = await this.EscaladorModel.findOne({
       where: { correo },
     });
     return this._toDomain(escaladorModel);
   }
+
   async encontrarPorApodo(apodo) {
     const escaladorModel = await this.EscaladorModel.findOne({
       where: { apodo },
@@ -95,6 +98,29 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
       return rocodromos.length > 0;
     } catch (error) {
       throw new Error(`Error al verificar suscripción: ${error.message}`);
+    }
+  }
+
+  async obtenerRocodromosSuscritos(escaladorId) {
+    try {
+      const escaladorModel = await this.EscaladorModel.findByPk(escaladorId);
+
+      if (!escaladorModel) {
+        throw new Error(`Escalador con ID ${escaladorId} no encontrado`);
+      }
+
+      const rocodromos = await escaladorModel.getRocodromos();
+      const rocodromosDomain = rocodromos.map(rocodromoModel => {
+        return new Rocodromo(
+          rocodromoModel.id,
+          rocodromoModel.nombre,
+          rocodromoModel.ubicacion,
+          rocodromoModel.descripcion
+        );
+      });
+      return rocodromosDomain;
+    } catch (error) {
+      throw new Error(`Error al obtener rocódromos suscritos: ${error.message}`);
     }
   }
 }

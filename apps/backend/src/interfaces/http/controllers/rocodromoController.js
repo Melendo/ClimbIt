@@ -28,6 +28,23 @@ class RocodromoController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  async obtenerInformacionRocodromo(req, res, next) {
+    try {
+      const { id } = req.params;
+      const rocodromo = await this.useCases.obtenerInformacion.execute(id);
+
+      if (!rocodromo) {
+        return res
+          .status(404)
+          .json({ error: `Rocódromo con ID ${id} no encontrado` });
+      }
+
+      res.status(200).json(rocodromo);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 export default RocodromoController;

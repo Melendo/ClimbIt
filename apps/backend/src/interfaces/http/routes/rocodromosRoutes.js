@@ -50,4 +50,34 @@ router.get(
   }
 );
 
+/**
+ * GET /rocodromos/:id
+ * Obtiene toda la informaación de un rocodromo específico
+ * 
+ * Parámetros esperados (URL Path):
+ * - id (@param {number} , requerido): ID del rocodromo (entero positivo)
+ * 
+ * Requiere: Token JWT válido en header Authorization
+ * 
+ * Respuesta esperada: @return {Object} Datos del rocodromo:
+ *   - id: identificador único
+ *   - nombre: nombre del rocodromo
+ *   - direccion: dirección física
+ */
+const obtenerInformacionRocodromoValidators = [
+  param('id')
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('El id del rocodromo debe ser un entero positivo'),
+];
+
+router.get(
+  '/:id',verifyTokenMiddleware,
+  obtenerInformacionRocodromoValidators,
+  validate,
+  (req, res, next) => {
+    rocodromoController.obtenerInformacionRocodromo(req, res, next);
+  }
+);
+
 export default router;
