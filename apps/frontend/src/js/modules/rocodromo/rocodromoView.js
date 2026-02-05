@@ -223,7 +223,7 @@ export function renderMapaRocodromo(container, data) {
     
     <!-- Cabecera: Icono + Nombre del rocódromo -->
     <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
-      <a href="#" onclick="history.back(); return false;" class="text-dark">
+      <a href="#misRocodromos" class="text-dark text-decoration-none">
         <span class="material-icons align-middle">arrow_back</span>
       </a>
       <img src="/assets/rocodromoDefecto.jpg" alt="Icono rocódromo" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
