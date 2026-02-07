@@ -142,4 +142,51 @@ describe('PistaRepositoryPostgres', () => {
       ).rejects.toThrow('Error de base de datos');
     });
   });
+
+  describe('obtenerEstado', () => {
+    it('debería retornar el estado del escalador en la pista', async () => {
+      // Arrange
+      const mockPistaInstance = {
+        id: 1,
+        escaladores: [{
+          id: 5,
+          EscalaPista: { estado: 'Flash' },
+        }],
+      };
+
+      mockPistaModel.findByPk.mockResolvedValue(mockPistaInstance);
+
+      // Act
+      const resultado = await repository.obtenerEstado(1, 5);
+
+      // Assert
+      expect(resultado).toBe('Flash');
+      expect(mockPistaModel.findByPk).toHaveBeenCalledWith(1, {
+        include: [{
+          association: 'escaladores',
+          where: { id: 5 },
+          required: false,
+        }],
+      });
+    });
+
+    it('debería retornar null si la pista no existe', async () => {
+      mockPistaModel.findByPk.mockResolvedValue(null);
+
+      const resultado = await repository.obtenerEstado(999, 1);
+      expect(resultado).toBeNull();
+    });
+
+    it('debería retornar null si el escalador no tiene estado en la pista', async () => {
+      const mockPistaInstance = {
+        id: 1,
+        escaladores: [],
+      };
+
+      mockPistaModel.findByPk.mockResolvedValue(mockPistaInstance);
+
+      const resultado = await repository.obtenerEstado(1, 5);
+      expect(resultado).toBeNull();
+    });
+  });
 });

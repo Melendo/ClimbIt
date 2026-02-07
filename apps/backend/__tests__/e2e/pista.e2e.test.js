@@ -160,6 +160,7 @@ describe('E2E: Pistas', () => {
 
       expect(response.body).toMatchObject(pistaTest);
       expect(response.body.id).toBe(pistaCreadaId);
+      expect(response.body).toHaveProperty('estado');
     });
 
     it('debería devolver 404 si la pista no existe', async () => {

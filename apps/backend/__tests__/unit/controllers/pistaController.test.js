@@ -49,7 +49,22 @@ describe('Unit: PistaController', () => {
 
   it('obtenerPistaPorId: 200 cuando existe', async () => {
     const useCases = {
-      obtenerPistaPorId: { execute: jest.fn().mockResolvedValue({ id: 7, idZona: 2, nombre: 'Pista', dificultad: '6a' }) },
+      obtenerPistaPorId: { execute: jest.fn().mockResolvedValue({ id: 7, idZona: 2, nombre: 'Pista', dificultad: '6a', estado: 'Flash' }) },
+    };
+    const controller = new PistaController(useCases);
+    const req = { params: { id: 7 }, user: { apodo: 'TestClimber' } };
+    const res = createResMock();
+
+    await controller.obtenerPistaPorId(req, res, () => {});
+
+    expect(useCases.obtenerPistaPorId.execute).toHaveBeenCalledWith(7, 'TestClimber');
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.body).toEqual({ id: 7, idZona: 2, nombre: 'Pista', dificultad: '6a', estado: 'Flash' });
+  });
+
+  it('obtenerPistaPorId: pasa null como apodo si no hay user', async () => {
+    const useCases = {
+      obtenerPistaPorId: { execute: jest.fn().mockResolvedValue({ id: 7, idZona: 2, nombre: 'Pista', dificultad: '6a', estado: null }) },
     };
     const controller = new PistaController(useCases);
     const req = { params: { id: 7 } };
@@ -57,9 +72,8 @@ describe('Unit: PistaController', () => {
 
     await controller.obtenerPistaPorId(req, res, () => {});
 
-    expect(useCases.obtenerPistaPorId.execute).toHaveBeenCalledWith(7);
+    expect(useCases.obtenerPistaPorId.execute).toHaveBeenCalledWith(7, null);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.body).toEqual({ id: 7, idZona: 2, nombre: 'Pista', dificultad: '6a' });
   });
 
   it('obtenerPistaPorId: 404 cuando no existe', async () => {
@@ -67,7 +81,7 @@ describe('Unit: PistaController', () => {
       obtenerPistaPorId: { execute: jest.fn().mockResolvedValue(null) },
     };
     const controller = new PistaController(useCases);
-    const req = { params: { id: 999 } };
+    const req = { params: { id: 999 }, user: { apodo: 'TestClimber' } };
     const res = createResMock();
 
     await controller.obtenerPistaPorId(req, res, () => {});
