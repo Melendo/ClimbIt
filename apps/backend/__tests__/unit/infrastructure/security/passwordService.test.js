@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import passwordService from '../../../../src/infrastructure/security/passwordService.js';
 
 describe('Infrastructure: PasswordService', () => {
