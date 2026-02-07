@@ -49,20 +49,6 @@ export function renderPerfil(container, escalador, callbacks) {
             </div>
             <span class="material-icons text-muted">chevron_right</span>
           </li>
-          <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-            <div class="d-flex align-items-center gap-2">
-              <span class="material-icons text-muted">notifications</span>
-              <span>Notificaciones</span>
-            </div>
-            <span class="material-icons text-muted">chevron_right</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-            <div class="d-flex align-items-center gap-2">
-              <span class="material-icons text-muted">help</span>
-              <span>Ayuda</span>
-            </div>
-            <span class="material-icons text-muted">chevron_right</span>
-          </li>
           <li class="list-group-item d-flex justify-content-between align-items-center px-0 text-danger" style="cursor: pointer;" id="logout-btn">
             <div class="d-flex align-items-center gap-2">
               <span class="material-icons">logout</span>
