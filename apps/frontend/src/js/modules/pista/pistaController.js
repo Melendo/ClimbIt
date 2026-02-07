@@ -147,6 +147,14 @@ export function crearPistaCmd(container) {
     renderCrearPista(container, callbacks);
 }
 
+// Mapeo de estados del backend a estados del frontend
+const ESTADOS_FRONTEND = {
+    'Flash': 'flash',
+    'Completado': 'completado',
+    'Proyecto': 'en-progreso',
+    'S/N': 'nada'
+};
+
 // Controlador para la vista de información de una pista
 export async function infoPistaCmd(container, id) {
     if (!id) {
@@ -187,6 +195,22 @@ export async function infoPistaCmd(container, id) {
         };
 
         renderInfoPista(container, pista, callbacks);
+
+        // Inicializar el estado actual del escalador en la UI
+        if (pista.estado) {
+            const estadoFrontend = ESTADOS_FRONTEND[pista.estado] || 'nada';
+            const config = ESTADOS_CONFIG[estadoFrontend] || ESTADOS_CONFIG['nada'];
+            const estadoActual = container.querySelector('#estado-actual');
+            const estadoTexto = container.querySelector('#estado-texto');
+
+            if (estadoActual) {
+                estadoActual.style.background = config.bg;
+                estadoActual.innerHTML = `<span class="material-icons" style="color: ${config.color}; font-size: 28px;">${config.icon}</span>`;
+            }
+            if (estadoTexto) {
+                estadoTexto.textContent = config.texto;
+            }
+        }
     } catch (err) {
         showError(`Error al obtener o procesar la pista: ${err.message}`);
     }
