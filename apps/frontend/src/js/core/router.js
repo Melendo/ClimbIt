@@ -68,7 +68,7 @@ export async function handleNavigation() {
             await mapaRocodromoCmd(mainContainer, id);
         }
         else if (hash === '#perfil') {
-            perfilCmd(mainContainer);
+            await perfilCmd(mainContainer);
         }
         else {
             error404Cmd(mainContainer);
