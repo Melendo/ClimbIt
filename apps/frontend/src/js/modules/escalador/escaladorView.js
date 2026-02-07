@@ -3,6 +3,7 @@ import { renderNavbar } from '../../components/navbar.js';
 // Vista del perfil del escalador
 export function renderPerfil(container, escalador, callbacks) {
     const { correo, apodo, fotoPerfil } = escalador;
+    const avatar = fotoPerfil || '/assets/johnDoe.png';
 
     container.innerHTML = `
     <div class="card shadow-sm d-flex flex-column" style="min-height: 100vh;">
@@ -19,7 +20,7 @@ export function renderPerfil(container, escalador, callbacks) {
         <!-- Sección de información del perfil -->
         <div class="text-center mb-4">
           <img 
-            src="${fotoPerfil}" 
+            src="${avatar}" 
             alt="Foto de perfil" 
             class="rounded-circle mb-3" 
             style="width: 100px; height: 100px; object-fit: cover;"
