@@ -47,6 +47,15 @@ class PistaRepositoryPostgres extends pistaRepository {
     await pistaModel.addEscaladores(idEscalador, { through: { estado: nuevoEstado } });
   }
 
+  async eliminarEstadoPista(idPista, idEscalador) {
+    const pistaModel = await this.PistaModel.findByPk(idPista);
+    if (!pistaModel) {
+      throw new Error(`Pista con ID ${idPista} no encontrada`);
+    }
+
+    await pistaModel.removeEscaladores(idEscalador);
+  }
+
   async obtenerEstado(idPista, idEscalador) {
     const pistaModel = await this.PistaModel.findByPk(idPista, {
       include: [{
