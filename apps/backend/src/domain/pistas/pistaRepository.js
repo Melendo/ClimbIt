@@ -11,6 +11,10 @@ class PistaRepository {
   async cambiarEstado(id, nuevoEstado) {
     throw new Error('Método "cambiarEstado" no implementado');
   }
+
+  async obtenerEstado(idPista, idEscalador) {
+    throw new Error('Método "obtenerEstado" no implementado');
+  }
 }
 
 export default PistaRepository;

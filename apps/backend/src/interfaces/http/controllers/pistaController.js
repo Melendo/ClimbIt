@@ -22,7 +22,8 @@ class PistaController {
   async obtenerPistaPorId(req, res, next) {
     try {
       const { id } = req.params;
-      const pista = await this.useCases.obtenerPistaPorId.execute(id);
+      const escaladorApodo = req.user ? req.user.apodo : null;
+      const pista = await this.useCases.obtenerPistaPorId.execute(id, escaladorApodo);
 
       if (!pista) {
         return res

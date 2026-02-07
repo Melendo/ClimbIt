@@ -20,6 +20,14 @@ const ESTADOS_CONFIG = {
     'nada': { icon: 'remove', color: '#6b7280', bg: '#e5e7eb', texto: 'Sin registrar' }
 };
 
+// Mapeo de estados del frontend a estados del backend
+const ESTADOS_BACKEND = {
+    'flash': 'Flash',
+    'completado': 'Completado',
+    'en-progreso': 'Proyecto',
+    'nada': 'S/N'
+};
+
 // Validación de campos del formulario
 function validateFields(values) {
     const errors = {};
@@ -139,6 +147,14 @@ export function crearPistaCmd(container) {
     renderCrearPista(container, callbacks);
 }
 
+// Mapeo de estados del backend a estados del frontend
+const ESTADOS_FRONTEND = {
+    'Flash': 'flash',
+    'Completado': 'completado',
+    'Proyecto': 'en-progreso',
+    'S/N': 'nada'
+};
+
 // Controlador para la vista de información de una pista
 export async function infoPistaCmd(container, id) {
     if (!id) {
@@ -153,15 +169,48 @@ export async function infoPistaCmd(container, id) {
         const pista = await res.json();
 
         const callbacks = {
-            onEstadoChange: (estado, estadoElement) => {
+            onEstadoChange: async (estado, estadoElement, estadoTextoElement) => {
                 const config = ESTADOS_CONFIG[estado] || ESTADOS_CONFIG['nada'];
+                const estadoBackend = ESTADOS_BACKEND[estado] || 'S/N';
+
+                // Actualizar UI inmediatamente para mejor UX
                 estadoElement.style.background = config.bg;
                 estadoElement.innerHTML = `<span class="material-icons" style="color: ${config.color}; font-size: 28px;">${config.icon}</span>`;
-                // TODO: En el futuro, guardar el estado en el backend
+
+                try {
+                    await fetchClient(`/pistas/cambiar-estado/${pista.id}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ estado: estadoBackend })
+                    });
+                } catch (err) {
+                    // Revertir UI en caso de error
+                    const prevConfig = ESTADOS_CONFIG['nada'];
+                    estadoElement.style.background = prevConfig.bg;
+                    estadoElement.innerHTML = `<span class="material-icons" style="color: ${prevConfig.color}; font-size: 28px;">${prevConfig.icon}</span>`;
+                    estadoTextoElement.textContent = 'Sin registrar';
+                    showError(`Error al cambiar estado: ${err.message}`);
+                }
             }
         };
 
         renderInfoPista(container, pista, callbacks);
+
+        // Inicializar el estado actual del escalador en la UI
+        if (pista.estado) {
+            const estadoFrontend = ESTADOS_FRONTEND[pista.estado] || 'nada';
+            const config = ESTADOS_CONFIG[estadoFrontend] || ESTADOS_CONFIG['nada'];
+            const estadoActual = container.querySelector('#estado-actual');
+            const estadoTexto = container.querySelector('#estado-texto');
+
+            if (estadoActual) {
+                estadoActual.style.background = config.bg;
+                estadoActual.innerHTML = `<span class="material-icons" style="color: ${config.color}; font-size: 28px;">${config.icon}</span>`;
+            }
+            if (estadoTexto) {
+                estadoTexto.textContent = config.texto;
+            }
+        }
     } catch (err) {
         showError(`Error al obtener o procesar la pista: ${err.message}`);
     }

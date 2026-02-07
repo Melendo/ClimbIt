@@ -78,7 +78,7 @@ async function inicializarContainer() {
   );
 
   const crearPistaUseCase = new CrearPista(pistaRepository, db.Zona);
-  const obtenerPistaPorIdUseCase = new ObtenerPistaPorId(pistaRepository);
+  const obtenerPistaPorIdUseCase = new ObtenerPistaPorId(pistaRepository, escaladorRepository);
   const cambiarEstadoPistaUseCase = new CambiarEstadoPista(
     pistaRepository,
     escaladorRepository

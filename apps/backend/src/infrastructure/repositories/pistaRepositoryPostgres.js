@@ -46,6 +46,25 @@ class PistaRepositoryPostgres extends pistaRepository {
 
     await pistaModel.addEscaladores(idEscalador, { through: { estado: nuevoEstado } });
   }
+
+  async obtenerEstado(idPista, idEscalador) {
+    const pistaModel = await this.PistaModel.findByPk(idPista, {
+      include: [{
+        association: 'escaladores',
+        where: { id: idEscalador },
+        required: false,
+      }],
+    });
+
+    if (!pistaModel) return null;
+
+    const escaladores = pistaModel.escaladores;
+    if (escaladores && escaladores.length > 0) {
+      return escaladores[0].EscalaPista.estado;
+    }
+
+    return null;
+  }
 }
 
 export default PistaRepositoryPostgres;
