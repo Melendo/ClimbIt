@@ -14,7 +14,7 @@ const ESTADOS_CONFIG = {
     'proyecto': { icon: 'sync', color: '#2563eb', bg: '#dbeafe' },
     'S/N': { icon: 'remove', color: '#6b7280', bg: '#e5e7eb' }
 };
-export async function mapaZonaCmd(container, idRocodromo) {
+export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) {
     if (!idRocodromo) {
         showError('ID de rocódromo no válido o no proporcionado');
         return;
@@ -41,11 +41,10 @@ export async function mapaZonaCmd(container, idRocodromo) {
             console.warn('No se pudieron obtener las zonas:', err.message);
         }
 
-        // Renderizar la vista inicial (sin pistas cargadas o con la primera zona por defecto si se desea)
-        // Pasamos una función callback para cargar pistas de una zona específica
+        // Renderizar la vista inicial
         renderMapaZona(container, { rocodromo, zonas }, async (idZona) => {
             return await cargarPistasZona(idZona);
-        });
+        }, initialZonaId);
 
     } catch (err) {
         showError(`Error al cargar el mapa de zona: ${err.message}`);

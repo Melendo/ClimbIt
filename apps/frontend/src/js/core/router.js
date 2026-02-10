@@ -69,7 +69,8 @@ export async function handleNavigation() {
         }
         else if (hash.startsWith('#mapaZona')) {
             const id = obtenerParametroDesdeHash('id');
-            await mapaZonaCmd(mainContainer, id);
+            const idZona = obtenerParametroDesdeHash('zona');
+            await mapaZonaCmd(mainContainer, id, idZona);
         }
         else if (hash === '#crearZona') {
             crearZonaCmd(mainContainer);
