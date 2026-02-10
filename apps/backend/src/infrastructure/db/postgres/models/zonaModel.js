@@ -42,6 +42,12 @@ export default (sequelize, DataTypes) => {
         allowNull: true,
         field: 'Mapa',
       },
+      activo: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+        field: 'Activo',
+      },
     },
     {
       sequelize,

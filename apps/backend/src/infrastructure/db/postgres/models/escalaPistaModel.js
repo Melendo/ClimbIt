@@ -30,7 +30,8 @@ export default (sequelize, DataTypes) => {
         },
       },
       estado: {
-        type: DataTypes.STRING,
+        // eslint-disable-next-line new-cap
+        type: DataTypes.ENUM('flash', 'completado', 'proyecto'),
         allowNull: false,
         field: 'Estado',
       },
