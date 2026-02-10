@@ -18,25 +18,28 @@ export function renderMapaZona(container, data, onZonaSelect) {
             </div>
 
             <!-- Mapa (Imagen estática por ahora) -->
-             <div class="mapa-rocodromo position-relative bg-dark" style="height: 650px; overflow: hidden;">
+             <div class="mapa-rocodromo position-relative bg-dark flex-shrink-0" style="height: 40vh; min-height: 300px; overflow: hidden;">
                 <img 
                     src="/assets/mapaDefecto.jpg" 
                     alt="Mapa del rocódromo" 
                     class="w-100 h-100" 
                     style="object-fit: cover; opacity: 0.8;"
                 />
+                
+                <!-- Título del Mapa (Fondo) -->
                 <div class="position-absolute bottom-0 start-0 end-0 p-3" style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
                     <h5 id="mapaTitulo" class="text-white mb-0 text-shadow">Mapa General</h5>
                 </div>
+                
+                <!-- Selector de Zona (Overlay Superior Izquierda) -->
+                <div class="position-absolute top-0 start-0 m-3" style="z-index: 10;">
+                   <select id="zonaSelector" class="form-select form-select-sm shadow-sm opacity-90 fw-bold border-0" style="min-width: 150px; backdrop-filter: blur(4px); background-color: rgba(255, 255, 255, 0.9);">
+                        ${zonas.map((z, index) => `<option value="${z.id}" ${index === 0 ? 'selected' : ''}>Zona ${z.tipo || z.id}</option>`).join('')}
+                    </select>
+                </div>
             </div>
 
-            <!-- Selector de Zona -->
-            <div class="px-3 py-3 bg-light border-bottom">
-                <label for="zonaSelector" class="form-label small text-muted fw-bold text-uppercase">Seleccionar Zona</label>
-                <select id="zonaSelector" class="form-select shadow-sm">
-                    ${zonas.map((z, index) => `<option value="${z.id}" ${index === 0 ? 'selected' : ''}>Zona ${z.tipo || z.id}</option>`).join('')}
-                </select>
-            </div>
+
 
             <!-- Contenedor de Pistas (Dinámico) -->
             <div id="pistasContainer" class="card-body flex-grow-1 overflow-auto bg-light">
@@ -121,6 +124,38 @@ export function renderMapaZona(container, data, onZonaSelect) {
     };
 
     selector.addEventListener('change', (e) => loadZonas(e.target.value));
+
+    // Lógica de Swipe para cambiar de zona
+    const mapaContainer = container.querySelector('.mapa-rocodromo');
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    mapaContainer.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    mapaContainer.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, { passive: true });
+
+    const handleSwipe = () => {
+        const threshold = 50; // Mínima distancia para considerar swipe
+        if (touchEndX < touchStartX - threshold) {
+            // Swipe Left -> Siguiente zona
+            if (selector.selectedIndex < selector.options.length - 1) {
+                selector.selectedIndex++;
+                selector.dispatchEvent(new Event('change'));
+            }
+        }
+        if (touchEndX > touchStartX + threshold) {
+            // Swipe Right -> Zona anterior
+            if (selector.selectedIndex > 0) {
+                selector.selectedIndex--;
+                selector.dispatchEvent(new Event('change'));
+            }
+        }
+    };
 
     // Cargar zona inicial si existe
     if (selector.value) {
