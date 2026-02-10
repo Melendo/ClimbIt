@@ -166,3 +166,75 @@ export function renderMapaZona(container, data, onZonaSelect) {
         loadZonas(selector.value);
     }
 }
+
+// Vista para crear una nueva zona
+export function renderCrearZona(container, callbacks) {
+    container.innerHTML = `
+  <div class="card shadow-sm">
+    <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
+      <a href="#" onclick="history.back(); return false;" class="text-dark">
+        <span class="material-icons align-middle">arrow_back</span>
+      </a>
+      <span class="fw-medium">Nueva Zona</span>
+    </div>
+    <div class="card-body">
+      <form id="form-crear-zona" novalidate>
+        <div class="mb-3">
+          <label for="idRocodromo" class="form-label">ID Rocódromo</label>
+          <input
+            type="number"
+            class="form-control"
+            name="idRocodromo"
+            id="idRocodromo"
+            required
+            placeholder="ID del rocódromo"
+          />
+          <div class="invalid-feedback"></div>
+        </div>
+        <div class="mb-3">
+          <label for="nombre" class="form-label">Nombre / Tipo</label>
+          <input
+            type="text"
+            class="form-control"
+            name="nombre"
+            id="nombre"
+            required
+            placeholder="Ej: Muro Principal, Boulder, etc."
+          />
+          <div class="invalid-feedback"></div>
+        </div>
+        <div id="form-alert" class="alert d-none" role="alert"></div>
+        <button type="submit" class="btn btn-primary w-100">Crear Zona</button>
+      </form>
+    </div>
+  </div>`;
+
+    const form = container.querySelector('#form-crear-zona');
+    const idRocodromoInput = container.querySelector('#idRocodromo');
+    const nombreInput = container.querySelector('#nombre');
+    const alertBox = container.querySelector('#form-alert');
+
+    // Pre-fill ID Rocódromo if present in URL hack (optional, but good UX)
+    // Pero como no tenemos acceso fácil a URL params aquí sin pasarlos, lo dejamos así.
+
+    // Limpiar errores al escribir
+    [idRocodromoInput, nombreInput].forEach((el) => {
+        el.addEventListener('input', () => {
+            el.classList.remove('is-invalid');
+            alertBox.classList.add('d-none');
+        });
+    });
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const values = {
+            idRoco: idRocodromoInput.value, // Backend expects 'idRoco' based on controller analysis
+            nombre: nombreInput.value.trim(),
+        };
+        callbacks.onSubmit(values, {
+            idRocodromoInput,
+            nombreInput,
+            alertBox
+        });
+    });
+}

@@ -1,4 +1,4 @@
-import { renderMapaZona } from './zonaView.js';
+import { renderMapaZona, renderCrearZona } from './zonaView.js';
 import { fetchClient } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
 
@@ -71,4 +71,56 @@ async function cargarPistasZona(idZona) {
         console.error(`Error al cargar pistas de la zona ${idZona}:`, err);
         return [];
     }
+}
+
+// Controlador para la vista de crear una nueva zona
+export function crearZonaCmd(container) {
+    const callbacks = {
+        onSubmit: async (values, fields) => {
+            const { idRocodromoInput, nombreInput } = fields;
+
+            // Simple validación frontend
+            if (!values.idRoco) {
+                idRocodromoInput.classList.add('is-invalid');
+                return;
+            }
+            if (!values.nombre) {
+                nombreInput.classList.add('is-invalid');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                // Backend expects: { idRoco, nombre }
+                await fetchClient('/zonas/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ...values,
+                        idRoco: Number(values.idRoco)
+                    }),
+                });
+
+                // Redirigir al mapa de la zona recien creada (o del rocódromo)
+                // Como mapaZona requiere idRocodromo, y zona tiene idRoco (o similar), usamos eso.
+                // Asumimos que zona.idRocodromo viene en la respuesta, o usamos values.idRoco
+                const idRocodromo = values.idRoco;
+                window.location.hash = `#mapaZona?id=${idRocodromo}`;
+
+            } catch (err) {
+                renderCrearZona(container, callbacks);
+
+                // Recuperar referencias
+                const newAlertBox = container.querySelector('#form-alert');
+                if (newAlertBox) {
+                    newAlertBox.textContent = `Error: ${err.message}`;
+                    newAlertBox.classList.remove('d-none');
+                    newAlertBox.classList.add('alert-danger');
+                }
+            }
+        }
+    };
+
+    renderCrearZona(container, callbacks);
 }
