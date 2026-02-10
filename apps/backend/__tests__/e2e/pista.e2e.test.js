@@ -237,11 +237,11 @@ describe('E2E: Pistas', () => {
       });
       
       expect(escaladores).toHaveLength(1);
-      expect(escaladores[0].EscalaPista.estado).toBe('Completado');
+      expect(escaladores[0].EscalaPista.estado).toBe('completado');
     });
 
     it('debería actualizar el estado si ya existe una relación', async () => {
-      // El estado ya fue creado en el test anterior con 'Completado'
+      // El estado ya fue creado en el test anterior con 'completado'
       const response = await request(app)
         .post(`/pistas/cambiar-estado/${pistaTest.id}`)
         .set('Authorization', `Bearer ${token}`)
@@ -258,7 +258,7 @@ describe('E2E: Pistas', () => {
       });
       
       expect(escaladores).toHaveLength(1);
-      expect(escaladores[0].EscalaPista.estado).toBe('Flash');
+      expect(escaladores[0].EscalaPista.estado).toBe('flash');
     });
 
     it('debería retornar 401 si no se proporciona token de autenticación', async () => {

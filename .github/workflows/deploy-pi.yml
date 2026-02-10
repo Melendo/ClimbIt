@@ -18,10 +18,22 @@ jobs:
           echo "${{ secrets.ENV_FILE_PRODUCTION }}" > .env
 
       - name: Stop current containers
-        run: docker compose down --remove-orphans -v || true
+        run: docker compose down --remove-orphans || true
+
+      - name: Fix Docker Cache (Clear Corrupted Snapshots)
+        run: |
+          # Esto elimina la caché de construcción que está causando el error
+          # sin borrar las imágenes que ya funcionan.
+          docker builder prune -f
 
       - name: Build and Start containers
-        run: docker compose up --build -d
+        run: |
+          # --pull asegura que las capas base (node:22-alpine, etc) estén sincronizadas
+          docker compose build --pull
+          docker compose up -d
 
-      - name: Clean up unused images
-        run: docker image prune -f
+      - name: Clean up unused Docker data
+        run: |
+          # Limpieza profunda para mantener el disco de la RaspPi optimizado
+          docker image prune -f
+          docker builder prune -f --filter "until=24h"
