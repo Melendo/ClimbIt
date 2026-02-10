@@ -1,8 +1,13 @@
 import { renderNavbar } from '../../components/navbar.js';
 
-export function renderMapaZona(container, data, onZonaSelect) {
+export function renderMapaZona(container, data, onZonaSelect, initialZonaId = null) {
     const { rocodromo, zonas } = data;
     const nombreRocodromo = rocodromo?.nombre || 'Rocódromo';
+
+    // Determinar zona inicial
+    const zonaInicial = initialZonaId
+        ? zonas.find(z => z.id == initialZonaId)
+        : zonas[0]; // Por defecto la primera
 
     // Crear estructura básica
     container.innerHTML = `
@@ -34,7 +39,7 @@ export function renderMapaZona(container, data, onZonaSelect) {
                 <!-- Selector de Zona (Overlay Superior Izquierda) -->
                 <div class="position-absolute top-0 start-0 m-3" style="z-index: 10;">
                    <select id="zonaSelector" class="form-select form-select-sm shadow-sm opacity-90 fw-bold border-0" style="min-width: 150px; backdrop-filter: blur(4px); background-color: rgba(255, 255, 255, 0.9);">
-                        ${zonas.map((z, index) => `<option value="${z.id}" ${index === 0 ? 'selected' : ''}>Zona ${z.tipo || z.id}</option>`).join('')}
+                        ${zonas.map((z) => `<option value="${z.id}" ${z.id == (zonaInicial?.id) ? 'selected' : ''}>Zona ${z.tipo || z.id}</option>`).join('')}
                     </select>
                 </div>
             </div>
@@ -43,11 +48,17 @@ export function renderMapaZona(container, data, onZonaSelect) {
 
             <!-- Contenedor de Pistas (Dinámico) -->
             <div id="pistasContainer" class="card-body flex-grow-1 overflow-auto bg-light">
+                ${zonas.length > 0 ? `
                 <div class="text-center text-muted mt-5 fade-in">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Cargando...</span>
                     </div>
+                </div>` : `
+                <div class="d-flex flex-column justify-content-center align-items-center h-100 text-muted fade-in">
+                    <span class="material-icons mb-3" style="font-size: 48px; opacity: 0.5;">map</span>
+                    <p class="mb-0">Este rocódromo no tiene zonas registradas.</p>
                 </div>
+                `}
             </div>
 
             <!-- Navbar -->
@@ -59,11 +70,38 @@ export function renderMapaZona(container, data, onZonaSelect) {
     const selector = container.querySelector('#zonaSelector');
     const pistasContainer = container.querySelector('#pistasContainer');
 
+    const updateUrl = (idZona) => {
+        const currentUrl = new URL(window.location.href);
+        // Usar replaceState para no llenar el historial de navegación con cada cambio de zona
+        // Pero si queremos que el botón "Atrás" funcione entre zonas, usaríamos pushState.
+        // El usuario pidió "cuando entras a una pista al ir atrás te redirige siempre a la primera zona".
+        // Esto sugiere que quiere que el estado se conserve. replaceState es suficiente para eso.
+        // Si cambia de zona 1 -> zona 2, y luego entra a pista X, al volver atrás, debería estar en zona 2.
+        // Si usamos replaceState, al cambiar de zona 1 a 2, reemplazamos la entrada actual.
+        // Al entrar a pista X (nueva entrada), el historial es: [..., zona 2, pista X].
+        // Al volver, volvemos a zona 2. Correcto.
+        currentUrl.hash = `#mapaZona?id=${rocodromo.id}&zona=${idZona}`;
+        history.replaceState(null, '', currentUrl.toString());
+    };
+
     const loadZonas = async (idZona, direction = null) => {
         if (!idZona) return;
 
+        // Validar que la zona existe en la lista (para evitar errores si viene un id raro en URL)
+        const zonaExists = zonas.some(z => z.id == idZona);
+        if (!zonaExists && zonas.length > 0) {
+            idZona = zonas[0].id; // Fallback
+        } else if (!zonaExists) {
+            return;
+        }
+
+        // Actualizar URL
+        updateUrl(idZona);
+
         // Actualizar título del mapa
-        const textoZona = selector.options[selector.selectedIndex].text;
+        const zonaObj = zonas.find(z => z.id == idZona);
+        const textoZona = zonaObj ? `Zona ${zonaObj.tipo || zonaObj.id}` : 'Mapa General';
+
         const mapaTitulo = container.querySelector('#mapaTitulo');
         if (mapaTitulo) mapaTitulo.textContent = `Mapa ${textoZona}`;
 
@@ -161,8 +199,84 @@ export function renderMapaZona(container, data, onZonaSelect) {
         }
     };
 
-    // Cargar zona inicial si existe
-    if (selector.value) {
-        loadZonas(selector.value);
+    // Cargar zona inicial (si hay zonas)
+    if (zonaInicial) {
+        // No llamamos a loadZonas inmediatamente porque podría sobreescribir la URL
+        // si initialZonaId es null. Solo la cargamos visualmente.
+        // O mejor: simplemente llamamos a loadZonas con el ID inicial.
+        // Si no habia ID en URL, updateUrl lo pondrá. Esto es deseable.
+        loadZonas(zonaInicial.id);
     }
+}
+
+// Vista para crear una nueva zona
+export function renderCrearZona(container, callbacks) {
+    container.innerHTML = `
+  <div class="card shadow-sm">
+    <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
+      <a href="#" onclick="history.back(); return false;" class="text-dark">
+        <span class="material-icons align-middle">arrow_back</span>
+      </a>
+      <span class="fw-medium">Nueva Zona</span>
+    </div>
+    <div class="card-body">
+      <form id="form-crear-zona" novalidate>
+        <div class="mb-3">
+          <label for="idRocodromo" class="form-label">ID Rocódromo</label>
+          <input
+            type="number"
+            class="form-control"
+            name="idRocodromo"
+            id="idRocodromo"
+            required
+            placeholder="ID del rocódromo"
+          />
+          <div class="invalid-feedback"></div>
+        </div>
+        <div class="mb-3">
+          <label for="nombre" class="form-label">Nombre / Tipo</label>
+          <input
+            type="text"
+            class="form-control"
+            name="nombre"
+            id="nombre"
+            required
+            placeholder="Ej: Muro Principal, Boulder, etc."
+          />
+          <div class="invalid-feedback"></div>
+        </div>
+        <div id="form-alert" class="alert d-none" role="alert"></div>
+        <button type="submit" class="btn btn-primary w-100">Crear Zona</button>
+      </form>
+    </div>
+  </div>`;
+
+    const form = container.querySelector('#form-crear-zona');
+    const idRocodromoInput = container.querySelector('#idRocodromo');
+    const nombreInput = container.querySelector('#nombre');
+    const alertBox = container.querySelector('#form-alert');
+
+    // Pre-fill ID Rocódromo if present in URL hack (optional, but good UX)
+    // Pero como no tenemos acceso fácil a URL params aquí sin pasarlos, lo dejamos así.
+
+    // Limpiar errores al escribir
+    [idRocodromoInput, nombreInput].forEach((el) => {
+        el.addEventListener('input', () => {
+            el.classList.remove('is-invalid');
+            alertBox.classList.add('d-none');
+        });
+    });
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const values = {
+            idRoco: idRocodromoInput.value, // Backend expects 'idRoco' based on controller analysis
+            nombre: nombreInput.value.trim(),
+        };
+        callbacks.onSubmit(values, {
+            idRocodromoInput,
+            nombreInput,
+            alertBox
+        });
+    });
 }

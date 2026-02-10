@@ -1,4 +1,4 @@
-import { renderMapaRocodromo, renderMisRocodromos, renderBuscarRocodromos } from './rocodromoView.js';
+import { renderMapaRocodromo, renderMisRocodromos, renderBuscarRocodromos, renderCrearRocodromo } from './rocodromoView.js';
 import { fetchClient } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
 
@@ -25,7 +25,7 @@ export async function buscarRocodromosCmd(container) {
         // Obtener todos los rocódromos disponibles
         const response = await fetchClient('/rocodromos');
         const rocodromos = await response.json();
-        
+
         // Obtener los rocódromos suscritos para marcarlos
         let suscritosIds = [];
         try {
@@ -35,7 +35,7 @@ export async function buscarRocodromosCmd(container) {
         } catch (err) {
             console.warn('No se pudieron obtener rocódromos suscritos:', err.message);
         }
-        
+
         renderBuscarRocodromos(container, rocodromos, suscritosIds);
     } catch (err) {
         console.warn('Error al obtener rocódromos:', err.message);
@@ -54,7 +54,7 @@ export async function suscribirseRocodromo(idRocodromo) {
             },
             body: JSON.stringify({ idRocodromo })
         });
-        
+
         // Recargar la vista actual
         window.location.reload();
     } catch (err) {
@@ -73,7 +73,7 @@ export async function desuscribirseRocodromo(idRocodromo) {
             },
             body: JSON.stringify({ idRocodromo })
         });
-        
+
         // Recargar la vista actual
         window.location.reload();
     } catch (err) {
@@ -131,4 +131,54 @@ export async function mapaRocodromoCmd(container, id) {
     } catch (err) {
         showError(`Error al obtener o procesar el rocódromo: ${err.message}`);
     }
+}
+
+// Controlador para la vista de crear un nuevo rocódromo
+export function crearRocodromoCmd(container) {
+    const callbacks = {
+        onSubmit: async (values, fields) => {
+            const { nombreInput, ubicacionInput } = fields;
+
+            // Simple validación frontend
+            if (!values.nombre) {
+                nombreInput.classList.add('is-invalid');
+                return;
+            }
+            if (!values.ubicacion) {
+                ubicacionInput.classList.add('is-invalid');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const res = await fetchClient('/rocodromos/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(values),
+                });
+                const rocodromo = await res.json();
+
+                // Redirigir al nuevo rocódromo
+                window.location.hash = `#mapaZona?id=${rocodromo.id}`;
+            } catch (err) {
+                // Restaurar la vista del formulario (el loading lo quita)
+                // Como showLoading reemplaza el contenido, tendríamos que volver a renderizar
+                // pero por simplicidad, mostraremos el error en una alerta general por ahora
+                // o idealmente, no usar showLoading fullscreen si queremos mantener el formulario
+                // Para este MVP, recargamos el formulario
+                renderCrearRocodromo(container, callbacks);
+
+                // Recuperar referencias
+                const newAlertBox = container.querySelector('#form-alert');
+                if (newAlertBox) {
+                    newAlertBox.textContent = `Error: ${err.message}`;
+                    newAlertBox.classList.remove('d-none');
+                    newAlertBox.classList.add('alert-danger');
+                }
+            }
+        }
+    };
+
+    renderCrearRocodromo(container, callbacks);
 }

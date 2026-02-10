@@ -1,4 +1,4 @@
-import { renderMapaZona } from './zonaView.js';
+import { renderMapaZona, renderCrearZona } from './zonaView.js';
 import { fetchClient } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
 
@@ -9,12 +9,12 @@ import { showLoading, showError } from '../../core/ui.js';
  * @param {number} idRocodromo ID del rocódromo
  */
 const ESTADOS_CONFIG = {
-    'Flash': { icon: 'bolt', color: '#d97706', bg: '#fef3c7' },
-    'Completado': { icon: 'done', color: '#16a34a', bg: '#dcfce7' },
-    'Proyecto': { icon: 'sync', color: '#2563eb', bg: '#dbeafe' },
+    'flash': { icon: 'bolt', color: '#d97706', bg: '#fef3c7' },
+    'completado': { icon: 'done', color: '#16a34a', bg: '#dcfce7' },
+    'proyecto': { icon: 'sync', color: '#2563eb', bg: '#dbeafe' },
     'S/N': { icon: 'remove', color: '#6b7280', bg: '#e5e7eb' }
 };
-export async function mapaZonaCmd(container, idRocodromo) {
+export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) {
     if (!idRocodromo) {
         showError('ID de rocódromo no válido o no proporcionado');
         return;
@@ -41,11 +41,10 @@ export async function mapaZonaCmd(container, idRocodromo) {
             console.warn('No se pudieron obtener las zonas:', err.message);
         }
 
-        // Renderizar la vista inicial (sin pistas cargadas o con la primera zona por defecto si se desea)
-        // Pasamos una función callback para cargar pistas de una zona específica
+        // Renderizar la vista inicial
         renderMapaZona(container, { rocodromo, zonas }, async (idZona) => {
             return await cargarPistasZona(idZona);
-        });
+        }, initialZonaId);
 
     } catch (err) {
         showError(`Error al cargar el mapa de zona: ${err.message}`);
@@ -71,4 +70,56 @@ async function cargarPistasZona(idZona) {
         console.error(`Error al cargar pistas de la zona ${idZona}:`, err);
         return [];
     }
+}
+
+// Controlador para la vista de crear una nueva zona
+export function crearZonaCmd(container) {
+    const callbacks = {
+        onSubmit: async (values, fields) => {
+            const { idRocodromoInput, nombreInput } = fields;
+
+            // Simple validación frontend
+            if (!values.idRoco) {
+                idRocodromoInput.classList.add('is-invalid');
+                return;
+            }
+            if (!values.nombre) {
+                nombreInput.classList.add('is-invalid');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                // Backend expects: { idRoco, nombre }
+                await fetchClient('/zonas/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ...values,
+                        idRoco: Number(values.idRoco)
+                    }),
+                });
+
+                // Redirigir al mapa de la zona recien creada (o del rocódromo)
+                // Como mapaZona requiere idRocodromo, y zona tiene idRoco (o similar), usamos eso.
+                // Asumimos que zona.idRocodromo viene en la respuesta, o usamos values.idRoco
+                const idRocodromo = values.idRoco;
+                window.location.hash = `#mapaZona?id=${idRocodromo}`;
+
+            } catch (err) {
+                renderCrearZona(container, callbacks);
+
+                // Recuperar referencias
+                const newAlertBox = container.querySelector('#form-alert');
+                if (newAlertBox) {
+                    newAlertBox.textContent = `Error: ${err.message}`;
+                    newAlertBox.classList.remove('d-none');
+                    newAlertBox.classList.add('alert-danger');
+                }
+            }
+        }
+    };
+
+    renderCrearZona(container, callbacks);
 }

@@ -92,7 +92,7 @@ export function crearPistaCmd(container) {
         // Enviar formulario
         onSubmit: async (values, fields) => {
             const { idRocodromoInput, idZonaInput, nombreInput, dificultadSelect, alertBox } = fields;
-            
+
             clearFormAlert(alertBox);
             [idZonaInput, nombreInput, dificultadSelect].forEach(clearFieldError);
 
@@ -149,9 +149,9 @@ export function crearPistaCmd(container) {
 
 // Mapeo de estados del backend a estados del frontend
 const ESTADOS_FRONTEND = {
-    'Flash': 'flash',
-    'Completado': 'completado',
-    'Proyecto': 'en-progreso',
+    'flash': 'flash',
+    'completado': 'completado',
+    'proyecto': 'en-progreso',
     'S/N': 'nada'
 };
 
