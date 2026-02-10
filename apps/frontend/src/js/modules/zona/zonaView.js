@@ -59,7 +59,7 @@ export function renderMapaZona(container, data, onZonaSelect) {
     const selector = container.querySelector('#zonaSelector');
     const pistasContainer = container.querySelector('#pistasContainer');
 
-    const loadZonas = async (idZona) => {
+    const loadZonas = async (idZona, direction = null) => {
         if (!idZona) return;
 
         // Actualizar título del mapa
@@ -68,8 +68,12 @@ export function renderMapaZona(container, data, onZonaSelect) {
         if (mapaTitulo) mapaTitulo.textContent = `Mapa ${textoZona}`;
 
         // Mostrar loading en el contenedor de pistas
+        let animationClass = '';
+        if (direction === 'next') animationClass = 'slide-in-right';
+        if (direction === 'prev') animationClass = 'slide-in-left';
+
         pistasContainer.innerHTML = `
-            <div class="d-flex justify-content-center align-items-center h-100">
+            <div class="d-flex justify-content-center align-items-center h-100 ${animationClass}">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Cargando...</span>
                 </div>
@@ -90,8 +94,8 @@ export function renderMapaZona(container, data, onZonaSelect) {
         }
 
         pistasContainer.innerHTML = `
-            <h6 class="text-muted mb-3 small fw-bold text-uppercase">Pistas Disponibles (${pistas.length})</h6>
-            <div class="row g-3">
+            <h6 class="text-muted mb-3 small fw-bold text-uppercase ${animationClass}">Pistas Disponibles (${pistas.length})</h6>
+            <div class="row g-3 ${animationClass}">
                 ${pistas.map(pista => {
             const status = pista.statusConfig;
             return `
@@ -145,14 +149,14 @@ export function renderMapaZona(container, data, onZonaSelect) {
             // Swipe Left -> Siguiente zona
             if (selector.selectedIndex < selector.options.length - 1) {
                 selector.selectedIndex++;
-                selector.dispatchEvent(new Event('change'));
+                loadZonas(selector.value, 'next');
             }
         }
         if (touchEndX > touchStartX + threshold) {
             // Swipe Right -> Zona anterior
             if (selector.selectedIndex > 0) {
                 selector.selectedIndex--;
-                selector.dispatchEvent(new Event('change'));
+                loadZonas(selector.value, 'prev');
             }
         }
     };
