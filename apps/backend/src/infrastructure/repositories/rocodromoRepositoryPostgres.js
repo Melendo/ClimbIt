@@ -14,14 +14,24 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
       return new Rocodromo(
         rocodromoModel.id,
         rocodromoModel.nombre,
-        rocodromoModel.ubicacion,
+        rocodromoModel.ubicacion
       );
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-    async obtenerZonasDeRocodromo(idRocodromo) {
+  async crearRocodromo(rocodromo) {
+    const data = {
+      nombre: rocodromo.nombre,
+      ubicacion: rocodromo.ubicacion,
+    };
+    const rocodromoModel = await this.RocodromoModel.create(data);
+
+    return this._toDomain(rocodromoModel);
+  }
+
+  async obtenerZonasDeRocodromo(idRocodromo) {
     try {
       const rocodromoData = await this.RocodromoModel.findByPk(idRocodromo, {
         include: 'zonas',
@@ -39,7 +49,9 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
 
       return zonas;
     } catch (error) {
-      throw new Error(`Error al obtener las zonas del rocódromo: ${error.message}`);
+      throw new Error(
+        `Error al obtener las zonas del rocódromo: ${error.message}`
+      );
     }
   }
 
@@ -59,10 +71,11 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
 
       return this._toDomain(rocodromoData);
     } catch (error) {
-      throw new Error(`Error al encontrar el rocódromo por ID: ${error.message}`);
+      throw new Error(
+        `Error al encontrar el rocódromo por ID: ${error.message}`
+      );
     }
   }
-
 }
 
 export default RocodromoRepositoryPostgres;

@@ -8,6 +8,10 @@ const router = express.Router();
 const container = await containerPromise;
 const { zonaController } = container;
 
+router.post('/create', verifyTokenMiddleware, (req, res, next) => {
+  zonaController.crearZona(req, res, next);
+});
+
 /**
  * GET /zonas/pistas/:id
  * Obtiene todas las pistas que pertenecen a una zona específica

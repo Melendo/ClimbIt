@@ -21,6 +21,16 @@ class ZonaRepositoryPostgres extends ZonaRepository {
     }
   }
 
+  async crearZona(zona) {
+    const data = {
+      idRoco: zona.idRoco,
+      tipo: zona.tipo,
+    };
+    const zonaModel = await this.ZonaModel.create(data);
+
+    return this._toDomain(zonaModel);
+  }
+
   async obtenerPistasDeZona(idZona, idEscalador) {
     try {
       const includeOptions = [

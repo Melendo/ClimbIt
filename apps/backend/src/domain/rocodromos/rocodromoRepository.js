@@ -1,4 +1,8 @@
 class RocodromoRepository {
+
+  async crearRocodromo(rocodromo) {
+    throw new Error('Método "crearRocodromo" no implementado');
+  }
   async obtenerZonasDeRocodromo(idRocodromo) {
     throw new Error('Método "obtenerZonasDeRocodromo" no implementado');
   }

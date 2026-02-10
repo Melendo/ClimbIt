@@ -8,12 +8,16 @@ const router = express.Router();
 const container = await containerPromise;
 const { rocodromoController } = container;
 
+router.post('/create', verifyTokenMiddleware, (req, res, next) => {
+  rocodromoController.crearRocodromo(req, res, next);
+});
+
 /**
  * GET /rocodromos
  * Obtiene la lista de todos los rocodromos disponibles
- * 
+ *
  * Requiere: Token JWT válido en header Authorization
- * 
+ *
  * Respuesta esperada: @return {Array} Array de rocodromos con sus detalles:
  *   - id: identificador único
  *   - nombre: nombre del rocodromo
@@ -26,12 +30,12 @@ router.get('/', verifyTokenMiddleware, (req, res, next) => {
 /**
  * GET /rocodromos/zonas/:id
  * Obtiene todas las zonas que pertenecen a un rocodromo específico
- * 
+ *
  * Parámetros esperados (URL Path):
  * - id (@param {number} , requerido): ID del rocodromo (entero positivo)
- * 
+ *
  * Requiere: Token JWT válido en header Authorization
- * 
+ *
  * Respuesta esperada: @return {Array} Array de zonas con sus pistas asociadas
  */
 const obtenerZonasRocodromoValidators = [
@@ -42,7 +46,8 @@ const obtenerZonasRocodromoValidators = [
 ];
 
 router.get(
-  '/zonas/:id',verifyTokenMiddleware,
+  '/zonas/:id',
+  verifyTokenMiddleware,
   obtenerZonasRocodromoValidators,
   validate,
   (req, res, next) => {
@@ -53,12 +58,12 @@ router.get(
 /**
  * GET /rocodromos/:id
  * Obtiene toda la informaación de un rocodromo específico
- * 
+ *
  * Parámetros esperados (URL Path):
  * - id (@param {number} , requerido): ID del rocodromo (entero positivo)
- * 
+ *
  * Requiere: Token JWT válido en header Authorization
- * 
+ *
  * Respuesta esperada: @return {Object} Datos del rocodromo:
  *   - id: identificador único
  *   - nombre: nombre del rocodromo
@@ -72,7 +77,8 @@ const obtenerInformacionRocodromoValidators = [
 ];
 
 router.get(
-  '/:id',verifyTokenMiddleware,
+  '/:id',
+  verifyTokenMiddleware,
   obtenerInformacionRocodromoValidators,
   validate,
   (req, res, next) => {
