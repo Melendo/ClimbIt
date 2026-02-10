@@ -6,7 +6,7 @@ export function renderMapaZona(container, data, onZonaSelect) {
 
     // Crear estructura básica
     container.innerHTML = `
-        <div class="card shadow-sm d-flex flex-column" style="min-height: 100vh;">
+        <div class="card shadow-sm d-flex flex-column" style="height: 100vh; overflow: hidden;">
             
             <!-- Cabecera -->
             <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
@@ -18,7 +18,7 @@ export function renderMapaZona(container, data, onZonaSelect) {
             </div>
 
             <!-- Mapa (Imagen estática por ahora) -->
-             <div class="mapa-rocodromo position-relative bg-dark" style="height: 250px; overflow: hidden;">
+             <div class="mapa-rocodromo position-relative bg-dark" style="height: 650px; overflow: hidden;">
                 <img 
                     src="/assets/mapaDefecto.jpg" 
                     alt="Mapa del rocódromo" 
@@ -26,7 +26,7 @@ export function renderMapaZona(container, data, onZonaSelect) {
                     style="object-fit: cover; opacity: 0.8;"
                 />
                 <div class="position-absolute bottom-0 start-0 end-0 p-3" style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
-                    <h5 class="text-white mb-0 text-shadow">Mapa General</h5>
+                    <h5 id="mapaTitulo" class="text-white mb-0 text-shadow">Mapa General</h5>
                 </div>
             </div>
 
@@ -59,6 +59,11 @@ export function renderMapaZona(container, data, onZonaSelect) {
     const loadZonas = async (idZona) => {
         if (!idZona) return;
 
+        // Actualizar título del mapa
+        const textoZona = selector.options[selector.selectedIndex].text;
+        const mapaTitulo = container.querySelector('#mapaTitulo');
+        if (mapaTitulo) mapaTitulo.textContent = `Mapa ${textoZona}`;
+
         // Mostrar loading en el contenedor de pistas
         pistasContainer.innerHTML = `
             <div class="d-flex justify-content-center align-items-center h-100">
@@ -85,20 +90,20 @@ export function renderMapaZona(container, data, onZonaSelect) {
             <h6 class="text-muted mb-3 small fw-bold text-uppercase">Pistas Disponibles (${pistas.length})</h6>
             <div class="row g-3">
                 ${pistas.map(pista => `
-                    <div class="col-12 col-sm-6 col-md-4 fade-in">
+                    <div class="col-6 fade-in">
                         <a href="#infoPista?id=${pista.id}" class="text-decoration-none text-dark">
                             <div class="card h-100 border-0 shadow-sm zona-card overflow-hidden">
-                                <div class="position-relative" style="aspect-ratio: 16/9;">
+                                <div class="position-relative" style="aspect-ratio: 3/4;">
                                     <img src="/assets/placeholder.jpg" class="card-img-top w-100 h-100" style="object-fit: cover;" alt="${pista.nombre}">
                                     <div class="position-absolute top-0 end-0 m-2">
                                         <span class="badge bg-primary shadow-sm">${pista.dificultad}</span>
                                     </div>
-                                </div>
-                                <div class="card-body p-3">
-                                    <h6 class="card-title text-truncate mb-1 fw-bold">${pista.nombre}</h6>
-                                    <small class="text-muted">${selector.options[selector.selectedIndex].text}</small>
+                                    <div class="position-absolute bottom-0 start-0 end-0 p-3 zona-card-overlay">
+                                        <h6 class="text-white mb-0 fw-bold text-truncate">${pista.nombre}</h6>
+                                    </div>
                                 </div>
                             </div>
+
                         </a>
                     </div>
                 `).join('')}
