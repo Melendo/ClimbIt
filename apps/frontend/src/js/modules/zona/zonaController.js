@@ -8,6 +8,12 @@ import { showLoading, showError } from '../../core/ui.js';
  * @param {HTMLElement} container Contenedor donde renderizar la vista
  * @param {number} idRocodromo ID del rocódromo
  */
+const ESTADOS_CONFIG = {
+    'Flash': { icon: 'bolt', color: '#d97706', bg: '#fef3c7' },
+    'Completado': { icon: 'done', color: '#16a34a', bg: '#dcfce7' },
+    'Proyecto': { icon: 'sync', color: '#2563eb', bg: '#dbeafe' },
+    'S/N': { icon: 'remove', color: '#6b7280', bg: '#e5e7eb' }
+};
 export async function mapaZonaCmd(container, idRocodromo) {
     if (!idRocodromo) {
         showError('ID de rocódromo no válido o no proporcionado');
@@ -55,7 +61,12 @@ async function cargarPistasZona(idZona) {
     try {
         const pistasRes = await fetchClient(`/zonas/pistas/${idZona}`);
         const pistas = await pistasRes.json();
-        return pistas;
+
+        // Mapear configuración de estado para la vista
+        return pistas.map(pista => ({
+            ...pista,
+            statusConfig: ESTADOS_CONFIG[pista.estado] || ESTADOS_CONFIG['S/N']
+        }));
     } catch (err) {
         console.error(`Error al cargar pistas de la zona ${idZona}:`, err);
         return [];

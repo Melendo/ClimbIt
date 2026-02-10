@@ -6,7 +6,8 @@ class ZonaController {
   async obtenerPistasDeZona(req, res, next) {
     try {
       const { id } = req.params;
-      const pistas = await this.useCases.obtenerPistasDeZona.execute(id);
+      const apodo = req.user ? req.user.apodo : null;
+      const pistas = await this.useCases.obtenerPistasDeZona.execute(id, apodo);
 
       if (!pistas) {
         return res

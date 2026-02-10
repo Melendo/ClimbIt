@@ -21,10 +21,25 @@ class ZonaRepositoryPostgres extends ZonaRepository {
     }
   }
 
-    async obtenerPistasDeZona(idZona) {
+  async obtenerPistasDeZona(idZona, idEscalador) {
     try {
+      const includeOptions = [
+        {
+          association: 'pistas',
+          include: idEscalador
+            ? [
+              {
+                association: 'escaladores',
+                where: { id: idEscalador },
+                required: false,
+              },
+            ]
+            : [],
+        },
+      ];
+
       const zonaData = await this.ZonaModel.findByPk(idZona, {
-        include: 'pistas',
+        include: includeOptions,
       });
 
       if (!zonaData) {
@@ -32,12 +47,20 @@ class ZonaRepositoryPostgres extends ZonaRepository {
       }
 
       // Mapear las pistas asociadas
-      const pistas = zonaData.pistas.map((pista) => ({
-        id: pista.id,
-        idZona: pista.idZona,
-        nombre: pista.nombre,
-        dificultad: pista.dificultad,
-      }));
+      const pistas = zonaData.pistas.map((pista) => {
+        let estado = null;
+        if (pista.escaladores && pista.escaladores.length > 0) {
+          estado = pista.escaladores[0].EscalaPista.estado;
+        }
+
+        return {
+          id: pista.id,
+          idZona: pista.idZona,
+          nombre: pista.nombre,
+          dificultad: pista.dificultad,
+          estado,
+        };
+      });
 
       return pistas;
     } catch (error) {

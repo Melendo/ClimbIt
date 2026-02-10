@@ -89,12 +89,20 @@ export function renderMapaZona(container, data, onZonaSelect) {
         pistasContainer.innerHTML = `
             <h6 class="text-muted mb-3 small fw-bold text-uppercase">Pistas Disponibles (${pistas.length})</h6>
             <div class="row g-3">
-                ${pistas.map(pista => `
+                ${pistas.map(pista => {
+            const status = pista.statusConfig;
+            return `
                     <div class="col-6 fade-in">
                         <a href="#infoPista?id=${pista.id}" class="text-decoration-none text-dark">
                             <div class="card h-100 border-0 shadow-sm zona-card overflow-hidden">
                                 <div class="position-relative" style="aspect-ratio: 3/4;">
                                     <img src="/assets/placeholder.jpg" class="card-img-top w-100 h-100" style="object-fit: cover;" alt="${pista.nombre}">
+                                    
+                                    <!-- Estado Indicator -->
+                                    <div class="position-absolute top-0 start-0 m-2 rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; background: ${status.bg};">
+                                        <span class="material-icons" style="color: ${status.color}; font-size: 20px;">${status.icon}</span>
+                                    </div>
+
                                     <div class="position-absolute top-0 end-0 m-2">
                                         <span class="badge bg-primary shadow-sm">${pista.dificultad}</span>
                                     </div>
@@ -106,7 +114,8 @@ export function renderMapaZona(container, data, onZonaSelect) {
 
                         </a>
                     </div>
-                `).join('')}
+                `;
+        }).join('')}
             </div>
         `;
     };
