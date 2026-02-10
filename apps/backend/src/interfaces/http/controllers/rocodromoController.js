@@ -3,6 +3,16 @@ class RocodromoController {
     this.useCases = rocodromoUseCases;
   }
 
+  async crearRocodromo(req, res, next) {
+    try {
+      const { nombre, ubicacion } = req.body;
+      const nuevoRocodromo = await this.useCases.crear.execute({ nombre, ubicacion });
+      res.status(201).json(nuevoRocodromo);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   async obtenerZonasDeRocodromo(req, res, next) {
     try {
       const { id } = req.params;

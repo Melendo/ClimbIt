@@ -3,6 +3,15 @@ class ZonaController {
     this.useCases = zonaUseCases;
   }
 
+  async crearZona(req, res, next) {
+    try {
+      const { idRoco, nombre } = req.body;
+      const nuevaZona = await this.useCases.crear.execute({ idRoco, nombre });
+      res.status(201).json(nuevaZona);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
   async obtenerPistasDeZona(req, res, next) {
     try {
       const { id } = req.params;
