@@ -92,6 +92,7 @@ describe('PistaRepositoryPostgres', () => {
 
       const mockPistaInstance = {
         id: idPista,
+        escaladores: [], // No existe la relación
         addEscaladores: jest.fn().mockResolvedValue(true),
       };
 
@@ -101,10 +102,54 @@ describe('PistaRepositoryPostgres', () => {
       await repository.cambiarEstado(idPista, idEscalador, nuevoEstado);
 
       // Assert
-      expect(mockPistaModel.findByPk).toHaveBeenCalledWith(idPista);
+      expect(mockPistaModel.findByPk).toHaveBeenCalledWith(idPista, {
+        include: [{
+          association: 'escaladores',
+          where: { id: idEscalador },
+          required: false,
+        }],
+      });
       expect(mockPistaInstance.addEscaladores).toHaveBeenCalledWith(idEscalador, { 
         through: { estado: nuevoEstado } 
       });
+    });
+
+    it('debería actualizar el estado si la relación ya existe', async () => {
+      // Arrange
+      const idPista = 1;
+      const idEscalador = 1;
+      const nuevoEstado = 'completado';
+      const estadoAnterior = 'flash';
+
+      const mockEscalaPistaData = {
+        estado: estadoAnterior,
+        update: jest.fn().mockResolvedValue(true),
+      };
+
+      const mockEscaladorData = {
+        id: idEscalador,
+        EscalaPista: mockEscalaPistaData,
+      };
+
+      const mockPistaInstance = {
+        id: idPista,
+        escaladores: [mockEscaladorData], // Ya existe la relación
+      };
+
+      mockPistaModel.findByPk.mockResolvedValue(mockPistaInstance);
+
+      // Act
+      await repository.cambiarEstado(idPista, idEscalador, nuevoEstado);
+
+      // Assert
+      expect(mockPistaModel.findByPk).toHaveBeenCalledWith(idPista, {
+        include: [{
+          association: 'escaladores',
+          where: { id: idEscalador },
+          required: false,
+        }],
+      });
+      expect(mockEscalaPistaData.update).toHaveBeenCalledWith({ estado: nuevoEstado });
     });
 
     it('debería lanzar un error si la pista no existe', async () => {
@@ -120,7 +165,13 @@ describe('PistaRepositoryPostgres', () => {
         repository.cambiarEstado(idPista, idEscalador, nuevoEstado)
       ).rejects.toThrow('Pista con ID 999 no encontrada');
 
-      expect(mockPistaModel.findByPk).toHaveBeenCalledWith(idPista);
+      expect(mockPistaModel.findByPk).toHaveBeenCalledWith(idPista, {
+        include: [{
+          association: 'escaladores',
+          where: { id: idEscalador },
+          required: false,
+        }],
+      });
     });
 
     it('debería lanzar un error si falla la asociación', async () => {
@@ -131,6 +182,7 @@ describe('PistaRepositoryPostgres', () => {
 
       const mockPistaInstance = {
         id: idPista,
+        escaladores: [],
         addEscaladores: jest.fn().mockRejectedValue(new Error('Error de base de datos')),
       };
 

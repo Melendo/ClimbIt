@@ -23,12 +23,12 @@ describe('Unit: ZonaController', () => {
       obtenerPistasDeZona: { execute: jest.fn().mockResolvedValue([{ id: 1, nombre: 'Pista 1' }]) },
     };
     const controller = new ZonaController(useCases);
-    const req = { params: { id: 3 } };
+    const req = { params: { id: 3 }, user: null };
     const res = createResMock();
 
     await controller.obtenerPistasDeZona(req, res, () => {});
 
-    expect(useCases.obtenerPistasDeZona.execute).toHaveBeenCalledWith(3);
+    expect(useCases.obtenerPistasDeZona.execute).toHaveBeenCalledWith(3, null);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.body).toEqual([{ id: 1, nombre: 'Pista 1' }]);
   });

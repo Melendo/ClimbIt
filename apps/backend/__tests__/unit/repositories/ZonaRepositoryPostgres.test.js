@@ -62,8 +62,8 @@ describe('ZonaRepositoryPostgres', () => {
         idRoco: 10,
         tipo: 'Zona Test',
         pistas: [
-          { id: 101, idZona: 1, nombre: 'Pista A', dificultad: '5a' },
-          { id: 102, idZona: 1, nombre: 'Pista B', dificultad: '6b' },
+          { id: 101, idZona: 1, nombre: 'Pista A', dificultad: '5a', escaladores: [] },
+          { id: 102, idZona: 1, nombre: 'Pista B', dificultad: '6b', escaladores: [] },
         ],
       };
 
@@ -74,7 +74,12 @@ describe('ZonaRepositoryPostgres', () => {
 
       // Assert
       expect(mockZonaModel.findByPk).toHaveBeenCalledWith(idZona, {
-        include: 'pistas',
+        include: [
+          {
+            association: 'pistas',
+            include: [],
+          },
+        ],
       });
       expect(resultado).toHaveLength(2);
       expect(resultado[0]).toEqual({
@@ -82,6 +87,7 @@ describe('ZonaRepositoryPostgres', () => {
         idZona: 1,
         nombre: 'Pista A',
         dificultad: '5a',
+        estado: null,
       });
     });
 

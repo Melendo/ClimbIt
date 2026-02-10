@@ -10,34 +10,42 @@ describe('obtenerPistasZonaUseCase', () => {
     ];
     
     const mockRepository = {
-      obtenerPistasDeZona: jest.fn(async (id) => mockPistas),
+      obtenerPistasDeZona: jest.fn(async (id, idEscalador) => mockPistas),
     };
 
-    const obtenerPistasZona = new ObtenerPistasZona(mockRepository);
+    const mockEscaladorRepository = {
+      encontrarPorApodo: jest.fn(async () => null),
+    };
+
+    const obtenerPistasZona = new ObtenerPistasZona(mockRepository, mockEscaladorRepository);
     const zonaId = 1;
 
     // Act
     const resultado = await obtenerPistasZona.execute(zonaId);
 
     // Assert
-    expect(mockRepository.obtenerPistasDeZona).toHaveBeenCalledWith(zonaId);
+    expect(mockRepository.obtenerPistasDeZona).toHaveBeenCalledWith(zonaId, null);
     expect(resultado).toEqual(mockPistas);
   });
 
   it('debería retornar null si no se encuentran pistas (o la zona no existe)', async () => {
     // Arrange
     const mockRepository = {
-      obtenerPistasDeZona: jest.fn(async (id) => null),
+      obtenerPistasDeZona: jest.fn(async (id, idEscalador) => null),
     };
 
-    const obtenerPistasZona = new ObtenerPistasZona(mockRepository);
+    const mockEscaladorRepository = {
+      encontrarPorApodo: jest.fn(async () => null),
+    };
+
+    const obtenerPistasZona = new ObtenerPistasZona(mockRepository, mockEscaladorRepository);
     const zonaId = 999;
 
     // Act
     const resultado = await obtenerPistasZona.execute(zonaId);
 
     // Assert
-    expect(mockRepository.obtenerPistasDeZona).toHaveBeenCalledWith(zonaId);
+    expect(mockRepository.obtenerPistasDeZona).toHaveBeenCalledWith(zonaId, null);
     expect(resultado).toBeNull();
   });
 
@@ -50,7 +58,11 @@ describe('obtenerPistasZonaUseCase', () => {
       }),
     };
 
-    const obtenerPistasZona = new ObtenerPistasZona(mockRepository);
+    const mockEscaladorRepository = {
+      encontrarPorApodo: jest.fn(async () => null),
+    };
+
+    const obtenerPistasZona = new ObtenerPistasZona(mockRepository, mockEscaladorRepository);
     const zonaId = 1;
 
     // Act & Assert

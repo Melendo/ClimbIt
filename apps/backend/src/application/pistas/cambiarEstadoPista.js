@@ -16,11 +16,14 @@ class CambiarEstadoPista {
         throw new Error(`Escalador con apodo ${escaladorApodo} no encontrado`);
       }
 
-      if (nuevoEstado !== 'S/N') {
+      // Convertir estado a minúsculas para que coincida con el ENUM
+      const estadoNormalizado = nuevoEstado.toLowerCase();
+
+      if (estadoNormalizado !== 's/n') {
         await this.pistaRepository.cambiarEstado(
           idPista,
           escalador.id,
-          nuevoEstado
+          estadoNormalizado
         );
       }else{
         await this.pistaRepository.eliminarEstadoPista(idPista, escalador.id);
