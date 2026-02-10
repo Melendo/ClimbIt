@@ -218,4 +218,86 @@ describe('E2E: Escalador', () => {
       expect(response.body).toHaveProperty('status', 'invalid_request');
     });
   });
+
+  describe('Obtener perfil del escalador', () => {
+    it('debería obtener el perfil del escalador autenticado', async () => {
+      const response = await request(app)
+        .get('/escaladores/perfil')
+        .set('Authorization', `Bearer ${tokenSuscripcion}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('id');
+      expect(response.body).toHaveProperty('correo');
+      expect(response.body).toHaveProperty('apodo');
+      expect(response.body.correo).toBe(escaladorSuscripcion.correo);
+      expect(response.body.apodo).toBe(escaladorSuscripcion.apodo);
+    });
+
+    it('debería retornar 401 si no se proporciona token de autenticación', async () => {
+      const response = await request(app)
+        .get('/escaladores/perfil')
+        .expect(401);
+
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toContain('Acceso denegado');
+    });
+  });
+
+  describe('Obtener rocodromos suscritos', () => {
+    beforeAll(async () => {
+      // Suscribir el escalador a un rocódromo
+      await escaladorSuscripcion.addRocodromo(rocodromoTest);
+    });
+
+    it('debería obtener los rocodromos suscritos del escalador', async () => {
+      const response = await request(app)
+        .get('/escaladores/mis-rocodromos')
+        .set('Authorization', `Bearer ${tokenSuscripcion}`)
+        .expect(200);
+
+      expect(response.body).toBeInstanceOf(Array);
+      expect(response.body.length).toBeGreaterThan(0);
+      
+      const rocodromoIds = response.body.map(r => r.id);
+      expect(rocodromoIds).toContain(rocodromoTest.id);
+      
+      const rocodromoEnRespuesta = response.body.find(r => r.id === rocodromoTest.id);
+      expect(rocodromoEnRespuesta).toHaveProperty('nombre');
+      expect(rocodromoEnRespuesta).toHaveProperty('ubicacion');
+    });
+
+    it('debería retornar un array vacío si el escalador no tiene suscripciones', async () => {
+      // Crear nuevo escalador sin suscripciones
+      const escaladorSinSuscripcion = await db.Escalador.create({
+        correo: 'sin-suscripcion@test.com',
+        contrasena: 'hashedPassword123',
+        apodo: 'SinSuscripcionTester',
+      });
+
+      const tokenSinSuscripcion = tokenService.crear({
+        correo: escaladorSinSuscripcion.correo,
+        apodo: escaladorSinSuscripcion.apodo,
+      });
+
+      const response = await request(app)
+        .get('/escaladores/mis-rocodromos')
+        .set('Authorization', `Bearer ${tokenSinSuscripcion}`)
+        .expect(200);
+
+      expect(response.body).toBeInstanceOf(Array);
+      expect(response.body).toHaveLength(0);
+
+      // Limpiar
+      await escaladorSinSuscripcion.destroy();
+    });
+
+    it('debería retornar 401 si no se proporciona token de autenticación', async () => {
+      const response = await request(app)
+        .get('/escaladores/mis-rocodromos')
+        .expect(401);
+
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toContain('Acceso denegado');
+    });
+  });
 });
