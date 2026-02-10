@@ -9,9 +9,9 @@ import { showLoading, showError } from '../../core/ui.js';
  * @param {number} idRocodromo ID del rocódromo
  */
 const ESTADOS_CONFIG = {
-    'Flash': { icon: 'bolt', color: '#d97706', bg: '#fef3c7' },
-    'Completado': { icon: 'done', color: '#16a34a', bg: '#dcfce7' },
-    'Proyecto': { icon: 'sync', color: '#2563eb', bg: '#dbeafe' },
+    'flash': { icon: 'bolt', color: '#d97706', bg: '#fef3c7' },
+    'completado': { icon: 'done', color: '#16a34a', bg: '#dcfce7' },
+    'proyecto': { icon: 'sync', color: '#2563eb', bg: '#dbeafe' },
     'S/N': { icon: 'remove', color: '#6b7280', bg: '#e5e7eb' }
 };
 export async function mapaZonaCmd(container, idRocodromo) {
