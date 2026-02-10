@@ -1,8 +1,9 @@
 'use strict';
 
+/** @type {import('sequelize-cli').Migration} */
 export default {
-  up: async (queryInterface, Sequelize) => {
-    // 1. Rocodromos
+  async up(queryInterface, Sequelize) {
+    // 1. Create Rocodromos table
     await queryInterface.createTable('Rocodromos', {
       IDRoco: {
         type: Sequelize.INTEGER,
@@ -17,10 +18,16 @@ export default {
       Ubicacion: {
         type: Sequelize.STRING,
         allowNull: false,
+        unique: true,
       },
       Mapa: {
         type: Sequelize.STRING,
         allowNull: true,
+      },
+      Activo: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
       },
       createdAt: {
         allowNull: false,
@@ -34,7 +41,7 @@ export default {
       },
     });
 
-    // 2. Escaladores
+    // 2. Create Escaladores table
     await queryInterface.createTable('Escaladores', {
       IDEscalador: {
         type: Sequelize.INTEGER,
@@ -54,6 +61,12 @@ export default {
       Apodo: {
         type: Sequelize.STRING,
         allowNull: false,
+        unique: true,
+      },
+      Activo: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
       },
       createdAt: {
         allowNull: false,
@@ -67,7 +80,7 @@ export default {
       },
     });
 
-    // 3. Zonas
+    // 3. Create Zonas table
     await queryInterface.createTable('Zonas', {
       IDZona: {
         type: Sequelize.INTEGER,
@@ -93,6 +106,11 @@ export default {
         type: Sequelize.STRING,
         allowNull: true,
       },
+      Activo: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
@@ -105,7 +123,7 @@ export default {
       },
     });
 
-    // 4. Pistas
+    // 4. Create Pistas table
     await queryInterface.createTable('Pistas', {
       IDPista: {
         type: Sequelize.INTEGER,
@@ -125,11 +143,16 @@ export default {
       },
       Nombre: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       Dificultad: {
         type: Sequelize.STRING,
         allowNull: true,
+      },
+      Activo: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
       },
       createdAt: {
         allowNull: false,
@@ -143,7 +166,7 @@ export default {
       },
     });
 
-    // 5. EscalaPista (Join table)
+    // 5. Create EscalaPista table (Join table)
     await queryInterface.createTable('EscalaPista', {
       IDPista: {
         type: Sequelize.INTEGER,
@@ -168,12 +191,13 @@ export default {
         onDelete: 'CASCADE',
       },
       Estado: {
-        type: Sequelize.STRING,
+        // eslint-disable-next-line new-cap
+        type: Sequelize.ENUM('flash', 'completado', 'proyecto'),
         allowNull: false,
       },
     });
 
-    // 6. Suscripciones (Join table)
+    // 6. Create Suscripciones table (Join table)
     await queryInterface.createTable('Suscripciones', {
       IDRocodromo: {
         type: Sequelize.INTEGER,
@@ -200,12 +224,17 @@ export default {
     });
   },
 
-  down: async (queryInterface, Sequelize) => {
+  async down(queryInterface, Sequelize) {
+    // Drop tables in reverse order
     await queryInterface.dropTable('Suscripciones');
     await queryInterface.dropTable('EscalaPista');
     await queryInterface.dropTable('Pistas');
     await queryInterface.dropTable('Zonas');
     await queryInterface.dropTable('Escaladores');
     await queryInterface.dropTable('Rocodromos');
+
+    await queryInterface.sequelize.query(
+      'DROP TYPE IF EXISTS "enum_escala_pista_estado";'
+    );
   },
 };

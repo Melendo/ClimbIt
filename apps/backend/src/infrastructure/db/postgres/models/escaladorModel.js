@@ -40,7 +40,14 @@ export default (sequelize, DataTypes) => {
       apodo: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
         field: 'Apodo',
+      },
+      activo: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+        field: 'Activo',
       },
     },
     {

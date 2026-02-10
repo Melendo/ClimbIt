@@ -35,13 +35,19 @@ export default (sequelize, DataTypes) => {
       },
       nombre: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         field: 'Nombre',
       },
       dificultad: {
         type: DataTypes.STRING,
         allowNull: true,
         field: 'Dificultad',
+      },
+      activo: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+        field: 'Activo',
       },
     },
     {
