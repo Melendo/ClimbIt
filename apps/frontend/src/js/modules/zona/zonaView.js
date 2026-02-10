@@ -48,11 +48,17 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
 
             <!-- Contenedor de Pistas (Dinámico) -->
             <div id="pistasContainer" class="card-body flex-grow-1 overflow-auto bg-light">
+                ${zonas.length > 0 ? `
                 <div class="text-center text-muted mt-5 fade-in">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Cargando...</span>
                     </div>
+                </div>` : `
+                <div class="d-flex flex-column justify-content-center align-items-center h-100 text-muted fade-in">
+                    <span class="material-icons mb-3" style="font-size: 48px; opacity: 0.5;">map</span>
+                    <p class="mb-0">Este rocódromo no tiene zonas registradas.</p>
                 </div>
+                `}
             </div>
 
             <!-- Navbar -->
