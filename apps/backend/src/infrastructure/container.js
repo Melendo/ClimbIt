@@ -83,7 +83,7 @@ async function inicializarContainer() {
     pistaRepository,
     escaladorRepository
   );
-  const obtenerPistasDeZonaUseCase = new ObtenerPistasDeZona(zonaRepository);
+  const obtenerPistasDeZonaUseCase = new ObtenerPistasDeZona(zonaRepository, escaladorRepository);
 
   const obtenerZonasRocodromoUseCase = new ObtenerZonasRocodromo(
     rocodromoRepository

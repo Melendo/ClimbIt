@@ -3,7 +3,8 @@ import { mainContainer, showLoading, showError } from './ui.js';
 import { isAuthenticated } from './client.js';
 import { perfilCmd } from '../modules/escalador/escaladorController.js';
 import { crearPistaCmd, infoPistaCmd } from '../modules/pista/pistaController.js';
-import { mapaRocodromoCmd, misRocodromosCmd, buscarRocodromosCmd } from '../modules/rocodromo/rocodromoController.js';
+import { misRocodromosCmd, buscarRocodromosCmd } from '../modules/rocodromo/rocodromoController.js';
+import { mapaZonaCmd } from '../modules/zona/zonaController.js';
 import { homeCmd } from '../modules/home/homeController.js';
 import { error404Cmd } from '../modules/error/errorController.js';
 import { loginCmd, registroCmd } from '../modules/autenticacion/authController.js';
@@ -63,9 +64,14 @@ export async function handleNavigation() {
         else if (hash === '#buscarRocodromos') {
             await buscarRocodromosCmd(mainContainer);
         }
-        else if (hash.startsWith('#mapaRocodromo')) {
+        else if (hash.startsWith('#mapaZona')) {
             const id = obtenerParametroDesdeHash('id');
-            await mapaRocodromoCmd(mainContainer, id);
+            await mapaZonaCmd(mainContainer, id);
+        }
+        else if (hash.startsWith('#mapaRocodromo')) {
+            // Redirección para compatibilidad hacia atras
+            const id = obtenerParametroDesdeHash('id');
+            window.location.hash = `#mapaZona?id=${id}`;
         }
         else if (hash === '#perfil') {
             await perfilCmd(mainContainer);

@@ -18,7 +18,7 @@ body {
 }
 
 /* Contenido centrado con ancho máximo */
-#app-container.app-vertical-layout > .app-content {
+#app-container.app-vertical-layout>.app-content {
   width: 100%;
   max-width: var(--app-max-width);
 }
@@ -28,19 +28,19 @@ body {
   #app-container.app-vertical-layout {
     padding: 0;
   }
-  
-  #app-container.app-vertical-layout > .app-content {
+
+  #app-container.app-vertical-layout>.app-content {
     max-width: 100%;
   }
-  
-  /* Cards a pantalla completa en móvil */
-  #app-container.app-vertical-layout .card {
+
+  /* Cards a pantalla completa en móvil (solo la card principal) */
+  #app-container.app-vertical-layout .app-content>.card {
     border-radius: 0 !important;
     border-left: none !important;
     border-right: none !important;
     min-height: 100vh;
   }
-  
+
   #app-container.app-vertical-layout .card .card-header,
   #app-container.app-vertical-layout .card .card-footer {
     border-radius: 0 !important;
@@ -55,6 +55,7 @@ body {
 .estado-btn {
   text-decoration: none !important;
 }
+
 .estado-btn:hover,
 .estado-btn:focus {
   text-decoration: none !important;
@@ -70,11 +71,11 @@ body {
 
 .zona-card:hover {
   transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .zona-card-overlay {
-  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
 }
 
 /* ========================================
@@ -102,7 +103,7 @@ body {
   left: 0;
   right: 0;
   padding: 1rem;
-  background: linear-gradient(transparent, rgba(255,255,255,0.95));
+  background: linear-gradient(transparent, rgba(255, 255, 255, 0.95));
   z-index: 100;
 }
 
@@ -135,12 +136,10 @@ body {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.4),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent);
   animation: shimmer 2s infinite;
 }
 
@@ -148,6 +147,7 @@ body {
   0% {
     left: -100%;
   }
+
   100% {
     left: 100%;
   }
@@ -205,4 +205,71 @@ body {
   color: white;
   font-size: 0.5rem;
   font-weight: bold;
+}
+
+/* ========================================
+   Animaciones de Transición (Swipe)
+   ======================================== */
+.slide-in-right {
+  animation: slideInRight 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.slide-out-right {
+  animation: slideOutRight 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.slide-out-left {
+  animation: slideOutLeft 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@keyframes slideInRight {
+  0% {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  0% {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+}
+
+@keyframes slideOutLeft {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
 }

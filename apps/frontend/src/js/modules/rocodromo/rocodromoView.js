@@ -18,7 +18,7 @@ export function renderMisRocodromos(container, rocodromos) {
         rocodromosHTML = rocodromos.map(rocodromo => `
           <div class="col-6 col-md-4">
             <div class="zona-card position-relative rounded overflow-hidden" style="aspect-ratio: 1;">
-              <a href="#mapaRocodromo?id=${rocodromo.id}" class="text-decoration-none">
+              <a href="#mapaZona?id=${rocodromo.id}" class="text-decoration-none">
                 <img src="/assets/rocodromoDefecto.jpg" alt="${rocodromo.nombre}" class="w-100 h-100" style="object-fit: cover;">
                 <div class="zona-card-overlay position-absolute bottom-0 start-0 end-0 p-2 text-white">
                   <small class="d-block fw-medium">${rocodromo.nombre}</small>
@@ -101,7 +101,7 @@ export function renderBuscarRocodromos(container, rocodromos, suscritosIds = [])
             return `
           <div class="col-6 col-md-4">
             <div class="zona-card position-relative rounded overflow-hidden" style="aspect-ratio: 1;">
-              <a href="#mapaRocodromo?id=${rocodromo.id}" class="text-decoration-none">
+              <a href="#mapaZona?id=${rocodromo.id}" class="text-decoration-none">
                 <img src="/assets/rocodromoDefecto.jpg" alt="${rocodromo.nombre}" class="w-100 h-100" style="object-fit: cover;">
                 <div class="zona-card-overlay position-absolute bottom-0 start-0 end-0 p-2 text-white">
                   <small class="d-block fw-medium">${rocodromo.nombre}</small>
