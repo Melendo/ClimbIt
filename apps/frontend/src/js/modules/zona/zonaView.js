@@ -11,7 +11,7 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
 
     // Crear estructura básica
     container.innerHTML = `
-        <div class="card shadow-sm d-flex flex-column" style="height: 100vh; overflow: hidden;">
+        <div class="card shadow-sm d-flex flex-column" style="height: 100dvh; overflow: hidden;">
             
             <!-- Cabecera -->
             <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
@@ -23,7 +23,7 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
             </div>
 
             <!-- Mapa (Imagen estática por ahora) -->
-             <div class="mapa-rocodromo position-relative bg-dark flex-shrink-0" style="height: 40vh; min-height: 300px; overflow: hidden;">
+             <div class="mapa-rocodromo position-relative bg-dark flex-shrink-0" style="height: 40dvh; min-height: 300px; overflow: hidden;">
                 <img 
                     src="/assets/mapaDefecto.jpg" 
                     alt="Mapa del rocódromo" 

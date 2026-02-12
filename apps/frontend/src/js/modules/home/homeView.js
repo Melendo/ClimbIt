@@ -1,7 +1,7 @@
 // Vista de la página principal (home)
 export function renderHomeView(container, callbacks) {
-    container.innerHTML = `
-    <div class="card shadow-sm d-flex flex-column" style="min-height: 100vh;">
+  container.innerHTML = `
+    <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
 
       <!-- Contenido principal centrado -->
       <div class="card-body flex-grow-1 d-flex flex-column justify-content-center align-items-center text-center">
@@ -24,12 +24,12 @@ export function renderHomeView(container, callbacks) {
 
     </div>`;
 
-    // Evento para el botón de login
-    const loginBtn = container.querySelector('#login-btn');
-    loginBtn.addEventListener('click', (e) => {
-        if (callbacks.isAuthenticated()) {
-            e.preventDefault();
-            callbacks.onAlreadyAuthenticated();
-        }
-    });
+  // Evento para el botón de login
+  const loginBtn = container.querySelector('#login-btn');
+  loginBtn.addEventListener('click', (e) => {
+    if (callbacks.isAuthenticated()) {
+      e.preventDefault();
+      callbacks.onAlreadyAuthenticated();
+    }
+  });
 }

@@ -2,11 +2,11 @@ import { renderNavbar } from '../../components/navbar.js';
 
 // Vista del perfil del escalador
 export function renderPerfil(container, escalador, callbacks) {
-    const { correo, apodo, fotoPerfil } = escalador;
-    const avatar = fotoPerfil || '/assets/johnDoe.png';
+  const { correo, apodo, fotoPerfil } = escalador;
+  const avatar = fotoPerfil || '/assets/johnDoe.png';
 
-    container.innerHTML = `
-    <div class="card shadow-sm d-flex flex-column" style="min-height: 100vh;">
+  container.innerHTML = `
+    <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
 
       <!-- Cabecera -->
       <div class="card-header bg-white d-flex align-items-center justify-content-center gap-2 py-3">
@@ -86,18 +86,18 @@ export function renderPerfil(container, escalador, callbacks) {
     </div>
     `;
 
-    // Evento para abrir el modal de confirmación
-    const logoutBtn = container.querySelector('#logout-btn');
-    const logoutModal = new window.bootstrap.Modal(container.querySelector('#logoutModal'));
-    
-    logoutBtn.addEventListener('click', () => {
-        logoutModal.show();
-    });
+  // Evento para abrir el modal de confirmación
+  const logoutBtn = container.querySelector('#logout-btn');
+  const logoutModal = new window.bootstrap.Modal(container.querySelector('#logoutModal'));
 
-    // Evento para confirmar el cierre de sesión
-    const confirmLogoutBtn = container.querySelector('#confirm-logout-btn');
-    confirmLogoutBtn.addEventListener('click', () => {
-        logoutModal.hide();
-        callbacks.onLogout();
-    });
+  logoutBtn.addEventListener('click', () => {
+    logoutModal.show();
+  });
+
+  // Evento para confirmar el cierre de sesión
+  const confirmLogoutBtn = container.querySelector('#confirm-logout-btn');
+  confirmLogoutBtn.addEventListener('click', () => {
+    logoutModal.hide();
+    callbacks.onLogout();
+  });
 }

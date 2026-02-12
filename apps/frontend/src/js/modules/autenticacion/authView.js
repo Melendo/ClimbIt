@@ -2,29 +2,29 @@ import { isValidEmail } from '../../core/ui.js';
 
 // Helper para configurar validación de email en formularios
 function setupEmailFormValidation(form, emailInput, alertBox, onValidEmail) {
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const email = emailInput.value.trim();
-        
-        if (!isValidEmail(email)) {
-            alertBox.className = 'alert alert-danger';
-            alertBox.textContent = 'El email debe tener el formato correcto (ej: usuario@dominio.com)';
-            return;
-        }
-        
-        alertBox.className = 'alert d-none';
-        onValidEmail(email);
-    });
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = emailInput.value.trim();
 
-    emailInput.addEventListener('input', () => {
-        alertBox.className = 'alert d-none';
-    });
+    if (!isValidEmail(email)) {
+      alertBox.className = 'alert alert-danger';
+      alertBox.textContent = 'El email debe tener el formato correcto (ej: usuario@dominio.com)';
+      return;
+    }
+
+    alertBox.className = 'alert d-none';
+    onValidEmail(email);
+  });
+
+  emailInput.addEventListener('input', () => {
+    alertBox.className = 'alert d-none';
+  });
 }
 
 // Vista paso 1: Pedir email
 export function renderLoginEmail(container, callbacks) {
-    container.innerHTML = `
-      <div class="card shadow-sm d-flex flex-column" style="min-height: 100vh;">
+  container.innerHTML = `
+      <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
         <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
           <a href="#home" class="text-dark">
             <span class="material-icons align-middle">arrow_back</span>
@@ -58,17 +58,17 @@ export function renderLoginEmail(container, callbacks) {
       </div>
     `;
 
-    const form = container.querySelector('#login-email-form');
-    const emailInput = container.querySelector('#email');
-    const alertBox = container.querySelector('#alert-box');
+  const form = container.querySelector('#login-email-form');
+  const emailInput = container.querySelector('#email');
+  const alertBox = container.querySelector('#alert-box');
 
-    setupEmailFormValidation(form, emailInput, alertBox, callbacks.onEmailSubmit);
+  setupEmailFormValidation(form, emailInput, alertBox, callbacks.onEmailSubmit);
 }
 
 // Vista paso 2: Pedir contraseña
 export function renderLoginPassword(container, email, callbacks) {
-    container.innerHTML = `
-      <div class="card shadow-sm d-flex flex-column" style="min-height: 100vh;">
+  container.innerHTML = `
+      <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
         <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
           <a href="#" id="back-btn" class="text-dark">
             <span class="material-icons align-middle">arrow_back</span>
@@ -104,68 +104,68 @@ export function renderLoginPassword(container, email, callbacks) {
       </div>
     `;
 
-    // Toggle para mostrar/ocultar contraseña
-    const toggleBtn = container.querySelector('#toggle-password');
-    const passwordInput = container.querySelector('#password');
-    toggleBtn.addEventListener('click', () => {
-        const isPassword = passwordInput.type === 'password';
-        passwordInput.type = isPassword ? 'text' : 'password';
-        toggleBtn.textContent = isPassword ? 'visibility_off' : 'visibility';
-    });
+  // Toggle para mostrar/ocultar contraseña
+  const toggleBtn = container.querySelector('#toggle-password');
+  const passwordInput = container.querySelector('#password');
+  toggleBtn.addEventListener('click', () => {
+    const isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    toggleBtn.textContent = isPassword ? 'visibility_off' : 'visibility';
+  });
 
-    // Botón volver al paso anterior
-    const backBtn = container.querySelector('#back-btn');
-    backBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        callbacks.onBack();
-    });
+  // Botón volver al paso anterior
+  const backBtn = container.querySelector('#back-btn');
+  backBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    callbacks.onBack();
+  });
 
-    // Enviar formulario
-    const form = container.querySelector('#login-password-form');
-    const submitBtn = container.querySelector('#submit-btn');
-    const alertBox = container.querySelector('#alert-box');
+  // Enviar formulario
+  const form = container.querySelector('#login-password-form');
+  const submitBtn = container.querySelector('#submit-btn');
+  const alertBox = container.querySelector('#alert-box');
 
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const password = passwordInput.value;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const password = passwordInput.value;
 
-        // Deshabilitar botón mientras se procesa
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = `
+    // Deshabilitar botón mientras se procesa
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `
             <span class="spinner-border spinner-border-sm me-2" role="status"></span>
             Iniciando sesión...
         `;
 
-        try {
-            await callbacks.onPasswordSubmit(password);
-        } 
-        // eslint-disable-next-line no-unused-vars
-        catch (error) {
-            // Mostrar error
-            alertBox.className = 'alert alert-danger';
-            alertBox.textContent = 'El usuario y la contraseña no coinciden';
-            
-            // Rehabilitar botón
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = `
+    try {
+      await callbacks.onPasswordSubmit(password);
+    }
+    // eslint-disable-next-line no-unused-vars
+    catch (error) {
+      // Mostrar error
+      alertBox.className = 'alert alert-danger';
+      alertBox.textContent = 'El usuario y la contraseña no coinciden';
+
+      // Rehabilitar botón
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `
                 Iniciar sesión
                 <span class="material-icons align-middle ms-1">login</span>
             `;
-        }
-    });
+    }
+  });
 }
 
 // Componente de barra de progreso para el registro
 function renderRegistroProgress(currentStep) {
-    const steps = [
-        { num: 1, label: 'Email' },
-        { num: 2, label: 'Contraseña' },
-        { num: 3, label: 'Apodo' }
-    ];
-    
-    const progressPercent = ((currentStep) / steps.length) * 100;
-    
-    return `
+  const steps = [
+    { num: 1, label: 'Email' },
+    { num: 2, label: 'Contraseña' },
+    { num: 3, label: 'Apodo' }
+  ];
+
+  const progressPercent = ((currentStep) / steps.length) * 100;
+
+  return `
       <div class="registro-progress-container">
         <div class="registro-progress-wrapper">
           <div class="registro-progress">
@@ -173,17 +173,17 @@ function renderRegistroProgress(currentStep) {
           </div>
           <div class="registro-steps">
             ${steps.map(step => {
-                let stepClass = '';
-                if (step.num < currentStep) stepClass = 'completed';
-                else if (step.num === currentStep) stepClass = 'active';
-                
-                return `
+    let stepClass = '';
+    if (step.num < currentStep) stepClass = 'completed';
+    else if (step.num === currentStep) stepClass = 'active';
+
+    return `
                   <div class="registro-step ${stepClass}">
                     <div class="registro-step-dot"></div>
                     <span>${step.label}</span>
                   </div>
                 `;
-            }).join('')}
+  }).join('')}
           </div>
         </div>
       </div>
@@ -192,8 +192,8 @@ function renderRegistroProgress(currentStep) {
 
 // Vista registro paso 1: Pedir email
 export function renderRegistroEmail(container, callbacks) {
-    container.innerHTML = `
-      <div class="card shadow-sm d-flex flex-column" style="min-height: 100vh;">
+  container.innerHTML = `
+      <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
         <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
           <a href="#home" class="text-dark">
             <span class="material-icons align-middle">arrow_back</span>
@@ -232,17 +232,17 @@ export function renderRegistroEmail(container, callbacks) {
       </div>
     `;
 
-    const form = container.querySelector('#registro-email-form');
-    const emailInput = container.querySelector('#email');
-    const alertBox = container.querySelector('#alert-box');
+  const form = container.querySelector('#registro-email-form');
+  const emailInput = container.querySelector('#email');
+  const alertBox = container.querySelector('#alert-box');
 
-    setupEmailFormValidation(form, emailInput, alertBox, callbacks.onEmailSubmit);
+  setupEmailFormValidation(form, emailInput, alertBox, callbacks.onEmailSubmit);
 }
 
 // Vista registro paso 2: Pedir contraseña
 export function renderRegistroPassword(container, email, callbacks) {
-    container.innerHTML = `
-      <div class="card shadow-sm d-flex flex-column" style="min-height: 100vh;">
+  container.innerHTML = `
+      <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
         <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
           <a href="#" id="back-btn" class="text-dark">
             <span class="material-icons align-middle">arrow_back</span>
@@ -290,74 +290,74 @@ export function renderRegistroPassword(container, email, callbacks) {
       </div>
     `;
 
-    // Toggle para mostrar/ocultar contraseña
-    const toggleBtn = container.querySelector('#toggle-password');
-    const passwordInput = container.querySelector('#password');
-    toggleBtn.addEventListener('click', () => {
-        const isPassword = passwordInput.type === 'password';
-        passwordInput.type = isPassword ? 'text' : 'password';
-        toggleBtn.textContent = isPassword ? 'visibility_off' : 'visibility';
-    });
+  // Toggle para mostrar/ocultar contraseña
+  const toggleBtn = container.querySelector('#toggle-password');
+  const passwordInput = container.querySelector('#password');
+  toggleBtn.addEventListener('click', () => {
+    const isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    toggleBtn.textContent = isPassword ? 'visibility_off' : 'visibility';
+  });
 
-    // Toggle para mostrar/ocultar confirmar contraseña
-    const toggleBtnConfirm = container.querySelector('#toggle-password-confirm');
-    const passwordConfirmInput = container.querySelector('#password-confirm');
-    toggleBtnConfirm.addEventListener('click', () => {
-        const isPassword = passwordConfirmInput.type === 'password';
-        passwordConfirmInput.type = isPassword ? 'text' : 'password';
-        toggleBtnConfirm.textContent = isPassword ? 'visibility_off' : 'visibility';
-    });
+  // Toggle para mostrar/ocultar confirmar contraseña
+  const toggleBtnConfirm = container.querySelector('#toggle-password-confirm');
+  const passwordConfirmInput = container.querySelector('#password-confirm');
+  toggleBtnConfirm.addEventListener('click', () => {
+    const isPassword = passwordConfirmInput.type === 'password';
+    passwordConfirmInput.type = isPassword ? 'text' : 'password';
+    toggleBtnConfirm.textContent = isPassword ? 'visibility_off' : 'visibility';
+  });
 
-    // Botón volver al paso anterior
-    const backBtn = container.querySelector('#back-btn');
-    backBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        callbacks.onBack();
-    });
+  // Botón volver al paso anterior
+  const backBtn = container.querySelector('#back-btn');
+  backBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    callbacks.onBack();
+  });
 
-    // Enviar formulario
-    const form = container.querySelector('#registro-password-form');
-    const alertBox = container.querySelector('#alert-box');
+  // Enviar formulario
+  const form = container.querySelector('#registro-password-form');
+  const alertBox = container.querySelector('#alert-box');
 
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const password = passwordInput.value;
-        const passwordConfirm = passwordConfirmInput.value;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const password = passwordInput.value;
+    const passwordConfirm = passwordConfirmInput.value;
 
-        // Validar longitud mínima de contraseña
-        if (password.length < 4) {
-            alertBox.className = 'alert alert-danger';
-            alertBox.textContent = 'La contraseña debe tener al menos 4 caracteres';
-            return;
-        }
+    // Validar longitud mínima de contraseña
+    if (password.length < 4) {
+      alertBox.className = 'alert alert-danger';
+      alertBox.textContent = 'La contraseña debe tener al menos 4 caracteres';
+      return;
+    }
 
-        // Validar que las contraseñas coincidan
-        if (password !== passwordConfirm) {
-            alertBox.className = 'alert alert-danger';
-            alertBox.textContent = 'Las contraseñas no coinciden';
-            return;
-        }
+    // Validar que las contraseñas coincidan
+    if (password !== passwordConfirm) {
+      alertBox.className = 'alert alert-danger';
+      alertBox.textContent = 'Las contraseñas no coinciden';
+      return;
+    }
 
-        // Limpiar errores
-        alertBox.className = 'alert d-none';
+    // Limpiar errores
+    alertBox.className = 'alert d-none';
 
-        callbacks.onPasswordSubmit(password);
-    });
+    callbacks.onPasswordSubmit(password);
+  });
 
-    // Limpiar errores al escribir
-    passwordInput.addEventListener('input', () => {
-        alertBox.className = 'alert d-none';
-    });
+  // Limpiar errores al escribir
+  passwordInput.addEventListener('input', () => {
+    alertBox.className = 'alert d-none';
+  });
 
-    passwordConfirmInput.addEventListener('input', () => {
-        alertBox.className = 'alert d-none';
-    });
+  passwordConfirmInput.addEventListener('input', () => {
+    alertBox.className = 'alert d-none';
+  });
 }
 
 // Vista registro paso 3: Pedir apodo
 export function renderRegistroApodo(container, email, callbacks) {
-    container.innerHTML = `
-      <div class="card shadow-sm d-flex flex-column" style="min-height: 100vh;">
+  container.innerHTML = `
+      <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
         <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
           <a href="#" id="back-btn" class="text-dark">
             <span class="material-icons align-middle">arrow_back</span>
@@ -394,70 +394,70 @@ export function renderRegistroApodo(container, email, callbacks) {
       </div>
     `;
 
-    // Botón volver al paso anterior
-    const backBtn = container.querySelector('#back-btn');
-    backBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        callbacks.onBack();
-    });
+  // Botón volver al paso anterior
+  const backBtn = container.querySelector('#back-btn');
+  backBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    callbacks.onBack();
+  });
 
-    // Enviar formulario
-    const form = container.querySelector('#registro-apodo-form');
-    const submitBtn = container.querySelector('#submit-btn');
-    const alertBox = container.querySelector('#alert-box');
-    const apodoInput = container.querySelector('#apodo');
+  // Enviar formulario
+  const form = container.querySelector('#registro-apodo-form');
+  const submitBtn = container.querySelector('#submit-btn');
+  const alertBox = container.querySelector('#alert-box');
+  const apodoInput = container.querySelector('#apodo');
 
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const apodo = apodoInput.value.trim();
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const apodo = apodoInput.value.trim();
 
-        if (!apodo) {
-            alertBox.className = 'alert alert-danger';
-            alertBox.textContent = 'El apodo es obligatorio';
-            apodoInput.classList.add('is-invalid');
-            return;
-        }
+    if (!apodo) {
+      alertBox.className = 'alert alert-danger';
+      alertBox.textContent = 'El apodo es obligatorio';
+      apodoInput.classList.add('is-invalid');
+      return;
+    }
 
-        if (apodo.length > 15) {
-            alertBox.className = 'alert alert-danger';
-            alertBox.textContent = 'El apodo no puede superar los 15 caracteres';
-            apodoInput.classList.add('is-invalid');
-            return;
-        }
+    if (apodo.length > 15) {
+      alertBox.className = 'alert alert-danger';
+      alertBox.textContent = 'El apodo no puede superar los 15 caracteres';
+      apodoInput.classList.add('is-invalid');
+      return;
+    }
 
-        if (apodo.length < 2) {
-            alertBox.className = 'alert alert-danger';
-            alertBox.textContent = 'El apodo debe tener al menos 2 caracteres';
-            apodoInput.classList.add('is-invalid');
-            return;
-        }
+    if (apodo.length < 2) {
+      alertBox.className = 'alert alert-danger';
+      alertBox.textContent = 'El apodo debe tener al menos 2 caracteres';
+      apodoInput.classList.add('is-invalid');
+      return;
+    }
 
-        // Deshabilitar botón mientras se procesa
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = `
+    // Deshabilitar botón mientras se procesa
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `
             <span class="spinner-border spinner-border-sm me-2" role="status"></span>
             Creando cuenta...
         `;
 
-        try {
-            await callbacks.onApodoSubmit(apodo);
-        } catch (error) {
-            // Mostrar error
-            alertBox.className = 'alert alert-danger';
-            alertBox.textContent = error.message || 'Error al crear la cuenta';
-            
-            // Rehabilitar botón
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = `
+    try {
+      await callbacks.onApodoSubmit(apodo);
+    } catch (error) {
+      // Mostrar error
+      alertBox.className = 'alert alert-danger';
+      alertBox.textContent = error.message || 'Error al crear la cuenta';
+
+      // Rehabilitar botón
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `
                 Crear cuenta
                 <span class="material-icons align-middle ms-1">check</span>
             `;
-        }
-    });
+    }
+  });
 
-    // Limpiar error al escribir
-    apodoInput.addEventListener('input', () => {
-        apodoInput.classList.remove('is-invalid');
-        alertBox.className = 'alert d-none';
-    });
+  // Limpiar error al escribir
+  apodoInput.addEventListener('input', () => {
+    apodoInput.classList.remove('is-invalid');
+    alertBox.className = 'alert d-none';
+  });
 }

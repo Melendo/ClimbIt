@@ -11,7 +11,7 @@ body {
 
 /* Contenedor principal de la app (vertical) */
 #app-container.app-vertical-layout {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   justify-content: center;
   padding: 1rem;
@@ -38,7 +38,7 @@ body {
     border-radius: 0 !important;
     border-left: none !important;
     border-right: none !important;
-    min-height: 100vh;
+    min-height: 100dvh;
   }
 
   #app-container.app-vertical-layout .card .card-header,

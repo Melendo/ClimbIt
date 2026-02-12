@@ -1,6 +1,6 @@
 export function error404View() {
-    return `
-        <div class="card shadow-sm">
+  return `
+        <div class="card shadow-sm" style="min-height: 100dvh;">
           <div class="card-body text-center py-5">
             <span class="material-icons text-warning mb-3" style="font-size: 64px;">search_off</span>
             <h1 class="display-1 fw-bold text-primary">404</h1>
@@ -13,8 +13,8 @@ export function error404View() {
 }
 
 export function error500View() {
-    return `
-        <div class="card shadow-sm">
+  return `
+        <div class="card shadow-sm" style="min-height: 100dvh;">
           <div class="card-body text-center py-5">
             <span class="material-icons text-danger mb-3" style="font-size: 64px;">error</span>
             <h1 class="display-1 fw-bold text-danger">500</h1>
@@ -27,8 +27,8 @@ export function error500View() {
 }
 
 export function errorGenericoView(mensaje = 'Ha ocurrido un error desconocido') {
-    return `
-        <div class="card shadow-sm">
+  return `
+        <div class="card shadow-sm" style="min-height: 100dvh;">
           <div class="card-body text-center py-5">
             <span class="material-icons text-warning mb-3" style="font-size: 64px;">warning</span>
             <h1 class="h3 fw-bold">Error</h1>

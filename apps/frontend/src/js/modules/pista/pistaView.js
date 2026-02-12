@@ -1,17 +1,17 @@
 // Escala de grados (falta traerla con peticion al backend)
 const GRADOS_FRANCESES = [
-    '3',
-    '4',
-    '5a', '5a+', '5b', '5b+', '5c', '5c+',
-    '6a', '6a+', '6b', '6b+', '6c', '6c+',
-    '7a', '7a+', '7b', '7b+', '7c', '7c+',
-    '8a', '8a+', '8b', '8b+', '8c', '8c+',
-    '9a', '9a+', '9b', '9b+', '9c', '9c+',
+  '3',
+  '4',
+  '5a', '5a+', '5b', '5b+', '5c', '5c+',
+  '6a', '6a+', '6b', '6b+', '6c', '6c+',
+  '7a', '7a+', '7b', '7b+', '7c', '7c+',
+  '8a', '8a+', '8b', '8b+', '8c', '8c+',
+  '9a', '9a+', '9b', '9b+', '9c', '9c+',
 ];
 
 // Vista para la creación de pistas
 export function renderCrearPista(container, callbacks) {
-    container.innerHTML = `
+  container.innerHTML = `
   <div class="card shadow-sm">
     <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
       <a href="#" onclick="history.back(); return false;" class="text-dark">
@@ -65,61 +65,61 @@ export function renderCrearPista(container, callbacks) {
     </div>
   </div>`;
 
-    // Referencias a elementos del formulario
-    const form = container.querySelector('#form-crear-pista');
-    const idRocodromoInput = container.querySelector('#idRocodromo');
-    const idZonaInput = container.querySelector('#idZona');
-    const nombreInput = container.querySelector('#nombre');
-    const dificultadSelect = container.querySelector('#dificultad');
-    const alertBox = container.querySelector('#form-alert');
+  // Referencias a elementos del formulario
+  const form = container.querySelector('#form-crear-pista');
+  const idRocodromoInput = container.querySelector('#idRocodromo');
+  const idZonaInput = container.querySelector('#idZona');
+  const nombreInput = container.querySelector('#nombre');
+  const dificultadSelect = container.querySelector('#dificultad');
+  const alertBox = container.querySelector('#form-alert');
 
-    // Poblar select de dificultades
-    dificultadSelect.innerHTML = GRADOS_FRANCESES
-        .map((grado) => `<option value="${grado}">${grado}</option>`)
-        .join('');
+  // Poblar select de dificultades
+  dificultadSelect.innerHTML = GRADOS_FRANCESES
+    .map((grado) => `<option value="${grado}">${grado}</option>`)
+    .join('');
 
-    // Limpiar errores al modificar campos
-    [idRocodromoInput, idZonaInput, nombreInput, dificultadSelect].forEach((el) => {
-        el.addEventListener('input', () => callbacks.onFieldChange(el, alertBox));
-        el.addEventListener('change', () => callbacks.onFieldChange(el, alertBox));
-    });
+  // Limpiar errores al modificar campos
+  [idRocodromoInput, idZonaInput, nombreInput, dificultadSelect].forEach((el) => {
+    el.addEventListener('input', () => callbacks.onFieldChange(el, alertBox));
+    el.addEventListener('change', () => callbacks.onFieldChange(el, alertBox));
+  });
 
-    // Cargar zonas al cambiar el rocódromo
-    idRocodromoInput.addEventListener('blur', () => {
-        callbacks.onRocodromoChange(idRocodromoInput, idZonaInput, alertBox);
-    });
-    idRocodromoInput.addEventListener('change', () => {
-        callbacks.onRocodromoChange(idRocodromoInput, idZonaInput, alertBox);
-    });
+  // Cargar zonas al cambiar el rocódromo
+  idRocodromoInput.addEventListener('blur', () => {
+    callbacks.onRocodromoChange(idRocodromoInput, idZonaInput, alertBox);
+  });
+  idRocodromoInput.addEventListener('change', () => {
+    callbacks.onRocodromoChange(idRocodromoInput, idZonaInput, alertBox);
+  });
 
-    // Envío del formulario
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const values = {
-            idRocodromo: idRocodromoInput.value,
-            idZona: idZonaInput.value,
-            nombre: nombreInput.value,
-            dificultad: dificultadSelect.value,
-        };
-        callbacks.onSubmit(values, {
-            idRocodromoInput,
-            idZonaInput,
-            nombreInput,
-            dificultadSelect,
-            alertBox
-        });
+  // Envío del formulario
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const values = {
+      idRocodromo: idRocodromoInput.value,
+      idZona: idZonaInput.value,
+      nombre: nombreInput.value,
+      dificultad: dificultadSelect.value,
+    };
+    callbacks.onSubmit(values, {
+      idRocodromoInput,
+      idZonaInput,
+      nombreInput,
+      dificultadSelect,
+      alertBox
     });
+  });
 }
 
 // Vista para la información de una pista
 export function renderInfoPista(container, pista, callbacks) {
-    const { nombre, dificultad } = pista || {};
+  const { nombre, dificultad } = pista || {};
 
-    container.innerHTML = `
-<div class="d-flex flex-column" style="min-height: 100vh; background: #f8f9fa;">
+  container.innerHTML = `
+<div class="d-flex flex-column" style="min-height: 100dvh; background: #f8f9fa;">
   
   <!-- Imagen hero con overlay -->
-  <div class="position-relative" style="height: 45vh; min-height: 280px;">
+  <div class="position-relative" style="height: 45dvh; min-height: 280px;">
     <img 
       src="/assets/placeholder.jpg" 
       alt="Imagen de la pista ${nombre || ''}" 
@@ -207,74 +207,74 @@ export function renderInfoPista(container, pista, callbacks) {
   </div>
 </div>`;
 
-    // Configurar eventos para los botones de estado
-    const estadoActual = container.querySelector('#estado-actual');
-    const estadoTexto = container.querySelector('#estado-texto');
-    const estadoBtns = container.querySelectorAll('.estado-btn');
+  // Configurar eventos para los botones de estado
+  const estadoActual = container.querySelector('#estado-actual');
+  const estadoTexto = container.querySelector('#estado-texto');
+  const estadoBtns = container.querySelectorAll('.estado-btn');
 
-    const estadosTexto = {
-        'flash': 'Flash',
-        'completado': 'Completado',
-        'en-progreso': 'Proyecto',
-        'nada': 'Sin registrar'
-    };
+  const estadosTexto = {
+    'flash': 'Flash',
+    'completado': 'Completado',
+    'en-progreso': 'Proyecto',
+    'nada': 'Sin registrar'
+  };
 
-    estadoBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            // Ignorar si se hizo clic en el icono de info
-            if (e.target.classList.contains('info-btn')) return;
-            
-            const estado = btn.dataset.estado;
-            
-            // Actualizar texto del estado
-            estadoTexto.textContent = estadosTexto[estado] || 'Sin registrar';
-            
-            // Delegar actualización visual del icono y llamada API al controlador
-            callbacks.onEstadoChange(estado, estadoActual, estadoTexto);
-        });
+  estadoBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      // Ignorar si se hizo clic en el icono de info
+      if (e.target.classList.contains('info-btn')) return;
+
+      const estado = btn.dataset.estado;
+
+      // Actualizar texto del estado
+      estadoTexto.textContent = estadosTexto[estado] || 'Sin registrar';
+
+      // Delegar actualización visual del icono y llamada API al controlador
+      callbacks.onEstadoChange(estado, estadoActual, estadoTexto);
     });
+  });
 
-    // Tooltips para los iconos de información
-    const infoBtns = container.querySelectorAll('.info-btn');
-    let activeTooltip = null;
+  // Tooltips para los iconos de información
+  const infoBtns = container.querySelectorAll('.info-btn');
+  let activeTooltip = null;
 
-    infoBtns.forEach(infoBtn => {
-        infoBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            
-            // Cerrar tooltip activo si existe
-            if (activeTooltip) {
-                activeTooltip.remove();
-                activeTooltip = null;
-            }
+  infoBtns.forEach(infoBtn => {
+    infoBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
 
-            // Crear tooltip
-            const tooltip = document.createElement('div');
-            tooltip.className = 'position-absolute px-3 py-2 rounded-3 shadow-sm';
-            tooltip.style.cssText = 'background: #1f2937; color: white; font-size: 0.8rem; z-index: 1000; top: 30px; right: 0; white-space: nowrap; animation: fadeIn 0.15s ease;';
-            tooltip.textContent = infoBtn.dataset.tooltip;
-            
-            infoBtn.parentElement.appendChild(tooltip);
-            activeTooltip = tooltip;
+      // Cerrar tooltip activo si existe
+      if (activeTooltip) {
+        activeTooltip.remove();
+        activeTooltip = null;
+      }
 
-            // Cerrar al hacer clic fuera
-            setTimeout(() => {
-                document.addEventListener('click', function closeTooltip() {
-                    if (activeTooltip) {
-                        activeTooltip.remove();
-                        activeTooltip = null;
-                    }
-                    document.removeEventListener('click', closeTooltip);
-                }, { once: true });
-            }, 10);
+      // Crear tooltip
+      const tooltip = document.createElement('div');
+      tooltip.className = 'position-absolute px-3 py-2 rounded-3 shadow-sm';
+      tooltip.style.cssText = 'background: #1f2937; color: white; font-size: 0.8rem; z-index: 1000; top: 30px; right: 0; white-space: nowrap; animation: fadeIn 0.15s ease;';
+      tooltip.textContent = infoBtn.dataset.tooltip;
 
-            // Auto-cerrar después de 3 segundos
-            setTimeout(() => {
-                if (activeTooltip === tooltip) {
-                    tooltip.remove();
-                    activeTooltip = null;
-                }
-            }, 3000);
-        });
+      infoBtn.parentElement.appendChild(tooltip);
+      activeTooltip = tooltip;
+
+      // Cerrar al hacer clic fuera
+      setTimeout(() => {
+        document.addEventListener('click', function closeTooltip() {
+          if (activeTooltip) {
+            activeTooltip.remove();
+            activeTooltip = null;
+          }
+          document.removeEventListener('click', closeTooltip);
+        }, { once: true });
+      }, 10);
+
+      // Auto-cerrar después de 3 segundos
+      setTimeout(() => {
+        if (activeTooltip === tooltip) {
+          tooltip.remove();
+          activeTooltip = null;
+        }
+      }, 3000);
     });
+  });
 }
