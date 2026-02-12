@@ -1,5 +1,5 @@
 import express from 'express';
-import { param } from 'express-validator';
+import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyTokenMiddleware from '../middlewares/verifyToken.js';
 import containerPromise from '../../../infrastructure/container.js';
@@ -8,7 +8,37 @@ const router = express.Router();
 const container = await containerPromise;
 const { zonaController } = container;
 
-router.post('/create', verifyTokenMiddleware, (req, res, next) => {
+/**
+ * POST /zonas/create
+ * Crea una nueva zona dentro de un rocodromo específico
+ *
+ * Parámetros esperados (body):
+ * - idRoco (@param {number} , requerido): ID del rocodromo al que pertenece la zona (entero positivo)
+ * - nombre (@param {string} , requerido): Nombre descriptivo de la zona (1-100 caracteres)
+ *
+ * Requiere: Token JWT válido en header Authorization
+ *
+ * Respuesta esperada: @return {Object} Detalles de la zona creada:
+ *   - id: identificador único
+ *   - idRoco: ID del rocodromo al que pertenece
+ *   - nombre: nombre de la zona
+ */
+const crearZonaValidators = [
+  body('idRoco')
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('idRoco debe ser un entero positivo'),
+  body('nombre')
+    .trim()
+    .notEmpty()
+    .withMessage('El nombre de la zona es requerido')
+    .isLength({ min: 1, max: 100 })
+    .withMessage('El nombre de la zona debe tener entre 1 y 100 caracteres')
+    .matches(/^[a-zA-Z0-9\s\-áéíóúñ]+$/)
+    .withMessage('El nombre de la zona contiene caracteres no válidos'),
+];
+
+router.post('/create', verifyTokenMiddleware, crearZonaValidators, validate, (req, res, next) => {
   zonaController.crearZona(req, res, next);
 });
 

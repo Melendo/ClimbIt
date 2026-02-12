@@ -141,10 +141,32 @@ router.post(
   }
 );
 
+/**
+ * GET /escaladores/mis-rocodromos
+ * Obtiene la lista de todos los rocodromos a los que está suscrito el escalador autenticado
+ *
+ * Requiere: Token JWT válido en header Authorization
+ *
+ * Respuesta esperada: @return {Array} Array de rocodromos suscritos con sus detalles:
+ *   - id: identificador único
+ *   - nombre: nombre del rocodromo
+ *   - ubicacion: dirección física
+ */
 router.get('/mis-rocodromos', verifyToken, (req, res, next) => {
   escaladorController.obtenerRocodromosSuscritos(req, res, next);
 });
 
+/**
+ * GET /escaladores/perfil
+ * Obtiene el perfil del escalador autenticado
+ *
+ * Requiere: Token JWT válido en header Authorization
+ *
+ * Respuesta esperada: @return {Object} Perfil del escalador con sus detalles:
+ *    - id: identificador único
+ *    - correo: email del escalador
+ *    - apodo: nombre de usuario único
+ */
 router.get('/perfil', verifyToken, (req, res, next) => {
   escaladorController.obtenerPerfil(req, res, next);
 });

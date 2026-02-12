@@ -1,5 +1,5 @@
 import express from 'express';
-import { param } from 'express-validator';
+import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyTokenMiddleware from '../middlewares/verifyToken.js';
 import containerPromise from '../../../infrastructure/container.js';
@@ -8,7 +8,37 @@ const router = express.Router();
 const container = await containerPromise;
 const { rocodromoController } = container;
 
-router.post('/create', verifyTokenMiddleware, (req, res, next) => {
+/**
+ * POST /rocodromos/create
+ * Crea un nuevo rocodromo en el sistema
+ *
+ * Parámetros esperados (body):
+ * - nombre (@param {string} , requerido): Nombre del rocodromo (1-100 caracteres)
+ * - ubicacion (@param {string} , requerido): Ubicación o dirección física del rocodromo (1-255 caracteres)
+ *
+ * Requiere: Token JWT válido en header Authorization
+ *
+ * Respuesta esperada: @return {Object} Detalles del rocodromo creado:
+ *   - id: identificador único
+ *   - nombre: nombre del rocodromo
+ *   - ubicacion: ubicación del rocodromo
+ */
+const crearRocodromoValidators = [
+  body('nombre')
+    .trim()
+    .notEmpty()
+    .withMessage('El nombre del rocodromo es requerido')
+    .isLength({ min: 1, max: 100 })
+    .withMessage('El nombre del rocodromo debe tener entre 1 y 100 caracteres'),
+  body('ubicacion')
+    .trim()
+    .notEmpty()
+    .withMessage('La ubicación del rocodromo es requerida')
+    .isLength({ min: 1, max: 255 })
+    .withMessage('La ubicación debe tener entre 1 y 255 caracteres'),
+];
+
+router.post('/create', verifyTokenMiddleware, crearRocodromoValidators, validate, (req, res, next) => {
   rocodromoController.crearRocodromo(req, res, next);
 });
 
