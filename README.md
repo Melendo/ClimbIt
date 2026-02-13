@@ -80,22 +80,8 @@ npm run db:migrate
 
 Esto creará las tablas necesarias en la base de datos.
 
-> **Nota:** Para visualizar las tablas creadas, puedes usar pgAdmin siguiendo la [Guía de conexión de PostgreSQL con pgAdmin](#3-guía-de-conexión-de-postgresql-con-pgadmin).
+> **Nota:** Para visualizar las tablas creadas, puedes usar pgAdmin siguiendo la Guía de conexión de PostgreSQL con pgAdmin en el punto 3.
 
-#### Paso 6: (Opcional) Compilar estilos SASS
-
-Si necesitas compilar los estilos del frontend:
-
-```bash
-cd apps/frontend
-npm run build-css
-```
-
-O para compilar automáticamente al hacer cambios:
-
-```bash
-npm run watch-css
-```
 
 ### 2.3. Ejecutar el proyecto
 
@@ -115,12 +101,12 @@ npm run dev
 
 Esto iniciará:
 
-- **Backend** en `http://localhost:3000` (con auto-reload)
-- **Frontend** en `http://localhost:8080` (con live-server)
+- **Backend** en `http://localhost:3000` (puerto definido en .env y con auto-reload)
+- **Frontend** en `http://localhost:5173` (puerto variable y con auto-reload)
 
 #### Acceder a la aplicación
 
-- **Frontend:** [http://localhost:8080](http://localhost:8080)
+- **Frontend:** [http://localhost:8080](http://localhost:5173)
 - **Backend API:** [http://localhost:3000](http://localhost:3000)
 - **pgAdmin:** [http://localhost:5050](http://localhost:5050)
 
@@ -197,12 +183,11 @@ Los reportes de cobertura se generan en `apps/backend/coverage/`.
 
 ### 2.6. Solución de problemas comunes
 
-#### El puerto 3000 u 8080 ya está en uso
+#### El puerto 3000 ya está en uso
 
 Cambia los puertos en:
 
 - Backend: modifica `PORT` en `apps/backend/.env`
-- Frontend: modifica el puerto en `apps/frontend/package.json` (script `start`)
 
 #### Error al conectar con la base de datos
 
@@ -216,10 +201,6 @@ Cambia los puertos en:
 2. Asegúrate de estar en la carpeta `apps/backend/` al ejecutar las migraciones
 3. Verifica el `DATABASE_URL` en el archivo `.env`
 
-#### El frontend no carga los estilos
-
-Ejecuta `npm run build-css` desde `apps/frontend/`
-
 ## 3. Guía de conexión de PostgreSQL con pgAdmin
 
 pgAdmin es una herramienta de administración gráfica para PostgreSQL que se levanta automáticamente con Docker Compose.
@@ -229,7 +210,6 @@ pgAdmin es una herramienta de administración gráfica para PostgreSQL que se le
 1. Asegúrate de que los contenedores de Docker estén corriendo:
 
    ```bash
-   cd apps/backend
    docker ps
    ```
 
