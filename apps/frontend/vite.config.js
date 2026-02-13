@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
 import path from 'path';
 
+const PORT = process.env.PORT || 3000;
+
 export default defineConfig({
   resolve: {
     alias: {
@@ -20,19 +22,19 @@ export default defineConfig({
   server: {
     proxy: {
       '/escaladores': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:' + PORT,
         changeOrigin: true,
       },
       '/pistas': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:' + PORT,
         changeOrigin: true,
       },
       '/zonas': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:' + PORT,
         changeOrigin: true,
       },
       '/rocodromos': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:' + PORT,
         changeOrigin: true,
       },
     },
