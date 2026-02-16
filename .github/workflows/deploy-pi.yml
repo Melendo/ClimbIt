@@ -47,7 +47,9 @@ jobs:
         run: |
           # Force remove potential 'local' containers from previous manual runs having default names
           # that might be hogging ports (like 5432).
-          docker rm -f climbit_db_local climbit_pgadmin_local climbit_backend_local climbit_frontend_local || true
+          # Also remove containers with legacy names (without suffix) if they exist.
+          docker rm -f climbit_db_local climbit_pgadmin_local climbit_backend_local climbit_frontend_local \
+                       climbit_db climbit_pgadmin climbit_backend climbit_frontend || true
 
       - name: Build and Start containers
         run: |
