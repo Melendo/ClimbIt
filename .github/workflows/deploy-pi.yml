@@ -43,6 +43,12 @@ jobs:
             echo "$ENV_FILE_DEV" > .env
           fi
 
+      - name: Cleanup Conflicting Containers
+        run: |
+          # Force remove potential 'local' containers from previous manual runs having default names
+          # that might be hogging ports (like 5432).
+          docker rm -f climbit_db_local climbit_pgadmin_local climbit_backend_local climbit_frontend_local || true
+
       - name: Build and Start containers
         run: |
           # --pull asegura que las capas base (node:22-alpine, etc) estén sincronizadas
