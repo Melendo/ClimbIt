@@ -2,14 +2,14 @@ services:
   # Servicio de Base de Datos (PostgreSQL)
   db:
     image: postgres:15
-    container_name: climbit_db
+    container_name: climbit_db_${ENV_NAME:-local}
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
@@ -18,13 +18,13 @@ services:
   # Servicio de Administración de Base de Datos (pgAdmin)
   pgadmin:
     image: dpage/pgadmin4
-    container_name: climbit_pgadmin
+    container_name: climbit_pgadmin_${ENV_NAME:-local}
     restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
-      - "5050:80"
+      - "${PGADMIN_PORT:-5050}:80"
     depends_on:
       - db
     networks:
@@ -33,10 +33,10 @@ services:
   # Servicio Backend (Node.js)
   backend:
     build: ./apps/backend
-    container_name: climbit_backend
+    container_name: climbit_backend_${ENV_NAME:-local}
     restart: always
     ports:
-      - "3000:3000"
+      - "${API_PORT:-3000}:3000"
     environment:
       PORT: 3000
       # Conexión a la DB usando el nombre del servicio 'db'
@@ -49,10 +49,10 @@ services:
   # Servicio Frontend (Nginx)
   frontend:
     build: ./apps/frontend
-    container_name: climbit_frontend
+    container_name: climbit_frontend_${ENV_NAME:-local}
     restart: always
     ports:
-      - "80:80"
+      - "${WEB_PORT:-80}:80"
     depends_on:
       - backend
     networks:
