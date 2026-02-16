@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY package.json ./
 
-RUN npm install
+RUN npm install --omit=dev
 
 # Instalar cliente de postgres para usar pg_isready
 RUN apk add --no-cache postgresql-client

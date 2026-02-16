@@ -7,13 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- Creación del repositorio
-- Configuración inicial de ramas (`main`, `develop`)
-- Archivos básicos de configuración (`.gitignore`, `LICENSE`, etc.)
+## [0.1.0] - 2026-02-16
 
-## [0.1.0] - En desarrollo
+### Añadido
 
-### Prototype
-- Inicio del desarrollo de la primera versión **prototipo** del proyecto
-- Se están implementando las bases para futuras funcionalidades
+#### Funcionalidades Usuario
+- **Autenticación**: 
+  - Inicio de sesión (correo/contraseña)
+  - Registro de nuevos usuarios
+  - Cierre de sesión
+- **Perfil**: 
+  - Visualización de información básica (nombre y correo).
+- **Rocódromos**:
+  - Buscador global de rocódromos.
+  - Suscripción y desuscripción.
+  - Listado de "Mis Rocódromos" para acceso rápido.
+  - Navegación por zonas de los rocódromos.
+- **Pistas**:
+  - Listado de pistas por zona con información visual.
+  - Detalle individual de la pista.
+  - Actualización de estado (encadenado, intento, proyecto).
+
+#### Infraestructura y DevOps
+- **Despliegue Continuo (CD)**: Pipeline automatizado con GitHub Actions en Raspberry Pi.
+- **Integración Continua (CI)**: Workflow de testing automatizado con Jest y PostgreSQL en Pull Requests (`ClimbIt-CI`).
+- **Entornos Aislados**: Configuración Multi-entorno (Desarrollo: `dev.climbit.es` / Producción: `app.climbit.es`).
+- **Contenedores**: Orquestación completa con Docker y Docker Compose (PostgreSQL, Node.js Backend, Frontend).
+- **Proxy**: Cloudflare Tunnel para gestión de DNS segura y acceso remoto.
+
+
