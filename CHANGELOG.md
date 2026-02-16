@@ -26,10 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Pistas**:
   - Listado de pistas por zona con información visual.
   - Detalle individual de la pista.
-  - Actualización de estado (encadenado, intento, proyecto).
+  - Actualización de estado (flash, completado y proyecto).
 
 #### Infraestructura y DevOps
-- **Despliegue Continuo (CD)**: Pipeline automatizado con GitHub Actions en Raspberry Pi.
+- **Despliegue Continuo (CD)**: Pipeline automatizado con GitHub Actions.
 - **Integración Continua (CI)**: Workflow de testing automatizado con Jest y PostgreSQL en Pull Requests (`ClimbIt-CI`).
 - **Entornos Aislados**: Configuración Multi-entorno (Desarrollo: `dev.climbit.es` / Producción: `app.climbit.es`).
 - **Contenedores**: Orquestación completa con Docker y Docker Compose (PostgreSQL, Node.js Backend, Frontend).
