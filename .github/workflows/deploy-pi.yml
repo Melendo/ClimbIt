@@ -1,0 +1,57 @@
+name: Deploy to RaspPi
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set Environment Variables
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "ENV_NAME=prod" >> $GITHUB_ENV
+            echo "WEB_PORT=80" >> $GITHUB_ENV
+            echo "API_PORT=3000" >> $GITHUB_ENV
+            echo "DB_PORT=5432" >> $GITHUB_ENV
+            echo "PGADMIN_PORT=5050" >> $GITHUB_ENV
+            echo "COMPOSE_PROJECT_NAME=climbit_prod" >> $GITHUB_ENV
+          else
+            echo "ENV_NAME=dev" >> $GITHUB_ENV
+            echo "WEB_PORT=81" >> $GITHUB_ENV
+            echo "API_PORT=3001" >> $GITHUB_ENV
+            echo "DB_PORT=5433" >> $GITHUB_ENV
+            echo "PGADMIN_PORT=5051" >> $GITHUB_ENV
+            echo "COMPOSE_PROJECT_NAME=climbit_dev" >> $GITHUB_ENV
+          fi
+
+      - name: Create .env file
+        env:
+          ENV_FILE_PROD: ${{ secrets.ENV_FILE_PRODUCTION }}
+          ENV_FILE_DEV: ${{ secrets.ENV_FILE_DEVELOPMENT }}
+        run: |
+          rm -f .env
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "$ENV_FILE_PROD" > .env
+          else
+            echo "$ENV_FILE_DEV" > .env
+          fi
+
+      - name: Build and Start containers
+        run: |
+          # --pull asegura que las capas base (node:22-alpine, etc) estén sincronizadas
+          docker compose -p ${{ env.COMPOSE_PROJECT_NAME }} build --pull
+          docker compose -p ${{ env.COMPOSE_PROJECT_NAME }} down --remove-orphans -v
+          docker compose -p ${{ env.COMPOSE_PROJECT_NAME }} up -d
+
+      - name: Clean up unused Docker data
+        run: |
+          # Limpieza profunda para mantener el disco de la RaspPi optimizado
+          docker image prune -f
+          docker builder prune -f --filter "until=24h"

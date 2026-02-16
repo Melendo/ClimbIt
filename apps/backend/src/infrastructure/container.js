@@ -1,0 +1,142 @@
+// Contenedor de dependencias:
+// - Importa las fábricas/objetos de infraestructura (sequelize, modelos, repositorios)
+// - Crea instancias (repositorios, casos de uso, controladores)
+// - Exporta las instancias que usarán las rutas
+
+// Importaciones de infraestructura
+import dbPromise from './db/postgres/models/index.js';
+
+// Repositorios (implementación concreta que usa el modelo)
+import EscaladorRepositoryPostgres from './repositories/escaladorRepositoryPostgres.js';
+import PistaRepositoryPostgres from './repositories/pistaRepositoryPostgres.js';
+import ZonaRepositoryPostgres from './repositories/zonaRepositoryPostgres.js';
+import RocodromoRepositoryPostgres from './repositories/rocodromoRepositoryPostgres.js';
+
+// Servicios de infra (Seguridad etc)
+import passwordService from './security/passwordService.js';
+import tokenService from './security/tokenService.js';
+
+// Casos de uso (lógica de aplicación)
+import CrearEscalador from '../application/escaladores/crearEscalador.js';
+import AutenticarEscalador from '../application/escaladores/autenticarEscalador.js';
+import ObtenerPerfil from '../application/escaladores/obtenerPerfilEscaladror.js';
+import SuscribirseRocodromo from '../application/escaladores/suscribirseRocodromo.js';
+import DesuscribirseRocodromo from '../application/escaladores/desuscribirseRocodromo.js';
+import ObtenerRocodromosSuscritos from '../application/escaladores/obtenerRocodromosSuscritos.js';
+
+import CrearPista from '../application/pistas/crearPista.js';
+import ObtenerPistaPorId from '../application/pistas/obtenerPistaPorId.js';
+import CambiarEstadoPista from '../application/pistas/cambiarEstadoPista.js';
+
+import CrearZona from '../application/zonas/crearZona.js';
+import ObtenerPistasDeZona from '../application/zonas/obtenerPistasZona.js';
+
+import CrearRocodromo from '../application/rocodromos/crearRocodromo.js';
+import ObtenerZonasRocodromo from '../application/rocodromos/obtenerZonasRocodromo.js';
+import ObtenerRocodromos from '../application/rocodromos/obtenerRocodromos.js';
+import ObtenerInformacionRocodromo from '../application/rocodromos/obtenerInformacionRocodromo.js';
+
+// Controladores (interfaces HTTP)
+import EscaladorController from '../interfaces/http/controllers/escaladorController.js';
+import PistaController from '../interfaces/http/controllers/pistaController.js';
+import ZonaController from '../interfaces/http/controllers/zonaController.js';
+import RocodromoController from '../interfaces/http/controllers/rocodromoController.js';
+
+// --- Composición / Inyección de dependencias ---
+
+// Función asíncrona para inicializar el contenedor
+async function inicializarContainer() {
+  // Esperar a que se carguen los modelos
+  const db = await dbPromise;
+
+  // 1) Instancia del repositorio con el modelo específico
+  const escaladorRepository = new EscaladorRepositoryPostgres(db.Escalador);
+  const pistaRepository = new PistaRepositoryPostgres(db.Pista);
+  const zonaRepository = new ZonaRepositoryPostgres(db.Zona);
+  const rocodromoRepository = new RocodromoRepositoryPostgres(db.Rocodromo);
+
+  // 2) Instancia del caso de uso con el repositorio inyectado
+  const crearEscaladorUseCase = new CrearEscalador(
+    escaladorRepository,
+    passwordService,
+    tokenService
+  );
+  const autenticarEscaladorUseCase = new AutenticarEscalador(
+    escaladorRepository,
+    passwordService,
+    tokenService
+  );
+  const obtenerPerfilUseCase = new ObtenerPerfil(escaladorRepository);
+  const suscribirseRocodromoUseCase = new SuscribirseRocodromo(
+    escaladorRepository,
+    rocodromoRepository
+  );
+  const desuscribirseRocodromoUseCase = new DesuscribirseRocodromo(
+    escaladorRepository,
+    rocodromoRepository
+  );
+  const obtenerRocodromosSuscritosUseCase = new ObtenerRocodromosSuscritos(
+    escaladorRepository
+  );
+
+  const crearPistaUseCase = new CrearPista(pistaRepository, db.Zona);
+  const obtenerPistaPorIdUseCase = new ObtenerPistaPorId(pistaRepository, escaladorRepository);
+  const cambiarEstadoPistaUseCase = new CambiarEstadoPista(
+    pistaRepository,
+    escaladorRepository
+  );
+
+  const crearZonaUseCase = new CrearZona(zonaRepository, db.Rocodromo);
+  const obtenerPistasDeZonaUseCase = new ObtenerPistasDeZona(zonaRepository, escaladorRepository);
+
+  const crearRocodromoUseCase = new CrearRocodromo(rocodromoRepository);
+  const obtenerZonasRocodromoUseCase = new ObtenerZonasRocodromo(
+    rocodromoRepository
+  );
+  const obtenerRocodromosUseCase = new ObtenerRocodromos(rocodromoRepository);
+  const obtenerInformacionRocodromoUseCase = new ObtenerInformacionRocodromo(
+    rocodromoRepository
+  );
+
+  // 3) Instancia del caso de uso con el repositorio inyectado
+  const escaladorUseCases = {
+    crear: crearEscaladorUseCase,
+    autenticar: autenticarEscaladorUseCase,
+    obtenerPerfil: obtenerPerfilUseCase,
+    suscribirseRocodromo: suscribirseRocodromoUseCase,
+    desuscribirseRocodromo: desuscribirseRocodromoUseCase,
+    obtenerRocodromosSuscritos: obtenerRocodromosSuscritosUseCase,
+  };
+  const pistaUseCases = {
+    crear: crearPistaUseCase,
+    obtenerPistaPorId: obtenerPistaPorIdUseCase,
+    cambiarEstado: cambiarEstadoPistaUseCase,
+  };
+  const zonaUseCases = {
+    crear: crearZonaUseCase,
+    obtenerPistasDeZona: obtenerPistasDeZonaUseCase,
+  };
+  const rocodromoUseCases = {
+    crear: crearRocodromoUseCase,
+    obtenerZonasRocodromo: obtenerZonasRocodromoUseCase,
+    obtenerRocodromos: obtenerRocodromosUseCase,
+    obtenerInformacion: obtenerInformacionRocodromoUseCase,
+  };
+
+  // 4) Instancia del controlador con los casos de uso inyectados
+  const escaladorController = new EscaladorController(escaladorUseCases);
+  const pistaController = new PistaController(pistaUseCases);
+  const zonaController = new ZonaController(zonaUseCases);
+  const rocodromoController = new RocodromoController(rocodromoUseCases);
+
+  // 5) Retornar las instancias que serán consumidas por las rutas
+  return {
+    escaladorController,
+    pistaController,
+    zonaController,
+    rocodromoController,
+  };
+}
+
+// Exportar la promesa del contenedor inicializado
+export default inicializarContainer();

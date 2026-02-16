@@ -1,0 +1,275 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap');
+
+:root {
+  --bs-font-sans-serif: 'Montserrat', sans-serif;
+  --app-max-width: 400px;
+}
+
+body {
+  font-family: var(--bs-font-sans-serif);
+}
+
+/* Contenedor principal de la app (vertical) */
+#app-container.app-vertical-layout {
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* Contenido centrado con ancho máximo */
+#app-container.app-vertical-layout>.app-content {
+  width: 100%;
+  max-width: var(--app-max-width);
+}
+
+/* En móvil: contenido a pantalla completa */
+@media (max-width: 576px) {
+  #app-container.app-vertical-layout {
+    padding: 0;
+  }
+
+  #app-container.app-vertical-layout>.app-content {
+    max-width: 100%;
+  }
+
+  /* Cards a pantalla completa en móvil (solo la card principal) */
+  #app-container.app-vertical-layout .app-content>.card {
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    min-height: 100dvh;
+  }
+
+  #app-container.app-vertical-layout .card .card-header,
+  #app-container.app-vertical-layout .card .card-footer {
+    border-radius: 0 !important;
+  }
+}
+
+/* ========================================
+   Estilos específicos de componentes
+   ======================================== */
+
+/* Estilos para botones de estado en vista de pista */
+.estado-btn {
+  text-decoration: none !important;
+}
+
+.estado-btn:hover,
+.estado-btn:focus {
+  text-decoration: none !important;
+}
+
+/* ========================================
+   Cards de zonas/pistas en mapa rocódromo
+   ======================================== */
+.zona-card {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.zona-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.zona-card-overlay {
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+}
+
+/* ========================================
+   Menú de navegación inferior
+   ======================================== */
+.nav-link-bottom {
+  text-decoration: none !important;
+  transition: color 0.2s ease;
+}
+
+.nav-link-bottom:hover {
+  color: var(--bs-primary) !important;
+}
+
+.nav-link-bottom.active {
+  color: var(--bs-primary) !important;
+}
+
+/* ========================================
+   Barra de progreso de registro
+   ======================================== */
+.registro-progress-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  background: linear-gradient(transparent, rgba(255, 255, 255, 0.95));
+  z-index: 100;
+}
+
+.registro-progress-wrapper {
+  max-width: var(--app-max-width);
+  margin: 0 auto;
+}
+
+.registro-progress {
+  height: 8px;
+  border-radius: 4px;
+  background-color: #e9ecef;
+  overflow: hidden;
+}
+
+.registro-progress-bar {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--bs-primary), #6610f2);
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efecto de brillo animado */
+.registro-progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+
+  100% {
+    left: 100%;
+  }
+}
+
+/* Indicadores de pasos */
+.registro-steps {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+}
+
+.registro-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.7rem;
+  color: #6c757d;
+  transition: color 0.3s ease;
+}
+
+.registro-step.active {
+  color: var(--bs-primary);
+  font-weight: 500;
+}
+
+.registro-step.completed {
+  color: #198754;
+}
+
+.registro-step-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  margin-bottom: 0.25rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.registro-step.active .registro-step-dot {
+  background-color: var(--bs-primary);
+  transform: scale(1.2);
+  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
+}
+
+.registro-step.completed .registro-step-dot {
+  background-color: #198754;
+}
+
+.registro-step.completed .registro-step-dot::after {
+  content: '✓';
+  color: white;
+  font-size: 0.5rem;
+  font-weight: bold;
+}
+
+/* ========================================
+   Animaciones de Transición (Swipe)
+   ======================================== */
+.slide-in-right {
+  animation: slideInRight 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.slide-out-right {
+  animation: slideOutRight 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.slide-out-left {
+  animation: slideOutLeft 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@keyframes slideInRight {
+  0% {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  0% {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+}
+
+@keyframes slideOutLeft {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+}

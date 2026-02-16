@@ -1,0 +1,40 @@
+{
+  "name": "prueba-monorepo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "lerna run start --parallel",
+    "test": "lerna run test",
+    "test:coverage": "lerna run test:coverage",
+    "clean": "lerna clean",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "prepare": "husky"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "",
+  "type": "module",
+  "devDependencies": {
+    "@eslint/js": "9.37.0",
+    "eslint": "9.37.0",
+    "eslint-config-google": "0.14.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-jest": "29.0.1",
+    "eslint-plugin-prettier": "5.5.4",
+    "globals": "16.4.0",
+    "husky": "9.1.7",
+    "lerna": "9.0.0",
+    "lint-staged": "16.2.4",
+    "prettier": "3.6.2"
+  },
+  "lint-staged": {
+    "**/*.{js,mjs}": "eslint --fix"
+  }
+}
