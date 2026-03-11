@@ -16,7 +16,10 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
         escaladorModel.id,
         escaladorModel.correo,
         escaladorModel.contrasena,
-        escaladorModel.apodo
+        escaladorModel.apodo,
+        escaladorModel.descripcion,
+        escaladorModel.fotoUrl,
+        escaladorModel.activo
       );
     } catch (error) {
       throw new Error(error.message);
@@ -28,6 +31,8 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
       correo: escalador.correo,
       contrasena: escalador.contrasena,
       apodo: escalador.apodo,
+      descripcion: escalador.descripcion,
+      fotoUrl: escalador.fotoUrl,
     };
     const escaladorModel = await this.EscaladorModel.create(data);
 
@@ -115,7 +120,10 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
           rocodromoModel.id,
           rocodromoModel.nombre,
           rocodromoModel.ubicacion,
-          rocodromoModel.descripcion
+          rocodromoModel.logoUrl,
+          rocodromoModel.descripcion,
+          rocodromoModel.horarios,
+          rocodromoModel.activo
         );
       });
       return rocodromosDomain;
