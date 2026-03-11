@@ -25,7 +25,7 @@ describe('ZonaRepositoryPostgres', () => {
       const modeloSequelize = {
         id: 1,
         idRoco: 2,
-        tipo: 'Zona Principal',
+        nombre: 'Zona Principal',
       };
 
       const resultado = repository._toDomain(modeloSequelize);
@@ -33,7 +33,7 @@ describe('ZonaRepositoryPostgres', () => {
       expect(resultado).toBeInstanceOf(Zona);
       expect(resultado.id).toBe(1);
       expect(resultado.idRoco).toBe(2);
-      expect(resultado.tipo).toBe('Zona Principal');
+      expect(resultado.nombre).toBe('Zona Principal');
     });
 
     it('debería retornar null si el modelo es null', () => {
@@ -46,7 +46,7 @@ describe('ZonaRepositoryPostgres', () => {
        const modeloInvalido = {
         id: 1,
         idRoco: 1, 
-        tipo: '', // Esto debería fallar en el constructor de Zona
+        nombre: '', // Esto debería fallar en el constructor de Zona
       };
       
       expect(() => repository._toDomain(modeloInvalido)).toThrow();

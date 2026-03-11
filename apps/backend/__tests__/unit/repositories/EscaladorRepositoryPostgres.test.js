@@ -82,6 +82,8 @@ describe('EscaladorRepositoryPostgres', () => {
         correo: 'test@test.com',
         contrasena: 'hashedpassword',
         apodo: 'Tester',
+        descripcion: null,
+        fotoUrl: null,
       });
       expect(resultado).toBeInstanceOf(Escalador);
       expect(resultado.id).toBe(1);
