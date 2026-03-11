@@ -18,7 +18,7 @@ class CrearZona {
         }
       }
 
-      const nuevaZona = new Zona(null, data.idRoco, data.nombre);
+      const nuevaZona = new Zona(null, data.idRoco, data.nombre, data.mapa);
       const zonaCreada = await this.zonaRepository.crearZona(nuevaZona);
 
       return zonaCreada;

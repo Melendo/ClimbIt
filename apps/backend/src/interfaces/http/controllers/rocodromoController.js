@@ -5,8 +5,8 @@ class RocodromoController {
 
   async crearRocodromo(req, res, next) {
     try {
-      const { nombre, ubicacion } = req.body;
-      const nuevoRocodromo = await this.useCases.crear.execute({ nombre, ubicacion });
+      const { nombre, ubicacion, logoUrl, descripcion, horarios } = req.body;
+      const nuevoRocodromo = await this.useCases.crear.execute({ nombre, ubicacion, logoUrl, descripcion, horarios });
       res.status(201).json(nuevoRocodromo);
     } catch (error) {
       res.status(500).json({ error: error.message });

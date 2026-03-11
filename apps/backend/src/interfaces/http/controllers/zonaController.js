@@ -5,9 +5,9 @@ class ZonaController {
 
   async crearZona(req, res, next) {
     try {
-      let { idRoco, nombre } = req.body;
+      let { idRoco, nombre, mapa } = req.body;
       idRoco = parseInt(idRoco);
-      const nuevaZona = await this.useCases.crear.execute({ idRoco, nombre });
+      const nuevaZona = await this.useCases.crear.execute({ idRoco, nombre, mapa });
       res.status(201).json(nuevaZona);
     } catch (error) {
       res.status(500).json({ error: error.message });

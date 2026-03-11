@@ -5,12 +5,14 @@ class EscaladorController {
 
   async crear(req, res, next) {
     try {
-      const { correo, contrasena, apodo } = req.body;
+      const { correo, contrasena, apodo, descripcion, fotoUrl } = req.body;
 
       const nuevoEscalador = await this.useCases.crear.execute({
         correo,
         contrasena,
         apodo,
+        descripcion,
+        fotoUrl,
       });
 
       res.status(201).json(nuevoEscalador);
