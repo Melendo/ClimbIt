@@ -2,26 +2,22 @@
 import { Model } from 'sequelize';
 
 export default (sequelize, DataTypes) => {
-  class Zona extends Model {
+  class EscalaDificultad extends Model {
     static associate(models) {
-      Zona.belongsTo(models.Rocodromo, {
+      EscalaDificultad.belongsTo(models.Rocodromo, {
         foreignKey: 'idRoco',
         as: 'rocodromo',
       });
-      Zona.hasMany(models.Pista, {
-        foreignKey: 'idZona',
-        as: 'pistas',
-      });
     }
   }
-  Zona.init(
+  EscalaDificultad.init(
     {
       id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
-        field: 'IDZona',
+        field: 'IDEscala',
       },
       idRoco: {
         type: DataTypes.INTEGER,
@@ -37,10 +33,11 @@ export default (sequelize, DataTypes) => {
         allowNull: false,
         field: 'Nombre',
       },
-      mapa: {
-        type: DataTypes.STRING,
+      colores: {
+        // eslint-disable-next-line new-cap
+        type: DataTypes.ARRAY(DataTypes.STRING),
         allowNull: true,
-        field: 'Mapa',
+        field: 'Colores',
       },
       activo: {
         type: DataTypes.BOOLEAN,
@@ -51,9 +48,9 @@ export default (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: 'Zona',
-      tableName: 'Zonas',
+      modelName: 'EscalaDificultad',
+      tableName: 'EscalasDificultad',
     }
   );
-  return Zona;
+  return EscalaDificultad;
 };
