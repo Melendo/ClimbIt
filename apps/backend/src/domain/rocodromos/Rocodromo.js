@@ -1,13 +1,21 @@
 class Rocodromo {
   /**
-   * @param {number|null} id - El ID único del rocodromo (null si es nuevo)
-   * @param {string} nombre - El nombre del rocodromo
-   * @param {string} ubicacion - La ubicación del rocodromo
+   * @param {number|null} id
+   * @param {string} nombre
+   * @param {string} ubicacion
+   * @param {string|null} logoUrl
+   * @param {string|null} descripcion
+   * @param {string|null} horarios
+   * @param {boolean} activo
    */
-  constructor(id, nombre, ubicacion) {
+  constructor(id, nombre, ubicacion, logoUrl = null, descripcion = null, horarios = null, activo = true) {
     this.id = id;
     this.nombre = nombre;
     this.ubicacion = ubicacion;
+    this.logoUrl = logoUrl;
+    this.descripcion = descripcion;
+    this.horarios = horarios;
+    this.activo = activo;
 
     if (id !== null && typeof id !== 'number') {
       throw new Error(`id inválido: Debe ser un número o null.`);

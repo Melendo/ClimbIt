@@ -1,15 +1,29 @@
 class Pista {
   /**
-   * @param {number|null} id - El ID único de la pista (null si es nueva)
-   * @param {number} idZona - El ID de la zona a la que pertenece la pista
-   * @param {string} nombre - El nombre de la pista
-   * @param {string} dificultad - La dificultad de la pista
+   * @param {number|null} id
+   * @param {number} idZona
+   * @param {string} nombre
+   * @param {string} dificultad
+   * @param {string|null} tipo
+   * @param {string|null} colorPresas
+   * @param {string|null} imagenUrl
+   * @param {string|null} ubicacionMapa
+   * @param {Date|null} fechaCreacion
+   * @param {Date|null} fechaRetirada
+   * @param {boolean} activo
    */
-  constructor(id, idZona, nombre, dificultad) {
+  constructor(id, idZona, nombre, dificultad, tipo = null, colorPresas = null, imagenUrl = null, ubicacionMapa = null, fechaCreacion = new Date(), fechaRetirada = null, activo = true) {
     this.id = id;
     this.idZona = idZona;
     this.nombre = nombre;
     this.dificultad = dificultad;
+    this.tipo = tipo;
+    this.colorPresas = colorPresas;
+    this.imagenUrl = imagenUrl;
+    this.ubicacionMapa = ubicacionMapa;
+    this.fechaCreacion = fechaCreacion;
+    this.fechaRetirada = fechaRetirada;
+    this.activo = activo;
 
     // Validaciones
     if (!Number.isInteger(this.idZona)) {
