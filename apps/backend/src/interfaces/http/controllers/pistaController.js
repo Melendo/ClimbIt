@@ -5,12 +5,18 @@ class PistaController {
 
   async crear(req, res, next) {
     try {
-      const { idZona, nombre, dificultad } = req.body;
+      const { idZona, nombre, dificultad, tipo, colorPresas, imagenUrl, ubicacionMapa, fechaCreacion, fechaRetirada } = req.body;
 
       const nuevaPista = await this.useCases.crear.execute({
         idZona,
         nombre,
         dificultad,
+        tipo,
+        colorPresas,
+        imagenUrl,
+        ubicacionMapa,
+        fechaCreacion,
+        fechaRetirada,
       });
 
       res.status(201).json(nuevaPista);

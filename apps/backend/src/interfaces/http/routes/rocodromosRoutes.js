@@ -2,6 +2,7 @@ import express from 'express';
 import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyTokenMiddleware from '../middlewares/verifyToken.js';
+import uploadLogoRocodromo from '../middlewares/uploadLogoRocodromo.js';
 import containerPromise from '../../../infrastructure/container.js';
 
 const router = express.Router();
@@ -113,6 +114,64 @@ router.get(
   validate,
   (req, res, next) => {
     rocodromoController.obtenerInformacionRocodromo(req, res, next);
+  }
+);
+
+/**
+ * POST /rocodromos/:id/logo
+ * Sube el logo de un rocódromo
+ *
+ * Parámetros esperados (URL Path):
+ * - id (@param {number} , requerido): ID del rocódromo (entero positivo)
+ *
+ * Parámetros esperados (multipart/form-data):
+ * - logo (@param {file} , requerido): Archivo de imagen
+ *
+ * Requiere: Token JWT válido en header Authorization
+ *
+ * Respuesta esperada: @return {Object} URL del logo
+ */
+const subirLogoRocodromoValidators = [
+  param('id')
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('El id del rocodromo debe ser un entero positivo'),
+];
+
+router.post(
+  '/:id/logo',
+  verifyTokenMiddleware,
+  subirLogoRocodromoValidators,
+  validate,
+  uploadLogoRocodromo.single('logo'),
+  (req, res, next) => {
+    rocodromoController.subirLogo(req, res, next);
+  }
+);
+
+/**
+ * GET /rocodromos/:id/logo
+ * Obtiene el logo de un rocódromo
+ *
+ * Parámetros esperados (URL Path):
+ * - id (@param {number} , requerido): ID del rocódromo (entero positivo)
+ *
+ * Requiere: Token JWT válido en header Authorization
+ */
+const obtenerLogoRocodromoValidators = [
+  param('id')
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('El id del rocodromo debe ser un entero positivo'),
+];
+
+router.get(
+  '/:id/logo',
+  verifyTokenMiddleware,
+  obtenerLogoRocodromoValidators,
+  validate,
+  (req, res, next) => {
+    rocodromoController.obtenerLogo(req, res, next);
   }
 );
 

@@ -14,7 +14,11 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
       return new Rocodromo(
         rocodromoModel.id,
         rocodromoModel.nombre,
-        rocodromoModel.ubicacion
+        rocodromoModel.ubicacion,
+        rocodromoModel.logoUrl,
+        rocodromoModel.descripcion,
+        rocodromoModel.horarios,
+        rocodromoModel.activo
       );
     } catch (error) {
       throw new Error(error.message);
@@ -25,6 +29,9 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
     const data = {
       nombre: rocodromo.nombre,
       ubicacion: rocodromo.ubicacion,
+      logoUrl: rocodromo.logoUrl,
+      descripcion: rocodromo.descripcion,
+      horarios: rocodromo.horarios,
     };
     const rocodromoModel = await this.RocodromoModel.create(data);
 
@@ -44,7 +51,8 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
       const zonas = rocodromoData.zonas.map((zona) => ({
         id: zona.id,
         idRoco: zona.idRoco,
-        tipo: zona.tipo,
+        nombre: zona.nombre,
+        mapa: zona.mapa
       }));
 
       return zonas;
@@ -73,6 +81,25 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
     } catch (error) {
       throw new Error(
         `Error al encontrar el rocódromo por ID: ${error.message}`
+      );
+    }
+  }
+
+  async actualizarLogoRocodromo(idRocodromo, logoUrl) {
+    try {
+      const rocodromoModel = await this.RocodromoModel.findByPk(idRocodromo);
+
+      if (!rocodromoModel) {
+        return null;
+      }
+
+      rocodromoModel.logoUrl = logoUrl;
+      await rocodromoModel.save();
+
+      return this._toDomain(rocodromoModel);
+    } catch (error) {
+      throw new Error(
+        `Error al actualizar el logo del rocódromo: ${error.message}`
       );
     }
   }

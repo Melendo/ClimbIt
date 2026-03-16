@@ -20,7 +20,13 @@ class CrearPista {
         null,
         data.idZona,
         data.nombre,
-        data.dificultad
+        data.dificultad,
+        data.tipo,
+        data.colorPresas,
+        data.imagenUrl,
+        data.ubicacionMapa,
+        data.fechaCreacion,
+        data.fechaRetirada
       );
       const pistaCreada = await this.pistaRepository.crear(nuevaPista);
 

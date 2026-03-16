@@ -14,7 +14,9 @@ class ZonaRepositoryPostgres extends ZonaRepository {
       return new Zona(
         zonaModel.id,
         zonaModel.idRoco,
-        zonaModel.tipo,
+        zonaModel.nombre,
+        zonaModel.mapa,
+        zonaModel.activo
       );
     } catch (error) {
       throw new Error(error.message);
@@ -24,7 +26,8 @@ class ZonaRepositoryPostgres extends ZonaRepository {
   async crearZona(zona) {
     const data = {
       idRoco: zona.idRoco,
-      tipo: zona.tipo,
+      nombre: zona.nombre,
+      mapa: zona.mapa,
     };
     const zonaModel = await this.ZonaModel.create(data);
 
@@ -68,6 +71,12 @@ class ZonaRepositoryPostgres extends ZonaRepository {
           idZona: pista.idZona,
           nombre: pista.nombre,
           dificultad: pista.dificultad,
+          colorPresas: pista.colorPresas,
+          tipo: pista.tipo,
+          imagenUrl: pista.imagenUrl,
+          ubicacionMapa: pista.ubicacionMapa,
+          fechaCreacion: pista.fechaCreacion,
+          fechaRetirada: pista.fechaRetirada,
           estado,
         };
       });

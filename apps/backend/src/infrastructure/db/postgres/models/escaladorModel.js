@@ -43,6 +43,16 @@ export default (sequelize, DataTypes) => {
         unique: true,
         field: 'Apodo',
       },
+      descripcion: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: 'Descripcion',
+      },
+      fotoUrl: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: 'FotoURL',
+      },
       activo: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
