@@ -30,9 +30,7 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
     const data = {
       correo: escalador.correo,
       contrasena: escalador.contrasena,
-      apodo: escalador.apodo,
-      descripcion: escalador.descripcion,
-      fotoUrl: escalador.fotoUrl,
+      apodo: escalador.apodo
     };
     const escaladorModel = await this.EscaladorModel.create(data);
 

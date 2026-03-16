@@ -14,9 +14,7 @@ class CrearEscalador {
         null,
         data.correo,
         hashedPassword,
-        data.apodo,
-        data.descripcion,
-        data.fotoUrl
+        data.apodo
       );
 
       const escaladorCreado =
