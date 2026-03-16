@@ -20,6 +20,10 @@ export function renderHomeView(container, callbacks) {
             Registrarse
           </a>
         </div>
+
+        <p class="text-muted small mt-4 mb-0 px-4" style="max-width: 520px;">
+          Esta aplicación es un proyecto de universidad y aún sigue en desarrollo. No se recomienda su uso para datos reales o sensibles. ¡Gracias por tu comprensión!
+        </p>
       </div>
 
     </div>`;
