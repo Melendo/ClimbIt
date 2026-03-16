@@ -15,10 +15,8 @@
   "license": "",
   "type": "module",
   "dependencies": {
-    "bootstrap": "5.3.8"
-  },
-  "devDependencies": {
+    "bootstrap": "5.3.8",
     "vite": "7.2.4",
-    "vite-plugin-pwa": "^0.19.8"
+    "vite-plugin-pwa": "^1.2.0"
   }
 }
