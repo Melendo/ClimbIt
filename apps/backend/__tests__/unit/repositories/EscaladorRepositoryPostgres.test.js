@@ -81,9 +81,7 @@ describe('EscaladorRepositoryPostgres', () => {
       expect(mockEscaladorModel.create).toHaveBeenCalledWith({
         correo: 'test@test.com',
         contrasena: 'hashedpassword',
-        apodo: 'Tester',
-        descripcion: null,
-        fotoUrl: null,
+        apodo: 'Tester'
       });
       expect(resultado).toBeInstanceOf(Escalador);
       expect(resultado.id).toBe(1);

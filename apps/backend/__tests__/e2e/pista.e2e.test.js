@@ -17,7 +17,7 @@ describe('E2E: Pistas', () => {
     });
     zona = await db.Zona.create({
       idRoco: rocodromo.id,
-      tipo: 'Bloque',
+      nombre: 'Zona Bloque Test',
     });
   });
 
