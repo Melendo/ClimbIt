@@ -22,12 +22,12 @@ describe('E2E: Zonas', () => {
 
     zonaConPistas = await db.Zona.create({
       idRoco: rocodromo.id,
-      tipo: 'Zona Con Pistas Test',
+      nombre: 'Zona Con Pistas Test',
     });
 
     zonaSinPistas = await db.Zona.create({
       idRoco: rocodromo.id,
-      tipo: 'Zona Vacía Test',
+      nombre: 'Zona Vacia Test',
     });
 
     pistasCreadas.push(await db.Pista.create({
@@ -122,9 +122,9 @@ describe('E2E: Zonas', () => {
         .expect(201);
 
       expect(response.body).toHaveProperty('id');
-      expect(response.body).toHaveProperty('tipo');
+      expect(response.body).toHaveProperty('nombre');
       expect(response.body).toHaveProperty('idRoco');
-      expect(response.body.tipo).toBe('Zona Nueva E2E');
+      expect(response.body.nombre).toBe('Zona Nueva E2E');
       expect(response.body.idRoco).toBe(rocodromo.id);
 
       // Limpiar

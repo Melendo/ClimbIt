@@ -61,8 +61,8 @@ describe('RocodromoRepositoryPostgres', () => {
         nombre: 'Roco Test',
         ubicacion: 'Ciudad Test',
         zonas: [
-          { id: 101, idRoco: 1, tipo: 'Boulder' },
-          { id: 102, idRoco: 1, tipo: 'Cuerda' },
+          { id: 101, idRoco: 1, nombre: 'Boulder' },
+          { id: 102, idRoco: 1, nombre: 'Cuerda' },
         ],
       };
 
@@ -79,12 +79,12 @@ describe('RocodromoRepositoryPostgres', () => {
       expect(resultado[0]).toEqual({
         id: 101,
         idRoco: 1,
-        tipo: 'Boulder',
+        nombre: 'Boulder',
       });
       expect(resultado[1]).toEqual({
         id: 102,
         idRoco: 1,
-        tipo: 'Cuerda',
+        nombre: 'Cuerda',
       });
     });
 

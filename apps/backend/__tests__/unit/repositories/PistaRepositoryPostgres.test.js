@@ -77,6 +77,12 @@ describe('PistaRepositoryPostgres', () => {
         idZona: 2,
         nombre: 'El Muro',
         dificultad: '6a',
+        tipo: null,
+        colorPresas: null,
+        imagenUrl: null,
+        ubicacionMapa: null,
+        fechaCreacion: expect.any(Date),
+        fechaRetirada: null,
       });
       expect(resultado).toBeInstanceOf(Pista);
       expect(resultado.id).toBe(1);

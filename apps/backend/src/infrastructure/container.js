@@ -32,6 +32,7 @@ import CrearZona from '../application/zonas/crearZona.js';
 import ObtenerPistasDeZona from '../application/zonas/obtenerPistasZona.js';
 
 import CrearRocodromo from '../application/rocodromos/crearRocodromo.js';
+import ActualizarLogoRocodromo from '../application/rocodromos/actualizarLogoRocodromo.js';
 import ObtenerZonasRocodromo from '../application/rocodromos/obtenerZonasRocodromo.js';
 import ObtenerRocodromos from '../application/rocodromos/obtenerRocodromos.js';
 import ObtenerInformacionRocodromo from '../application/rocodromos/obtenerInformacionRocodromo.js';
@@ -90,6 +91,9 @@ async function inicializarContainer() {
   const obtenerPistasDeZonaUseCase = new ObtenerPistasDeZona(zonaRepository, escaladorRepository);
 
   const crearRocodromoUseCase = new CrearRocodromo(rocodromoRepository);
+  const actualizarLogoRocodromoUseCase = new ActualizarLogoRocodromo(
+    rocodromoRepository
+  );
   const obtenerZonasRocodromoUseCase = new ObtenerZonasRocodromo(
     rocodromoRepository
   );
@@ -118,6 +122,7 @@ async function inicializarContainer() {
   };
   const rocodromoUseCases = {
     crear: crearRocodromoUseCase,
+    actualizarLogo: actualizarLogoRocodromoUseCase,
     obtenerZonasRocodromo: obtenerZonasRocodromoUseCase,
     obtenerRocodromos: obtenerRocodromosUseCase,
     obtenerInformacion: obtenerInformacionRocodromoUseCase,

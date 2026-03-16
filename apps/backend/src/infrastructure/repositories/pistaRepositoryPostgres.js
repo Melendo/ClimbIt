@@ -15,7 +15,14 @@ class PistaRepositoryPostgres extends pistaRepository {
         pistaModel.id,
         pistaModel.idZona,
         pistaModel.nombre,
-        pistaModel.dificultad
+        pistaModel.dificultad,
+        pistaModel.tipo,
+        pistaModel.colorPresas,
+        pistaModel.imagenUrl,
+        pistaModel.ubicacionMapa,
+        pistaModel.fechaCreacion,
+        pistaModel.fechaRetirada,
+        pistaModel.activo
       );
     } catch (error) {
       throw new Error(error.message);
@@ -27,6 +34,12 @@ class PistaRepositoryPostgres extends pistaRepository {
       idZona: pista.idZona,
       nombre: pista.nombre,
       dificultad: pista.dificultad,
+      tipo: pista.tipo,
+      colorPresas: pista.colorPresas,
+      imagenUrl: pista.imagenUrl,
+      ubicacionMapa: pista.ubicacionMapa,
+      fechaCreacion: pista.fechaCreacion,
+      fechaRetirada: pista.fechaRetirada,
     };
     const pistaModel = await this.PistaModel.create(data);
 
