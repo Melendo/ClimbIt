@@ -45,6 +45,8 @@ export default defineConfig({
         ]
       },
       workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/(escaladores|pistas|rocodromos|zonas)\b/],
         runtimeCaching: [
