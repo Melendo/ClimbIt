@@ -84,6 +84,25 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
       );
     }
   }
+
+  async actualizarLogoRocodromo(idRocodromo, logoUrl) {
+    try {
+      const rocodromoModel = await this.RocodromoModel.findByPk(idRocodromo);
+
+      if (!rocodromoModel) {
+        return null;
+      }
+
+      rocodromoModel.logoUrl = logoUrl;
+      await rocodromoModel.save();
+
+      return this._toDomain(rocodromoModel);
+    } catch (error) {
+      throw new Error(
+        `Error al actualizar el logo del rocódromo: ${error.message}`
+      );
+    }
+  }
 }
 
 export default RocodromoRepositoryPostgres;
