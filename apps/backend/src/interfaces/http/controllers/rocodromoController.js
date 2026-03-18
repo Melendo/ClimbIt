@@ -1,3 +1,4 @@
+import fs from 'fs/promises';
 import path from 'path';
 
 class RocodromoController {
@@ -66,17 +67,49 @@ class RocodromoController {
         return res.status(400).json({ error: 'El logo es requerido' });
       }
 
-      const logoUrl = `/uploads/logos_rocodromos/${req.file.filename}`;
-      const rocodromo = await this.useCases.actualizarLogo.execute(
-        id,
-        logoUrl
-      );
+      const existingRocodromo = await this.useCases.obtenerInformacion.execute(id);
 
-      if (!rocodromo) {
+      if (!existingRocodromo) {
+        const uploadedPath = path.resolve(
+          process.cwd(),
+          'uploads',
+          'logos_rocodromos',
+          req.file.filename
+        );
+
+        try {
+          await fs.unlink(uploadedPath);
+        } catch (unlinkError) {
+          if (unlinkError.code !== 'ENOENT') {
+            throw unlinkError;
+          }
+        }
+
         return res
           .status(404)
           .json({ error: `Rocódromo con ID ${id} no encontrado` });
       }
+
+      if (existingRocodromo.logoUrl) {
+        const previousFileName = path.basename(existingRocodromo.logoUrl);
+        const previousLogoPath = path.resolve(
+          process.cwd(),
+          'uploads',
+          'logos_rocodromos',
+          previousFileName
+        );
+
+        try {
+          await fs.unlink(previousLogoPath);
+        } catch (unlinkError) {
+          if (unlinkError.code !== 'ENOENT') {
+            throw unlinkError;
+          }
+        }
+      }
+
+      const logoUrl = `/uploads/logos_rocodromos/${req.file.filename}`;
+      const rocodromo = await this.useCases.actualizarLogo.execute(id, logoUrl);
 
       res.status(200).json({ logoUrl: rocodromo.logoUrl });
     } catch (error) {

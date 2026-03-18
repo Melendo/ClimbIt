@@ -79,6 +79,15 @@ class PistaRepositoryPostgres extends pistaRepository {
     }
   }
 
+  async actualizarImagenUrl(id, imagenUrl) {
+    const pistaModel = await this.PistaModel.findByPk(id);
+    if (!pistaModel) return null;
+
+    await pistaModel.update({ imagenUrl });
+    await pistaModel.save(); // Recargar para obtener los datos actualizados
+    return this._toDomain(pistaModel);
+  }
+
   async eliminarEstadoPista(idPista, idEscalador) {
     const pistaModel = await this.PistaModel.findByPk(idPista);
     if (!pistaModel) {

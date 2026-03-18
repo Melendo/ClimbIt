@@ -2,6 +2,7 @@ import express from 'express';
 import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyTokenMiddleware from '../middlewares/verifyToken.js';
+import uploadImages from '../middlewares/uploadImages.js';
 
 import escalaDificultadJSON from '../../../domain/sharedObjects/escalaDificultadFrancesa.json' with { type: 'json' };
 const GRADOS_FRANCESES = escalaDificultadJSON.escala_francesa_escalada.grados;
@@ -12,6 +13,15 @@ const router = express.Router();
 const container = await containerPromise;
 const { pistaController } = container;
 
+const getPistaImageBaseName = (req) => {
+  const nombre = typeof req.body?.nombre === 'string' ? req.body.nombre.trim() : '';
+  if (nombre && nombre.toLowerCase() !== 'null') {
+    return nombre;
+  }
+
+  return req.body?.idZona ?? req.params?.id;
+};
+
 /**
  * POST /pistas/create
  * Crea una nueva pista dentro de una zona específica
@@ -20,6 +30,9 @@ const { pistaController } = container;
  * - idZona (@param {number} , requerido): ID de la zona a la que pertenece la pista (entero positivo)
  * - nombre (@param {string} , requerido): Nombre descriptivo de la pista (1-100 caracteres)
  * - dificultad (@param {string} , requerido): Grado de dificultad francés (ej: "3a", "5b", "6c+")
+ *
+ * Parámetros esperados (multipart/form-data):
+ * - imagen (@param {file} , opcional): Archivo de imagen de la pista
  *
  * Requiere: Token JWT válido en header Authorization
  *
@@ -52,9 +65,26 @@ const crearPistaValidators = [
     ),
 ];
 
+const uploadImagenPista = uploadImages({
+  uploadDir: 'uploads/tmp/imagenes_pistas',
+  fileName: (req) => {
+    const baseName = getPistaImageBaseName(req);
+    return `pista-${baseName}-${Date.now()}`;
+  },
+});
+
+const uploadImagenPistaUpdate = uploadImages({
+  uploadDir: 'uploads/tmp/imagenes_pistas',
+  fileName: (req) => {
+    const baseName = getPistaImageBaseName(req);
+    return `pista-${baseName}-${Date.now()}`;
+  },
+});
+
 router.post(
   '/create',
   verifyTokenMiddleware,
+  uploadImagenPista.single('imagen'),
   crearPistaValidators,
   validate,
   (req, res, next) => {
@@ -127,6 +157,36 @@ router.post(
   validate,
   (req, res, next) => {
     pistaController.cambiarEstado(req, res, next);
+  }
+);
+
+/**
+ * PUT /pistas/:id/imagen
+ * Actualiza la imagen de una pista
+ *
+ * Parámetros esperados (URL Path):
+ * - id (@param {number} , requerido): ID de la pista (entero positivo)
+ *
+ * Parámetros esperados (multipart/form-data):
+ * - imagen (@param {file} , requerido): Archivo de imagen de la pista
+ *
+ * Requiere: Token JWT válido en header Authorization
+ */
+const actualizarImagenPistaValidators = [
+  param('id')
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('El id de la pista debe ser un entero positivo'),
+];
+
+router.put(
+  '/:id/imagen',
+  verifyTokenMiddleware,
+  uploadImagenPistaUpdate.single('imagen'),
+  actualizarImagenPistaValidators,
+  validate,
+  (req, res, next) => {
+    pistaController.actualizarImagen(req, res, next);
   }
 );
 
