@@ -2,6 +2,7 @@ import express from 'express';
 import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyTokenMiddleware from '../middlewares/verifyToken.js';
+import uploadImages from '../middlewares/uploadImages.js';
 
 import escalaDificultadJSON from '../../../domain/sharedObjects/escalaDificultadFrancesa.json' with { type: 'json' };
 const GRADOS_FRANCESES = escalaDificultadJSON.escala_francesa_escalada.grados;
@@ -20,6 +21,9 @@ const { pistaController } = container;
  * - idZona (@param {number} , requerido): ID de la zona a la que pertenece la pista (entero positivo)
  * - nombre (@param {string} , requerido): Nombre descriptivo de la pista (1-100 caracteres)
  * - dificultad (@param {string} , requerido): Grado de dificultad francés (ej: "3a", "5b", "6c+")
+ *
+ * Parámetros esperados (multipart/form-data):
+ * - imagen (@param {file} , opcional): Archivo de imagen de la pista
  *
  * Requiere: Token JWT válido en header Authorization
  *
@@ -52,9 +56,22 @@ const crearPistaValidators = [
     ),
 ];
 
+const uploadImagenPista = uploadImages({
+  uploadDir: 'uploads/imagenes_pistas',
+  fileName: (req) => {
+    const nombre = typeof req.body?.nombre === 'string' ? req.body.nombre.trim() : '';
+    const baseName = nombre && nombre.toLowerCase() !== 'null'
+      ? nombre
+      : req.body?.idZona;
+
+    return `pista-${baseName}-${Date.now()}`;
+  },
+});
+
 router.post(
   '/create',
   verifyTokenMiddleware,
+  uploadImagenPista.single('imagen'),
   crearPistaValidators,
   validate,
   (req, res, next) => {

@@ -2,7 +2,7 @@ import express from 'express';
 import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyTokenMiddleware from '../middlewares/verifyToken.js';
-import uploadLogoRocodromo from '../middlewares/uploadLogoRocodromo.js';
+import uploadImages from '../middlewares/uploadImages.js';
 import containerPromise from '../../../infrastructure/container.js';
 
 const router = express.Router();
@@ -138,6 +138,11 @@ const subirLogoRocodromoValidators = [
     .withMessage('El id del rocodromo debe ser un entero positivo'),
 ];
 
+const uploadLogoRocodromo = uploadImages({
+  uploadDir: 'uploads/logos_rocodromos',
+  fileName: (req) => `logo-${req.params.id}-${Date.now()}`,
+});
+
 router.post(
   '/:id/logo',
   verifyTokenMiddleware,
@@ -145,6 +150,7 @@ router.post(
   validate,
   uploadLogoRocodromo.single('logo'),
   (req, res, next) => {
+    console.log("ID del rocódromo:", req.params.id);
     rocodromoController.subirLogo(req, res, next);
   }
 );

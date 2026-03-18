@@ -6,6 +6,9 @@ class PistaController {
   async crear(req, res, next) {
     try {
       const { idZona, nombre, dificultad, tipo, colorPresas, imagenUrl, ubicacionMapa, fechaCreacion, fechaRetirada } = req.body;
+      const resolvedImagenUrl = req.file
+        ? `/uploads/imagenes_pistas/${req.file.filename}`
+        : imagenUrl;
 
       const nuevaPista = await this.useCases.crear.execute({
         idZona,
@@ -13,7 +16,7 @@ class PistaController {
         dificultad,
         tipo,
         colorPresas,
-        imagenUrl,
+        imagenUrl: resolvedImagenUrl,
         ubicacionMapa,
         fechaCreacion,
         fechaRetirada,
