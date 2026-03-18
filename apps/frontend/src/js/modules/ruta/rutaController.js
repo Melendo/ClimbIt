@@ -1,4 +1,4 @@
-import { renderCrearRuta, renderInfoRuta } from './pistaView.js';
+import { renderCrearRuta, renderInfoRuta } from './rutaView.js';
 import { fetchClient } from '../../core/client.js';
 import { showError, showLoading, showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
 

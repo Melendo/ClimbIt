@@ -39,15 +39,15 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                 <!-- Selector de Zona (Overlay Superior Izquierda) -->
                 <div class="position-absolute top-0 start-0 m-3" style="z-index: 10;">
                    <select id="zonaSelector" class="form-select form-select-sm shadow-sm opacity-90 fw-bold border-0" style="min-width: 150px; backdrop-filter: blur(4px); background-color: rgba(255, 255, 255, 0.9);">
-                        ${zonas.map((z) => `<option value="${z.id}" ${z.id == (zonaInicial?.id) ? 'selected' : ''}>Zona ${z.tipo || z.id}</option>`).join('')}
+                        ${zonas.map((z) => `<option value="${z.id}" ${z.id == (zonaInicial?.id) ? 'selected' : ''}>Zona ${z.nombre || z.id}</option>`).join('')}
                     </select>
                 </div>
             </div>
 
 
 
-            <!-- Contenedor de Pistas (Dinámico) -->
-            <div id="pistasContainer" class="card-body flex-grow-1 overflow-auto bg-light">
+            <!-- Contenedor de Rutas (Dinámico) -->
+            <div id="rutasContainer" class="card-body flex-grow-1 overflow-auto bg-light">
                 ${zonas.length > 0 ? `
                 <div class="text-center text-muted mt-5 fade-in">
                     <div class="spinner-border text-primary" role="status">
@@ -68,17 +68,17 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
 
     // Lógica del selector
     const selector = container.querySelector('#zonaSelector');
-    const pistasContainer = container.querySelector('#pistasContainer');
+    const rutasContainer = container.querySelector('#rutasContainer');
 
     const updateUrl = (idZona) => {
         const currentUrl = new URL(window.location.href);
         // Usar replaceState para no llenar el historial de navegación con cada cambio de zona
         // Pero si queremos que el botón "Atrás" funcione entre zonas, usaríamos pushState.
-        // El usuario pidió "cuando entras a una pista al ir atrás te redirige siempre a la primera zona".
+        // El usuario pidió "cuando entras a una ruta al ir atrás te redirige siempre a la primera zona".
         // Esto sugiere que quiere que el estado se conserve. replaceState es suficiente para eso.
-        // Si cambia de zona 1 -> zona 2, y luego entra a pista X, al volver atrás, debería estar en zona 2.
+        // Si cambia de zona 1 -> zona 2, y luego entra a ruta X, al volver atrás, debería estar en zona 2.
         // Si usamos replaceState, al cambiar de zona 1 a 2, reemplazamos la entrada actual.
-        // Al entrar a pista X (nueva entrada), el historial es: [..., zona 2, pista X].
+        // Al entrar a ruta X (nueva entrada), el historial es: [..., zona 2, ruta X].
         // Al volver, volvemos a zona 2. Correcto.
         currentUrl.hash = `#mapaZona?id=${rocodromo.id}&zona=${idZona}`;
         history.replaceState(null, '', currentUrl.toString());
@@ -100,17 +100,17 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
 
         // Actualizar título del mapa
         const zonaObj = zonas.find(z => z.id == idZona);
-        const textoZona = zonaObj ? `Zona ${zonaObj.tipo || zonaObj.id}` : 'Mapa General';
+        const textoZona = zonaObj ? `Zona ${zonaObj.nombre || zonaObj.id}` : 'Mapa General';
 
         const mapaTitulo = container.querySelector('#mapaTitulo');
         if (mapaTitulo) mapaTitulo.textContent = `Mapa ${textoZona}`;
 
-        // Mostrar loading en el contenedor de pistas
+        // Mostrar loading en el contenedor de rutas
         let animationClass = '';
         if (direction === 'next') animationClass = 'slide-in-right';
         if (direction === 'prev') animationClass = 'slide-in-left';
 
-        pistasContainer.innerHTML = `
+        rutasContainer.innerHTML = `
             <div class="d-flex justify-content-center align-items-center h-100 ${animationClass}">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Cargando...</span>
@@ -118,30 +118,30 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
             </div>
         `;
 
-        // Cargar pistas usando el callback
-        const pistas = await onZonaSelect(idZona);
+        // Cargar rutas usando el callback
+        const rutas = await onZonaSelect(idZona);
 
-        // Renderizar pistas
-        if (!pistas || pistas.length === 0) {
-            pistasContainer.innerHTML = `
+        // Renderizar rutas
+        if (!rutas || rutas.length === 0) {
+            rutasContainer.innerHTML = `
                 <div class="alert alert-info text-center mt-3">
-                    No hay pistas registradas en esta zona.
+                    No hay rutas registradas en esta zona.
                 </div>
             `;
             return;
         }
 
-        pistasContainer.innerHTML = `
-            <h6 class="text-muted mb-3 small fw-bold text-uppercase ${animationClass}">Pistas Disponibles (${pistas.length})</h6>
+        rutasContainer.innerHTML = `
+            <h6 class="text-muted mb-3 small fw-bold text-uppercase ${animationClass}">Rutas Disponibles (${rutas.length})</h6>
             <div class="row g-3 ${animationClass}">
-                ${pistas.map(pista => {
-            const status = pista.statusConfig;
+                ${rutas.map(ruta => {
+            const status = ruta.statusConfig;
             return `
                     <div class="col-6 fade-in">
-                        <a href="#infoPista?id=${pista.id}" class="text-decoration-none text-dark">
+                        <a href="#infoRuta?id=${ruta.id}" class="text-decoration-none text-dark">
                             <div class="card h-100 border-0 shadow-sm zona-card overflow-hidden">
                                 <div class="position-relative" style="aspect-ratio: 3/4;">
-                                    <img src="/assets/placeholder.jpg" class="card-img-top w-100 h-100" style="object-fit: cover;" alt="${pista.nombre}">
+                                    <img src="/assets/placeholder.jpg" class="card-img-top w-100 h-100" style="object-fit: cover;" alt="${ruta.nombre}">
                                     
                                     <!-- Estado Indicator -->
                                     <div class="position-absolute top-0 start-0 m-2 rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; background: ${status.bg};">
@@ -149,10 +149,10 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                                     </div>
 
                                     <div class="position-absolute top-0 end-0 m-2">
-                                        <span class="badge bg-primary shadow-sm">${pista.dificultad}</span>
+                                        <span class="badge bg-primary shadow-sm">${ruta.dificultad}</span>
                                     </div>
                                     <div class="position-absolute bottom-0 start-0 end-0 p-3 zona-card-overlay">
-                                        <h6 class="text-white mb-0 fw-bold text-truncate">${pista.nombre}</h6>
+                                        <h6 class="text-white mb-0 fw-bold text-truncate">${ruta.nombre}</h6>
                                     </div>
                                 </div>
                             </div>
@@ -234,7 +234,7 @@ export function renderCrearZona(container, callbacks) {
           <div class="invalid-feedback"></div>
         </div>
         <div class="mb-3">
-          <label for="nombre" class="form-label">Nombre / Tipo</label>
+          <label for="nombre" class="form-label">Nombre / Nombre</label>
           <input
             type="text"
             class="form-control"
