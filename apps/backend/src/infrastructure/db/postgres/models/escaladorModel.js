@@ -14,6 +14,11 @@ export default (sequelize, DataTypes) => {
         foreignKey: 'idEscalador',
         as: 'pistasEscaladas',
       });
+      Escalador.belongsToMany(models.Rocodromo, {
+        through: models.GestorRocodromo,
+        foreignKey: 'idEscalador',
+        as: 'rocodromosGestionados',
+      });
     }
   }
 
