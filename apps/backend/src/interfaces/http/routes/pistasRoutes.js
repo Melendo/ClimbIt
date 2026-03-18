@@ -13,6 +13,15 @@ const router = express.Router();
 const container = await containerPromise;
 const { pistaController } = container;
 
+const getPistaImageBaseName = (req) => {
+  const nombre = typeof req.body?.nombre === 'string' ? req.body.nombre.trim() : '';
+  if (nombre && nombre.toLowerCase() !== 'null') {
+    return nombre;
+  }
+
+  return req.body?.idZona ?? req.params?.id;
+};
+
 /**
  * POST /pistas/create
  * Crea una nueva pista dentro de una zona específica
@@ -57,13 +66,17 @@ const crearPistaValidators = [
 ];
 
 const uploadImagenPista = uploadImages({
-  uploadDir: 'uploads/imagenes_pistas',
+  uploadDir: 'uploads/tmp/imagenes_pistas',
   fileName: (req) => {
-    const nombre = typeof req.body?.nombre === 'string' ? req.body.nombre.trim() : '';
-    const baseName = nombre && nombre.toLowerCase() !== 'null'
-      ? nombre
-      : req.body?.idZona;
+    const baseName = getPistaImageBaseName(req);
+    return `pista-${baseName}-${Date.now()}`;
+  },
+});
 
+const uploadImagenPistaUpdate = uploadImages({
+  uploadDir: 'uploads/tmp/imagenes_pistas',
+  fileName: (req) => {
+    const baseName = getPistaImageBaseName(req);
     return `pista-${baseName}-${Date.now()}`;
   },
 });
@@ -144,6 +157,36 @@ router.post(
   validate,
   (req, res, next) => {
     pistaController.cambiarEstado(req, res, next);
+  }
+);
+
+/**
+ * PUT /pistas/:id/imagen
+ * Actualiza la imagen de una pista
+ *
+ * Parámetros esperados (URL Path):
+ * - id (@param {number} , requerido): ID de la pista (entero positivo)
+ *
+ * Parámetros esperados (multipart/form-data):
+ * - imagen (@param {file} , requerido): Archivo de imagen de la pista
+ *
+ * Requiere: Token JWT válido en header Authorization
+ */
+const actualizarImagenPistaValidators = [
+  param('id')
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('El id de la pista debe ser un entero positivo'),
+];
+
+router.put(
+  '/:id/imagen',
+  verifyTokenMiddleware,
+  uploadImagenPistaUpdate.single('imagen'),
+  actualizarImagenPistaValidators,
+  validate,
+  (req, res, next) => {
+    pistaController.actualizarImagen(req, res, next);
   }
 );
 
