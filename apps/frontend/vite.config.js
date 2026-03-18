@@ -16,7 +16,7 @@ export default defineConfig({
       manifest: {
         name: 'ClimbIt',
         short_name: 'ClimbIt',
-        description: 'Aplicacion para gestionar escaladores, rocodromos, zonas y pistas',
+        description: 'Aplicacion para gestionar escaladores, rocodromos, zonas y rutas',
         theme_color: '#f8f9fa',
         background_color: '#f8f9fa',
         orientation: 'portrait',

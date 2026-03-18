@@ -4,7 +4,7 @@ import { showLoading, showError } from '../../core/ui.js';
 
 /**
  * Controlador para la vista de mapa de zona
- * Muestra el mapa del rocódromo y permite seleccionar una zona para ver sus pistas
+ * Muestra el mapa del rocódromo y permite seleccionar una zona para ver sus rutas
  * @param {HTMLElement} container Contenedor donde renderizar la vista
  * @param {number} idRocodromo ID del rocódromo
  */
@@ -43,7 +43,7 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
 
         // Renderizar la vista inicial
         renderMapaZona(container, { rocodromo, zonas }, async (idZona) => {
-            return await cargarPistasZona(idZona);
+            return await cargarRutasZona(idZona);
         }, initialZonaId);
 
     } catch (err) {
@@ -52,22 +52,22 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
 }
 
 /**
- * Función auxiliar para obtener las pistas de una zona
+ * Función auxiliar para obtener las rutas de una zona
  * @param {number} idZona ID de la zona
- * @returns {Promise<Array>} Lista de pistas
+ * @returns {Promise<Array>} Lista de rutas
  */
-async function cargarPistasZona(idZona) {
+async function cargarRutasZona(idZona) {
     try {
-        const pistasRes = await fetchClient(`/zonas/pistas/${idZona}`);
-        const pistas = await pistasRes.json();
+        const rutasRes = await fetchClient(`/zonas/pistas/${idZona}`);
+        const rutas = await rutasRes.json();
 
         // Mapear configuración de estado para la vista
-        return pistas.map(pista => ({
-            ...pista,
-            statusConfig: ESTADOS_CONFIG[pista.estado] || ESTADOS_CONFIG['S/N']
+        return rutas.map(ruta => ({
+            ...ruta,
+            statusConfig: ESTADOS_CONFIG[ruta.estado] || ESTADOS_CONFIG['S/N']
         }));
     } catch (err) {
-        console.error(`Error al cargar pistas de la zona ${idZona}:`, err);
+        console.error(`Error al cargar rutas de la zona ${idZona}:`, err);
         return [];
     }
 }

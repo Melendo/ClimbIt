@@ -40,7 +40,8 @@ export function renderLoginEmail(container, callbacks) {
           
           <form id="login-email-form">
             <div class="mb-3">
-              <input class="form-control form-control-lg" id="email" 
+              <input class="form-control form-control-lg" id="email"
+                     type="email" name="email" autocomplete="username"
                      placeholder="tu@email.com" required autofocus>
               <div class="invalid-feedback"></div>
             </div>
@@ -84,7 +85,10 @@ export function renderLoginPassword(container, email, callbacks) {
           
           <form id="login-password-form">
             <div class="mb-3 position-relative">
-              <input type="password" class="form-control form-control-lg" id="password" 
+              <input type="password" class="form-control form-control-lg" id="password"
+                     name="password" autocomplete="current-password"
+                     autocapitalize="off" autocorrect="off" spellcheck="false"
+                     data-lpignore="true" data-1p-ignore="true"
                      placeholder="Contraseña" required autofocus>
               <span class="material-icons position-absolute top-50 end-0 translate-middle-y me-3 text-muted" 
                     style="cursor: pointer;" id="toggle-password">visibility</span>
@@ -209,7 +213,8 @@ export function renderRegistroEmail(container, callbacks) {
           
           <form id="registro-email-form">
             <div class="mb-3">
-              <input class="form-control form-control-lg" id="email" 
+              <input class="form-control form-control-lg" id="email"
+                     type="email" name="email" autocomplete="email"
                      placeholder="tu@email.com" required autofocus>
             </div>
             
@@ -259,7 +264,10 @@ export function renderRegistroPassword(container, email, callbacks) {
           <form id="registro-password-form">
             <div class="mb-3">
               <div class="position-relative">
-                <input type="password" class="form-control form-control-lg" id="password" 
+                <input type="password" class="form-control form-control-lg" id="password"
+                  name="new-password" autocomplete="new-password"
+                  autocapitalize="off" autocorrect="off" spellcheck="false"
+                  data-lpignore="true" data-1p-ignore="true"
                        placeholder="Contraseña" required autofocus style="padding-right: 48px;">
                 <span class="material-icons position-absolute top-50 end-0 translate-middle-y me-3 text-muted" 
                       style="cursor: pointer;" id="toggle-password">visibility</span>
@@ -268,7 +276,10 @@ export function renderRegistroPassword(container, email, callbacks) {
             
             <div class="mb-3">
               <div class="position-relative">
-                <input type="password" class="form-control form-control-lg" id="password-confirm" 
+                <input type="password" class="form-control form-control-lg" id="password-confirm"
+                  name="new-password-confirm" autocomplete="new-password"
+                  autocapitalize="off" autocorrect="off" spellcheck="false"
+                  data-lpignore="true" data-1p-ignore="true"
                        placeholder="Repetir contraseña" required style="padding-right: 48px;">
                 <span class="material-icons position-absolute top-50 end-0 translate-middle-y me-3 text-muted" 
                       style="cursor: pointer;" id="toggle-password-confirm">visibility</span>

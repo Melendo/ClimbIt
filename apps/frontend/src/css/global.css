@@ -51,7 +51,7 @@ body {
    Estilos específicos de componentes
    ======================================== */
 
-/* Estilos para botones de estado en vista de pista */
+/* Estilos para botones de estado en vista de ruta */
 .estado-btn {
   text-decoration: none !important;
 }
@@ -62,7 +62,7 @@ body {
 }
 
 /* ========================================
-   Cards de zonas/pistas en mapa rocódromo
+  Cards de zonas/rutas en mapa rocódromo
    ======================================== */
 .zona-card {
   cursor: pointer;
