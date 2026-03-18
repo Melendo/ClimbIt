@@ -9,7 +9,19 @@ class ObtenerPistaPorId {
     try {
       const result = await this.pistaRepository.obtenerPorId(id);
       const pista = result
-        ? new Pista(result.id, result.idZona, result.nombre, result.dificultad)
+        ? new Pista(
+            result.id,
+            result.idZona,
+            result.nombre,
+            result.dificultad,
+            result.tipo,
+            result.colorPresas,
+            result.imagenUrl,
+            result.ubicacionMapa,
+            result.fechaCreacion,
+            result.fechaRetirada,
+            result.activo
+          )
         : null;
 
       if (!pista) return null;
@@ -17,9 +29,13 @@ class ObtenerPistaPorId {
       // Obtener el estado del escalador en esta pista
       let estado = null;
       if (escaladorApodo) {
-        const escalador = await this.escaladorRepository.encontrarPorApodo(escaladorApodo);
+        const escalador =
+          await this.escaladorRepository.encontrarPorApodo(escaladorApodo);
         if (escalador) {
-          estado = await this.pistaRepository.obtenerEstado(pista.id, escalador.id);
+          estado = await this.pistaRepository.obtenerEstado(
+            pista.id,
+            escalador.id
+          );
         }
       }
 
