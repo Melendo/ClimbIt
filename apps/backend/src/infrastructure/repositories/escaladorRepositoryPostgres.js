@@ -12,7 +12,7 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
   _toDomain(escaladorModel) {
     if (!escaladorModel) return null;
     try {
-      return new Escalador(
+      const escalador = new Escalador(
         escaladorModel.id,
         escaladorModel.correo,
         escaladorModel.contrasena,
@@ -21,6 +21,8 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
         escaladorModel.fotoUrl,
         escaladorModel.activo
       );
+      escalador.isAdmin = Boolean(escaladorModel.isAdmin);
+      return escalador;
     } catch (error) {
       throw new Error(error.message);
     }

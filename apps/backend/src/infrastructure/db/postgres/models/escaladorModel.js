@@ -64,6 +64,12 @@ export default (sequelize, DataTypes) => {
         defaultValue: true,
         field: 'Activo',
       },
+      isAdmin: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+        field: 'IsAdmin',
+      },
     },
     {
       sequelize,

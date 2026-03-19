@@ -20,11 +20,20 @@ class AutenticarEscalador {
       if (!passwordMatch) {
         throw new Error('Contraseña incorrecta');
       }
-      const rocodromosGestionados =
-        await this.escaladorRepository.obtenerIdsRocodromosGestionados(
-          escaladorExistente.id
-        );
-      const rol = rocodromosGestionados.length > 0 ? 'Gestor' : 'Escalador';
+      const esAdmin = Boolean(escaladorExistente.isAdmin);
+      let rocodromosGestionados = [];
+      let rol = 'Escalador';
+
+      if (esAdmin) {
+        rol = 'Admin';
+      } else {
+        rocodromosGestionados =
+          await this.escaladorRepository.obtenerIdsRocodromosGestionados(
+            escaladorExistente.id
+          );
+        rol = rocodromosGestionados.length > 0 ? 'Gestor' : 'Escalador';
+      }
+
       const payload = {
         correo: escaladorExistente.correo,
         apodo: escaladorExistente.apodo,
