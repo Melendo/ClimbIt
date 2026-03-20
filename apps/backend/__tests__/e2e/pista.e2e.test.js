@@ -37,7 +37,7 @@ describe('E2E: Pistas', () => {
         nombre: 'E2E Test',
         dificultad: '6a',
       };
-      token = tokenService.crear({ id: 1, correo: 'test@e2e.com', role: 'admin' });
+      token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'Admin' });
     });
 
     afterAll(async () => {
@@ -143,7 +143,7 @@ describe('E2E: Pistas', () => {
       };
       const pistaCreada = await db.Pista.create(pistaTest);
       pistaCreadaId = pistaCreada.id;
-      token = tokenService.crear({ id: 1, correo: 'test@e2e.com', role: 'admin' });
+      token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'Admin' });
     });
 
     afterAll(async () => {

@@ -13,7 +13,7 @@ describe('E2E: Zonas', () => {
   let token;
 
   beforeAll(async () => {
-    token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'admin' });
+    token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'Admin' });
     
     rocodromo = await db.Rocodromo.create({
       nombre: 'Roco Zonas Integration',
