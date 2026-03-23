@@ -28,6 +28,13 @@ const CLICK_THRESHOLD = 10;
 let rocoSvgCache = null;
 let mapaPanzoomInstance = null;
 
+function resetMapaZoom() {
+    if (!mapaPanzoomInstance) return;
+
+    mapaPanzoomInstance.moveTo(0, 0);
+    mapaPanzoomInstance.zoomAbs(0, 0, 1);
+}
+
 // Función para obtener coordenada X o Y de una ruta, con validación y fallback a null
 function getRutaCoord(ruta, key) {
     const value = key === 'x' ? Number(ruta?.posX) : Number(ruta?.posY);
@@ -251,11 +258,25 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
         }
 
         // Renderizar la vista inicial
-        renderMapaZona(container, { rocodromo, zonas }, async (idZona) => {
-            return await cargarRutasZona(idZona);
-        }, initialZonaId, async (_idZona, rutas) => {
-            await renderMapaInteractivoZona(container, rutas);
-        });
+        renderMapaZona(
+            container,
+            { rocodromo, zonas },
+            async (idZona) => {
+                return await cargarRutasZona(idZona);
+            },
+            initialZonaId,
+            async (_idZona, rutas) => {
+                await renderMapaInteractivoZona(container, rutas);
+            },
+            () => {
+                // Esperar a que el DOM aplique el nuevo tamano antes de resetear pan/zoom.
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        resetMapaZoom();
+                    });
+                });
+            }
+        );
 
     } catch (err) {
         showError(`Error al cargar el mapa de zona: ${err.message}`);

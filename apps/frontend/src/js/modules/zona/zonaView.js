@@ -1,6 +1,6 @@
 import { renderNavbar } from '../../components/navbar.js';
 
-export function renderMapaZona(container, data, onZonaSelect, initialZonaId = null, onMapaUpdate = null) {
+export function renderMapaZona(container, data, onZonaSelect, initialZonaId = null, onMapaUpdate = null, onMapaToggle = null) {
     const { rocodromo, zonas } = data;
     const nombreRocodromo = rocodromo?.nombre || 'Rocódromo';
 
@@ -11,7 +11,7 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
 
     // Crear estructura básica
     container.innerHTML = `
-        <div class="card shadow-sm d-flex flex-column" style="height: 100dvh; overflow: hidden;">
+        <div id="mapaZonaCard" class="card shadow-sm d-flex flex-column" style="height: 100dvh; overflow: hidden;">
             
             <!-- Cabecera -->
             <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
@@ -28,13 +28,24 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
             </div>
 
             <!-- Mapa SVG Interactivo -->
-             <div class="mapa-rocodromo position-relative bg-dark flex-shrink-0" style="height: 40dvh; min-height: 300px; overflow: hidden;">
+             <div id="mapaRocodromoContainer" class="mapa-rocodromo position-relative bg-dark flex-shrink-0" style="height: 40dvh; min-height: 300px; overflow: hidden;">
                 <div id="mapaSvgViewport" class="mapa-svg-viewport w-100 h-100" aria-label="Mapa del rocódromo">
                     <div class="d-flex justify-content-center align-items-center h-100 text-white-50">
                         <div class="spinner-border" role="status">
                             <span class="visually-hidden">Cargando mapa...</span>
                         </div>
                     </div>
+                </div>
+
+                <div class="position-absolute end-0 bottom-0 m-3 d-flex gap-2" style="z-index: 12;">
+                    <button id="btnMapaExpandir" type="button" class="btn btn-sm btn-light shadow-sm d-flex align-items-center gap-1 mapa-toggle-btn" aria-label="Expandir mapa">
+                        <span class="material-icons" style="font-size: 18px;">fullscreen</span>
+                        <span class="small fw-semibold">Expandir</span>
+                    </button>
+                    <button id="btnMapaContraer" type="button" class="btn btn-sm btn-light shadow-sm d-none d-flex align-items-center gap-1 mapa-toggle-btn" aria-label="Contraer mapa">
+                        <span class="material-icons" style="font-size: 18px;">fullscreen_exit</span>
+                        <span class="small fw-semibold">Contraer</span>
+                    </button>
                 </div>
                 
                 <!-- Título del Mapa (Fondo) -->
@@ -68,6 +79,23 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
     // Lógica del selector
     const selector = container.querySelector('#zonaSelector');
     const rutasContainer = container.querySelector('#rutasContainer');
+    const mapaContainer = container.querySelector('#mapaRocodromoContainer');
+    const btnMapaExpandir = container.querySelector('#btnMapaExpandir');
+    const btnMapaContraer = container.querySelector('#btnMapaContraer');
+
+    const setMapaExpandido = (expandido) => {
+        mapaContainer.classList.toggle('mapa-rocodromo-fullscreen', expandido);
+        rutasContainer.classList.toggle('d-none', expandido);
+        btnMapaExpandir.classList.toggle('d-none', expandido);
+        btnMapaContraer.classList.toggle('d-none', !expandido);
+
+        if (typeof onMapaToggle === 'function') {
+            onMapaToggle(expandido);
+        }
+    };
+
+    btnMapaExpandir.addEventListener('click', () => setMapaExpandido(true));
+    btnMapaContraer.addEventListener('click', () => setMapaExpandido(false));
 
     const updateUrl = (idZona) => {
         const currentUrl = new URL(window.location.href);
