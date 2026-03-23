@@ -38,6 +38,7 @@ describe('crearEscaladorUseCase', () => {
     expect(mockTokenService.crear).toHaveBeenCalledWith({
       correo: 'juan@example.com',
       apodo: 'JuanClimb',
+      rol: 'Escalador',
     });
     expect(resultado).toEqual({ token: 'token_jwt_simulado' });
   });

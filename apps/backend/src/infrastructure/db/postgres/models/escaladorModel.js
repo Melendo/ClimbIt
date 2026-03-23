@@ -14,6 +14,11 @@ export default (sequelize, DataTypes) => {
         foreignKey: 'idEscalador',
         as: 'pistasEscaladas',
       });
+      Escalador.belongsToMany(models.Rocodromo, {
+        through: models.GestorRocodromo,
+        foreignKey: 'idEscalador',
+        as: 'rocodromosGestionados',
+      });
     }
   }
 
@@ -58,6 +63,12 @@ export default (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: true,
         field: 'Activo',
+      },
+      isAdmin: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+        field: 'IsAdmin',
       },
     },
     {

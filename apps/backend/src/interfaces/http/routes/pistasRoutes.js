@@ -3,6 +3,10 @@ import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyTokenMiddleware from '../middlewares/verifyToken.js';
 import uploadImages from '../middlewares/uploadImages.js';
+import authorizeRocodromoAccess, {
+  resolveRocodromoIdFromPistaParam,
+  resolveRocodromoIdFromZonaBody,
+} from '../middlewares/authorizeRocodromoAccess.js';
 
 import escalaDificultadJSON from '../../../domain/sharedObjects/escalaDificultadFrancesa.json' with { type: 'json' };
 const GRADOS_FRANCESES = escalaDificultadJSON.escala_francesa_escalada.grados;
@@ -87,6 +91,7 @@ router.post(
   uploadImagenPista.single('imagen'),
   crearPistaValidators,
   validate,
+  authorizeRocodromoAccess({ resolveRocodromoId: resolveRocodromoIdFromZonaBody }),
   (req, res, next) => {
     pistaController.crear(req, res, next);
   }
@@ -182,9 +187,10 @@ const actualizarImagenPistaValidators = [
 router.put(
   '/:id/imagen',
   verifyTokenMiddleware,
-  uploadImagenPistaUpdate.single('imagen'),
   actualizarImagenPistaValidators,
   validate,
+  authorizeRocodromoAccess({ resolveRocodromoId: resolveRocodromoIdFromPistaParam }),
+  uploadImagenPistaUpdate.single('imagen'),
   (req, res, next) => {
     pistaController.actualizarImagen(req, res, next);
   }

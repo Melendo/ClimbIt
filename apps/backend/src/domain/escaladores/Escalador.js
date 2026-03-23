@@ -16,6 +16,7 @@ class Escalador {
     this.descripcion = descripcion;
     this.fotoUrl = fotoUrl;
     this.activo = activo;
+    this.isAdmin = false;
 
     if (typeof this.correo !== 'string' || this.correo.trim() === '') {
       throw new Error(`correo inválido: Debe ser una cadena no vacía.`);

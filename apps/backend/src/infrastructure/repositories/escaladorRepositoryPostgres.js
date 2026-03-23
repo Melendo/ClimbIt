@@ -12,7 +12,7 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
   _toDomain(escaladorModel) {
     if (!escaladorModel) return null;
     try {
-      return new Escalador(
+      const escalador = new Escalador(
         escaladorModel.id,
         escaladorModel.correo,
         escaladorModel.contrasena,
@@ -21,6 +21,8 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
         escaladorModel.fotoUrl,
         escaladorModel.activo
       );
+      escalador.isAdmin = Boolean(escaladorModel.isAdmin);
+      return escalador;
     } catch (error) {
       throw new Error(error.message);
     }
@@ -127,6 +129,27 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
       return rocodromosDomain;
     } catch (error) {
       throw new Error(`Error al obtener rocódromos suscritos: ${error.message}`);
+    }
+  }
+
+  async obtenerIdsRocodromosGestionados(escaladorId) {
+    try {
+      const escaladorModel = await this.EscaladorModel.findByPk(escaladorId);
+
+      if (!escaladorModel) {
+        throw new Error(`Escalador con ID ${escaladorId} no encontrado`);
+      }
+
+      const rocodromos = await escaladorModel.getRocodromosGestionados({
+        attributes: ['id'],
+        joinTableAttributes: [],
+      });
+
+      return rocodromos.map((rocodromo) => rocodromo.id);
+    } catch (error) {
+      throw new Error(
+        `Error al obtener rocódromos gestionados: ${error.message}`
+      );
     }
   }
 }

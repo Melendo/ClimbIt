@@ -27,5 +27,9 @@ class EscaladorRepository {
   async obtenerRocodromosSuscritos(escaladorId) {
     throw new Error('Método "obtenerRocodromosSuscritos" no implementado');
   }
+
+  async obtenerIdsRocodromosGestionados(escaladorId) {
+    throw new Error('Método "obtenerIdsRocodromosGestionados" no implementado');
+  }
 }
 export default EscaladorRepository;

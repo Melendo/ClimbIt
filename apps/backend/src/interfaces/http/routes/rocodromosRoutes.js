@@ -3,6 +3,9 @@ import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyTokenMiddleware from '../middlewares/verifyToken.js';
 import uploadImages from '../middlewares/uploadImages.js';
+import authorizeRocodromoAccess, {
+  resolveRocodromoIdFromRocodromoParam,
+} from '../middlewares/authorizeRocodromoAccess.js';
 import containerPromise from '../../../infrastructure/container.js';
 
 const router = express.Router();
@@ -39,9 +42,16 @@ const crearRocodromoValidators = [
     .withMessage('La ubicación debe tener entre 1 y 255 caracteres'),
 ];
 
-router.post('/create', verifyTokenMiddleware, crearRocodromoValidators, validate, (req, res, next) => {
-  rocodromoController.crearRocodromo(req, res, next);
-});
+router.post(
+  '/create',
+  verifyTokenMiddleware,
+  authorizeRocodromoAccess({ requireAdmin: true }),
+  crearRocodromoValidators,
+  validate,
+  (req, res, next) => {
+    rocodromoController.crearRocodromo(req, res, next);
+  }
+);
 
 /**
  * GET /rocodromos
@@ -148,6 +158,7 @@ router.post(
   verifyTokenMiddleware,
   subirLogoRocodromoValidators,
   validate,
+  authorizeRocodromoAccess({ resolveRocodromoId: resolveRocodromoIdFromRocodromoParam }),
   uploadLogoRocodromo.single('logo'),
   (req, res, next) => {
     console.log("ID del rocódromo:", req.params.id);

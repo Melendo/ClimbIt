@@ -2,6 +2,9 @@ import express from 'express';
 import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyTokenMiddleware from '../middlewares/verifyToken.js';
+import authorizeRocodromoAccess, {
+  resolveRocodromoIdFromRocodromoBody,
+} from '../middlewares/authorizeRocodromoAccess.js';
 import containerPromise from '../../../infrastructure/container.js';
 
 const router = express.Router();
@@ -38,9 +41,18 @@ const crearZonaValidators = [
     .withMessage('El nombre de la zona contiene caracteres no válidos'),
 ];
 
-router.post('/create', verifyTokenMiddleware, crearZonaValidators, validate, (req, res, next) => {
-  zonaController.crearZona(req, res, next);
-});
+router.post(
+  '/create',
+  verifyTokenMiddleware,
+  crearZonaValidators,
+  validate,
+  authorizeRocodromoAccess({
+    resolveRocodromoId: resolveRocodromoIdFromRocodromoBody,
+  }),
+  (req, res, next) => {
+    zonaController.crearZona(req, res, next);
+  }
+);
 
 /**
  * GET /zonas/pistas/:id
