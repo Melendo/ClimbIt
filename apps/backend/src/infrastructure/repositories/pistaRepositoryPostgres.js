@@ -19,7 +19,8 @@ class PistaRepositoryPostgres extends pistaRepository {
         pistaModel.tipo,
         pistaModel.colorPresas,
         pistaModel.imagenUrl,
-        pistaModel.ubicacionMapa,
+        pistaModel.posX,
+        pistaModel.posY,
         pistaModel.fechaCreacion,
         pistaModel.fechaRetirada,
         pistaModel.activo
@@ -37,7 +38,8 @@ class PistaRepositoryPostgres extends pistaRepository {
       tipo: pista.tipo,
       colorPresas: pista.colorPresas,
       imagenUrl: pista.imagenUrl,
-      ubicacionMapa: pista.ubicacionMapa,
+      posX: pista.posX,
+      posY: pista.posY,
       fechaCreacion: pista.fechaCreacion,
       fechaRetirada: pista.fechaRetirada,
     };

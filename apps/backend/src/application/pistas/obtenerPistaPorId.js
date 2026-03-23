@@ -17,7 +17,8 @@ class ObtenerPistaPorId {
             result.tipo,
             result.colorPresas,
             result.imagenUrl,
-            result.ubicacionMapa,
+            result.posX,
+            result.posY,
             result.fechaCreacion,
             result.fechaRetirada,
             result.activo

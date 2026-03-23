@@ -59,10 +59,15 @@ export default (sequelize, DataTypes) => {
         allowNull: true,
         field: 'ImagenURL',
       },
-      ubicacionMapa: {
-        type: DataTypes.STRING,
+      posX: {
+        type: DataTypes.INTEGER,
         allowNull: true,
-        field: 'UbicacionMapa',
+        field: 'PosX',
+      },
+      posY: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        field: 'PosY',
       },
       fechaCreacion: {
         type: DataTypes.DATE,
