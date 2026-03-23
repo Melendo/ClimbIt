@@ -24,7 +24,8 @@ class CrearPista {
         data.tipo,
         data.colorPresas,
         data.imagenUrl,
-        data.ubicacionMapa,
+        data.posX,
+        data.posY,
         data.fechaCreacion,
         data.fechaRetirada
       );

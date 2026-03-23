@@ -7,12 +7,13 @@ class Pista {
    * @param {string|null} tipo
    * @param {string|null} colorPresas
    * @param {string|null} imagenUrl
-   * @param {string|null} ubicacionMapa
+  * @param {number|null} posX
+  * @param {number|null} posY
    * @param {Date|null} fechaCreacion
    * @param {Date|null} fechaRetirada
    * @param {boolean} activo
    */
-  constructor(id, idZona, nombre, dificultad, tipo = null, colorPresas = null, imagenUrl = null, ubicacionMapa = null, fechaCreacion = new Date(), fechaRetirada = null, activo = true) {
+  constructor(id, idZona, nombre, dificultad, tipo = null, colorPresas = null, imagenUrl = null, posX = null, posY = null, fechaCreacion = new Date(), fechaRetirada = null, activo = true) {
     this.id = id;
     this.idZona = idZona;
     this.nombre = nombre;
@@ -20,7 +21,8 @@ class Pista {
     this.tipo = tipo;
     this.colorPresas = colorPresas;
     this.imagenUrl = imagenUrl;
-    this.ubicacionMapa = ubicacionMapa;
+    this.posX = posX;
+    this.posY = posY;
     this.fechaCreacion = fechaCreacion;
     this.fechaRetirada = fechaRetirada;
     this.activo = activo;

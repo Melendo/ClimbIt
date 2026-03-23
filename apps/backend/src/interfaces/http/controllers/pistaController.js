@@ -10,7 +10,7 @@ class PistaController {
     let finalPath = null;
 
     try {
-      const { idZona, nombre, dificultad, tipo, colorPresas, imagenUrl, ubicacionMapa, fechaCreacion, fechaRetirada } = req.body;
+      const { idZona, nombre, dificultad, tipo, colorPresas, imagenUrl, posX, posY, fechaCreacion, fechaRetirada } = req.body;
       const hasUpload = Boolean(req.file);
 
       let nuevaPista = await this.useCases.crear.execute({
@@ -20,7 +20,8 @@ class PistaController {
         tipo,
         colorPresas,
         imagenUrl: hasUpload ? null : imagenUrl,
-        ubicacionMapa,
+        posX,
+        posY,
         fechaCreacion,
         fechaRetirada,
       });

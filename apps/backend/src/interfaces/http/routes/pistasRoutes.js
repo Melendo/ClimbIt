@@ -34,6 +34,8 @@ const getPistaImageBaseName = (req) => {
  * - idZona (@param {number} , requerido): ID de la zona a la que pertenece la pista (entero positivo)
  * - nombre (@param {string} , requerido): Nombre descriptivo de la pista (1-100 caracteres)
  * - dificultad (@param {string} , requerido): Grado de dificultad francés (ej: "3a", "5b", "6c+")
+ * - posX (@param {number} , opcional): Coordenada X en el mapa de la pista
+ * - posY (@param {number} , opcional): Coordenada Y en el mapa de la pista
  *
  * Parámetros esperados (multipart/form-data):
  * - imagen (@param {file} , opcional): Archivo de imagen de la pista
@@ -67,6 +69,16 @@ const crearPistaValidators = [
     .withMessage(
       `La dificultad debe ser uno de: ${GRADOS_FRANCESES.join(', ')}`
     ),
+  body('posX')
+    .optional({ nullable: true })
+    .toInt()
+    .isInt()
+    .withMessage('posX debe ser un numero entero valido'),
+  body('posY')
+    .optional({ nullable: true })
+    .toInt()
+    .isInt()
+    .withMessage('posY debe ser un numero entero valido'),
 ];
 
 const uploadImagenPista = uploadImages({
