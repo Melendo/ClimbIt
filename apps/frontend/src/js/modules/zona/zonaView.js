@@ -20,6 +20,11 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                 </a>
                 <img src="/assets/rocodromoDefecto.jpg" alt="Icono rocódromo" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
                 <span class="fw-medium text-truncate">${nombreRocodromo}</span>
+                <div class="ms-auto" style="max-width: 170px;">
+                   <select id="zonaSelector" class="form-select form-select-sm shadow-sm fw-bold border-0" style="min-width: 150px; background-color: rgba(255, 255, 255, 0.95);">
+                        ${zonas.map((z) => `<option value="${z.id}" ${z.id == (zonaInicial?.id) ? 'selected' : ''}>Zona ${z.nombre || z.id}</option>`).join('')}
+                    </select>
+                </div>
             </div>
 
             <!-- Mapa SVG Interactivo -->
@@ -35,13 +40,6 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                 <!-- Título del Mapa (Fondo) -->
                 <div class="position-absolute bottom-0 start-0 end-0 p-3" style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
                     <h5 id="mapaTitulo" class="text-white mb-0 text-shadow">Mapa General</h5>
-                </div>
-                
-                <!-- Selector de Zona (Overlay Superior Izquierda) -->
-                <div class="position-absolute top-0 start-0 m-3" style="z-index: 10;">
-                   <select id="zonaSelector" class="form-select form-select-sm shadow-sm opacity-90 fw-bold border-0" style="min-width: 150px; backdrop-filter: blur(4px); background-color: rgba(255, 255, 255, 0.9);">
-                        ${zonas.map((z) => `<option value="${z.id}" ${z.id == (zonaInicial?.id) ? 'selected' : ''}>Zona ${z.nombre || z.id}</option>`).join('')}
-                    </select>
                 </div>
             </div>
 
