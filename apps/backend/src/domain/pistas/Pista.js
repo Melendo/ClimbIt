@@ -31,11 +31,26 @@ class Pista {
     if (!Number.isInteger(this.idZona)) {
       throw new Error(`idZona inválido: Debe ser un número entero.`);
     }
-    if (typeof nombre !== 'string' || nombre.trim() === '') {
-      throw new Error(`nombre inválido: Debe ser una cadena no vacía.`);
+    if (typeof nombre !== 'string' || nombre.trim() === '' || nombre === null) {
+      this.nombre = this.tipo + "-" + this.dificultad;
     }
     if (typeof dificultad !== 'string' || dificultad.trim() === '') {
       throw new Error(`dificultad inválida: Debe ser una cadena no vacía.`);
+    }
+    if (!(this.fechaCreacion instanceof Date) || Number.isNaN(this.fechaCreacion.getTime())) {
+      throw new Error('fechaCreacion inválida: Debe ser una fecha válida.');
+    }
+    const now = new Date();
+    if (this.fechaCreacion > now) {
+      throw new Error('fechaCreacion inválida: Debe ser anterior o igual a la fecha actual.');
+    }
+    if (this.fechaRetirada !== null) {
+      if (!(this.fechaRetirada instanceof Date) || Number.isNaN(this.fechaRetirada.getTime())) {
+        throw new Error('fechaRetirada inválida: Debe ser una fecha válida.');
+      }
+      if (this.fechaRetirada <= now) {
+        throw new Error('fechaRetirada inválida: Debe ser posterior a la fecha actual.');
+      }
     }
   }
 }

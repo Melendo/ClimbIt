@@ -18,7 +18,8 @@ const container = await containerPromise;
 const { pistaController } = container;
 
 const getPistaImageBaseName = (req) => {
-  const nombre = typeof req.body?.nombre === 'string' ? req.body.nombre.trim() : '';
+  const nombre =
+    typeof req.body?.nombre === 'string' ? req.body.nombre.trim() : '';
   if (nombre && nombre.toLowerCase() !== 'null') {
     return nombre;
   }
@@ -33,11 +34,11 @@ const getPistaImageBaseName = (req) => {
  * Parámetros esperados (body) obligatorios:
  * - idZona (@param {int} , requerido): ID de la zona a la que pertenece la pista (entero positivo)
  * - dificultad (@param {string} , requerido): Grado de dificultad francés (ej: "3a", "5b", "6c+")
- * 
+ *  * - tipo (@param {string}): Tipo de la pista (ej: "Boulder", "Via", etc.)
+
  * Parámetros esperados (body) opcionales:
  * - nombre (@param {string}): Nombre descriptivo de la pista (1-100 caracteres)
  * - colorPresas (@param {string}): Color de las presas de la pista (ej: "Rojo", "Azul", etc.)
- * - tipo (@param {string}): Tipo de la pista (ej: "Boulder", "Via", etc.)
  * - posX (@param {int}): Coordenada X en el mapa de la pista
  * - posY (@param {int}): Coordenada Y en el mapa de la pista
  * - fechaCreacion (@param {Date}): Fecha de creación de la pista en Date (ej: "2024-06-01T12:00:00Z")
@@ -72,12 +73,8 @@ const crearPistaValidators = [
     .withMessage('idZona debe ser un entero positivo'),
   body('nombre')
     .trim()
-    .notEmpty()
-    .withMessage('El nombre de la pista es requerido')
-    .isLength({ min: 1, max: 100 })
-    .withMessage('El nombre de la pista debe tener entre 1 y 100 caracteres')
-    .matches(/^[a-zA-Z0-9\s\-áéíóúñ]+$/)
-    .withMessage('El nombre de la pista contiene caracteres no válidos'),
+    .isLength({ min: 0, max: 100 })
+    .withMessage('El nombre de la pista debe tener entre 1 y 100 caracteres'),
   body('dificultad')
     .trim()
     .notEmpty()
@@ -96,6 +93,37 @@ const crearPistaValidators = [
     .toInt()
     .isInt()
     .withMessage('posY debe ser un numero entero valido'),
+  body('tipo')
+    .isIn(['boulder', 'via'])
+    .withMessage('El tipo debe ser uno de: "Boulder", "Via"'),
+  body('colorPresas')
+    .optional({ nullable: true })
+    .isString()
+    .trim()
+    .isLength({ min: 1, max: 50 })
+    .withMessage(
+      'El color de las presas debe ser una cadena de 1 a 50 caracteres'
+    ),
+  body('fechaCreacion')
+    .optional({ nullable: true })
+    .toDate()
+    .custom((value) => {
+      if (value > new Date()) {
+        throw new Error('La fecha de creación no puede ser futura');
+      }
+      return true;
+    })  ,
+
+  body('fechaRetirada')
+    .optional({ nullable: true })
+    .toDate()
+    .custom((value) => {
+      if (value <= new Date()) {
+        throw new Error('La fecha de retirada no puede ser anterior a la fecha de creación');
+      }
+      return true;
+    }),
+
 ];
 
 const uploadImagenPista = uploadImages({
@@ -120,7 +148,9 @@ router.post(
   uploadImagenPista.single('imagen'),
   crearPistaValidators,
   validate,
-  authorizeRocodromoAccess({ resolveRocodromoId: resolveRocodromoIdFromZonaBody }),
+  authorizeRocodromoAccess({
+    resolveRocodromoId: resolveRocodromoIdFromZonaBody,
+  }),
   (req, res, next) => {
     pistaController.crear(req, res, next);
   }
@@ -237,7 +267,9 @@ router.put(
   verifyTokenMiddleware,
   actualizarImagenPistaValidators,
   validate,
-  authorizeRocodromoAccess({ resolveRocodromoId: resolveRocodromoIdFromPistaParam }),
+  authorizeRocodromoAccess({
+    resolveRocodromoId: resolveRocodromoIdFromPistaParam,
+  }),
   uploadImagenPistaUpdate.single('imagen'),
   (req, res, next) => {
     pistaController.actualizarImagen(req, res, next);
