@@ -195,6 +195,42 @@ class PistaController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  async obtenerImagen(req, res, next) {
+    try {
+      const { id } = req.params;
+      const pista = await this.useCases.obtenerPistaPorId.execute(id, null);
+
+      if (!pista) {
+        return res
+          .status(404)
+          .json({ error: `Pista con ID ${id} no encontrada` });
+      }
+
+      if (!pista.imagenUrl) {
+        return res
+          .status(404)
+          .json({ error: 'La pista no tiene imagen asignada' });
+      }
+
+      const fileName = path.basename(pista.imagenUrl);
+      const filePath = path.resolve(
+        process.cwd(),
+        'uploads',
+        'imagenes_pistas',
+        fileName
+      );
+
+      await fs.access(filePath);
+      return res.sendFile(filePath);
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return res.status(404).json({ error: 'Imagen no encontrada' });
+      }
+
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 export default PistaController;

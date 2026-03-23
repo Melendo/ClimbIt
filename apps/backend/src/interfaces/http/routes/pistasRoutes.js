@@ -30,23 +30,40 @@ const getPistaImageBaseName = (req) => {
  * POST /pistas/create
  * Crea una nueva pista dentro de una zona específica
  *
- * Parámetros esperados (body):
- * - idZona (@param {number} , requerido): ID de la zona a la que pertenece la pista (entero positivo)
- * - nombre (@param {string} , requerido): Nombre descriptivo de la pista (1-100 caracteres)
+ * Parámetros esperados (body) obligatorios:
+ * - idZona (@param {int} , requerido): ID de la zona a la que pertenece la pista (entero positivo)
  * - dificultad (@param {string} , requerido): Grado de dificultad francés (ej: "3a", "5b", "6c+")
- * - posX (@param {number} , opcional): Coordenada X en el mapa de la pista
- * - posY (@param {number} , opcional): Coordenada Y en el mapa de la pista
- *
+ * 
+ * Parámetros esperados (body) opcionales:
+ * - nombre (@param {string}): Nombre descriptivo de la pista (1-100 caracteres)
+ * - colorPresas (@param {string}): Color de las presas de la pista (ej: "Rojo", "Azul", etc.)
+ * - tipo (@param {string}): Tipo de la pista (ej: "Boulder", "Via", etc.)
+ * - posX (@param {int}): Coordenada X en el mapa de la pista
+ * - posY (@param {int}): Coordenada Y en el mapa de la pista
+ * - fechaCreacion (@param {Date}): Fecha de creación de la pista en Date (ej: "2024-06-01T12:00:00Z")
+ * - fechaRetirada (@param {Date}): Fecha de retirada de la pista en Date (ej: "2024-06-01T12:00:00Z")
+ * 
  * Parámetros esperados (multipart/form-data):
  * - imagen (@param {file} , opcional): Archivo de imagen de la pista
  *
- * Requiere: Token JWT válido en header Authorization
+ * Requiere: 
+ * - Token JWT válido en header Authorization 
+ * - Rol de Administrador o Gestor del Rocódromo al que pertenece la zona
  *
  * Respuesta esperada: @return {Object} Detalles de la pista creada:
  * - id: identificador único
  * - idZona: ID de la zona a la que pertenece la pista
  * - nombre: nombre de la pista
  * - dificultad: grado de dificultad en escala francesa
+ * - tipo: tipo de la pista (ej: "Boulder", "Via", etc.)
+ * - colorPresas: color de las presas de la pista (ej: "Rojo", "Azul", etc.)
+ * - imagenUrl: URL de la imagen de la pista
+ * - posX: coordenada X en el mapa de la zona
+ * - posY: coordenada Y en el mapa de la zona
+ * - fechaCreacion: fecha de creación de la pista
+ * - fechaRetirada: fecha de retirada de la pista (null si no ha sido retirada)
+ * - activo: booleano que indica si la pista está activa o no
+ *
  */
 const crearPistaValidators = [
   body('idZona')
@@ -138,6 +155,25 @@ router.get(
   validate,
   (req, res, next) => {
     pistaController.obtenerPistaPorId(req, res, next);
+  }
+);
+
+/**
+ * GET /pistas/:id/imagen
+ * Obtiene la imagen de una pista
+ *
+ * Parámetros esperados (URL Path):
+ * - id (@param {number} , requerido): ID de la pista (entero positivo)
+ *
+ * Requiere: Token JWT válido en header Authorization
+ */
+router.get(
+  '/:id/imagen',
+  verifyTokenMiddleware,
+  obtenerPistaPorIdValidators,
+  validate,
+  (req, res, next) => {
+    pistaController.obtenerImagen(req, res, next);
   }
 );
 
