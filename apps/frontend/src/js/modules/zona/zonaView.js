@@ -1,6 +1,6 @@
 import { renderNavbar } from '../../components/navbar.js';
 
-export function renderMapaZona(container, data, onZonaSelect, initialZonaId = null) {
+export function renderMapaZona(container, data, onZonaSelect, initialZonaId = null, onMapaUpdate = null) {
     const { rocodromo, zonas } = data;
     const nombreRocodromo = rocodromo?.nombre || 'Rocódromo';
 
@@ -22,14 +22,15 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                 <span class="fw-medium text-truncate">${nombreRocodromo}</span>
             </div>
 
-            <!-- Mapa (Imagen estática por ahora) -->
+            <!-- Mapa SVG Interactivo -->
              <div class="mapa-rocodromo position-relative bg-dark flex-shrink-0" style="height: 40dvh; min-height: 300px; overflow: hidden;">
-                <img 
-                    src="/assets/mapaDefecto.jpg" 
-                    alt="Mapa del rocódromo" 
-                    class="w-100 h-100" 
-                    style="object-fit: cover; opacity: 0.8;"
-                />
+                <div id="mapaSvgViewport" class="mapa-svg-viewport w-100 h-100" aria-label="Mapa del rocódromo">
+                    <div class="d-flex justify-content-center align-items-center h-100 text-white-50">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Cargando mapa...</span>
+                        </div>
+                    </div>
+                </div>
                 
                 <!-- Título del Mapa (Fondo) -->
                 <div class="position-absolute bottom-0 start-0 end-0 p-3" style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
@@ -121,6 +122,10 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
         // Cargar rutas usando el callback
         const rutas = await onZonaSelect(idZona);
 
+        if (typeof onMapaUpdate === 'function') {
+            await onMapaUpdate(idZona, rutas || []);
+        }
+
         // Renderizar rutas
         if (!rutas || rutas.length === 0) {
             rutasContainer.innerHTML = `
@@ -166,38 +171,6 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
     };
 
     selector.addEventListener('change', (e) => loadZonas(e.target.value));
-
-    // Lógica de Swipe para cambiar de zona
-    const mapaContainer = container.querySelector('.mapa-rocodromo');
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    mapaContainer.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
-
-    mapaContainer.addEventListener('touchend', (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-    }, { passive: true });
-
-    const handleSwipe = () => {
-        const threshold = 50; // Mínima distancia para considerar swipe
-        if (touchEndX < touchStartX - threshold) {
-            // Swipe Left -> Siguiente zona
-            if (selector.selectedIndex < selector.options.length - 1) {
-                selector.selectedIndex++;
-                loadZonas(selector.value, 'next');
-            }
-        }
-        if (touchEndX > touchStartX + threshold) {
-            // Swipe Right -> Zona anterior
-            if (selector.selectedIndex > 0) {
-                selector.selectedIndex--;
-                loadZonas(selector.value, 'prev');
-            }
-        }
-    };
 
     // Cargar zona inicial (si hay zonas)
     if (zonaInicial) {
