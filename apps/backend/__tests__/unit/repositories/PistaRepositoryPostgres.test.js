@@ -80,7 +80,8 @@ describe('PistaRepositoryPostgres', () => {
         tipo: null,
         colorPresas: null,
         imagenUrl: null,
-        ubicacionMapa: null,
+        posX: null,
+        posY: null,
         fechaCreacion: expect.any(Date),
         fechaRetirada: null,
       });
