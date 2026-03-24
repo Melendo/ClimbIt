@@ -59,6 +59,23 @@ export const resolveRocodromoIdFromZonaBody = async (req, db) => {
   return { idRoco: zona.idRoco };
 };
 
+export const resolveRocodromoIdFromZonaParam = async (req, db) => {
+  const idZona = Number(req.params?.id);
+  if (!Number.isFinite(idZona) || idZona <= 0) {
+    return { idRoco: null, notFoundMessage: 'Zona no encontrada' };
+  }
+
+  const zona = await db.Zona.findByPk(idZona);
+  if (!zona) {
+    return {
+      idRoco: null,
+      notFoundMessage: `Zona con ID ${idZona} no encontrada`,
+    };
+  }
+
+  return { idRoco: zona.idRoco };
+};
+
 export const resolveRocodromoIdFromPistaParam = async (req, db) => {
   const idPista = Number(req.params?.id);
   if (!Number.isFinite(idPista) || idPista <= 0) {

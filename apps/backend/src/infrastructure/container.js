@@ -31,6 +31,8 @@ import CambiarEstadoPista from '../application/pistas/cambiarEstadoPista.js';
 
 import CrearZona from '../application/zonas/crearZona.js';
 import ObtenerPistasDeZona from '../application/zonas/obtenerPistasZona.js';
+import ActualizarMapaZona from '../application/zonas/actualizarMapaZona.js';
+import ObtenerZonaPorId from '../application/zonas/obtenerZonaPorId.js';
 
 import CrearRocodromo from '../application/rocodromos/crearRocodromo.js';
 import ActualizarLogoRocodromo from '../application/rocodromos/actualizarLogoRocodromo.js';
@@ -91,6 +93,8 @@ async function inicializarContainer() {
 
   const crearZonaUseCase = new CrearZona(zonaRepository, db.Rocodromo);
   const obtenerPistasDeZonaUseCase = new ObtenerPistasDeZona(zonaRepository, escaladorRepository);
+  const actualizarMapaZonaUseCase = new ActualizarMapaZona(zonaRepository);
+  const obtenerZonaPorIdUseCase = new ObtenerZonaPorId(zonaRepository);
 
   const crearRocodromoUseCase = new CrearRocodromo(rocodromoRepository);
   const actualizarLogoRocodromoUseCase = new ActualizarLogoRocodromo(
@@ -122,6 +126,8 @@ async function inicializarContainer() {
   const zonaUseCases = {
     crear: crearZonaUseCase,
     obtenerPistasDeZona: obtenerPistasDeZonaUseCase,
+    actualizarMapa: actualizarMapaZonaUseCase,
+    obtenerZonaPorId: obtenerZonaPorIdUseCase,
   };
   const rocodromoUseCases = {
     crear: crearRocodromoUseCase,
