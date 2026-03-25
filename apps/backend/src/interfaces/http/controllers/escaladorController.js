@@ -1,3 +1,6 @@
+import fs from 'fs/promises';
+import path from 'path';
+
 class EscaladorController {
   constructor(escaladorUseCases) {
     this.useCases = escaladorUseCases;
@@ -82,6 +85,97 @@ class EscaladorController {
         await this.useCases.obtenerRocodromosSuscritos.execute(apodo);
 
       res.status(200).json(rocodromos);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async crearFotoPerfil(req, res, next) {
+    let uploadedPath = null;
+
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'La imagen es requerida' });
+      }
+
+      uploadedPath = req.file.path;
+      const urlFoto = `/uploads/fotos_perfil/${req.file.filename}`;
+      const fotoPerfil = await this.useCases.crearFotoPerfil.execute({
+        urlFoto,
+      });
+
+      res.status(201).json({
+        id: fotoPerfil.id,
+        nombre: path.basename(fotoPerfil.urlFoto),
+        urlFoto: fotoPerfil.urlFoto,
+      });
+    } catch (error) {
+      if (uploadedPath) {
+        try {
+          await fs.unlink(uploadedPath);
+        } catch (unlinkError) {
+          if (unlinkError.code !== 'ENOENT') {
+            return res.status(500).json({ error: unlinkError.message });
+          }
+        }
+      }
+
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async obtenerFotosPerfil(req, res, next) {
+    try {
+      const fotosPerfil = await this.useCases.obtenerFotosPerfil.execute();
+
+      res.status(200).json(fotosPerfil);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async obtenerFotoPerfil(req, res, next) {
+    try {
+      const { id } = req.params;
+      const fotoPerfil = await this.useCases.obtenerFotoPerfil.execute(id);
+
+      if (!fotoPerfil) {
+        return res
+          .status(404)
+          .json({ error: `Foto de perfil con ID ${id} no encontrada` });
+      }
+
+      const fileName = path.basename(fotoPerfil.urlFoto);
+      const filePath = path.resolve(
+        process.cwd(),
+        'uploads',
+        'fotos_perfil',
+        fileName
+      );
+
+      await fs.access(filePath);
+      return res.sendFile(filePath);
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return res.status(404).json({ error: 'Imagen no encontrada' });
+      }
+
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async actualizarFotoPerfil(req, res, next) {
+    try {
+      const { idFotoPerfil, urlFoto } = req.body;
+      const apodo = req.user.apodo;
+
+      const resultado = await this.useCases.actualizarFotoPerfil.execute({
+        apodo,
+        idFotoPerfil,
+        urlFoto,
+      });
+
+      res.status(200).json(resultado);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

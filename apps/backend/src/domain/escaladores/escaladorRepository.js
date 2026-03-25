@@ -31,5 +31,9 @@ class EscaladorRepository {
   async obtenerIdsRocodromosGestionados(escaladorId) {
     throw new Error('Método "obtenerIdsRocodromosGestionados" no implementado');
   }
+
+  async actualizarFotoUrl(escaladorApodo, fotoUrl) {
+    throw new Error('Método "actualizarFotoUrl" no implementado');
+  }
 }
 export default EscaladorRepository;

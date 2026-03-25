@@ -152,6 +152,27 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
       );
     }
   }
+
+  async actualizarFotoUrl(escaladorApodo, fotoUrl) {
+    try {
+      const escaladorModel = await this.EscaladorModel.findOne({
+        where: { apodo: escaladorApodo },
+      });
+
+      if (!escaladorModel) {
+        return null;
+      }
+
+      escaladorModel.fotoUrl = fotoUrl;
+      await escaladorModel.save();
+
+      return this._toDomain(escaladorModel);
+    } catch (error) {
+      throw new Error(
+        `Error al actualizar la foto del escalador: ${error.message}`
+      );
+    }
+  }
 }
 
 export default EscaladorRepositoryPostgres;

@@ -1,7 +1,9 @@
 import express from 'express';
-import { body } from 'express-validator';
+import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyToken from '../middlewares/verifyToken.js';
+import uploadImages from '../middlewares/uploadImages.js';
+import authorizeRocodromoAccess from '../middlewares/authorizeRocodromoAccess.js';
 import containerPromise from '../../../infrastructure/container.js';
 
 const router = express.Router();
@@ -170,5 +172,87 @@ router.get('/mis-rocodromos', verifyToken, (req, res, next) => {
 router.get('/perfil', verifyToken, (req, res, next) => {
   escaladorController.obtenerPerfil(req, res, next);
 });
+
+/**
+ * POST /escaladores/fotos-perfil
+ * Crea una nueva imagen de perfil disponible para escaladores
+ *
+ * Requiere: Token JWT válido en header Authorization y rol Admin
+ */
+const uploadFotoPerfil = uploadImages({
+  uploadDir: 'uploads/fotos_perfil',
+  fileName: () => `foto-perfil-${Date.now()}`,
+});
+
+router.post(
+  '/fotos-perfil',
+  verifyToken,
+  authorizeRocodromoAccess({ requireAdmin: true }),
+  uploadFotoPerfil.single('foto'),
+  (req, res, next) => {
+    escaladorController.crearFotoPerfil(req, res, next);
+  }
+);
+
+/**
+ * GET /escaladores/fotos-perfil
+ * Obtiene las fotos de perfil activas disponibles
+ *
+ * Requiere: Token JWT válido en header Authorization
+ */
+router.get('/fotos-perfil', verifyToken, (req, res, next) => {
+  escaladorController.obtenerFotosPerfil(req, res, next);
+});
+
+/**
+ * GET /escaladores/fotos-perfil/:id
+ * Obtiene una foto de perfil por su id
+ *
+ * Requiere: Token JWT válido en header Authorization
+ */
+const obtenerFotoPerfilValidators = [
+  param('id')
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('El id de la foto de perfil debe ser un entero positivo'),
+];
+
+router.get(
+  '/fotos-perfil/:id',
+  verifyToken,
+  obtenerFotoPerfilValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.obtenerFotoPerfil(req, res, next);
+  }
+);
+
+/**
+ * PUT /escaladores/perfil/foto
+ * Actualiza la foto de perfil del escalador autenticado
+ *
+ * Parámetros esperados (body):
+ * - idFotoPerfil (@param {Number} , requerido): ID de la foto de perfil seleccionada (entero positivo)
+ * - urlFoto (@param {String} , requerido): Ruta relativa de la foto seleccionada (formato: "/uploads/fotos_perfil/[nombre_foto]")
+ *
+ * Requiere: Token JWT válido en header Authorization
+ */
+const actualizarFotoPerfilValidators = [
+  body('idFotoPerfil')
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('idFotoPerfil debe ser un entero positivo'),
+  body('urlFoto').trim().notEmpty().withMessage('urlFoto es requerida'),
+];
+
+router.put(
+  '/perfil/foto',
+  verifyToken,
+  actualizarFotoPerfilValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.actualizarFotoPerfil(req, res, next);
+  }
+);
 
 export default router;
