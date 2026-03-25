@@ -36,6 +36,7 @@ describe('E2E: Pistas', () => {
         idZona: zona.id,
         nombre: 'E2E Test',
         dificultad: '6a',
+        tipo: 'via',
       };
       token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'Admin' });
     });
@@ -71,7 +72,7 @@ describe('E2E: Pistas', () => {
       expect(response.body).toHaveProperty('status', 'invalid_request');
       expect(Array.isArray(response.body.errors)).toBe(true);
       const fields = response.body.errors.map((e) => e.field);
-      expect(fields).toContain('nombre');
+      expect(fields).toContain('tipo');
     });
 
     it('debería fallar al crear una pista sin token', async () => {
@@ -140,8 +141,12 @@ describe('E2E: Pistas', () => {
         idZona: zona.id,
         nombre: 'E2E Test',
         dificultad: '6a',
+        tipo: 'via',
       };
-      const pistaCreada = await db.Pista.create(pistaTest);
+      const pistaCreada = await db.Pista.create({
+        ...pistaTest,
+        fechaCreacion: new Date(),
+      });
       pistaCreadaId = pistaCreada.id;
       token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'Admin' });
     });
@@ -196,6 +201,8 @@ describe('E2E: Pistas', () => {
         idZona: zona.id,
         nombre: 'Pista Cambiar Estado',
         dificultad: '6b',
+        tipo: 'via',
+        fechaCreacion: new Date(),
       });
 
       // Generar token de autenticación

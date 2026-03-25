@@ -27,27 +27,23 @@ describe('Pista (Entidad de dominio)', () => {
 
   describe('Validaciones de nombre', () => {
     it('no debería crear una pista con nombre vacío', () => {
-      expect(() => new Pista(null, 1, '', '6a')).toThrow(
-        'nombre inválido: Debe ser una cadena no vacía.'
-      );
+      const pista = new Pista(null, 1, '', '6a', 'via');
+      expect(pista.nombre).toBe('via-6a');
     });
 
     it('no debería crear una pista con nombre solo espacios', () => {
-      expect(() => new Pista(null, 1, '   ', '6a')).toThrow(
-        'nombre inválido: Debe ser una cadena no vacía.'
-      );
+      const pista = new Pista(null, 1, '   ', '6a', 'via');
+      expect(pista.nombre).toBe('via-6a');
     });
 
     it('no debería crear una pista con nombre no string', () => {
-      expect(() => new Pista(null, 1, 123, '6a')).toThrow(
-        'nombre inválido: Debe ser una cadena no vacía.'
-      );
+      const pista = new Pista(null, 1, 123, '6a', 'via');
+      expect(pista.nombre).toBe('via-6a');
     });
 
     it('no debería crear una pista con nombre undefined', () => {
-      expect(() => new Pista(null, 1, undefined, '6a')).toThrow(
-        'nombre inválido: Debe ser una cadena no vacía.'
-      );
+      const pista = new Pista(null, 1, undefined, '6a', 'via');
+      expect(pista.nombre).toBe('via-6a');
     });
   });
 
