@@ -56,7 +56,19 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
       ${contextError ? `<div id="crear-ruta-context-error" class="alert alert-warning">${contextError}</div>` : ''}
       <form id="form-crear-ruta" novalidate>
         <div class="mb-3">
-          <label for="nombre" class="form-label">Nombre (opcional)</label>
+          <label for="tipo" class="form-label">Tipo</label>
+          <select class="form-select" name="tipo" id="tipo" required>
+            <option value="">Selecciona un tipo</option>
+            <option value="boulder">Boulder</option>
+            <option value="via">Via</option>
+          </select>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <p class="text-muted small fw-semibold text-uppercase mb-2">Opcionales</p>
+
+        <div class="mb-3">
+          <label for="nombre" class="form-label">Nombre</label>
           <input
             type="text"
             class="form-control"
@@ -70,17 +82,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
 
         <div class="mb-3">
           <label for="dificultad" class="form-label">Dificultad</label>
-          <select class="form-select" name="dificultad" id="dificultad" required></select>
-          <div class="invalid-feedback"></div>
-        </div>
-
-        <div class="mb-3">
-          <label for="tipo" class="form-label">Tipo</label>
-          <select class="form-select" name="tipo" id="tipo" required>
-            <option value="">Selecciona un tipo</option>
-            <option value="boulder">Boulder</option>
-            <option value="via">Via</option>
-          </select>
+          <select class="form-select" name="dificultad" id="dificultad"></select>
           <div class="invalid-feedback"></div>
         </div>
 
@@ -122,7 +124,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
   const alertBox = container.querySelector('#form-alert');
 
   dificultadSelect.innerHTML = [
-    '<option value="">Selecciona una dificultad</option>',
+    '<option value="">Sin dificultad</option>',
     ...GRADOS_FRANCESES.map((grado) => `<option value="${grado}">${grado}</option>`),
   ].join('');
 

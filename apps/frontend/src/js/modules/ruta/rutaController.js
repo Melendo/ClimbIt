@@ -70,7 +70,7 @@ function validateFields(values, selectedPoint) {
     }
 
     const dificultad = (values.dificultad || '').trim();
-    if (!GRADOS_FRANCESES.includes(dificultad)) {
+    if (dificultad && !GRADOS_FRANCESES.includes(dificultad)) {
         errors.dificultad = `dificultad debe ser uno de: ${GRADOS_FRANCESES.join(', ')}`;
     }
 
@@ -247,10 +247,14 @@ export async function crearRutaCmd(container, params = {}) {
 
             const formData = new FormData();
             formData.append('idZona', String(Number(values.idZona)));
-            formData.append('dificultad', values.dificultad.trim());
             formData.append('tipo', values.tipo.trim());
             formData.append('posX', String(selectedPoint.x));
             formData.append('posY', String(selectedPoint.y));
+
+            const dificultad = (values.dificultad || '').trim();
+            if (dificultad) {
+                formData.append('dificultad', dificultad);
+            }
 
             const nombre = (values.nombre || '').trim();
             if (nombre) {
