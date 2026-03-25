@@ -67,6 +67,8 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
         }
 
         let mapaInteractivo = null;
+        let mapaSourceKey = null;
+        const mapaCache = new Map();
 
         // Renderizar la vista inicial
         renderMapaZona(
@@ -76,18 +78,43 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
                 return await cargarRutasZona(idZona);
             },
             initialZonaId,
-            async (_idZona, rutas) => {
+            async (idZona, rutas) => {
                 const mapaViewport = container.querySelector('#mapaSvgViewport');
                 if (!mapaViewport) return;
 
-                if (!mapaInteractivo) {
+                const zona = zonas.find((z) => z.id == idZona);
+                let backgroundImageUrl = null;
+
+                if (zona?.mapa) {
+                    if (mapaCache.has(idZona)) {
+                        backgroundImageUrl = mapaCache.get(idZona);
+                    } else {
+                        try {
+                            backgroundImageUrl = await fetchImageObjectUrl(`/zonas/${idZona}/mapa`);
+                            mapaCache.set(idZona, backgroundImageUrl);
+                        } catch (err) {
+                            console.warn('No se pudo cargar el mapa de la zona:', err.message);
+                        }
+                    }
+                }
+
+                const nextMapKey = backgroundImageUrl || 'default-svg';
+
+                if (!mapaInteractivo || mapaSourceKey !== nextMapKey) {
+                    if (mapaInteractivo) {
+                        mapaInteractivo.dispose();
+                    }
+
                     mapaInteractivo = createSvgPanzoomMap({
                         viewport: mapaViewport,
                         svgAssetUrl: '/assets/Roco.svg',
+                        backgroundImageUrl,
                         onMarkerClick: (ruta) => {
                             window.location.hash = `#infoRuta?id=${ruta.id}`;
                         },
                     });
+
+                    mapaSourceKey = nextMapKey;
                 }
 
                 await mapaInteractivo.renderMarkers(rutas || []);
