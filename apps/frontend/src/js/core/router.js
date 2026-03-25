@@ -1,6 +1,6 @@
 // Importamos los controladores de los diferentes modulos y las funciones de UI
 import { mainContainer, showLoading, showError } from './ui.js';
-import { isAuthenticated } from './client.js';
+import { isAuthenticated, canManageRocodromo } from './client.js';
 import { perfilCmd } from '../modules/escalador/escaladorController.js';
 import { crearRutaCmd, infoRutaCmd } from '../modules/ruta/rutaController.js';
 import { misRocodromosCmd, buscarRocodromosCmd, crearRocodromoCmd } from '../modules/rocodromo/rocodromoController.js';
@@ -54,7 +54,13 @@ export async function handleNavigation() {
         else if (baseRoute === '#crearRuta') {
             const idRocodromo = obtenerParametroDesdeHash('idRocodromo');
             const idZona = obtenerParametroDesdeHash('idZona');
-            crearRutaCmd(mainContainer, { idRocodromo, idZona });
+
+            if (!canManageRocodromo(idRocodromo)) {
+                showError('No tienes permisos para crear rutas en este rocódromo.');
+                return;
+            }
+
+            await crearRutaCmd(mainContainer, { idRocodromo, idZona });
         }
         else if (hash.startsWith('#infoRuta')) {
             const id = obtenerParametroDesdeHash('id');

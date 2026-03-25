@@ -1,6 +1,6 @@
 import { renderCrearRuta, renderInfoRuta } from './rutaView.js';
 import { createSvgPanzoomMap } from '../../components/svgPanzoomMap.js';
-import { fetchClient } from '../../core/client.js';
+import { fetchClient, canManageRocodromo } from '../../core/client.js';
 import { showError, showLoading, showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
 
 // Escala de grados para validación
@@ -118,6 +118,12 @@ export async function crearRutaCmd(container, params = {}) {
 
     const idRocodromo = Number(params.idRocodromo);
     const idZona = Number(params.idZona);
+
+    if (!canManageRocodromo(idRocodromo)) {
+        showError('No tienes permisos para crear rutas en este rocódromo.');
+        return;
+    }
+
     const hasValidParams = Number.isInteger(idRocodromo) && idRocodromo > 0 && Number.isInteger(idZona) && idZona > 0;
 
     let nombreRocodromo = hasValidParams ? `Rocodromo ${idRocodromo}` : 'Rocodromo';
