@@ -24,11 +24,17 @@ export function isAuthenticated() {
 
 export async function fetchClient(url, options = {}) {
     const token = getToken();
+    const isFormDataBody = options.body instanceof FormData;
 
     // Añadir el token a los headers si existe
     const headers = {
         ...options.headers,
     };
+
+    if (isFormDataBody && headers['Content-Type']) {
+        // El navegador gestiona multipart/form-data y boundary automaticamente.
+        delete headers['Content-Type'];
+    }
 
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;

@@ -51,8 +51,10 @@ export async function handleNavigation() {
         else if (hash === '#registro') {
             registroCmd(mainContainer);
         }
-        else if (hash === '#crearRuta') {
-            crearRutaCmd(mainContainer);
+        else if (baseRoute === '#crearRuta') {
+            const idRocodromo = obtenerParametroDesdeHash('idRocodromo');
+            const idZona = obtenerParametroDesdeHash('idZona');
+            crearRutaCmd(mainContainer, { idRocodromo, idZona });
         }
         else if (hash.startsWith('#infoRuta')) {
             const id = obtenerParametroDesdeHash('id');
