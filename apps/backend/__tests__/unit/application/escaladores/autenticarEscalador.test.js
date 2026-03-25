@@ -10,6 +10,7 @@ describe('AutenticarEscaladorUseCase', () => {
   beforeEach(() => {
     mockRepository = {
       encontrarPorCorreo: jest.fn(),
+      obtenerIdsRocodromosGestionados: jest.fn(),
     };
     mockPasswordService = {
       compare: jest.fn(),
@@ -35,9 +36,11 @@ describe('AutenticarEscaladorUseCase', () => {
       correo: 'test@example.com',
       contrasena: 'hashed_password',
       apodo: 'TestClimb',
+      isAdmin: false,
     };
 
     mockRepository.encontrarPorCorreo.mockResolvedValue(escaladorEncontrado);
+    mockRepository.obtenerIdsRocodromosGestionados.mockResolvedValue([]);
     mockPasswordService.compare.mockResolvedValue(true);
     mockTokenService.crear.mockReturnValue('fake_jwt_token');
 
@@ -48,7 +51,71 @@ describe('AutenticarEscaladorUseCase', () => {
         datosEntrada.contrasena,
         escaladorEncontrado.contrasena
     );
-    expect(mockTokenService.crear).toHaveBeenCalledWith({ correo: escaladorEncontrado.correo, apodo: escaladorEncontrado.apodo });
+    expect(mockTokenService.crear).toHaveBeenCalledWith({
+      correo: escaladorEncontrado.correo,
+      apodo: escaladorEncontrado.apodo,
+      rol: 'Escalador',
+    });
+    expect(resultado).toEqual({ token: 'fake_jwt_token' });
+  });
+
+  it('debería asignar rol Gestor con un solo rocódromo gestionado', async () => {
+    const datosEntrada = {
+      correo: 'gestor1@example.com',
+      contrasena: 'password123',
+    };
+
+    const escaladorEncontrado = {
+      id: 10,
+      correo: 'gestor1@example.com',
+      contrasena: 'hashed_password',
+      apodo: 'GestorUno',
+      isAdmin: false,
+    };
+
+    mockRepository.encontrarPorCorreo.mockResolvedValue(escaladorEncontrado);
+    mockRepository.obtenerIdsRocodromosGestionados.mockResolvedValue([7]);
+    mockPasswordService.compare.mockResolvedValue(true);
+    mockTokenService.crear.mockReturnValue('fake_jwt_token');
+
+    const resultado = await autenticarEscalador.execute(datosEntrada);
+
+    expect(mockTokenService.crear).toHaveBeenCalledWith({
+      correo: escaladorEncontrado.correo,
+      apodo: escaladorEncontrado.apodo,
+      rol: 'Gestor',
+      rocodromosGestionados: [7],
+    });
+    expect(resultado).toEqual({ token: 'fake_jwt_token' });
+  });
+
+  it('debería asignar rol Gestor con varios rocódromos gestionados', async () => {
+    const datosEntrada = {
+      correo: 'gestor2@example.com',
+      contrasena: 'password123',
+    };
+
+    const escaladorEncontrado = {
+      id: 11,
+      correo: 'gestor2@example.com',
+      contrasena: 'hashed_password',
+      apodo: 'GestorMulti',
+      isAdmin: false,
+    };
+
+    mockRepository.encontrarPorCorreo.mockResolvedValue(escaladorEncontrado);
+    mockRepository.obtenerIdsRocodromosGestionados.mockResolvedValue([3, 5, 9]);
+    mockPasswordService.compare.mockResolvedValue(true);
+    mockTokenService.crear.mockReturnValue('fake_jwt_token');
+
+    const resultado = await autenticarEscalador.execute(datosEntrada);
+
+    expect(mockTokenService.crear).toHaveBeenCalledWith({
+      correo: escaladorEncontrado.correo,
+      apodo: escaladorEncontrado.apodo,
+      rol: 'Gestor',
+      rocodromosGestionados: [3, 5, 9],
+    });
     expect(resultado).toEqual({ token: 'fake_jwt_token' });
   });
 
@@ -64,6 +131,7 @@ describe('AutenticarEscaladorUseCase', () => {
     const escaladorEncontrado = {
       correo: 'test@example.com',
       contrasena: 'hashed_password',
+      isAdmin: false,
     };
 
     mockRepository.encontrarPorCorreo.mockResolvedValue(escaladorEncontrado);
@@ -72,5 +140,34 @@ describe('AutenticarEscaladorUseCase', () => {
     await expect(
       autenticarEscalador.execute({ correo: 'test@example.com', contrasena: 'wrong' })
     ).rejects.toThrow('Contraseña incorrecta');
+  });
+
+  it('debería asignar rol Admin cuando el escalador es admin', async () => {
+    const datosEntrada = {
+      correo: 'admin@example.com',
+      contrasena: 'password123',
+    };
+
+    const escaladorEncontrado = {
+      id: 99,
+      correo: 'admin@example.com',
+      contrasena: 'hashed_password',
+      apodo: 'AdminTotal',
+      isAdmin: true,
+    };
+
+    mockRepository.encontrarPorCorreo.mockResolvedValue(escaladorEncontrado);
+    mockPasswordService.compare.mockResolvedValue(true);
+    mockTokenService.crear.mockReturnValue('fake_jwt_token');
+
+    const resultado = await autenticarEscalador.execute(datosEntrada);
+
+    expect(mockRepository.obtenerIdsRocodromosGestionados).not.toHaveBeenCalled();
+    expect(mockTokenService.crear).toHaveBeenCalledWith({
+      correo: escaladorEncontrado.correo,
+      apodo: escaladorEncontrado.apodo,
+      rol: 'Admin',
+    });
+    expect(resultado).toEqual({ token: 'fake_jwt_token' });
   });
 });

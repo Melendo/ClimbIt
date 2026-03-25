@@ -2,6 +2,11 @@ import express from 'express';
 import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyTokenMiddleware from '../middlewares/verifyToken.js';
+import uploadImages from '../middlewares/uploadImages.js';
+import authorizeRocodromoAccess, {
+  resolveRocodromoIdFromRocodromoBody,
+  resolveRocodromoIdFromZonaParam,
+} from '../middlewares/authorizeRocodromoAccess.js';
 import containerPromise from '../../../infrastructure/container.js';
 
 const router = express.Router();
@@ -38,9 +43,18 @@ const crearZonaValidators = [
     .withMessage('El nombre de la zona contiene caracteres no válidos'),
 ];
 
-router.post('/create', verifyTokenMiddleware, crearZonaValidators, validate, (req, res, next) => {
-  zonaController.crearZona(req, res, next);
-});
+router.post(
+  '/create',
+  verifyTokenMiddleware,
+  crearZonaValidators,
+  validate,
+  authorizeRocodromoAccess({
+    resolveRocodromoId: resolveRocodromoIdFromRocodromoBody,
+  }),
+  (req, res, next) => {
+    zonaController.crearZona(req, res, next);
+  }
+);
 
 /**
  * GET /zonas/pistas/:id
@@ -66,5 +80,71 @@ const obtenerPistasZonaValidators = [
 router.get('/pistas/:id', verifyTokenMiddleware, obtenerPistasZonaValidators, validate, (req, res, next) => {
   zonaController.obtenerPistasDeZona(req, res, next);
 });
+
+/**
+ * POST /zonas/:id/mapa
+ * Sube el mapa de una zona
+ *
+ * Parametros esperados (URL Path):
+ * - id (@param {number} , requerido): ID de la zona (entero positivo)
+ *
+ * Parametros esperados (multipart/form-data):
+ * - mapa (@param {file} , requerido): Archivo de imagen
+ *
+ * Requiere:
+ * - Token JWT valido en header Authorization
+ * - Rol de Administrador o Gestor del Rocodromo al que pertenece la zona
+ *
+ * Respuesta esperada: @return {Object} URL del mapa
+ */
+const subirMapaZonaValidators = [
+  param('id')
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('El id de la zona debe ser un entero positivo'),
+];
+
+const uploadMapaZona = uploadImages({
+  uploadDir: 'uploads/mapas_zonas',
+  fileName: (req) => `mapa-zona-${req.params.id}-${Date.now()}`,
+});
+
+router.post(
+  '/:id/mapa',
+  verifyTokenMiddleware,
+  subirMapaZonaValidators,
+  validate,
+  authorizeRocodromoAccess({ resolveRocodromoId: resolveRocodromoIdFromZonaParam }),
+  uploadMapaZona.single('mapa'),
+  (req, res, next) => {
+    zonaController.subirMapa(req, res, next);
+  }
+);
+
+/**
+ * GET /zonas/:id/mapa
+ * Obtiene el mapa de una zona
+ *
+ * Parametros esperados (URL Path):
+ * - id (@param {number} , requerido): ID de la zona (entero positivo)
+ *
+ * Requiere: Token JWT valido en header Authorization
+ */
+const obtenerMapaZonaValidators = [
+  param('id')
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('El id de la zona debe ser un entero positivo'),
+];
+
+router.get(
+  '/:id/mapa',
+  verifyTokenMiddleware,
+  obtenerMapaZonaValidators,
+  validate,
+  (req, res, next) => {
+    zonaController.obtenerMapa(req, res, next);
+  }
+);
 
 export default router;

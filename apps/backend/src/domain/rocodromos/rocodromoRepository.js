@@ -13,6 +13,10 @@ class RocodromoRepository {
   async encontrarPorId(idRocodromo) {
     throw new Error('Método "encontrarPorId" no implementado');
   }
+
+  async actualizarLogoRocodromo(idRocodromo, logoUrl) {
+    throw new Error('Método "actualizarLogoRocodromo" no implementado');
+  }
 }
 
 export default RocodromoRepository;

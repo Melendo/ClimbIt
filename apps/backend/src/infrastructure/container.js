@@ -25,13 +25,17 @@ import DesuscribirseRocodromo from '../application/escaladores/desuscribirseRoco
 import ObtenerRocodromosSuscritos from '../application/escaladores/obtenerRocodromosSuscritos.js';
 
 import CrearPista from '../application/pistas/crearPista.js';
+import ActualizarImagenPista from '../application/pistas/actualizarImagenPista.js';
 import ObtenerPistaPorId from '../application/pistas/obtenerPistaPorId.js';
 import CambiarEstadoPista from '../application/pistas/cambiarEstadoPista.js';
 
 import CrearZona from '../application/zonas/crearZona.js';
 import ObtenerPistasDeZona from '../application/zonas/obtenerPistasZona.js';
+import ActualizarMapaZona from '../application/zonas/actualizarMapaZona.js';
+import ObtenerZonaPorId from '../application/zonas/obtenerZonaPorId.js';
 
 import CrearRocodromo from '../application/rocodromos/crearRocodromo.js';
+import ActualizarLogoRocodromo from '../application/rocodromos/actualizarLogoRocodromo.js';
 import ObtenerZonasRocodromo from '../application/rocodromos/obtenerZonasRocodromo.js';
 import ObtenerRocodromos from '../application/rocodromos/obtenerRocodromos.js';
 import ObtenerInformacionRocodromo from '../application/rocodromos/obtenerInformacionRocodromo.js';
@@ -80,6 +84,7 @@ async function inicializarContainer() {
   );
 
   const crearPistaUseCase = new CrearPista(pistaRepository, db.Zona);
+  const actualizarImagenPistaUseCase = new ActualizarImagenPista(pistaRepository);
   const obtenerPistaPorIdUseCase = new ObtenerPistaPorId(pistaRepository, escaladorRepository);
   const cambiarEstadoPistaUseCase = new CambiarEstadoPista(
     pistaRepository,
@@ -88,8 +93,13 @@ async function inicializarContainer() {
 
   const crearZonaUseCase = new CrearZona(zonaRepository, db.Rocodromo);
   const obtenerPistasDeZonaUseCase = new ObtenerPistasDeZona(zonaRepository, escaladorRepository);
+  const actualizarMapaZonaUseCase = new ActualizarMapaZona(zonaRepository);
+  const obtenerZonaPorIdUseCase = new ObtenerZonaPorId(zonaRepository);
 
   const crearRocodromoUseCase = new CrearRocodromo(rocodromoRepository);
+  const actualizarLogoRocodromoUseCase = new ActualizarLogoRocodromo(
+    rocodromoRepository
+  );
   const obtenerZonasRocodromoUseCase = new ObtenerZonasRocodromo(
     rocodromoRepository
   );
@@ -109,15 +119,19 @@ async function inicializarContainer() {
   };
   const pistaUseCases = {
     crear: crearPistaUseCase,
+    actualizarImagen: actualizarImagenPistaUseCase,
     obtenerPistaPorId: obtenerPistaPorIdUseCase,
     cambiarEstado: cambiarEstadoPistaUseCase,
   };
   const zonaUseCases = {
     crear: crearZonaUseCase,
     obtenerPistasDeZona: obtenerPistasDeZonaUseCase,
+    actualizarMapa: actualizarMapaZonaUseCase,
+    obtenerZonaPorId: obtenerZonaPorIdUseCase,
   };
   const rocodromoUseCases = {
     crear: crearRocodromoUseCase,
+    actualizarLogo: actualizarLogoRocodromoUseCase,
     obtenerZonasRocodromo: obtenerZonasRocodromoUseCase,
     obtenerRocodromos: obtenerRocodromosUseCase,
     obtenerInformacion: obtenerInformacionRocodromoUseCase,

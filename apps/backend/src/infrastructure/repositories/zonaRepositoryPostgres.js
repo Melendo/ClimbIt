@@ -14,7 +14,9 @@ class ZonaRepositoryPostgres extends ZonaRepository {
       return new Zona(
         zonaModel.id,
         zonaModel.idRoco,
-        zonaModel.tipo,
+        zonaModel.nombre,
+        zonaModel.mapa,
+        zonaModel.activo
       );
     } catch (error) {
       throw new Error(error.message);
@@ -24,7 +26,8 @@ class ZonaRepositoryPostgres extends ZonaRepository {
   async crearZona(zona) {
     const data = {
       idRoco: zona.idRoco,
-      tipo: zona.tipo,
+      nombre: zona.nombre,
+      mapa: zona.mapa,
     };
     const zonaModel = await this.ZonaModel.create(data);
 
@@ -68,6 +71,13 @@ class ZonaRepositoryPostgres extends ZonaRepository {
           idZona: pista.idZona,
           nombre: pista.nombre,
           dificultad: pista.dificultad,
+          colorPresas: pista.colorPresas,
+          tipo: pista.tipo,
+          imagenUrl: pista.imagenUrl,
+          posX: pista.posX,
+          posY: pista.posY,
+          fechaCreacion: pista.fechaCreacion,
+          fechaRetirada: pista.fechaRetirada,
           estado,
         };
       });
@@ -75,6 +85,32 @@ class ZonaRepositoryPostgres extends ZonaRepository {
       return pistas;
     } catch (error) {
       throw new Error(`Error al obtener las pistas de la zona: ${error.message}`);
+    }
+  }
+
+  async encontrarPorId(idZona) {
+    try {
+      const zonaModel = await this.ZonaModel.findByPk(idZona);
+      return this._toDomain(zonaModel);
+    } catch (error) {
+      throw new Error(`Error al encontrar la zona por ID: ${error.message}`);
+    }
+  }
+
+  async actualizarMapaZona(idZona, mapaUrl) {
+    try {
+      const zonaModel = await this.ZonaModel.findByPk(idZona);
+
+      if (!zonaModel) {
+        return null;
+      }
+
+      zonaModel.mapa = mapaUrl;
+      await zonaModel.save();
+
+      return this._toDomain(zonaModel);
+    } catch (error) {
+      throw new Error(`Error al actualizar el mapa de la zona: ${error.message}`);
     }
   }
 

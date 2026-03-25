@@ -51,7 +51,7 @@ body {
    Estilos específicos de componentes
    ======================================== */
 
-/* Estilos para botones de estado en vista de pista */
+/* Estilos para botones de estado en vista de ruta */
 .estado-btn {
   text-decoration: none !important;
 }
@@ -62,7 +62,7 @@ body {
 }
 
 /* ========================================
-   Cards de zonas/pistas en mapa rocódromo
+  Cards de zonas/rutas en mapa rocódromo
    ======================================== */
 .zona-card {
   cursor: pointer;
@@ -207,69 +207,82 @@ body {
   font-weight: bold;
 }
 
+
 /* ========================================
-   Animaciones de Transición (Swipe)
+   Mapa SVG interactivo de zonas
    ======================================== */
-.slide-in-right {
-  animation: slideInRight 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+.mapa-svg-viewport {
+  background: radial-gradient(circle at 20% 20%, #2d2d2d 0%, #111 70%);
 }
 
-.slide-in-left {
-  animation: slideInLeft 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+.mapa-rocodromo.mapa-rocodromo-fullscreen {
+  height: auto !important;
+  min-height: 0 !important;
+  flex: 1 1 auto;
 }
 
-.slide-out-right {
-  animation: slideOutRight 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+.mapa-toggle-btn {
+  border-radius: 999px;
+  backdrop-filter: blur(3px);
+  background: rgba(255, 255, 255, 0.92);
 }
 
-.slide-out-left {
-  animation: slideOutLeft 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+.roco-svg {
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
 }
 
-@keyframes slideInRight {
-  0% {
-    transform: translateX(100px);
-    opacity: 0;
-  }
-
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
+.roco-svg:active {
+  cursor: grabbing;
 }
 
-@keyframes slideInLeft {
-  0% {
-    transform: translateX(-100px);
-    opacity: 0;
-  }
-
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
+.ruta-marker {
+  filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.5));
 }
 
-@keyframes slideOutRight {
-  0% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-
-  100% {
-    transform: translateX(100px);
-    opacity: 0;
-  }
+.ruta-hitbox {
+  fill: transparent;
+  cursor: pointer;
 }
 
-@keyframes slideOutLeft {
-  0% {
-    transform: translateX(0);
-    opacity: 1;
-  }
+.ruta-dot {
+  stroke: #ffffff;
+  stroke-width: 3;
+  pointer-events: none;
+}
 
-  100% {
-    transform: translateX(-100px);
-    opacity: 0;
-  }
+.selected-point-marker {
+  filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.45));
+  pointer-events: none;
+}
+
+.selected-point-ring {
+  fill: rgba(59, 130, 246, 0.2);
+  stroke: #ffffff;
+  stroke-width: 3;
+}
+
+.selected-point-dot {
+  fill: #0d6efd;
+  stroke: #ffffff;
+  stroke-width: 3;
+}
+
+/* ========================================
+   Vista crear ruta
+   ======================================== */
+.crear-ruta-card {
+  min-height: 100dvh;
+}
+
+.crear-ruta-mapa-wrap {
+  height: 38dvh;
+  min-height: 260px;
+  overflow: hidden;
+}
+
+.crear-ruta-mapa-overlay {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.78), transparent);
 }

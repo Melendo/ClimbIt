@@ -3,12 +3,13 @@ import Pista from '../../../../src/domain/pistas/Pista.js';
 describe('Pista (Entidad de dominio)', () => {
   describe('Creación exitosa', () => {
     it('debería crear una pista con los datos correctos', () => {
-      const datos = { id: null, idZona: 1, nombre: 'Ex1', dificultad: '3a' };
+      const datos = { id: null, idZona: 1, nombre: 'Ex1', dificultad: '3a', tipo: 'boulder' };
       const pista = new Pista(
         datos.id,
         datos.idZona,
         datos.nombre,
-        datos.dificultad
+        datos.dificultad,
+        datos.tipo
       );
 
       expect(pista.idZona).toBe(1);
@@ -17,7 +18,7 @@ describe('Pista (Entidad de dominio)', () => {
     });
 
     it('debería crear una pista con ID numérico', () => {
-      const pista = new Pista(1, 2, 'Overhang', '7c');
+      const pista = new Pista(1, 2, 'Overhang', '7c', 'boulder');
       expect(pista.id).toBe(1);
       expect(pista.idZona).toBe(2);
       expect(pista.nombre).toBe('Overhang');
@@ -27,35 +28,30 @@ describe('Pista (Entidad de dominio)', () => {
 
   describe('Validaciones de nombre', () => {
     it('no debería crear una pista con nombre vacío', () => {
-      expect(() => new Pista(null, 1, '', '6a')).toThrow(
-        'nombre inválido: Debe ser una cadena no vacía.'
-      );
+      const pista = new Pista(null, 1, '', '6a', 'via');
+      expect(pista.nombre).toBe('via-6a');
     });
 
     it('no debería crear una pista con nombre solo espacios', () => {
-      expect(() => new Pista(null, 1, '   ', '6a')).toThrow(
-        'nombre inválido: Debe ser una cadena no vacía.'
-      );
+      const pista = new Pista(null, 1, '   ', '6a', 'via');
+      expect(pista.nombre).toBe('via-6a');
     });
 
     it('no debería crear una pista con nombre no string', () => {
-      expect(() => new Pista(null, 1, 123, '6a')).toThrow(
-        'nombre inválido: Debe ser una cadena no vacía.'
-      );
+      const pista = new Pista(null, 1, 123, '6a', 'via');
+      expect(pista.nombre).toBe('via-6a');
     });
 
     it('no debería crear una pista con nombre undefined', () => {
-      expect(() => new Pista(null, 1, undefined, '6a')).toThrow(
-        'nombre inválido: Debe ser una cadena no vacía.'
-      );
+      const pista = new Pista(null, 1, undefined, '6a', 'via');
+      expect(pista.nombre).toBe('via-6a');
     });
   });
 
   describe('Validaciones de dificultad', () => {
-    it('no debería crear una pista con dificultad vacía', () => {
-      expect(() => new Pista(null, 1, 'Pista Test', '')).toThrow(
-        'dificultad inválida: Debe ser una cadena no vacía.'
-      );
+    it('debería permitir dificultad vacía o null', () => {
+      expect(() => new Pista(null, 1, 'Pista Test', '', 'via')).not.toThrow();
+      expect(() => new Pista(null, 1, 'Pista Test', null, 'via')).not.toThrow();
     });
   });
 

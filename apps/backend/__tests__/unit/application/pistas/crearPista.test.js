@@ -16,7 +16,7 @@ describe('crearPistaUseCase', () => {
 
     const crearPista = new CrearPistaUseCase(mockRepository, mockZonaModel);
 
-    const datos = { idZona: 1, nombre: 'Ex1', dificultad: '3a' };
+    const datos = { idZona: 1, nombre: 'Ex1', dificultad: '3a', tipo: 'boulder' };
     const resultado = await crearPista.execute(datos);
 
     expect(mockZonaModel.findByPk).toHaveBeenCalledWith(1);
@@ -24,6 +24,7 @@ describe('crearPistaUseCase', () => {
       idZona: 1,
       nombre: 'Ex1',
       dificultad: '3a',
+      tipo: 'boulder',
       id: 1,
     });
   });
@@ -42,7 +43,7 @@ describe('crearPistaUseCase', () => {
 
     const crearPista = new CrearPistaUseCase(mockRepository, mockZonaModel);
 
-    const datos = { idZona: 999, nombre: 'Ex1', dificultad: '3a' };
+    const datos = { idZona: 999, nombre: 'Ex1', dificultad: '3a', tipo: 'boulder' };
     await expect(() => crearPista.execute(datos)).rejects.toThrow(
       `Error al crear la pista: La zona con ID 999 no existe`
     );

@@ -20,7 +20,11 @@ class CrearEscalador {
       const escaladorCreado =
         await this.escaladorRepository.crear(nuevoEscalador);
 
-      const token = this.tokenService.crear({ correo: escaladorCreado.correo, apodo: escaladorCreado.apodo });
+      const token = this.tokenService.crear({
+        correo: escaladorCreado.correo,
+        apodo: escaladorCreado.apodo,
+        rol: 'Escalador',
+      });
 
       return { token };
     } catch (error) {

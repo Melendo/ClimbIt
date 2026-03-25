@@ -32,10 +32,10 @@ export default (sequelize, DataTypes) => {
           key: 'IDRoco',
         },
       },
-      tipo: {
+      nombre: {
         type: DataTypes.STRING,
         allowNull: false,
-        field: 'Tipo',
+        field: 'Nombre',
       },
       mapa: {
         type: DataTypes.STRING,

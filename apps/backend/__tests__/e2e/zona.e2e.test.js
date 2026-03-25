@@ -13,7 +13,7 @@ describe('E2E: Zonas', () => {
   let token;
 
   beforeAll(async () => {
-    token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'admin' });
+    token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'Admin' });
     
     rocodromo = await db.Rocodromo.create({
       nombre: 'Roco Zonas Integration',
@@ -22,24 +22,26 @@ describe('E2E: Zonas', () => {
 
     zonaConPistas = await db.Zona.create({
       idRoco: rocodromo.id,
-      tipo: 'Zona Con Pistas Test',
+      nombre: 'Zona Con Pistas Test',
     });
 
     zonaSinPistas = await db.Zona.create({
       idRoco: rocodromo.id,
-      tipo: 'Zona Vacía Test',
+      nombre: 'Zona Vacia Test',
     });
 
     pistasCreadas.push(await db.Pista.create({
       idZona: zonaConPistas.id,
       nombre: 'Pista Test 1',
       dificultad: '5a',
+      tipo: 'via',
     }));
 
     pistasCreadas.push(await db.Pista.create({
       idZona: zonaConPistas.id,
       nombre: 'Pista Test 2',
       dificultad: '7b',
+      tipo: 'via',
     }));
   });
 
@@ -122,9 +124,9 @@ describe('E2E: Zonas', () => {
         .expect(201);
 
       expect(response.body).toHaveProperty('id');
-      expect(response.body).toHaveProperty('tipo');
+      expect(response.body).toHaveProperty('nombre');
       expect(response.body).toHaveProperty('idRoco');
-      expect(response.body.tipo).toBe('Zona Nueva E2E');
+      expect(response.body.nombre).toBe('Zona Nueva E2E');
       expect(response.body.idRoco).toBe(rocodromo.id);
 
       // Limpiar

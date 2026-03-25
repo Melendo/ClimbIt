@@ -9,40 +9,64 @@ const GRADOS_FRANCESES = [
   '9a', '9a+', '9b', '9b+', '9c', '9c+',
 ];
 
-// Vista para la creación de pistas
-export function renderCrearPista(container, callbacks) {
+// Vista para la creación de rutas
+export function renderCrearRuta(container, callbacks, viewData = {}) {
+  const {
+    idRocodromo,
+    idZona,
+    nombreRocodromo = 'Rocódromo',
+    nombreZona = 'Zona',
+    contextError = '',
+  } = viewData;
+
+  const backHref = (idRocodromo && idZona)
+    ? `#mapaZona?id=${idRocodromo}&zona=${idZona}`
+    : '#misRocodromos';
+
   container.innerHTML = `
-  <div class="card shadow-sm">
+  <div class="card shadow-sm d-flex flex-column crear-ruta-card" style="height: 100dvh; overflow: hidden;">
     <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
-      <a href="#" onclick="history.back(); return false;" class="text-dark">
+      <a href="${backHref}" class="text-dark text-decoration-none">
         <span class="material-icons align-middle">arrow_back</span>
       </a>
-      <span class="fw-medium">Nueva Pista</span>
+      <div class="d-flex flex-column lh-sm">
+        <span class="fw-semibold">${nombreRocodromo}</span>
+        <small class="text-muted">Zona ${nombreZona}</small>
+      </div>
+      <span class="badge text-bg-light ms-auto">Nueva ruta</span>
     </div>
-    <div class="card-body">
-      <form id="form-crear-pista" novalidate>
+
+    <div class="crear-ruta-mapa-wrap position-relative bg-dark flex-shrink-0">
+      <div id="crearRutaMapaViewport" class="mapa-svg-viewport w-100 h-100" aria-label="Seleccion de posicion de ruta">
+        <div class="d-flex justify-content-center align-items-center h-100 text-white-50">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Cargando mapa...</span>
+          </div>
+        </div>
+      </div>
+      <div class="position-absolute bottom-0 start-0 end-0 px-3 py-2 crear-ruta-mapa-overlay">
+        <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+          <small class="text-white-50">Selecciona un punto para guardar posX y posY</small>
+          <span id="coordenadasSeleccionadas" class="badge text-bg-light">Sin punto</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body flex-grow-1 overflow-auto bg-light">
+      ${contextError ? `<div id="crear-ruta-context-error" class="alert alert-warning">${contextError}</div>` : ''}
+      <form id="form-crear-ruta" novalidate>
         <div class="mb-3">
-          <label for="idRocodromo" class="form-label">ID Rocódromo</label>
-          <input
-            type="number"
-            class="form-control"
-            name="idRocodromo"
-            id="idRocodromo"
-            required
-          />
+          <label for="tipo" class="form-label">Tipo</label>
+          <select class="form-select" name="tipo" id="tipo" required>
+            <option value="">Selecciona un tipo</option>
+            <option value="boulder">Boulder</option>
+            <option value="via">Via</option>
+          </select>
           <div class="invalid-feedback"></div>
         </div>
-        <div class="mb-3">
-          <label for="idZona" class="form-label">Zona</label>
-          <select
-            class="form-control"
-            name="idZona"
-            id="idZona"
-            required
-            disabled
-          ></select>
-          <div class="invalid-feedback"></div>
-        </div>
+
+        <p class="text-muted small fw-semibold text-uppercase mb-2">Opcionales</p>
+
         <div class="mb-3">
           <label for="nombre" class="form-label">Nombre</label>
           <input
@@ -50,70 +74,105 @@ export function renderCrearPista(container, callbacks) {
             class="form-control"
             name="nombre"
             id="nombre"
-            required
+            maxlength="100"
+            placeholder="Ej: Placa central"
           />
           <div class="invalid-feedback"></div>
         </div>
+
         <div class="mb-3">
           <label for="dificultad" class="form-label">Dificultad</label>
-          <select class="form-control" name="dificultad" id="dificultad" required></select>
+          <select class="form-select" name="dificultad" id="dificultad"></select>
           <div class="invalid-feedback"></div>
         </div>
+
+        <div class="mb-3">
+          <label for="fechaCreacion" class="form-label">Fecha de creacion (opcional)</label>
+          <input type="datetime-local" class="form-control" name="fechaCreacion" id="fechaCreacion" />
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <div class="mb-3">
+          <label for="fechaRetirada" class="form-label">Fecha de retirada (opcional)</label>
+          <input type="datetime-local" class="form-control" name="fechaRetirada" id="fechaRetirada" />
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <div class="mb-3">
+          <label for="imagen" class="form-label">Imagen (opcional)</label>
+          <input type="file" class="form-control" name="imagen" id="imagen" accept="image/*" />
+          <div class="invalid-feedback"></div>
+        </div>
+
         <div id="form-alert" class="alert d-none" role="alert"></div>
-        <button type="submit" class="btn btn-primary w-100">Crear</button>
+
+        <button type="submit" id="crear-ruta-submit" class="btn btn-primary w-100" ${contextError ? 'disabled' : ''}>Crear ruta</button>
       </form>
     </div>
   </div>`;
 
-  // Referencias a elementos del formulario
-  const form = container.querySelector('#form-crear-pista');
-  const idRocodromoInput = container.querySelector('#idRocodromo');
-  const idZonaInput = container.querySelector('#idZona');
+  const form = container.querySelector('#form-crear-ruta');
   const nombreInput = container.querySelector('#nombre');
   const dificultadSelect = container.querySelector('#dificultad');
+  const tipoSelect = container.querySelector('#tipo');
+  const fechaCreacionInput = container.querySelector('#fechaCreacion');
+  const fechaRetiradaInput = container.querySelector('#fechaRetirada');
+  const imagenInput = container.querySelector('#imagen');
+  const mapaViewport = container.querySelector('#crearRutaMapaViewport');
+  const coordsBadge = container.querySelector('#coordenadasSeleccionadas');
+  const submitButton = container.querySelector('#crear-ruta-submit');
   const alertBox = container.querySelector('#form-alert');
 
-  // Poblar select de dificultades
-  dificultadSelect.innerHTML = GRADOS_FRANCESES
-    .map((grado) => `<option value="${grado}">${grado}</option>`)
-    .join('');
+  dificultadSelect.innerHTML = [
+    '<option value="">Sin dificultad</option>',
+    ...GRADOS_FRANCESES.map((grado) => `<option value="${grado}">${grado}</option>`),
+  ].join('');
 
-  // Limpiar errores al modificar campos
-  [idRocodromoInput, idZonaInput, nombreInput, dificultadSelect].forEach((el) => {
+  [nombreInput, dificultadSelect, tipoSelect, fechaCreacionInput, fechaRetiradaInput, imagenInput].forEach((el) => {
     el.addEventListener('input', () => callbacks.onFieldChange(el, alertBox));
     el.addEventListener('change', () => callbacks.onFieldChange(el, alertBox));
   });
 
-  // Cargar zonas al cambiar el rocódromo
-  idRocodromoInput.addEventListener('blur', () => {
-    callbacks.onRocodromoChange(idRocodromoInput, idZonaInput, alertBox);
-  });
-  idRocodromoInput.addEventListener('change', () => {
-    callbacks.onRocodromoChange(idRocodromoInput, idZonaInput, alertBox);
-  });
-
-  // Envío del formulario
   form.addEventListener('submit', (e) => {
     e.preventDefault();
+
     const values = {
-      idRocodromo: idRocodromoInput.value,
-      idZona: idZonaInput.value,
+      idRocodromo,
+      idZona,
       nombre: nombreInput.value,
       dificultad: dificultadSelect.value,
+      tipo: tipoSelect.value,
+      fechaCreacion: fechaCreacionInput.value,
+      fechaRetirada: fechaRetiradaInput.value,
+      imagen: imagenInput.files?.[0] || null,
     };
+
     callbacks.onSubmit(values, {
-      idRocodromoInput,
-      idZonaInput,
       nombreInput,
       dificultadSelect,
-      alertBox
+      tipoSelect,
+      fechaCreacionInput,
+      fechaRetiradaInput,
+      imagenInput,
+      alertBox,
+      submitButton,
+      coordsBadge,
     });
   });
+
+  if (typeof callbacks.onViewReady === 'function') {
+    callbacks.onViewReady({
+      mapaViewport,
+      coordsBadge,
+      submitButton,
+      alertBox,
+    });
+  }
 }
 
-// Vista para la información de una pista
-export function renderInfoPista(container, pista, callbacks) {
-  const { nombre, dificultad } = pista || {};
+// Vista para la información de una ruta
+export function renderInfoRuta(container, ruta, callbacks) {
+  const { nombre, dificultad } = ruta || {};
 
   container.innerHTML = `
 <div class="d-flex flex-column" style="min-height: 100dvh; background: #f8f9fa;">
@@ -122,7 +181,7 @@ export function renderInfoPista(container, pista, callbacks) {
   <div class="position-relative" style="height: 45dvh; min-height: 280px;">
     <img 
       src="/assets/placeholder.jpg" 
-      alt="Imagen de la pista ${nombre || ''}" 
+      alt="Imagen de la ruta ${nombre || ''}" 
       class="w-100 h-100" 
       style="object-fit: cover;"
     />

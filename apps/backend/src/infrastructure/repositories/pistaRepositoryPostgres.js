@@ -15,7 +15,15 @@ class PistaRepositoryPostgres extends pistaRepository {
         pistaModel.id,
         pistaModel.idZona,
         pistaModel.nombre,
-        pistaModel.dificultad
+        pistaModel.dificultad,
+        pistaModel.tipo,
+        pistaModel.colorPresas,
+        pistaModel.imagenUrl,
+        pistaModel.posX,
+        pistaModel.posY,
+        pistaModel.fechaCreacion,
+        pistaModel.fechaRetirada,
+        pistaModel.activo
       );
     } catch (error) {
       throw new Error(error.message);
@@ -27,6 +35,13 @@ class PistaRepositoryPostgres extends pistaRepository {
       idZona: pista.idZona,
       nombre: pista.nombre,
       dificultad: pista.dificultad,
+      tipo: pista.tipo,
+      colorPresas: pista.colorPresas,
+      imagenUrl: pista.imagenUrl,
+      posX: pista.posX,
+      posY: pista.posY,
+      fechaCreacion: pista.fechaCreacion,
+      fechaRetirada: pista.fechaRetirada,
     };
     const pistaModel = await this.PistaModel.create(data);
 
@@ -64,6 +79,15 @@ class PistaRepositoryPostgres extends pistaRepository {
         through: { estado: nuevoEstado },
       });
     }
+  }
+
+  async actualizarImagenUrl(id, imagenUrl) {
+    const pistaModel = await this.PistaModel.findByPk(id);
+    if (!pistaModel) return null;
+
+    await pistaModel.update({ imagenUrl });
+    await pistaModel.save(); // Recargar para obtener los datos actualizados
+    return this._toDomain(pistaModel);
   }
 
   async eliminarEstadoPista(idPista, idEscalador) {

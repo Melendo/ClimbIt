@@ -13,6 +13,15 @@ export default (sequelize, DataTypes) => {
         foreignKey: 'idRocodromo',
         as: 'escaladores',
       });
+      Rocodromo.hasMany(models.EscalaDificultad, {
+        foreignKey: 'idRoco',
+        as: 'escalasDificultad',
+      });
+      Rocodromo.belongsToMany(models.Escalador, {
+        through: models.GestorRocodromo,
+        foreignKey: 'idRocodromo',
+        as: 'gestores',
+      });
     }
   }
   Rocodromo.init(
@@ -35,10 +44,20 @@ export default (sequelize, DataTypes) => {
         unique: true,
         field: 'Ubicacion',
       },
-      mapa: {
-        type: DataTypes.STRING, // Assuming URL or path to image
+      logoUrl: {
+        type: DataTypes.STRING,
         allowNull: true,
-        field: 'Mapa',
+        field: 'LogoURL',
+      },
+      descripcion: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: 'Descripcion',
+      },
+      horarios: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: 'Horarios',
       },
       activo: {
         type: DataTypes.BOOLEAN,

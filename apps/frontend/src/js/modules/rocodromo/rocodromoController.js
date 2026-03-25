@@ -114,20 +114,20 @@ export async function mapaRocodromoCmd(container, id) {
             console.warn('No se pudieron obtener las zonas:', err.message);
         }
 
-        // Para cada zona, intentar obtener sus pistas
-        const zonasConPistas = await Promise.all(
+        // Para cada zona, intentar obtener sus rutas
+        const zonasConRutas = await Promise.all(
             zonas.map(async (zona) => {
                 try {
-                    const pistasRes = await fetchClient(`/zonas/pistas/${zona.id}`);
-                    const pistas = await pistasRes.json();
-                    return { ...zona, pistas };
+                    const rutasRes = await fetchClient(`/zonas/pistas/${zona.id}`);
+                    const rutas = await rutasRes.json();
+                    return { ...zona, rutas };
                 } catch {
-                    return { ...zona, pistas: [] };
+                    return { ...zona, rutas: [] };
                 }
             })
         );
 
-        renderMapaRocodromo(container, { rocodromo, zonas: zonasConPistas });
+        renderMapaRocodromo(container, { rocodromo, zonas: zonasConRutas });
     } catch (err) {
         showError(`Error al obtener o procesar el rocódromo: ${err.message}`);
     }

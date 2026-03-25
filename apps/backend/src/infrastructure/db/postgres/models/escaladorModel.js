@@ -14,6 +14,11 @@ export default (sequelize, DataTypes) => {
         foreignKey: 'idEscalador',
         as: 'pistasEscaladas',
       });
+      Escalador.belongsToMany(models.Rocodromo, {
+        through: models.GestorRocodromo,
+        foreignKey: 'idEscalador',
+        as: 'rocodromosGestionados',
+      });
     }
   }
 
@@ -43,11 +48,27 @@ export default (sequelize, DataTypes) => {
         unique: true,
         field: 'Apodo',
       },
+      descripcion: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: 'Descripcion',
+      },
+      fotoUrl: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: 'FotoURL',
+      },
       activo: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: true,
         field: 'Activo',
+      },
+      isAdmin: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+        field: 'IsAdmin',
       },
     },
     {

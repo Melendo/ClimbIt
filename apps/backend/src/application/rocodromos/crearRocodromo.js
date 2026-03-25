@@ -10,7 +10,10 @@ class CrearRocodromo {
       const nuevoRocodromo = new Rocodromo(
         null,
         rocodromoData.nombre,
-        rocodromoData.ubicacion
+        rocodromoData.ubicacion,
+        rocodromoData.logoUrl,
+        rocodromoData.descripcion,
+        rocodromoData.horarios
       );
       const creado =
         await this.rocodromoRepository.crearRocodromo(nuevoRocodromo);

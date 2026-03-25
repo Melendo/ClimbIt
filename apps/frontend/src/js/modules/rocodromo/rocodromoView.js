@@ -170,12 +170,12 @@ export function renderBuscarRocodromos(container, rocodromos, suscritosIds = [])
   });
 }
 
-// Vista para mostrar el mapa de un rocódromo con sus zonas y pistas
+// Vista para mostrar el mapa de un rocódromo con sus zonas y rutas
 export function renderMapaRocodromo(container, data) {
   const { rocodromo, zonas } = data;
   const nombreRocodromo = rocodromo?.nombre || 'Rocódromo';
 
-  // Generar cards de zonas con sus pistas
+  // Generar cards de zonas con sus rutas
   let zonasHTML = '';
 
   if (!Array.isArray(zonas) || zonas.length === 0) {
@@ -185,29 +185,29 @@ export function renderMapaRocodromo(container, data) {
           </div>`;
   } else {
     zonasHTML = zonas.flatMap(zona => {
-      if (!zona.pistas || zona.pistas.length === 0) {
+      if (!zona.rutas || zona.rutas.length === 0) {
         return [`
                   <div class="col-6 col-md-4">
                     <div class="zona-card position-relative rounded overflow-hidden" style="aspect-ratio: 1;">
                       <img src="/assets/placeholder.jpg" alt="Zona ${zona.id}" class="w-100 h-100" style="object-fit: cover;">
                       <div class="zona-card-overlay position-absolute bottom-0 start-0 end-0 p-2 text-white">
                         <small class="d-block fw-medium">Zona ${zona.tipo || zona.id}</small>
-                        <small class="text-white-50">Sin pistas</small>
+                        <small class="text-white-50">Sin rutas</small>
                       </div>
                     </div>
                   </div>
                 `];
       }
-      return zona.pistas.map(pista => `
+      return zona.rutas.map(ruta => `
               <div class="col-6 col-md-4">
-                <a href="#infoPista?id=${pista.id}" class="text-decoration-none">
+                <a href="#infoRuta?id=${ruta.id}" class="text-decoration-none">
                   <div class="zona-card position-relative rounded overflow-hidden" style="aspect-ratio: 1;">
-                    <img src="/assets/placeholder.jpg" alt="${pista.nombre}" class="w-100 h-100" style="object-fit: cover;">
+                    <img src="/assets/placeholder.jpg" alt="${ruta.nombre}" class="w-100 h-100" style="object-fit: cover;">
                     <div class="zona-card-overlay position-absolute bottom-0 start-0 end-0 p-2 text-white">
                       <small class="d-block fw-medium">${zona.tipo || 'Zona ' + zona.id}</small>
                       <div class="d-flex align-items-center gap-1">
-                        <span class="badge bg-primary">${pista.dificultad}</span>
-                        <small class="text-truncate">${pista.nombre}</small>
+                        <span class="badge bg-primary">${ruta.dificultad}</span>
+                        <small class="text-truncate">${ruta.nombre}</small>
                       </div>
                     </div>
                   </div>
@@ -239,7 +239,7 @@ export function renderMapaRocodromo(container, data) {
       />
     </div>
 
-    <!-- Grid de zonas/pistas (scrollable) -->
+    <!-- Grid de zonas/rutas (scrollable) -->
     <div class="card-body flex-grow-1 overflow-auto" style="max-height: calc(100vh - 350px);">
       <div class="row g-2">
         ${zonasHTML}
@@ -279,7 +279,7 @@ export function renderZonasRocodromo(container, zonas) {
   const zonasHTML = zonas.map(zona => `
   <li class="list-group-item d-flex justify-content-between align-items-center">
     <span>Tipo: ${zona.tipo}</span>
-    <a href="#mapaZona?id=${zona.id}" class="btn btn-sm btn-primary">Ver Pistas</a>
+    <a href="#mapaZona?id=${zona.id}" class="btn btn-sm btn-primary">Ver Rutas</a>
   </li>
 `).join('');
 

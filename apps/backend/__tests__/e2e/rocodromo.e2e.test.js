@@ -12,7 +12,7 @@ describe('E2E: Rocodromos', () => {
   let token;
 
   beforeAll(async () => {
-    token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'admin' });
+    token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'Admin' });
     
     rocodromoConZonas = await db.Rocodromo.create({
       nombre: 'Roco Con Zonas Integration',
@@ -26,12 +26,12 @@ describe('E2E: Rocodromos', () => {
 
     zonasCreadas.push(await db.Zona.create({
       idRoco: rocodromoConZonas.id,
-      tipo: 'Zona Boulder',
+      nombre: 'Zona Boulder',
     }));
 
     zonasCreadas.push(await db.Zona.create({
       idRoco: rocodromoConZonas.id,
-      tipo: 'Zona Cuerda',
+      nombre: 'Zona Cuerda',
     }));
   });
 
@@ -55,9 +55,9 @@ describe('E2E: Rocodromos', () => {
       expect(response.body).toBeInstanceOf(Array);
       expect(response.body).toHaveLength(2);
       
-      const tipos = response.body.map(z => z.tipo);
-      expect(tipos).toContain('Zona Boulder');
-      expect(tipos).toContain('Zona Cuerda');
+      const nombres = response.body.map(z => z.nombre);
+      expect(nombres).toContain('Zona Boulder');
+      expect(nombres).toContain('Zona Cuerda');
     });
 
     it('debería obtener una lista vacía para un rocódromo existente sin zonas', async () => {

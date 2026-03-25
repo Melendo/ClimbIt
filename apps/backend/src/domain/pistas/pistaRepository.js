@@ -12,6 +12,10 @@ class PistaRepository {
     throw new Error('Método "cambiarEstado" no implementado');
   }
 
+  async actualizarImagenUrl(id, imagenUrl) {
+    throw new Error('Método "actualizarImagenUrl" no implementado');
+  }
+
   async obtenerEstado(idPista, idEscalador) {
     throw new Error('Método "obtenerEstado" no implementado');
   }
