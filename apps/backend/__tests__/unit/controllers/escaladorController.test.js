@@ -288,7 +288,7 @@ describe('Unit: EscaladorController', () => {
       const controller = new EscaladorController(useCases);
       const req = {
         user: { apodo: 'Tester' },
-        body: { idFotoPerfil: 1, urlFoto: '/uploads/fotos_perfil/foto.png' },
+        body: { idFotoPerfil: 1 },
       };
       const res = createResMock();
 
@@ -297,7 +297,6 @@ describe('Unit: EscaladorController', () => {
       expect(useCases.actualizarFotoPerfil.execute).toHaveBeenCalledWith({
         apodo: 'Tester',
         idFotoPerfil: 1,
-        urlFoto: '/uploads/fotos_perfil/foto.png',
       });
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.body).toEqual({ fotoUrl: '/uploads/fotos_perfil/foto.png' });

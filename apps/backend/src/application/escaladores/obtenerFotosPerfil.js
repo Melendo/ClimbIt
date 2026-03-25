@@ -1,5 +1,3 @@
-// import path from 'path';
-
 class ObtenerFotosPerfil {
 	constructor(fotosPerfilRepository) {
 		this.fotosPerfilRepository = fotosPerfilRepository;
@@ -11,7 +9,8 @@ class ObtenerFotosPerfil {
 
 			return fotosPerfil.map((fotoPerfil) => ({
 				id: fotoPerfil.id,
-				nombre: (fotoPerfil.urlFoto),
+				nombre: fotoPerfil.urlFoto.split('/').pop(),
+				urlFoto: fotoPerfil.urlFoto,
 			}));
 		} catch (error) {
 			throw new Error(`Error al obtener fotos de perfil: ${error.message}`);

@@ -4,7 +4,7 @@ class ActualizarFotoPerfilEscalador {
     this.fotosPerfilRepository = fotosPerfilRepository;
   }
 
-  async execute({ apodo, idFotoPerfil, urlFoto }) {
+  async execute({ apodo, idFotoPerfil }) {
     try {
       const fotoPerfil = await this.fotosPerfilRepository.encontrarPorId(
         idFotoPerfil
@@ -16,10 +16,6 @@ class ActualizarFotoPerfilEscalador {
 
       if (!fotoPerfil.activo) {
         throw new Error('La foto de perfil no está activa');
-      }
-
-      if (urlFoto && fotoPerfil.urlFoto !== urlFoto) {
-        throw new Error('La URL de la foto no coincide con la foto seleccionada');
       }
 
       const escalador = await this.escaladorRepository.actualizarFotoUrl(

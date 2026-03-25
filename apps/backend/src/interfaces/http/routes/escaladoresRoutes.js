@@ -233,7 +233,6 @@ router.get(
  *
  * Parámetros esperados (body):
  * - idFotoPerfil (@param {Number} , requerido): ID de la foto de perfil seleccionada (entero positivo)
- * - urlFoto (@param {String} , requerido): Ruta relativa de la foto seleccionada (formato: "/uploads/fotos_perfil/[nombre_foto]")
  *
  * Requiere: Token JWT válido en header Authorization
  */
@@ -242,7 +241,6 @@ const actualizarFotoPerfilValidators = [
     .toInt()
     .isInt({ min: 1 })
     .withMessage('idFotoPerfil debe ser un entero positivo'),
-  body('urlFoto').trim().notEmpty().withMessage('urlFoto es requerida'),
 ];
 
 router.put(

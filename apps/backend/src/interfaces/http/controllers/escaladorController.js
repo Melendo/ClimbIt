@@ -166,13 +166,12 @@ class EscaladorController {
 
   async actualizarFotoPerfil(req, res, next) {
     try {
-      const { idFotoPerfil, urlFoto } = req.body;
+      const { idFotoPerfil } = req.body;
       const apodo = req.user.apodo;
 
       const resultado = await this.useCases.actualizarFotoPerfil.execute({
         apodo,
         idFotoPerfil,
-        urlFoto,
       });
 
       res.status(200).json(resultado);

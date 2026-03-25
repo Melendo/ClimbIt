@@ -16,8 +16,8 @@ describe('ObtenerFotosPerfil', () => {
 
     expect(fotosPerfilRepository.obtenerActivas).toHaveBeenCalled();
     expect(resultado).toEqual([
-      { id: 1, nombre: '/uploads/fotos_perfil/foto-1.png' },
-      { id: 2, nombre: '/uploads/fotos_perfil/foto-2.jpg' },
+      { id: 1, nombre: 'foto-1.png', urlFoto: '/uploads/fotos_perfil/foto-1.png' },
+      { id: 2, nombre: 'foto-2.jpg', urlFoto: '/uploads/fotos_perfil/foto-2.jpg' },
     ]);
   });
 });

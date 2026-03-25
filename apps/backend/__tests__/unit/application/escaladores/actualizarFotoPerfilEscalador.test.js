@@ -22,7 +22,6 @@ describe('ActualizarFotoPerfilEscalador', () => {
     const resultado = await useCase.execute({
       apodo: 'tester',
       idFotoPerfil: 1,
-      urlFoto: '/uploads/fotos_perfil/foto-1.png',
     });
 
     expect(fotosPerfilRepository.encontrarPorId).toHaveBeenCalledWith(1);
@@ -54,7 +53,6 @@ describe('ActualizarFotoPerfilEscalador', () => {
       useCase.execute({
         apodo: 'tester',
         idFotoPerfil: 1,
-        urlFoto: '/uploads/fotos_perfil/foto-1.png',
       })
     ).rejects.toThrow('La foto de perfil no está activa');
   });
