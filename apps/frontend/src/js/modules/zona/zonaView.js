@@ -1,6 +1,6 @@
 import { renderNavbar } from '../../components/navbar.js';
 
-export function renderMapaZona(container, data, onZonaSelect, initialZonaId = null) {
+export function renderMapaZona(container, data, onZonaSelect, initialZonaId = null, onMapaRender = null, onMapaToggle = null) {
     const { rocodromo, zonas } = data;
     const nombreRocodromo = rocodromo?.nombre || 'Rocódromo';
 
@@ -11,7 +11,7 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
 
     // Crear estructura básica
     container.innerHTML = `
-        <div class="card shadow-sm d-flex flex-column" style="height: 100dvh; overflow: hidden;">
+        <div id="mapaZonaCard" class="card shadow-sm d-flex flex-column" style="height: 100dvh; overflow: hidden;">
             
             <!-- Cabecera -->
             <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
@@ -20,27 +20,37 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                 </a>
                 <img src="/assets/rocodromoDefecto.jpg" alt="Icono rocódromo" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
                 <span class="fw-medium text-truncate">${nombreRocodromo}</span>
+                <div class="ms-auto" style="max-width: 170px;">
+                   <select id="zonaSelector" class="form-select form-select-sm shadow-sm fw-bold border-0" style="min-width: 150px; background-color: rgba(255, 255, 255, 0.95);">
+                        ${zonas.map((z) => `<option value="${z.id}" ${z.id == (zonaInicial?.id) ? 'selected' : ''}>Zona ${z.nombre || z.id}</option>`).join('')}
+                    </select>
+                </div>
             </div>
 
-            <!-- Mapa (Imagen estática por ahora) -->
-             <div class="mapa-rocodromo position-relative bg-dark flex-shrink-0" style="height: 40dvh; min-height: 300px; overflow: hidden;">
-                <img 
-                    src="/assets/mapaDefecto.jpg" 
-                    alt="Mapa del rocódromo" 
-                    class="w-100 h-100" 
-                    style="object-fit: cover; opacity: 0.8;"
-                />
+            <!-- Componente de mapa SVG interactivo -->
+             <div id="mapaRocodromoContainer" class="mapa-rocodromo position-relative bg-dark flex-shrink-0" style="height: 40dvh; min-height: 300px; overflow: hidden;">
+                <div id="mapaSvgViewport" class="mapa-svg-viewport w-100 h-100" aria-label="Mapa del rocódromo">
+                    <div class="d-flex justify-content-center align-items-center h-100 text-white-50">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Cargando mapa...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="position-absolute end-0 bottom-0 m-3 d-flex gap-2" style="z-index: 12;">
+                    <button id="btnMapaExpandir" type="button" class="btn btn-sm btn-light shadow-sm d-flex align-items-center gap-1 mapa-toggle-btn" aria-label="Expandir mapa">
+                        <span class="material-icons" style="font-size: 18px;">fullscreen</span>
+                        <span class="small fw-semibold">Expandir</span>
+                    </button>
+                    <button id="btnMapaContraer" type="button" class="btn btn-sm btn-light shadow-sm d-none d-flex align-items-center gap-1 mapa-toggle-btn" aria-label="Contraer mapa">
+                        <span class="material-icons" style="font-size: 18px;">fullscreen_exit</span>
+                        <span class="small fw-semibold">Contraer</span>
+                    </button>
+                </div>
                 
                 <!-- Título del Mapa (Fondo) -->
                 <div class="position-absolute bottom-0 start-0 end-0 p-3" style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
                     <h5 id="mapaTitulo" class="text-white mb-0 text-shadow">Mapa General</h5>
-                </div>
-                
-                <!-- Selector de Zona (Overlay Superior Izquierda) -->
-                <div class="position-absolute top-0 start-0 m-3" style="z-index: 10;">
-                   <select id="zonaSelector" class="form-select form-select-sm shadow-sm opacity-90 fw-bold border-0" style="min-width: 150px; backdrop-filter: blur(4px); background-color: rgba(255, 255, 255, 0.9);">
-                        ${zonas.map((z) => `<option value="${z.id}" ${z.id == (zonaInicial?.id) ? 'selected' : ''}>Zona ${z.nombre || z.id}</option>`).join('')}
-                    </select>
                 </div>
             </div>
 
@@ -69,6 +79,23 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
     // Lógica del selector
     const selector = container.querySelector('#zonaSelector');
     const rutasContainer = container.querySelector('#rutasContainer');
+    const mapaContainer = container.querySelector('#mapaRocodromoContainer');
+    const btnMapaExpandir = container.querySelector('#btnMapaExpandir');
+    const btnMapaContraer = container.querySelector('#btnMapaContraer');
+
+    const setMapaExpandido = (expandido) => {
+        mapaContainer.classList.toggle('mapa-rocodromo-fullscreen', expandido);
+        rutasContainer.classList.toggle('d-none', expandido);
+        btnMapaExpandir.classList.toggle('d-none', expandido);
+        btnMapaContraer.classList.toggle('d-none', !expandido);
+
+        if (typeof onMapaToggle === 'function') {
+            onMapaToggle(expandido);
+        }
+    };
+
+    btnMapaExpandir.addEventListener('click', () => setMapaExpandido(true));
+    btnMapaContraer.addEventListener('click', () => setMapaExpandido(false));
 
     const updateUrl = (idZona) => {
         const currentUrl = new URL(window.location.href);
@@ -121,6 +148,10 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
         // Cargar rutas usando el callback
         const rutas = await onZonaSelect(idZona);
 
+        if (typeof onMapaRender === 'function') {
+            await onMapaRender(idZona, rutas || []);
+        }
+
         // Renderizar rutas
         if (!rutas || rutas.length === 0) {
             rutasContainer.innerHTML = `
@@ -166,38 +197,6 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
     };
 
     selector.addEventListener('change', (e) => loadZonas(e.target.value));
-
-    // Lógica de Swipe para cambiar de zona
-    const mapaContainer = container.querySelector('.mapa-rocodromo');
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    mapaContainer.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
-
-    mapaContainer.addEventListener('touchend', (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-    }, { passive: true });
-
-    const handleSwipe = () => {
-        const threshold = 50; // Mínima distancia para considerar swipe
-        if (touchEndX < touchStartX - threshold) {
-            // Swipe Left -> Siguiente zona
-            if (selector.selectedIndex < selector.options.length - 1) {
-                selector.selectedIndex++;
-                loadZonas(selector.value, 'next');
-            }
-        }
-        if (touchEndX > touchStartX + threshold) {
-            // Swipe Right -> Zona anterior
-            if (selector.selectedIndex > 0) {
-                selector.selectedIndex--;
-                loadZonas(selector.value, 'prev');
-            }
-        }
-    };
 
     // Cargar zona inicial (si hay zonas)
     if (zonaInicial) {

@@ -1,4 +1,5 @@
 import { renderMapaZona, renderCrearZona } from './zonaView.js';
+import { createSvgPanzoomMap } from '../../components/svgPanzoomMap.js';
 import { fetchClient } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
 
@@ -9,11 +10,12 @@ import { showLoading, showError } from '../../core/ui.js';
  * @param {number} idRocodromo ID del rocódromo
  */
 const ESTADOS_CONFIG = {
-    'flash': { icon: 'bolt', color: '#d97706', bg: '#fef3c7' },
+    'flash': { icon: 'bolt', color: '#ffba0c', bg: '#fef3c7' },
     'completado': { icon: 'done', color: '#16a34a', bg: '#dcfce7' },
     'proyecto': { icon: 'sync', color: '#2563eb', bg: '#dbeafe' },
     'S/N': { icon: 'remove', color: '#6b7280', bg: '#e5e7eb' }
 };
+
 export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) {
     if (!idRocodromo) {
         showError('ID de rocódromo no válido o no proporcionado');
@@ -41,10 +43,43 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
             console.warn('No se pudieron obtener las zonas:', err.message);
         }
 
+        let mapaInteractivo = null;
+
         // Renderizar la vista inicial
-        renderMapaZona(container, { rocodromo, zonas }, async (idZona) => {
-            return await cargarRutasZona(idZona);
-        }, initialZonaId);
+        renderMapaZona(
+            container,
+            { rocodromo, zonas },
+            async (idZona) => {
+                return await cargarRutasZona(idZona);
+            },
+            initialZonaId,
+            async (_idZona, rutas) => {
+                const mapaViewport = container.querySelector('#mapaSvgViewport');
+                if (!mapaViewport) return;
+
+                if (!mapaInteractivo) {
+                    mapaInteractivo = createSvgPanzoomMap({
+                        viewport: mapaViewport,
+                        svgAssetUrl: '/assets/Roco.svg',
+                        onMarkerClick: (ruta) => {
+                            window.location.hash = `#infoRuta?id=${ruta.id}`;
+                        },
+                    });
+                }
+
+                await mapaInteractivo.renderMarkers(rutas || []);
+            },
+            () => {
+                // Esperar a que el DOM aplique el nuevo tamano antes de resetear pan/zoom.
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        if (mapaInteractivo) {
+                            mapaInteractivo.reset();
+                        }
+                    });
+                });
+            }
+        );
 
     } catch (err) {
         showError(`Error al cargar el mapa de zona: ${err.message}`);
