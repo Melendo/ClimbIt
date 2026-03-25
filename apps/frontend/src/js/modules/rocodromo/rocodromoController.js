@@ -1,6 +1,35 @@
 import { renderMapaRocodromo, renderMisRocodromos, renderBuscarRocodromos, renderCrearRocodromo } from './rocodromoView.js';
-import { fetchClient } from '../../core/client.js';
+import { fetchClient, fetchImageObjectUrl } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
+
+const ROCODROMO_LOGO_PLACEHOLDER = '/assets/rocodromoDefecto.jpg';
+const RUTA_IMAGE_PLACEHOLDER = '/assets/placeholder.jpg';
+
+async function resolveRocodromoLogoSrc(rocodromo) {
+    if (!rocodromo?.logoUrl) {
+        return ROCODROMO_LOGO_PLACEHOLDER;
+    }
+
+    try {
+        return await fetchImageObjectUrl(`/rocodromos/${rocodromo.id}/logo`);
+    } catch (err) {
+        console.warn('No se pudo cargar el logo del rocódromo:', err.message);
+        return ROCODROMO_LOGO_PLACEHOLDER;
+    }
+}
+
+async function resolveRutaImageSrc(ruta) {
+    if (!ruta?.imagenUrl) {
+        return RUTA_IMAGE_PLACEHOLDER;
+    }
+
+    try {
+        return await fetchImageObjectUrl(`/pistas/${ruta.id}/imagen`);
+    } catch (err) {
+        console.warn('No se pudo cargar la imagen de la ruta:', err.message);
+        return RUTA_IMAGE_PLACEHOLDER;
+    }
+}
 
 // Controlador para la vista de "Mis Rocódromos" (rocodromos suscritos del usuario)
 export async function misRocodromosCmd(container) {
@@ -9,7 +38,13 @@ export async function misRocodromosCmd(container) {
     try {
         const response = await fetchClient('/escaladores/mis-rocodromos');
         const rocodromos = await response.json();
-        renderMisRocodromos(container, rocodromos);
+        const rocodromosConLogo = await Promise.all(
+            rocodromos.map(async (rocodromo) => ({
+                ...rocodromo,
+                logoSrc: await resolveRocodromoLogoSrc(rocodromo),
+            }))
+        );
+        renderMisRocodromos(container, rocodromosConLogo);
     } catch (err) {
         console.warn('Error al obtener mis rocódromos:', err.message);
         // Mostrar vista con lista vacía si hay error
@@ -36,7 +71,14 @@ export async function buscarRocodromosCmd(container) {
             console.warn('No se pudieron obtener rocódromos suscritos:', err.message);
         }
 
-        renderBuscarRocodromos(container, rocodromos, suscritosIds);
+        const rocodromosConLogo = await Promise.all(
+            rocodromos.map(async (rocodromo) => ({
+                ...rocodromo,
+                logoSrc: await resolveRocodromoLogoSrc(rocodromo),
+            }))
+        );
+
+        renderBuscarRocodromos(container, rocodromosConLogo, suscritosIds);
     } catch (err) {
         console.warn('Error al obtener rocódromos:', err.message);
         // Mostrar vista con lista vacía si hay error
@@ -107,6 +149,8 @@ export async function mapaRocodromoCmd(container, id) {
             console.warn('No se pudo obtener info del rocódromo:', err.message);
         }
 
+        rocodromo.logoSrc = await resolveRocodromoLogoSrc(rocodromo);
+
         try {
             const zonasRes = await fetchClient(`/rocodromos/zonas/${id}`);
             zonas = await zonasRes.json();
@@ -120,7 +164,13 @@ export async function mapaRocodromoCmd(container, id) {
                 try {
                     const rutasRes = await fetchClient(`/zonas/pistas/${zona.id}`);
                     const rutas = await rutasRes.json();
-                    return { ...zona, rutas };
+                    const rutasConImagen = await Promise.all(
+                        rutas.map(async (ruta) => ({
+                            ...ruta,
+                            imagenSrc: await resolveRutaImageSrc(ruta),
+                        }))
+                    );
+                    return { ...zona, rutas: rutasConImagen };
                 } catch {
                     return { ...zona, rutas: [] };
                 }

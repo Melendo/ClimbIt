@@ -1,6 +1,8 @@
 import { renderCrearRuta, renderInfoRuta } from './rutaView.js';
-import { fetchClient } from '../../core/client.js';
+import { fetchClient, fetchImageObjectUrl } from '../../core/client.js';
 import { showError, showLoading, showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
+
+const RUTA_IMAGE_PLACEHOLDER = '/assets/placeholder.jpg';
 
 // Escala de grados para validación
 const GRADOS_FRANCESES = [
@@ -167,6 +169,17 @@ export async function infoRutaCmd(container, id) {
     try {
         const res = await fetchClient(`/pistas/${id}`);
         const ruta = await res.json();
+
+        if (ruta?.imagenUrl) {
+            try {
+                ruta.imagenSrc = await fetchImageObjectUrl(`/pistas/${ruta.id}/imagen`);
+            } catch (err) {
+                console.warn('No se pudo cargar la imagen de la ruta:', err.message);
+                ruta.imagenSrc = RUTA_IMAGE_PLACEHOLDER;
+            }
+        } else {
+            ruta.imagenSrc = RUTA_IMAGE_PLACEHOLDER;
+        }
 
         const callbacks = {
             onEstadoChange: async (estado, estadoElement, estadoTextoElement) => {

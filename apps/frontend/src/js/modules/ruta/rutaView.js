@@ -121,7 +121,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
   <!-- Imagen hero con overlay -->
   <div class="position-relative" style="height: 45dvh; min-height: 280px;">
     <img 
-      src="/assets/placeholder.jpg" 
+      src="${ruta?.imagenSrc || '/assets/placeholder.jpg'}" 
       alt="Imagen de la ruta ${nombre || ''}" 
       class="w-100 h-100" 
       style="object-fit: cover;"
