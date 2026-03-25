@@ -88,6 +88,32 @@ class ZonaRepositoryPostgres extends ZonaRepository {
     }
   }
 
+  async encontrarPorId(idZona) {
+    try {
+      const zonaModel = await this.ZonaModel.findByPk(idZona);
+      return this._toDomain(zonaModel);
+    } catch (error) {
+      throw new Error(`Error al encontrar la zona por ID: ${error.message}`);
+    }
+  }
+
+  async actualizarMapaZona(idZona, mapaUrl) {
+    try {
+      const zonaModel = await this.ZonaModel.findByPk(idZona);
+
+      if (!zonaModel) {
+        return null;
+      }
+
+      zonaModel.mapa = mapaUrl;
+      await zonaModel.save();
+
+      return this._toDomain(zonaModel);
+    } catch (error) {
+      throw new Error(`Error al actualizar el mapa de la zona: ${error.message}`);
+    }
+  }
+
 }
 
 export default ZonaRepositoryPostgres;
