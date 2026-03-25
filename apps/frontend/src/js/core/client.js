@@ -119,3 +119,8 @@ export async function fetchImageObjectUrl(url) {
     const blob = await response.blob();
     return URL.createObjectURL(blob);
 }
+
+export async function fetchSvgText(url) {
+    const response = await fetchClient(url);
+    return await response.text();
+}

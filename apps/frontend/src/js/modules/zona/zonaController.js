@@ -1,6 +1,6 @@
 import { renderMapaZona, renderCrearZona } from './zonaView.js';
 import { createSvgPanzoomMap } from '../../components/svgPanzoomMap.js';
-import { fetchClient, canManageRocodromo, fetchImageObjectUrl } from '../../core/client.js';
+import { fetchClient, canManageRocodromo, fetchImageObjectUrl, fetchSvgText } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
 
 /**
@@ -85,22 +85,22 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
                 if (!mapaViewport) return;
 
                 const zona = zonas.find((z) => z.id == idZona);
-                let backgroundImageUrl = null;
+                let zonaSvgContent = null;
 
                 if (zona?.mapa) {
                     if (mapaCache.has(idZona)) {
-                        backgroundImageUrl = mapaCache.get(idZona);
+                        zonaSvgContent = mapaCache.get(idZona);
                     } else {
                         try {
-                            backgroundImageUrl = await fetchImageObjectUrl(`/zonas/${idZona}/mapa`);
-                            mapaCache.set(idZona, backgroundImageUrl);
+                            zonaSvgContent = await fetchSvgText(`/zonas/${idZona}/mapa`);
+                            mapaCache.set(idZona, zonaSvgContent);
                         } catch (err) {
                             console.warn('No se pudo cargar el mapa de la zona:', err.message);
                         }
                     }
                 }
 
-                const nextMapKey = backgroundImageUrl || 'default-svg';
+                const nextMapKey = zonaSvgContent ? `zona-svg-${idZona}` : 'default-svg';
 
                 if (!mapaInteractivo || mapaSourceKey !== nextMapKey) {
                     if (mapaInteractivo) {
@@ -110,7 +110,7 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
                     mapaInteractivo = createSvgPanzoomMap({
                         viewport: mapaViewport,
                         svgAssetUrl: '/assets/Roco.svg',
-                        backgroundImageUrl,
+                        svgContent: zonaSvgContent,
                         onMarkerClick: (ruta) => {
                             window.location.hash = `#infoRuta?id=${ruta.id}`;
                         },

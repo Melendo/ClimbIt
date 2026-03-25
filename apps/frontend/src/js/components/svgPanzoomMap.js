@@ -53,6 +53,7 @@ export function createSvgPanzoomMap(options) {
         viewport,
         svgAssetUrl = '/assets/Roco.svg',
         backgroundImageUrl = null,
+        svgContent = null,
         svgSize = DEFAULT_SVG_SIZE,
         clickThreshold = DEFAULT_CLICK_THRESHOLD,
         enablePointSelection = false,
@@ -149,9 +150,11 @@ export function createSvgPanzoomMap(options) {
 
     const renderMarkers = async (items = []) => {
         try {
-            const rawSvg = backgroundImageUrl
-                ? buildSvgWithBackground(backgroundImageUrl, svgSize)
-                : await loadSvg(svgAssetUrl);
+            const rawSvg = svgContent
+                ? svgContent
+                : backgroundImageUrl
+                    ? buildSvgWithBackground(backgroundImageUrl, svgSize)
+                    : await loadSvg(svgAssetUrl);
             const svgDoc = new DOMParser().parseFromString(rawSvg, 'image/svg+xml');
             const svgElement = svgDoc.documentElement;
 
