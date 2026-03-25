@@ -252,3 +252,37 @@ body {
   stroke-width: 3;
   pointer-events: none;
 }
+
+.selected-point-marker {
+  filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.45));
+  pointer-events: none;
+}
+
+.selected-point-ring {
+  fill: rgba(59, 130, 246, 0.2);
+  stroke: #ffffff;
+  stroke-width: 3;
+}
+
+.selected-point-dot {
+  fill: #0d6efd;
+  stroke: #ffffff;
+  stroke-width: 3;
+}
+
+/* ========================================
+   Vista crear ruta
+   ======================================== */
+.crear-ruta-card {
+  min-height: 100dvh;
+}
+
+.crear-ruta-mapa-wrap {
+  height: 38dvh;
+  min-height: 260px;
+  overflow: hidden;
+}
+
+.crear-ruta-mapa-overlay {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.78), transparent);
+}

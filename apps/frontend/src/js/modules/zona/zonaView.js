@@ -1,7 +1,7 @@
 import { renderNavbar } from '../../components/navbar.js';
 
 export function renderMapaZona(container, data, onZonaSelect, initialZonaId = null, onMapaRender = null, onMapaToggle = null) {
-    const { rocodromo, zonas } = data;
+    const { rocodromo, zonas, canCreateRuta = false } = data;
     const nombreRocodromo = rocodromo?.nombre || 'Rocódromo';
 
     // Determinar zona inicial
@@ -155,6 +155,14 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
         // Renderizar rutas
         if (!rutas || rutas.length === 0) {
             rutasContainer.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-3 ${animationClass}">
+                    <h6 class="text-muted small fw-bold text-uppercase mb-0">Rutas Disponibles (0)</h6>
+                    ${canCreateRuta ? `
+                    <a href="#crearRuta?idRocodromo=${rocodromo.id}&idZona=${idZona}" class="btn btn-sm btn-primary d-flex align-items-center gap-1">
+                        <span class="material-icons" style="font-size: 18px;">add</span>
+                        <span>Crear ruta</span>
+                    </a>` : ''}
+                </div>
                 <div class="alert alert-info text-center mt-3">
                     No hay rutas registradas en esta zona.
                 </div>
@@ -163,7 +171,14 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
         }
 
         rutasContainer.innerHTML = `
-            <h6 class="text-muted mb-3 small fw-bold text-uppercase ${animationClass}">Rutas Disponibles (${rutas.length})</h6>
+            <div class="d-flex justify-content-between align-items-center mb-3 ${animationClass}">
+                <h6 class="text-muted small fw-bold text-uppercase mb-0">Rutas Disponibles (${rutas.length})</h6>
+                ${canCreateRuta ? `
+                <a href="#crearRuta?idRocodromo=${rocodromo.id}&idZona=${idZona}" class="btn btn-sm btn-primary d-flex align-items-center gap-1">
+                    <span class="material-icons" style="font-size: 18px;">add</span>
+                    <span>Crear ruta</span>
+                </a>` : ''}
+            </div>
             <div class="row g-3 ${animationClass}">
                 ${rutas.map(ruta => {
             const status = ruta.statusConfig;

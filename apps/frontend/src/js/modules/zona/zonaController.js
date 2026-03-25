@@ -1,6 +1,6 @@
 import { renderMapaZona, renderCrearZona } from './zonaView.js';
 import { createSvgPanzoomMap } from '../../components/svgPanzoomMap.js';
-import { fetchClient } from '../../core/client.js';
+import { fetchClient, canManageRocodromo } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
 
 /**
@@ -23,6 +23,8 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
     }
 
     showLoading();
+
+    const canCreateRuta = canManageRocodromo(idRocodromo);
 
     try {
         // 1. Obtener información del rocódromo
@@ -48,7 +50,7 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
         // Renderizar la vista inicial
         renderMapaZona(
             container,
-            { rocodromo, zonas },
+            { rocodromo, zonas, canCreateRuta },
             async (idZona) => {
                 return await cargarRutasZona(idZona);
             },
