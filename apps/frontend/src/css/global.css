@@ -207,69 +207,48 @@ body {
   font-weight: bold;
 }
 
+
 /* ========================================
-   Animaciones de Transición (Swipe)
+   Mapa SVG interactivo de zonas
    ======================================== */
-.slide-in-right {
-  animation: slideInRight 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+.mapa-svg-viewport {
+  background: radial-gradient(circle at 20% 20%, #2d2d2d 0%, #111 70%);
 }
 
-.slide-in-left {
-  animation: slideInLeft 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+.mapa-rocodromo.mapa-rocodromo-fullscreen {
+  height: auto !important;
+  min-height: 0 !important;
+  flex: 1 1 auto;
 }
 
-.slide-out-right {
-  animation: slideOutRight 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+.mapa-toggle-btn {
+  border-radius: 999px;
+  backdrop-filter: blur(3px);
+  background: rgba(255, 255, 255, 0.92);
 }
 
-.slide-out-left {
-  animation: slideOutLeft 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+.roco-svg {
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
 }
 
-@keyframes slideInRight {
-  0% {
-    transform: translateX(100px);
-    opacity: 0;
-  }
-
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
+.roco-svg:active {
+  cursor: grabbing;
 }
 
-@keyframes slideInLeft {
-  0% {
-    transform: translateX(-100px);
-    opacity: 0;
-  }
-
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
+.ruta-marker {
+  filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.5));
 }
 
-@keyframes slideOutRight {
-  0% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-
-  100% {
-    transform: translateX(100px);
-    opacity: 0;
-  }
+.ruta-hitbox {
+  fill: transparent;
+  cursor: pointer;
 }
 
-@keyframes slideOutLeft {
-  0% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-
-  100% {
-    transform: translateX(-100px);
-    opacity: 0;
-  }
+.ruta-dot {
+  stroke: #ffffff;
+  stroke-width: 3;
+  pointer-events: none;
 }
