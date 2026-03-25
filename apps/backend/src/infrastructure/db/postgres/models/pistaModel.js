@@ -45,8 +45,8 @@ export default (sequelize, DataTypes) => {
       },
       tipo: {
         // eslint-disable-next-line new-cap
-        type: DataTypes.ENUM('bloque', 'via'),
-        allowNull: true,
+        type: DataTypes.ENUM('boulder', 'via'),
+        allowNull: false,
         field: 'Tipo',
       },
       colorPresas: {

@@ -29,6 +29,7 @@ describe('PistaRepositoryPostgres', () => {
         idZona: 2,
         nombre: 'El Muro',
         dificultad: '6a',
+        tipo: 'boulder',
       };
 
       // Act
@@ -40,6 +41,7 @@ describe('PistaRepositoryPostgres', () => {
       expect(resultado.idZona).toBe(2);
       expect(resultado.nombre).toBe('El Muro');
       expect(resultado.dificultad).toBe('6a');
+      expect(resultado.tipo).toBe('boulder');
     });
 
     it('debería retornar null si el modelo es null', () => {
@@ -59,12 +61,13 @@ describe('PistaRepositoryPostgres', () => {
   describe('crear', () => {
     it('debería crear una pista y devolver la entidad de dominio', async () => {
       // Arrange
-      const pista = new Pista(null, 2, 'El Muro', '6a');
+      const pista = new Pista(null, 2, 'El Muro', '6a', 'boulder');
       const modeloCreado = {
         id: 1,
         idZona: 2,
         nombre: 'El Muro',
         dificultad: '6a',
+        tipo: 'boulder',
       };
 
       mockPistaModel.create.mockResolvedValue(modeloCreado);
@@ -77,7 +80,7 @@ describe('PistaRepositoryPostgres', () => {
         idZona: 2,
         nombre: 'El Muro',
         dificultad: '6a',
-        tipo: null,
+        tipo: 'boulder',
         colorPresas: null,
         imagenUrl: null,
         posX: null,
