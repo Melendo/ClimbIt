@@ -33,11 +33,11 @@ const getPistaImageBaseName = (req) => {
  *
  * Parámetros esperados (body) obligatorios:
  * - idZona (@param {int} , requerido): ID de la zona a la que pertenece la pista (entero positivo)
- * - dificultad (@param {string} , requerido): Grado de dificultad francés (ej: "3a", "5b", "6c+")
- *  * - tipo (@param {string}): Tipo de la pista (ej: "Boulder", "Via", etc.)
-
+ * - tipo (@param {string}): Tipo de la pista (ej: "Boulder", "Via", etc.)
+ * 
  * Parámetros esperados (body) opcionales:
  * - nombre (@param {string}): Nombre descriptivo de la pista (1-100 caracteres)
+ * - dificultad (@param {string}): Grado de dificultad en escala francesa (ej: "6a", "7b+", etc.)
  * - colorPresas (@param {string}): Color de las presas de la pista (ej: "Rojo", "Azul", etc.)
  * - posX (@param {int}): Coordenada X en el mapa de la pista
  * - posY (@param {int}): Coordenada Y en el mapa de la pista
@@ -56,7 +56,7 @@ const getPistaImageBaseName = (req) => {
  * - idZona: ID de la zona a la que pertenece la pista
  * - nombre: nombre de la pista
  * - dificultad: grado de dificultad en escala francesa
- * - tipo: tipo de la pista (ej: "Boulder", "Via", etc.)
+ * - tipo: tipo de la pista ("boulder", "via")
  * - colorPresas: color de las presas de la pista (ej: "Rojo", "Azul", etc.)
  * - imagenUrl: URL de la imagen de la pista
  * - posX: coordenada X en el mapa de la zona
@@ -76,9 +76,8 @@ const crearPistaValidators = [
     .isLength({ min: 0, max: 100 })
     .withMessage('El nombre de la pista debe tener entre 1 y 100 caracteres'),
   body('dificultad')
+    .optional({ nullable: true, checkFalsy: true })
     .trim()
-    .notEmpty()
-    .withMessage('La dificultad es requerida')
     .isIn(GRADOS_FRANCESES)
     .withMessage(
       `La dificultad debe ser uno de: ${GRADOS_FRANCESES.join(', ')}`
@@ -105,9 +104,12 @@ const crearPistaValidators = [
       'El color de las presas debe ser una cadena de 1 a 50 caracteres'
     ),
   body('fechaCreacion')
-    .optional({ nullable: true })
+    .optional({ nullable: true, checkFalsy: true })
     .toDate()
     .custom((value) => {
+      if (!value) {
+        return true;
+      }
       if (value > new Date()) {
         throw new Error('La fecha de creación no puede ser futura');
       }
@@ -115,11 +117,14 @@ const crearPistaValidators = [
     })  ,
 
   body('fechaRetirada')
-    .optional({ nullable: true })
+    .optional({ nullable: true, checkFalsy: true })
     .toDate()
     .custom((value) => {
+      if (!value) {
+        return true;
+      }
       if (value <= new Date()) {
-        throw new Error('La fecha de retirada no puede ser anterior a la fecha de creación');
+        throw new Error('La fecha de retirada no puede ser anterior a la fecha actual');
       }
       return true;
     }),

@@ -34,12 +34,14 @@ describe('E2E: Zonas', () => {
       idZona: zonaConPistas.id,
       nombre: 'Pista Test 1',
       dificultad: '5a',
+      tipo: 'via',
     }));
 
     pistasCreadas.push(await db.Pista.create({
       idZona: zonaConPistas.id,
       nombre: 'Pista Test 2',
       dificultad: '7b',
+      tipo: 'via',
     }));
   });
 
