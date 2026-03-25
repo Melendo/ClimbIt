@@ -1,6 +1,6 @@
 import { renderNavbar } from '../../components/navbar.js';
 
-export function renderMapaZona(container, data, onZonaSelect, initialZonaId = null, onMapaUpdate = null, onMapaToggle = null) {
+export function renderMapaZona(container, data, onZonaSelect, initialZonaId = null, onMapaRender = null, onMapaToggle = null) {
     const { rocodromo, zonas } = data;
     const nombreRocodromo = rocodromo?.nombre || 'Rocódromo';
 
@@ -27,7 +27,7 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                 </div>
             </div>
 
-            <!-- Mapa SVG Interactivo -->
+            <!-- Componente de mapa SVG interactivo -->
              <div id="mapaRocodromoContainer" class="mapa-rocodromo position-relative bg-dark flex-shrink-0" style="height: 40dvh; min-height: 300px; overflow: hidden;">
                 <div id="mapaSvgViewport" class="mapa-svg-viewport w-100 h-100" aria-label="Mapa del rocódromo">
                     <div class="d-flex justify-content-center align-items-center h-100 text-white-50">
@@ -148,8 +148,8 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
         // Cargar rutas usando el callback
         const rutas = await onZonaSelect(idZona);
 
-        if (typeof onMapaUpdate === 'function') {
-            await onMapaUpdate(idZona, rutas || []);
+        if (typeof onMapaRender === 'function') {
+            await onMapaRender(idZona, rutas || []);
         }
 
         // Renderizar rutas
