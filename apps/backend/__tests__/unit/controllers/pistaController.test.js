@@ -1,10 +1,13 @@
 import { jest } from '@jest/globals';
+import fs from 'fs/promises';
+import path from 'path';
 import PistaController from '../../../src/interfaces/http/controllers/pistaController.js';
 
 function createResMock() {
   const res = {
     statusCode: null,
     body: null,
+    sentFile: null,
   };
   res.status = jest.fn((code) => {
     res.statusCode = code;
@@ -14,8 +17,16 @@ function createResMock() {
     res.body = payload;
     return res;
   });
+  res.sendFile = jest.fn((filePath) => {
+    res.sentFile = filePath;
+    return res;
+  });
   return res;
 }
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
 describe('Unit: PistaController', () => {
   it('crear: responde 201 con la pista creada', async () => {
@@ -88,6 +99,68 @@ describe('Unit: PistaController', () => {
 
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.body).toEqual({ error: 'Pista con ID 999 no encontrada' });
+  });
+
+  it('actualizarImagen: actualiza la imagen y elimina la anterior', async () => {
+    const useCases = {
+      obtenerPistaPorId: { execute: jest.fn().mockResolvedValue({ id: 7, imagenUrl: '/uploads/imagenes_pistas/old.png' }) },
+      actualizarImagen: { execute: jest.fn().mockResolvedValue({ id: 7, imagenUrl: '/uploads/imagenes_pistas/new.png' }) },
+      crear: { execute: jest.fn() },
+    };
+    const controller = new PistaController(useCases);
+    const req = {
+      params: { id: 7 },
+      file: { path: '/tmp/new.png', filename: 'new.png' },
+    };
+    const res = createResMock();
+
+    jest.spyOn(fs, 'unlink').mockResolvedValue();
+    jest.spyOn(fs, 'mkdir').mockResolvedValue();
+    jest.spyOn(fs, 'rename').mockResolvedValue();
+
+    await controller.actualizarImagen(req, res, () => {});
+
+    expect(useCases.obtenerPistaPorId.execute).toHaveBeenCalledWith(7, null);
+    expect(fs.unlink).toHaveBeenCalledWith(
+      path.resolve(process.cwd(), 'uploads', 'imagenes_pistas', 'old.png')
+    );
+    expect(fs.rename).toHaveBeenCalledWith(
+      '/tmp/new.png',
+      path.resolve(process.cwd(), 'uploads', 'imagenes_pistas', 'new.png')
+    );
+    expect(useCases.actualizarImagen.execute).toHaveBeenCalledWith(7, '/uploads/imagenes_pistas/new.png');
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.body).toEqual({ id: 7, imagenUrl: '/uploads/imagenes_pistas/new.png' });
+  });
+
+  it('obtenerImagen: devuelve el archivo de la pista', async () => {
+    const useCases = {
+      obtenerPistaPorId: { execute: jest.fn().mockResolvedValue({ id: 7, imagenUrl: '/uploads/imagenes_pistas/existing.png' }) },
+    };
+    const controller = new PistaController(useCases);
+    const req = { params: { id: 7 } };
+    const res = createResMock();
+
+    jest.spyOn(fs, 'access').mockResolvedValue();
+
+    await controller.obtenerImagen(req, res, () => {});
+
+    expect(useCases.obtenerPistaPorId.execute).toHaveBeenCalledWith(7, null);
+    expect(res.sentFile).toBe(path.resolve(process.cwd(), 'uploads', 'imagenes_pistas', 'existing.png'));
+  });
+
+  it('obtenerImagen: responde 404 si la pista no tiene imagen', async () => {
+    const useCases = {
+      obtenerPistaPorId: { execute: jest.fn().mockResolvedValue({ id: 7, imagenUrl: null }) },
+    };
+    const controller = new PistaController(useCases);
+    const req = { params: { id: 7 } };
+    const res = createResMock();
+
+    await controller.obtenerImagen(req, res, () => {});
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.body).toEqual({ error: 'La pista no tiene imagen asignada' });
   });
 
   describe('cambiarEstado', () => {

@@ -1,10 +1,13 @@
 import { jest } from '@jest/globals';
+import fs from 'fs/promises';
+import path from 'path';
 import EscaladorController from '../../../src/interfaces/http/controllers/escaladorController.js';
 
 function createResMock() {
   const res = {
     statusCode: null,
     body: null,
+    sentFile: null,
   };
   res.status = jest.fn((code) => {
     res.statusCode = code;
@@ -14,8 +17,16 @@ function createResMock() {
     res.body = payload;
     return res;
   });
+  res.sendFile = jest.fn((filePath) => {
+    res.sentFile = filePath;
+    return res;
+  });
   return res;
 }
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
 describe('Unit: EscaladorController', () => {
   it('crear: responde 201 con el token del escalador creado', async () => {
@@ -181,6 +192,48 @@ describe('Unit: EscaladorController', () => {
   });
 
   describe('fotos de perfil', () => {
+    it('crearFotoPerfil responde 201 con la foto creada', async () => {
+      const useCases = {
+        crearFotoPerfil: {
+          execute: jest.fn().mockResolvedValue({ id: 3, urlFoto: '/uploads/fotos_perfil/foto.png' }),
+        },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = {
+        file: {
+          path: '/tmp/foto.png',
+          filename: 'foto.png',
+        },
+      };
+      const res = createResMock();
+
+      await controller.crearFotoPerfil(req, res, () => {});
+
+      expect(useCases.crearFotoPerfil.execute).toHaveBeenCalledWith({
+        urlFoto: '/uploads/fotos_perfil/foto.png',
+      });
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.body).toEqual({
+        id: 3,
+        nombre: 'foto.png',
+        urlFoto: '/uploads/fotos_perfil/foto.png',
+      });
+    });
+
+    it('crearFotoPerfil responde 400 si no se envía imagen', async () => {
+      const useCases = {
+        crearFotoPerfil: { execute: jest.fn() },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = {};
+      const res = createResMock();
+
+      await controller.crearFotoPerfil(req, res, () => {});
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.body).toEqual({ error: 'La imagen es requerida' });
+    });
+
     it('obtenerFotosPerfil responde 200 con el listado', async () => {
       const useCases = {
         obtenerFotosPerfil: { execute: jest.fn().mockResolvedValue([{ id: 1, nombre: 'foto.png' }]) },
@@ -194,6 +247,38 @@ describe('Unit: EscaladorController', () => {
       expect(useCases.obtenerFotosPerfil.execute).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.body).toEqual([{ id: 1, nombre: 'foto.png' }]);
+    });
+
+    it('obtenerFotoPerfil devuelve el archivo solicitado', async () => {
+      const useCases = {
+        obtenerFotoPerfil: {
+          execute: jest.fn().mockResolvedValue({ id: 4, urlFoto: '/uploads/fotos_perfil/foto.png' }),
+        },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = { params: { id: 4 } };
+      const res = createResMock();
+
+      jest.spyOn(fs, 'access').mockResolvedValue();
+
+      await controller.obtenerFotoPerfil(req, res, () => {});
+
+      expect(useCases.obtenerFotoPerfil.execute).toHaveBeenCalledWith(4);
+      expect(res.sentFile).toBe(path.resolve(process.cwd(), 'uploads', 'fotos_perfil', 'foto.png'));
+    });
+
+    it('obtenerFotoPerfil responde 404 si no existe', async () => {
+      const useCases = {
+        obtenerFotoPerfil: { execute: jest.fn().mockResolvedValue(null) },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = { params: { id: 4 } };
+      const res = createResMock();
+
+      await controller.obtenerFotoPerfil(req, res, () => {});
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.body).toEqual({ error: 'Foto de perfil con ID 4 no encontrada' });
     });
 
     it('actualizarFotoPerfil responde 200 con el resultado del caso de uso', async () => {
