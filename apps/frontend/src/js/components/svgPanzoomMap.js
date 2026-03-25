@@ -55,6 +55,7 @@ export function createSvgPanzoomMap(options) {
         backgroundImageUrl = null,
         svgSize = DEFAULT_SVG_SIZE,
         clickThreshold = DEFAULT_CLICK_THRESHOLD,
+        enablePointSelection = false,
         getMarkerData = (item) => ({
             x: toNumberOrNull(item?.posX),
             y: toNumberOrNull(item?.posY),
@@ -62,6 +63,7 @@ export function createSvgPanzoomMap(options) {
             payload: item,
         }),
         onMarkerClick = null,
+        onMapPointSelect = null,
     } = options || {};
 
     if (!viewport) {
@@ -69,6 +71,67 @@ export function createSvgPanzoomMap(options) {
     }
 
     let panzoomInstance = null;
+    let selectionLayer = null;
+    let selectedPoint = null;
+
+    const normalizePoint = (point) => {
+        const x = toNumberOrNull(point?.x);
+        const y = toNumberOrNull(point?.y);
+
+        if (x === null || y === null) {
+            return null;
+        }
+
+        return {
+            x: Math.round(clamp(x, 0, svgSize)),
+            y: Math.round(clamp(y, 0, svgSize)),
+        };
+    };
+
+    const renderSelectedPoint = () => {
+        if (!selectionLayer) return;
+
+        selectionLayer.replaceChildren();
+
+        if (!selectedPoint) return;
+
+        const pointGroup = document.createElementNS(SVG_NS, 'g');
+        pointGroup.setAttribute('class', 'selected-point-marker');
+        pointGroup.setAttribute('transform', `translate(${selectedPoint.x}, ${selectedPoint.y})`);
+
+        const visualGroup = document.createElementNS(SVG_NS, 'g');
+        visualGroup.setAttribute('class', 'selected-point-visual');
+
+        const outerCircle = document.createElementNS(SVG_NS, 'circle');
+        outerCircle.setAttribute('cx', '0');
+        outerCircle.setAttribute('cy', '0');
+        outerCircle.setAttribute('r', '34');
+        outerCircle.setAttribute('class', 'selected-point-ring');
+
+        const innerCircle = document.createElementNS(SVG_NS, 'circle');
+        innerCircle.setAttribute('cx', '0');
+        innerCircle.setAttribute('cy', '0');
+        innerCircle.setAttribute('r', '12');
+        innerCircle.setAttribute('class', 'selected-point-dot');
+
+        visualGroup.appendChild(outerCircle);
+        visualGroup.appendChild(innerCircle);
+        pointGroup.appendChild(visualGroup);
+        selectionLayer.appendChild(pointGroup);
+    };
+
+    const setSelectedPoint = (point) => {
+        selectedPoint = normalizePoint(point);
+        renderSelectedPoint();
+        return selectedPoint;
+    };
+
+    const clearSelectedPoint = () => {
+        selectedPoint = null;
+        renderSelectedPoint();
+    };
+
+    const getSelectedPoint = () => selectedPoint;
 
     const reset = () => {
         if (!panzoomInstance) return;
@@ -103,13 +166,34 @@ export function createSvgPanzoomMap(options) {
             const markerLayer = document.createElementNS(SVG_NS, 'g');
             markerLayer.setAttribute('id', 'rutas-layer');
 
+            selectionLayer = document.createElementNS(SVG_NS, 'g');
+            selectionLayer.setAttribute('id', 'point-selection-layer');
+
             let movedByPan = false;
+            let mapStartX = 0;
+            let mapStartY = 0;
+
+            const getMapPointFromEvent = (event) => {
+                const ctm = svgElement.getScreenCTM();
+                if (!ctm) return null;
+
+                const point = svgElement.createSVGPoint();
+                point.x = event.clientX;
+                point.y = event.clientY;
+
+                const transformedPoint = point.matrixTransform(ctm.inverse());
+                return normalizePoint(transformedPoint);
+            };
 
             const updateMarkerScale = (currentScale = 1) => {
                 const safeScale = currentScale > 0 ? currentScale : 1;
                 const hybridScale = 1 / Math.pow(safeScale, 0.5);
 
                 markerLayer.querySelectorAll('.ruta-visual').forEach((visualGroup) => {
+                    visualGroup.setAttribute('transform', `scale(${hybridScale})`);
+                });
+
+                selectionLayer.querySelectorAll('.selected-point-visual').forEach((visualGroup) => {
                     visualGroup.setAttribute('transform', `scale(${hybridScale})`);
                 });
             };
@@ -172,6 +256,44 @@ export function createSvgPanzoomMap(options) {
             });
 
             svgElement.appendChild(markerLayer);
+            svgElement.appendChild(selectionLayer);
+            renderSelectedPoint();
+
+            if (enablePointSelection) {
+                svgElement.addEventListener('pointerdown', (event) => {
+                    const isMarkerTarget = typeof event.target.closest === 'function' && event.target.closest('.ruta-marker');
+                    if (isMarkerTarget) return;
+
+                    mapStartX = event.clientX;
+                    mapStartY = event.clientY;
+                    movedByPan = false;
+                });
+
+                svgElement.addEventListener('pointerup', (event) => {
+                    const isMarkerTarget = typeof event.target.closest === 'function' && event.target.closest('.ruta-marker');
+                    if (isMarkerTarget) return;
+
+                    const deltaX = Math.abs(event.clientX - mapStartX);
+                    const deltaY = Math.abs(event.clientY - mapStartY);
+                    const isClick = deltaX <= clickThreshold && deltaY <= clickThreshold;
+
+                    if (!isClick || movedByPan) {
+                        return;
+                    }
+
+                    const nextPoint = getMapPointFromEvent(event);
+                    if (!nextPoint) {
+                        return;
+                    }
+
+                    selectedPoint = nextPoint;
+                    renderSelectedPoint();
+
+                    if (typeof onMapPointSelect === 'function') {
+                        onMapPointSelect(selectedPoint);
+                    }
+                });
+            }
 
             dispose();
 
@@ -242,5 +364,8 @@ export function createSvgPanzoomMap(options) {
         renderMarkers,
         reset,
         dispose,
+        setSelectedPoint,
+        getSelectedPoint,
+        clearSelectedPoint,
     };
 }
