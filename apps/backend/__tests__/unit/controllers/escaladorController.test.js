@@ -179,4 +179,43 @@ describe('Unit: EscaladorController', () => {
       expect(res.body).toEqual({ error: errorMessage });
     });
   });
+
+  describe('fotos de perfil', () => {
+    it('obtenerFotosPerfil responde 200 con el listado', async () => {
+      const useCases = {
+        obtenerFotosPerfil: { execute: jest.fn().mockResolvedValue([{ id: 1, nombre: 'foto.png' }]) },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = {};
+      const res = createResMock();
+
+      await controller.obtenerFotosPerfil(req, res, () => {});
+
+      expect(useCases.obtenerFotosPerfil.execute).toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.body).toEqual([{ id: 1, nombre: 'foto.png' }]);
+    });
+
+    it('actualizarFotoPerfil responde 200 con el resultado del caso de uso', async () => {
+      const useCases = {
+        actualizarFotoPerfil: { execute: jest.fn().mockResolvedValue({ fotoUrl: '/uploads/fotos_perfil/foto.png' }) },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = {
+        user: { apodo: 'Tester' },
+        body: { idFotoPerfil: 1, urlFoto: '/uploads/fotos_perfil/foto.png' },
+      };
+      const res = createResMock();
+
+      await controller.actualizarFotoPerfil(req, res, () => {});
+
+      expect(useCases.actualizarFotoPerfil.execute).toHaveBeenCalledWith({
+        apodo: 'Tester',
+        idFotoPerfil: 1,
+        urlFoto: '/uploads/fotos_perfil/foto.png',
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.body).toEqual({ fotoUrl: '/uploads/fotos_perfil/foto.png' });
+    });
+  });
 });
