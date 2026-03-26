@@ -14,7 +14,7 @@ class ObtenerPerfilEscalador {
         correo: escalador.correo,
         apodo: escalador.apodo,
         descripcion: escalador.descripcion,
-        fotoUrl: escalador.fotoUrl,
+        idFotoPerfil: escalador.idFotoPerfil,
       };
       return perfil;
     } catch (error) {

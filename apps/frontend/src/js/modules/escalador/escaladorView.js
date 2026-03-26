@@ -2,8 +2,8 @@ import { renderNavbar } from '../../components/navbar.js';
 
 // Vista del perfil del escalador
 export function renderPerfil(container, escalador, callbacks) {
-  const { correo, apodo, fotoPerfil } = escalador;
-  const avatar = fotoPerfil || '/assets/johnDoe.png';
+  const { correo, apodo, fotoSrc } = escalador;
+  const avatar = fotoSrc || '/assets/johnDoe.png';
 
   container.innerHTML = `
     <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">

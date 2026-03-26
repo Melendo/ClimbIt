@@ -18,16 +18,16 @@ class ActualizarFotoPerfilEscalador {
         throw new Error('La foto de perfil no está activa');
       }
 
-      const escalador = await this.escaladorRepository.actualizarFotoUrl(
+      const escalador = await this.escaladorRepository.actualizarFotoPerfilId(
         apodo,
-        fotoPerfil.urlFoto
+        fotoPerfil.id
       );
 
       if (!escalador) {
         throw new Error('Escalador no encontrado');
       }
 
-      return { fotoUrl: escalador.fotoUrl };
+      return { idFotoPerfil: escalador.idFotoPerfil };
     } catch (error) {
       throw new Error(
         `Error al actualizar la foto de perfil del escalador: ${error.message}`

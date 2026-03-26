@@ -18,7 +18,7 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
         escaladorModel.contrasena,
         escaladorModel.apodo,
         escaladorModel.descripcion,
-        escaladorModel.fotoUrl,
+        escaladorModel.idFotoPerfil,
         escaladorModel.activo
       );
       escalador.isAdmin = Boolean(escaladorModel.isAdmin);
@@ -153,7 +153,7 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
     }
   }
 
-  async actualizarFotoUrl(escaladorApodo, fotoUrl) {
+  async actualizarFotoPerfilId(escaladorApodo, idFotoPerfil) {
     try {
       const escaladorModel = await this.EscaladorModel.findOne({
         where: { apodo: escaladorApodo },
@@ -163,7 +163,7 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
         return null;
       }
 
-      escaladorModel.fotoUrl = fotoUrl;
+      escaladorModel.idFotoPerfil = idFotoPerfil;
       await escaladorModel.save();
 
       return this._toDomain(escaladorModel);
