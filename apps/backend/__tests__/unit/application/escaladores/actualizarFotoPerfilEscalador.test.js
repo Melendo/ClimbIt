@@ -4,7 +4,7 @@ import ActualizarFotoPerfilEscalador from '../../../../src/application/escalador
 describe('ActualizarFotoPerfilEscalador', () => {
   it('actualiza la foto del escalador si la foto existe y está activa', async () => {
     const escaladorRepository = {
-      actualizarFotoUrl: jest.fn().mockResolvedValue({ fotoUrl: '/uploads/fotos_perfil/foto-1.png' }),
+      actualizarFotoPerfilId: jest.fn().mockResolvedValue({ idFotoPerfil: 1 }),
     };
     const fotosPerfilRepository = {
       encontrarPorId: jest.fn().mockResolvedValue({
@@ -25,16 +25,16 @@ describe('ActualizarFotoPerfilEscalador', () => {
     });
 
     expect(fotosPerfilRepository.encontrarPorId).toHaveBeenCalledWith(1);
-    expect(escaladorRepository.actualizarFotoUrl).toHaveBeenCalledWith(
+    expect(escaladorRepository.actualizarFotoPerfilId).toHaveBeenCalledWith(
       'tester',
-      '/uploads/fotos_perfil/foto-1.png'
+      1
     );
-    expect(resultado).toEqual({ fotoUrl: '/uploads/fotos_perfil/foto-1.png' });
+    expect(resultado).toEqual({ idFotoPerfil: 1 });
   });
 
   it('rechaza una foto inactiva', async () => {
     const escaladorRepository = {
-      actualizarFotoUrl: jest.fn(),
+      actualizarFotoPerfilId: jest.fn(),
     };
     const fotosPerfilRepository = {
       encontrarPorId: jest.fn().mockResolvedValue({
