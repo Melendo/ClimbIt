@@ -12,10 +12,10 @@ export async function perfilCmd(container) {
         const response = await fetchClient('/escaladores/perfil');
         const escalador = await response.json();
 
-        const fotoUrl = escalador?.fotoUrl || escalador?.fotoPerfil || escalador?.urlFoto || '';
-        if (fotoUrl) {
+        const idFotoPerfil = Number(escalador?.idFotoPerfil);
+        if (Number.isInteger(idFotoPerfil) && idFotoPerfil > 0) {
             try {
-                escalador.fotoSrc = await fetchImageObjectUrl(fotoUrl);
+                escalador.fotoSrc = await fetchImageObjectUrl(`/escaladores/fotos-perfil/${idFotoPerfil}`);
             } catch (err) {
                 console.warn('No se pudo cargar la foto de perfil:', err.message);
                 escalador.fotoSrc = PERFIL_PLACEHOLDER;
