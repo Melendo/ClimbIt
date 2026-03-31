@@ -2,7 +2,7 @@ import express from 'express';
 import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyTokenMiddleware from '../middlewares/verifyToken.js';
-import uploadImages from '../middlewares/uploadImages.js';
+import uploadImages, { validateUploadedFileType } from '../middlewares/uploadImages.js';
 import authorizeRocodromoAccess, {
   resolveRocodromoIdFromRocodromoParam,
 } from '../middlewares/authorizeRocodromoAccess.js';
@@ -11,6 +11,9 @@ import containerPromise from '../../../infrastructure/container.js';
 const router = express.Router();
 const container = await containerPromise;
 const { rocodromoController } = container;
+
+const RASTER_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const LOGO_MAX_FILE_SIZE_BYTES = 3 * 1024 * 1024;
 
 /**
  * POST /rocodromos/create
@@ -151,6 +154,12 @@ const subirLogoRocodromoValidators = [
 const uploadLogoRocodromo = uploadImages({
   uploadDir: 'uploads/logos_rocodromos',
   fileName: (req) => `logo-${req.params.id}-${Date.now()}`,
+  allowedMimeTypes: RASTER_IMAGE_MIME_TYPES,
+  maxFileSizeBytes: LOGO_MAX_FILE_SIZE_BYTES,
+});
+
+const validateLogoUpload = validateUploadedFileType({
+  allowedMimeTypes: RASTER_IMAGE_MIME_TYPES,
 });
 
 router.post(
@@ -160,6 +169,7 @@ router.post(
   validate,
   authorizeRocodromoAccess({ resolveRocodromoId: resolveRocodromoIdFromRocodromoParam }),
   uploadLogoRocodromo.single('logo'),
+  validateLogoUpload,
   (req, res, next) => {
     console.log("ID del rocódromo:", req.params.id);
     rocodromoController.subirLogo(req, res, next);
