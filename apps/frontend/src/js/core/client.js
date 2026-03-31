@@ -113,3 +113,14 @@ export async function fetchClient(url, options = {}) {
     }
     return response;
 }
+
+export async function fetchImageObjectUrl(url) {
+    const response = await fetchClient(url);
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+}
+
+export async function fetchSvgText(url) {
+    const response = await fetchClient(url);
+    return await response.text();
+}

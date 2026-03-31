@@ -18,7 +18,7 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
         escaladorModel.contrasena,
         escaladorModel.apodo,
         escaladorModel.descripcion,
-        escaladorModel.fotoUrl,
+        escaladorModel.idFotoPerfil,
         escaladorModel.activo
       );
       escalador.isAdmin = Boolean(escaladorModel.isAdmin);
@@ -149,6 +149,27 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
     } catch (error) {
       throw new Error(
         `Error al obtener rocódromos gestionados: ${error.message}`
+      );
+    }
+  }
+
+  async actualizarFotoPerfilId(escaladorApodo, idFotoPerfil) {
+    try {
+      const escaladorModel = await this.EscaladorModel.findOne({
+        where: { apodo: escaladorApodo },
+      });
+
+      if (!escaladorModel) {
+        return null;
+      }
+
+      escaladorModel.idFotoPerfil = idFotoPerfil;
+      await escaladorModel.save();
+
+      return this._toDomain(escaladorModel);
+    } catch (error) {
+      throw new Error(
+        `Error al actualizar la foto del escalador: ${error.message}`
       );
     }
   }

@@ -1,6 +1,6 @@
 import { renderMapaZona, renderCrearZona } from './zonaView.js';
 import { createSvgPanzoomMap } from '../../components/svgPanzoomMap.js';
-import { fetchClient, canManageRocodromo } from '../../core/client.js';
+import { fetchClient, canManageRocodromo, fetchImageObjectUrl, fetchSvgText } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
 
 /**
@@ -15,6 +15,21 @@ const ESTADOS_CONFIG = {
     'proyecto': { icon: 'sync', color: '#2563eb', bg: '#dbeafe' },
     'S/N': { icon: 'remove', color: '#6b7280', bg: '#e5e7eb' }
 };
+
+const RUTA_IMAGE_PLACEHOLDER = '/assets/placeholder.jpg';
+
+async function resolveRutaImageSrc(ruta) {
+    if (!ruta?.imagenUrl) {
+        return RUTA_IMAGE_PLACEHOLDER;
+    }
+
+    try {
+        return await fetchImageObjectUrl(`/pistas/${ruta.id}/imagen`);
+    } catch (err) {
+        console.warn('No se pudo cargar la imagen de la ruta:', err.message);
+        return RUTA_IMAGE_PLACEHOLDER;
+    }
+}
 
 export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) {
     if (!idRocodromo) {
@@ -36,6 +51,14 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
             console.warn('No se pudo obtener info del rocódromo:', err.message);
         }
 
+        if (rocodromo?.logoUrl) {
+            try {
+                rocodromo.logoSrc = await fetchImageObjectUrl(`/rocodromos/${idRocodromo}/logo`);
+            } catch (err) {
+                console.warn('No se pudo cargar el logo del rocódromo:', err.message);
+            }
+        }
+
         // 2. Obtener lista de zonas del rocódromo
         let zonas = [];
         try {
@@ -46,6 +69,8 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
         }
 
         let mapaInteractivo = null;
+        let mapaSourceKey = null;
+        const mapaCache = new Map();
 
         // Renderizar la vista inicial
         renderMapaZona(
@@ -55,18 +80,43 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
                 return await cargarRutasZona(idZona);
             },
             initialZonaId,
-            async (_idZona, rutas) => {
+            async (idZona, rutas) => {
                 const mapaViewport = container.querySelector('#mapaSvgViewport');
                 if (!mapaViewport) return;
 
-                if (!mapaInteractivo) {
+                const zona = zonas.find((z) => z.id == idZona);
+                let zonaSvgContent = null;
+
+                if (zona?.mapa) {
+                    if (mapaCache.has(idZona)) {
+                        zonaSvgContent = mapaCache.get(idZona);
+                    } else {
+                        try {
+                            zonaSvgContent = await fetchSvgText(`/zonas/${idZona}/mapa`);
+                            mapaCache.set(idZona, zonaSvgContent);
+                        } catch (err) {
+                            console.warn('No se pudo cargar el mapa de la zona:', err.message);
+                        }
+                    }
+                }
+
+                const nextMapKey = zonaSvgContent ? `zona-svg-${idZona}` : 'default-svg';
+
+                if (!mapaInteractivo || mapaSourceKey !== nextMapKey) {
+                    if (mapaInteractivo) {
+                        mapaInteractivo.dispose();
+                    }
+
                     mapaInteractivo = createSvgPanzoomMap({
                         viewport: mapaViewport,
                         svgAssetUrl: '/assets/Roco.svg',
+                        svgContent: zonaSvgContent,
                         onMarkerClick: (ruta) => {
                             window.location.hash = `#infoRuta?id=${ruta.id}`;
                         },
                     });
+
+                    mapaSourceKey = nextMapKey;
                 }
 
                 await mapaInteractivo.renderMarkers(rutas || []);
@@ -99,10 +149,15 @@ async function cargarRutasZona(idZona) {
         const rutas = await rutasRes.json();
 
         // Mapear configuración de estado para la vista
-        return rutas.map(ruta => ({
-            ...ruta,
-            statusConfig: ESTADOS_CONFIG[ruta.estado] || ESTADOS_CONFIG['S/N']
-        }));
+        const rutasConImagen = await Promise.all(
+            rutas.map(async (ruta) => ({
+                ...ruta,
+                statusConfig: ESTADOS_CONFIG[ruta.estado] || ESTADOS_CONFIG['S/N'],
+                imagenSrc: await resolveRutaImageSrc(ruta),
+            }))
+        );
+
+        return rutasConImagen;
     } catch (err) {
         console.error(`Error al cargar rutas de la zona ${idZona}:`, err);
         return [];

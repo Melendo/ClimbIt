@@ -53,10 +53,10 @@ export default (sequelize, DataTypes) => {
         allowNull: true,
         field: 'Descripcion',
       },
-      fotoUrl: {
-        type: DataTypes.STRING,
+      idFotoPerfil: {
+        type: DataTypes.INTEGER,
         allowNull: true,
-        field: 'FotoURL',
+        field: 'IDFotoPerfil',
       },
       activo: {
         type: DataTypes.BOOLEAN,

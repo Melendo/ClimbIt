@@ -11,6 +11,7 @@ import EscaladorRepositoryPostgres from './repositories/escaladorRepositoryPostg
 import PistaRepositoryPostgres from './repositories/pistaRepositoryPostgres.js';
 import ZonaRepositoryPostgres from './repositories/zonaRepositoryPostgres.js';
 import RocodromoRepositoryPostgres from './repositories/rocodromoRepositoryPostgres.js';
+import FotosPerfilRepositoryPostgres from './repositories/fotosPerfilRepositoryPostgres.js';
 
 // Servicios de infra (Seguridad etc)
 import passwordService from './security/passwordService.js';
@@ -23,6 +24,10 @@ import ObtenerPerfil from '../application/escaladores/obtenerPerfilEscaladror.js
 import SuscribirseRocodromo from '../application/escaladores/suscribirseRocodromo.js';
 import DesuscribirseRocodromo from '../application/escaladores/desuscribirseRocodromo.js';
 import ObtenerRocodromosSuscritos from '../application/escaladores/obtenerRocodromosSuscritos.js';
+import CrearFotoPerfil from '../application/escaladores/crearFotoPerfil.js';
+import ObtenerFotosPerfil from '../application/escaladores/obtenerFotosPerfil.js';
+import ObtenerFotoPerfil from '../application/escaladores/obtenerFotoPerfil.js';
+import ActualizarFotoPerfilEscalador from '../application/escaladores/actualizarFotoPerfilEscalador.js';
 
 import CrearPista from '../application/pistas/crearPista.js';
 import ActualizarImagenPista from '../application/pistas/actualizarImagenPista.js';
@@ -58,6 +63,7 @@ async function inicializarContainer() {
   const pistaRepository = new PistaRepositoryPostgres(db.Pista);
   const zonaRepository = new ZonaRepositoryPostgres(db.Zona);
   const rocodromoRepository = new RocodromoRepositoryPostgres(db.Rocodromo);
+  const fotosPerfilRepository = new FotosPerfilRepositoryPostgres(db.FotosPerfil);
 
   // 2) Instancia del caso de uso con el repositorio inyectado
   const crearEscaladorUseCase = new CrearEscalador(
@@ -81,6 +87,13 @@ async function inicializarContainer() {
   );
   const obtenerRocodromosSuscritosUseCase = new ObtenerRocodromosSuscritos(
     escaladorRepository
+  );
+  const crearFotoPerfilUseCase = new CrearFotoPerfil(fotosPerfilRepository);
+  const obtenerFotosPerfilUseCase = new ObtenerFotosPerfil(fotosPerfilRepository);
+  const obtenerFotoPerfilUseCase = new ObtenerFotoPerfil(fotosPerfilRepository);
+  const actualizarFotoPerfilUseCase = new ActualizarFotoPerfilEscalador(
+    escaladorRepository,
+    fotosPerfilRepository
   );
 
   const crearPistaUseCase = new CrearPista(pistaRepository, db.Zona);
@@ -116,6 +129,10 @@ async function inicializarContainer() {
     suscribirseRocodromo: suscribirseRocodromoUseCase,
     desuscribirseRocodromo: desuscribirseRocodromoUseCase,
     obtenerRocodromosSuscritos: obtenerRocodromosSuscritosUseCase,
+    crearFotoPerfil: crearFotoPerfilUseCase,
+    obtenerFotosPerfil: obtenerFotosPerfilUseCase,
+    obtenerFotoPerfil: obtenerFotoPerfilUseCase,
+    actualizarFotoPerfil: actualizarFotoPerfilUseCase,
   };
   const pistaUseCases = {
     crear: crearPistaUseCase,

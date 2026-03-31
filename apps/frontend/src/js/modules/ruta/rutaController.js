@@ -1,7 +1,10 @@
 import { renderCrearRuta, renderInfoRuta } from './rutaView.js';
+
 import { createSvgPanzoomMap } from '../../components/svgPanzoomMap.js';
-import { fetchClient, canManageRocodromo } from '../../core/client.js';
+import { fetchClient, canManageRocodromo, fetchImageObjectUrl, fetchSvgText } from '../../core/client.js';
 import { showError, showLoading, showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
+
+const RUTA_IMAGE_PLACEHOLDER = '/assets/placeholder.jpg';
 
 // Escala de grados para validación
 const GRADOS_FRANCESES = [
@@ -129,6 +132,7 @@ export async function crearRutaCmd(container, params = {}) {
     let nombreRocodromo = hasValidParams ? `Rocodromo ${idRocodromo}` : 'Rocodromo';
     let nombreZona = hasValidParams ? `${idZona}` : 'N/D';
     let contextError = '';
+    let zonaMapaSvg = null;
 
     if (!hasValidParams) {
         contextError = 'La URL debe incluir idRocodromo e idZona validos para crear una ruta.';
@@ -152,6 +156,14 @@ export async function crearRutaCmd(container, params = {}) {
                 contextError = 'La zona indicada no pertenece a este rocodromo o no existe.';
             } else {
                 nombreZona = zonaActual.nombre || `${idZona}`;
+
+                if (zonaActual.mapa) {
+                    try {
+                        zonaMapaSvg = await fetchSvgText(`/zonas/${idZona}/mapa`);
+                    } catch (err) {
+                        console.warn('No se pudo cargar el mapa de la zona:', err.message);
+                    }
+                }
             }
         } catch (err) {
             contextError = `No se pudo validar la zona indicada: ${err.message}`;
@@ -168,7 +180,7 @@ export async function crearRutaCmd(container, params = {}) {
             clearFormAlert(alertBox);
         },
 
-        onViewReady: ({ mapaViewport, coordsBadge, alertBox }) => {
+        onViewReady: ({ mapaViewport, coordsBadge, alertBox, submitButton }) => {
             updateCoordinatesBadge(coordsBadge, selectedPoint);
 
             if (contextError || !mapaViewport) {
@@ -178,9 +190,27 @@ export async function crearRutaCmd(container, params = {}) {
                 return;
             }
 
+            if (!zonaMapaSvg) {
+                mapaViewport.innerHTML = `
+                    <div class="d-flex flex-column justify-content-center align-items-center h-100 text-white-50 text-center px-3">
+                        <span class="material-icons mb-2" style="font-size: 32px;">map</span>
+                        <p class="mb-1">No hay mapa para esta zona.</p>
+                        <small>No se puede seleccionar la ubicacion.</small>
+                    </div>
+                `;
+                if (coordsBadge) {
+                    coordsBadge.className = 'badge text-bg-secondary';
+                    coordsBadge.textContent = 'Sin mapa';
+                }
+                if (submitButton) {
+                    submitButton.disabled = true;
+                }
+                return;
+            }
+
             mapaSelector = createSvgPanzoomMap({
                 viewport: mapaViewport,
-                svgAssetUrl: '/assets/Roco.svg',
+                svgContent: zonaMapaSvg,
                 enablePointSelection: true,
                 onMapPointSelect: (point) => {
                     selectedPoint = point;
@@ -218,6 +248,14 @@ export async function crearRutaCmd(container, params = {}) {
 
             if (contextError) {
                 showFormAlert(alertBox, 'warning', contextError);
+                return;
+            }
+
+            if (!zonaMapaSvg) {
+                showFormAlert(alertBox, 'warning', 'No hay mapa para esta zona, no se puede seleccionar la ubicacion.');
+                if (submitButton) {
+                    submitButton.disabled = true;
+                }
                 return;
             }
 
@@ -345,6 +383,17 @@ export async function infoRutaCmd(container, id) {
     try {
         const res = await fetchClient(`/pistas/${id}`);
         const ruta = await res.json();
+
+        if (ruta?.imagenUrl) {
+            try {
+                ruta.imagenSrc = await fetchImageObjectUrl(`/pistas/${ruta.id}/imagen`);
+            } catch (err) {
+                console.warn('No se pudo cargar la imagen de la ruta:', err.message);
+                ruta.imagenSrc = RUTA_IMAGE_PLACEHOLDER;
+            }
+        } else {
+            ruta.imagenSrc = RUTA_IMAGE_PLACEHOLDER;
+        }
 
         const callbacks = {
             onEstadoChange: async (estado, estadoElement, estadoTextoElement) => {

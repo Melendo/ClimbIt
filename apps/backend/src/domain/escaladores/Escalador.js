@@ -5,16 +5,16 @@ class Escalador {
    * @param {string} contrasena
    * @param {string} apodo
    * @param {string|null} descripcion
-   * @param {string|null} fotoUrl
+  * @param {number|null} idFotoPerfil
    * @param {boolean} activo
    */
-  constructor(id, correo, contrasena, apodo, descripcion = null, fotoUrl = null, activo = true) {
+  constructor(id, correo, contrasena, apodo, descripcion = null, idFotoPerfil = null, activo = true) {
     this.id = id;
     this.correo = correo;
     this.contrasena = contrasena;
     this.apodo = apodo;
     this.descripcion = descripcion;
-    this.fotoUrl = fotoUrl;
+    this.idFotoPerfil = idFotoPerfil;
     this.activo = activo;
     this.isAdmin = false;
 

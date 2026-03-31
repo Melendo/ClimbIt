@@ -19,7 +19,7 @@ export function renderMisRocodromos(container, rocodromos) {
           <div class="col-6 col-md-4">
             <div class="zona-card position-relative rounded overflow-hidden" style="aspect-ratio: 1;">
               <a href="#mapaZona?id=${rocodromo.id}" class="text-decoration-none">
-                <img src="/assets/rocodromoDefecto.jpg" alt="${rocodromo.nombre}" class="w-100 h-100" style="object-fit: cover;">
+                <img src="${rocodromo.logoSrc || '/assets/rocodromoDefecto.jpg'}" alt="${rocodromo.nombre}" class="w-100 h-100" style="object-fit: cover;">
                 <div class="zona-card-overlay position-absolute bottom-0 start-0 end-0 p-2 text-white">
                   <small class="d-block fw-medium">${rocodromo.nombre}</small>
                 </div>
@@ -102,7 +102,7 @@ export function renderBuscarRocodromos(container, rocodromos, suscritosIds = [])
           <div class="col-6 col-md-4">
             <div class="zona-card position-relative rounded overflow-hidden" style="aspect-ratio: 1;">
               <a href="#mapaZona?id=${rocodromo.id}" class="text-decoration-none">
-                <img src="/assets/rocodromoDefecto.jpg" alt="${rocodromo.nombre}" class="w-100 h-100" style="object-fit: cover;">
+                <img src="${rocodromo.logoSrc || '/assets/rocodromoDefecto.jpg'}" alt="${rocodromo.nombre}" class="w-100 h-100" style="object-fit: cover;">
                 <div class="zona-card-overlay position-absolute bottom-0 start-0 end-0 p-2 text-white">
                   <small class="d-block fw-medium">${rocodromo.nombre}</small>
                 </div>
@@ -202,7 +202,7 @@ export function renderMapaRocodromo(container, data) {
               <div class="col-6 col-md-4">
                 <a href="#infoRuta?id=${ruta.id}" class="text-decoration-none">
                   <div class="zona-card position-relative rounded overflow-hidden" style="aspect-ratio: 1;">
-                    <img src="/assets/placeholder.jpg" alt="${ruta.nombre}" class="w-100 h-100" style="object-fit: cover;">
+                    <img src="${ruta.imagenSrc || '/assets/placeholder.jpg'}" alt="${ruta.nombre}" class="w-100 h-100" style="object-fit: cover;">
                     <div class="zona-card-overlay position-absolute bottom-0 start-0 end-0 p-2 text-white">
                       <small class="d-block fw-medium">${zona.tipo || 'Zona ' + zona.id}</small>
                       <div class="d-flex align-items-center gap-1">
@@ -225,7 +225,7 @@ export function renderMapaRocodromo(container, data) {
       <a href="#misRocodromos" class="text-dark text-decoration-none">
         <span class="material-icons align-middle">arrow_back</span>
       </a>
-      <img src="/assets/rocodromoDefecto.jpg" alt="Icono rocódromo" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+      <img src="${rocodromo.logoSrc || '/assets/rocodromoDefecto.jpg'}" alt="Icono rocódromo" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
       <span class="fw-medium">${nombreRocodromo}</span>
     </div>
 

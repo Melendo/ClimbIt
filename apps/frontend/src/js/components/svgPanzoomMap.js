@@ -29,6 +29,14 @@ async function loadSvg(svgAssetUrl) {
     return svgCache.get(svgAssetUrl);
 }
 
+function buildSvgWithBackground(backgroundImageUrl, svgSize) {
+    return `
+        <svg xmlns="${SVG_NS}" viewBox="0 0 ${svgSize} ${svgSize}" preserveAspectRatio="xMidYMid slice">
+            <image href="${backgroundImageUrl}" x="0" y="0" width="${svgSize}" height="${svgSize}" preserveAspectRatio="xMidYMid slice" />
+        </svg>
+    `;
+}
+
 /**
  * Crea un mapa SVG interactivo reusable con pan y zoom.
  * @param {Object} options
@@ -44,6 +52,8 @@ export function createSvgPanzoomMap(options) {
     const {
         viewport,
         svgAssetUrl = '/assets/Roco.svg',
+        backgroundImageUrl = null,
+        svgContent = null,
         svgSize = DEFAULT_SVG_SIZE,
         clickThreshold = DEFAULT_CLICK_THRESHOLD,
         enablePointSelection = false,
@@ -140,7 +150,11 @@ export function createSvgPanzoomMap(options) {
 
     const renderMarkers = async (items = []) => {
         try {
-            const rawSvg = await loadSvg(svgAssetUrl);
+            const rawSvg = svgContent
+                ? svgContent
+                : backgroundImageUrl
+                    ? buildSvgWithBackground(backgroundImageUrl, svgSize)
+                    : await loadSvg(svgAssetUrl);
             const svgDoc = new DOMParser().parseFromString(rawSvg, 'image/svg+xml');
             const svgElement = svgDoc.documentElement;
 

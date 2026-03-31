@@ -18,7 +18,7 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                  <a href="#misRocodromos" class="text-dark text-decoration-none">
                     <span class="material-icons align-middle">arrow_back</span>
                 </a>
-                <img src="/assets/rocodromoDefecto.jpg" alt="Icono rocódromo" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                <img src="${rocodromo?.logoSrc || '/assets/rocodromoDefecto.jpg'}" alt="Icono rocódromo" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
                 <span class="fw-medium text-truncate">${nombreRocodromo}</span>
                 <div class="ms-auto" style="max-width: 170px;">
                    <select id="zonaSelector" class="form-select form-select-sm shadow-sm fw-bold border-0" style="min-width: 150px; background-color: rgba(255, 255, 255, 0.95);">
@@ -187,7 +187,7 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                         <a href="#infoRuta?id=${ruta.id}" class="text-decoration-none text-dark">
                             <div class="card h-100 border-0 shadow-sm zona-card overflow-hidden">
                                 <div class="position-relative" style="aspect-ratio: 3/4;">
-                                    <img src="/assets/placeholder.jpg" class="card-img-top w-100 h-100" style="object-fit: cover;" alt="${ruta.nombre}">
+                                    <img src="${ruta.imagenSrc || '/assets/placeholder.jpg'}" class="card-img-top w-100 h-100" style="object-fit: cover;" alt="${ruta.nombre}">
                                     
                                     <!-- Estado Indicator -->
                                     <div class="position-absolute top-0 start-0 m-2 rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; background: ${status.bg};">
