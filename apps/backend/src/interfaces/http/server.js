@@ -33,7 +33,9 @@ async function setupRoutes() {
     if (
       err.code === 'UPLOAD_UNSUPPORTED_MIME_TYPE' ||
       err.code === 'UPLOAD_SIGNATURE_VALIDATION_FAILED' ||
-      err.code === 'UPLOAD_SIGNATURE_VALIDATION_ERROR'
+      err.code === 'UPLOAD_SIGNATURE_VALIDATION_ERROR' ||
+      err.code === 'UPLOAD_IMAGE_PROCESSING_FAILED' ||
+      err.code === 'UPLOAD_FFMPEG_NOT_AVAILABLE'
     ) {
       return res.status(err.status || 400).json({ error: err.message });
     }

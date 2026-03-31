@@ -2,7 +2,10 @@ import express from 'express';
 import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyToken from '../middlewares/verifyToken.js';
-import uploadImages, { validateUploadedFileType } from '../middlewares/uploadImages.js';
+import uploadImages, {
+  processUploadedRasterToWebp,
+  validateUploadedFileType,
+} from '../middlewares/uploadImages.js';
 import authorizeRocodromoAccess from '../middlewares/authorizeRocodromoAccess.js';
 import containerPromise from '../../../infrastructure/container.js';
 
@@ -199,6 +202,7 @@ router.post(
   authorizeRocodromoAccess({ requireAdmin: true }),
   uploadFotoPerfil.single('foto'),
   validateFotoPerfilUpload,
+  processUploadedRasterToWebp(),
   (req, res, next) => {
     escaladorController.crearFotoPerfil(req, res, next);
   }

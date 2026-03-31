@@ -2,7 +2,10 @@ import express from 'express';
 import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyTokenMiddleware from '../middlewares/verifyToken.js';
-import uploadImages, { validateUploadedFileType } from '../middlewares/uploadImages.js';
+import uploadImages, {
+  processUploadedRasterToWebp,
+  validateUploadedFileType,
+} from '../middlewares/uploadImages.js';
 import authorizeRocodromoAccess, {
   resolveRocodromoIdFromPistaParam,
   resolveRocodromoIdFromZonaBody,
@@ -163,6 +166,7 @@ router.post(
   verifyTokenMiddleware,
   uploadImagenPista.single('imagen'),
   validatePistaImageUpload,
+  processUploadedRasterToWebp(),
   crearPistaValidators,
   validate,
   authorizeRocodromoAccess({
@@ -289,6 +293,7 @@ router.put(
   }),
   uploadImagenPistaUpdate.single('imagen'),
   validatePistaImageUpload,
+  processUploadedRasterToWebp(),
   (req, res, next) => {
     pistaController.actualizarImagen(req, res, next);
   }

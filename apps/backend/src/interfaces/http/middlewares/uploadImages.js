@@ -1,7 +1,10 @@
 import fs from 'fs';
 import path from 'path';
+import { randomUUID } from 'crypto';
+import { spawn } from 'child_process';
 import multer from 'multer';
 import { fileTypeFromFile } from 'file-type';
+import ffmpegPath from 'ffmpeg-static';
 
 const DEFAULT_ALLOWED_MIME_TYPES = [
   'image/jpeg',
@@ -12,6 +15,13 @@ const DEFAULT_ALLOWED_MIME_TYPES = [
 
 const SVG_MIME_TYPE = 'image/svg+xml';
 const DEFAULT_MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+const WEBP_MIME_TYPE = 'image/webp';
+const RASTER_SOURCE_MIME_TYPES = new Set([
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+]);
 
 const normalizeAllowedMimeTypes = (allowedMimeTypes) => {
   if (!Array.isArray(allowedMimeTypes) || allowedMimeTypes.length === 0) {
@@ -30,6 +40,67 @@ const createUploadError = (message, code, status = 400) => {
   error.code = code;
   error.status = status;
   return error;
+};
+
+const randomFileName = (extension) => `${randomUUID()}${extension}`;
+
+const getExtensionByMimeType = (mimetype) => {
+  switch (mimetype?.toLowerCase()) {
+    case 'image/jpeg':
+    case 'image/jpg':
+      return '.jpg';
+    case 'image/png':
+      return '.png';
+    case 'image/webp':
+      return '.webp';
+    case SVG_MIME_TYPE:
+      return '.svg';
+    default:
+      return '.img';
+  }
+};
+
+const runFfmpegToWebp = async ({ inputPath, outputPath, quality }) => {
+  if (!ffmpegPath) {
+    throw createUploadError(
+      'No se encontro binario de FFmpeg para procesar la imagen',
+      'UPLOAD_FFMPEG_NOT_AVAILABLE',
+      500
+    );
+  }
+
+  await new Promise((resolve, reject) => {
+    const ffmpeg = spawn(ffmpegPath, [
+      '-y',
+      '-i',
+      inputPath,
+      '-map_metadata',
+      '-1',
+      '-c:v',
+      'libwebp',
+      '-q:v',
+      String(quality),
+      outputPath,
+    ]);
+
+    let stderr = '';
+    ffmpeg.stderr.on('data', (chunk) => {
+      stderr += chunk.toString();
+    });
+
+    ffmpeg.on('error', (error) => {
+      reject(error);
+    });
+
+    ffmpeg.on('close', (code) => {
+      if (code === 0) {
+        resolve();
+        return;
+      }
+
+      reject(new Error(stderr || `FFmpeg finalizo con codigo ${code}`));
+    });
+  });
 };
 
 const isLikelySvgFile = (filePath) => {
@@ -68,18 +139,9 @@ const resolveUploadDir = (uploadDir) => {
   return resolvedDir;
 };
 
-const buildFileName = (req, file, fileName) => {
-  const ext = path.extname(file.originalname).toLowerCase();
-  const baseName = typeof fileName === 'function'
-    ? fileName(req, file)
-    : fileName;
-
-  if (baseName && baseName.trim()) {
-    return `${baseName}${ext}`;
-  }
-
-  const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-  return `image-${unique}${ext}`;
+const buildFileName = (_req, file) => {
+  const ext = getExtensionByMimeType(file.mimetype) || path.extname(file.originalname).toLowerCase();
+  return randomFileName(ext);
 };
 
 const removeFileIfExists = async (filePath) => {
@@ -143,9 +205,53 @@ export const validateUploadedFileType = ({ allowedMimeTypes, allowSvg = false })
   };
 };
 
+export const processUploadedRasterToWebp = ({ quality = 82 } = {}) => {
+  return async (req, _res, next) => {
+    if (!req.file?.path) {
+      return next();
+    }
+
+    const detectedMimeType = req.file.detectedMimeType?.toLowerCase();
+
+    if (!detectedMimeType || !RASTER_SOURCE_MIME_TYPES.has(detectedMimeType)) {
+      return next();
+    }
+
+    const outputPath = path.join(path.dirname(req.file.path), randomFileName('.webp'));
+
+    try {
+      await runFfmpegToWebp({
+        inputPath: req.file.path,
+        outputPath,
+        quality,
+      });
+
+      await removeFileIfExists(req.file.path);
+
+      req.file.path = outputPath;
+      req.file.filename = path.basename(outputPath);
+      req.file.mimetype = WEBP_MIME_TYPE;
+      req.file.detectedMimeType = WEBP_MIME_TYPE;
+
+      return next();
+      // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+      await removeFileIfExists(outputPath);
+      await removeFileIfExists(req.file.path);
+
+      return next(
+        createUploadError(
+          'No se pudo procesar la imagen subida',
+          'UPLOAD_IMAGE_PROCESSING_FAILED',
+          500
+        )
+      );
+    }
+  };
+};
+
 const uploadImages = ({
   uploadDir,
-  fileName,
   allowedMimeTypes,
   maxFileSizeBytes = DEFAULT_MAX_FILE_SIZE_BYTES,
 }) => {
@@ -161,7 +267,7 @@ const uploadImages = ({
       cb(null, resolvedDir);
     },
     filename: (req, file, cb) => {
-      cb(null, buildFileName(req, file, fileName));
+      cb(null, buildFileName(req, file));
     },
   });
 

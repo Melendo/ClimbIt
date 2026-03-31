@@ -2,7 +2,10 @@ import express from 'express';
 import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyTokenMiddleware from '../middlewares/verifyToken.js';
-import uploadImages, { validateUploadedFileType } from '../middlewares/uploadImages.js';
+import uploadImages, {
+  processUploadedRasterToWebp,
+  validateUploadedFileType,
+} from '../middlewares/uploadImages.js';
 import authorizeRocodromoAccess, {
   resolveRocodromoIdFromRocodromoParam,
 } from '../middlewares/authorizeRocodromoAccess.js';
@@ -170,6 +173,7 @@ router.post(
   authorizeRocodromoAccess({ resolveRocodromoId: resolveRocodromoIdFromRocodromoParam }),
   uploadLogoRocodromo.single('logo'),
   validateLogoUpload,
+  processUploadedRasterToWebp(),
   (req, res, next) => {
     console.log("ID del rocódromo:", req.params.id);
     rocodromoController.subirLogo(req, res, next);
