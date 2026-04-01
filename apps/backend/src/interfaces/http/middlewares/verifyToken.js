@@ -1,35 +1,63 @@
 import tokenService from '../../../infrastructure/security/tokenService.js';
+import {
+  AuthenticationError,
+  BadRequestError,
+  InternalServerError,
+} from '../../../domain/sharedObjects/AppError.js';
 
 function verifyTokenMiddleware(req, res, next) {
   const authHeader = req.header('Authorization');
   if (!authHeader) {
-    return res
-      .status(401)
-      .json({ message: 'Acceso denegado: No se proporcionó token' });
+    return next(
+      new AuthenticationError(
+        'Acceso denegado: No se proporcionó token',
+        'AUTH_TOKEN_MISSING'
+      )
+    );
   }
+
   const parts = authHeader.split(' ');
   if (parts.length !== 2 || parts[0] !== 'Bearer') {
-    return res
-      .status(400)
-      .json({ message: 'Formato inválido. Use: Bearer <token>' });
+    return next(
+      new BadRequestError(
+        'Formato inválido. Use: Bearer <token>',
+        'AUTH_HEADER_INVALID_FORMAT'
+      )
+    );
   }
+
   const token = parts[1];
   if (!token) {
-    return res
-      .status(400)
-      .json({ message: 'Token no encontrado en la cabecera' });
+    return next(
+      new BadRequestError(
+        'Token no encontrado en la cabecera',
+        'AUTH_TOKEN_EMPTY'
+      )
+    );
   }
+
   try {
     const decoded = tokenService.verificar(token);
     req.user = decoded;
-    next();
+    return next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ message: 'El token ha expirado' });
+      return next(
+        new AuthenticationError('El token ha expirado', 'AUTH_TOKEN_EXPIRED')
+      );
     }
-    return res
-      .status(401)
-      .json({ message: 'Token inválido', error: error.message });
+
+    if (error.name === 'JsonWebTokenError') {
+      return next(new AuthenticationError('Token inválido', 'AUTH_TOKEN_INVALID'));
+    }
+
+    return next(
+      new InternalServerError(
+        'Error al validar el token de autenticación',
+        'AUTH_TOKEN_VALIDATION_FAILED',
+        error
+      )
+    );
   }
 }
 

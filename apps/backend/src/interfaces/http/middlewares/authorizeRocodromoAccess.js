@@ -1,5 +1,11 @@
 import fs from 'fs/promises';
 import dbPromise from '../../../infrastructure/db/postgres/models/index.js';
+import {
+  AppError,
+  AuthorizationError,
+  InternalServerError,
+  NotFoundError,
+} from '../../../domain/sharedObjects/AppError.js';
 
 const FORBIDDEN_MESSAGE = 'Acceso denegado: permisos insuficientes';
 
@@ -112,12 +118,16 @@ const authorizeRocodromoAccess = ({ resolveRocodromoId, requireAdmin = false }) 
 
       if (requireAdmin) {
         await cleanupUpload(req);
-        return res.status(403).json({ message: FORBIDDEN_MESSAGE });
+        return next(
+          new AuthorizationError(FORBIDDEN_MESSAGE, 'ROCODROMO_ACCESS_FORBIDDEN')
+        );
       }
 
       if (rol !== 'Gestor') {
         await cleanupUpload(req);
-        return res.status(403).json({ message: FORBIDDEN_MESSAGE });
+        return next(
+          new AuthorizationError(FORBIDDEN_MESSAGE, 'ROCODROMO_ACCESS_FORBIDDEN')
+        );
       }
 
       const db = await dbPromise;
@@ -126,9 +136,12 @@ const authorizeRocodromoAccess = ({ resolveRocodromoId, requireAdmin = false }) 
 
       if (!idRoco) {
         await cleanupUpload(req);
-        return res.status(404).json({
-          error: resolved?.notFoundMessage || 'Recurso no encontrado',
-        });
+        return next(
+          new NotFoundError(
+            resolved?.notFoundMessage || 'Recurso no encontrado',
+            'ROCODROMO_RELATED_RESOURCE_NOT_FOUND'
+          )
+        );
       }
 
       const managedIds = Array.isArray(req.user?.rocodromosGestionados)
@@ -137,13 +150,36 @@ const authorizeRocodromoAccess = ({ resolveRocodromoId, requireAdmin = false }) 
 
       if (!managedIds.includes(Number(idRoco))) {
         await cleanupUpload(req);
-        return res.status(403).json({ message: FORBIDDEN_MESSAGE });
+        return next(
+          new AuthorizationError(FORBIDDEN_MESSAGE, 'ROCODROMO_ACCESS_FORBIDDEN')
+        );
       }
 
       return next();
     } catch (error) {
-      await cleanupUpload(req);
-      return res.status(500).json({ error: error.message });
+      try {
+        await cleanupUpload(req);
+      } catch (cleanupError) {
+        return next(
+          new InternalServerError(
+            'Error al limpiar archivo temporal tras denegar acceso',
+            'UPLOAD_CLEANUP_FAILED',
+            cleanupError
+          )
+        );
+      }
+
+      if (error instanceof AppError) {
+        return next(error);
+      }
+
+      return next(
+        new InternalServerError(
+          'Error al validar permisos de acceso al rocódromo',
+          'ROCODROMO_ACCESS_CHECK_FAILED',
+          error
+        )
+      );
     }
   };
 };

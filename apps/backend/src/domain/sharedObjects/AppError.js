@@ -14,6 +14,12 @@ class ValidationError extends AppError {
   }
 }
 
+class BadRequestError extends AppError {
+  constructor(message, code = 'BAD_REQUEST', cause = null) {
+    super(message, { statusCode: 400, code, cause });
+  }
+}
+
 class AuthenticationError extends AppError {
   constructor(message, code = 'AUTHENTICATION_ERROR', cause = null) {
     super(message, { statusCode: 401, code, cause });
@@ -54,6 +60,7 @@ function toAppError(error, fallbackMessage = 'Error interno del servidor') {
 
 export {
   AppError,
+  BadRequestError,
   ValidationError,
   AuthenticationError,
   AuthorizationError,
