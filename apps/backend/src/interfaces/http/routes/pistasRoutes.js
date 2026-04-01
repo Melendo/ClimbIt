@@ -2,7 +2,10 @@ import express from 'express';
 import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyTokenMiddleware from '../middlewares/verifyToken.js';
-import uploadImages from '../middlewares/uploadImages.js';
+import uploadImages, {
+  processUploadedRasterToWebp,
+  validateUploadedFileType,
+} from '../middlewares/uploadImages.js';
 import authorizeRocodromoAccess, {
   resolveRocodromoIdFromPistaParam,
   resolveRocodromoIdFromZonaBody,
@@ -16,6 +19,9 @@ import containerPromise from '../../../infrastructure/container.js';
 const router = express.Router();
 const container = await containerPromise;
 const { pistaController } = container;
+
+const RASTER_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const PISTA_MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024;
 
 const getPistaImageBaseName = (req) => {
   const nombre =
@@ -137,6 +143,8 @@ const uploadImagenPista = uploadImages({
     const baseName = getPistaImageBaseName(req);
     return `pista-${baseName}-${Date.now()}`;
   },
+  allowedMimeTypes: RASTER_IMAGE_MIME_TYPES,
+  maxFileSizeBytes: PISTA_MAX_FILE_SIZE_BYTES,
 });
 
 const uploadImagenPistaUpdate = uploadImages({
@@ -145,12 +153,20 @@ const uploadImagenPistaUpdate = uploadImages({
     const baseName = getPistaImageBaseName(req);
     return `pista-${baseName}-${Date.now()}`;
   },
+  allowedMimeTypes: RASTER_IMAGE_MIME_TYPES,
+  maxFileSizeBytes: PISTA_MAX_FILE_SIZE_BYTES,
+});
+
+const validatePistaImageUpload = validateUploadedFileType({
+  allowedMimeTypes: RASTER_IMAGE_MIME_TYPES,
 });
 
 router.post(
   '/create',
   verifyTokenMiddleware,
   uploadImagenPista.single('imagen'),
+  validatePistaImageUpload,
+  processUploadedRasterToWebp(),
   crearPistaValidators,
   validate,
   authorizeRocodromoAccess({
@@ -276,6 +292,8 @@ router.put(
     resolveRocodromoId: resolveRocodromoIdFromPistaParam,
   }),
   uploadImagenPistaUpdate.single('imagen'),
+  validatePistaImageUpload,
+  processUploadedRasterToWebp(),
   (req, res, next) => {
     pistaController.actualizarImagen(req, res, next);
   }

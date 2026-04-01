@@ -2,13 +2,19 @@ import express from 'express';
 import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyToken from '../middlewares/verifyToken.js';
-import uploadImages from '../middlewares/uploadImages.js';
+import uploadImages, {
+  processUploadedRasterToWebp,
+  validateUploadedFileType,
+} from '../middlewares/uploadImages.js';
 import authorizeRocodromoAccess from '../middlewares/authorizeRocodromoAccess.js';
 import containerPromise from '../../../infrastructure/container.js';
 
 const router = express.Router();
 const container = await containerPromise;
 const { escaladorController } = container;
+
+const RASTER_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const FOTO_PERFIL_MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024;
 
 /**
  * POST /escaladores/create
@@ -182,6 +188,12 @@ router.get('/perfil', verifyToken, (req, res, next) => {
 const uploadFotoPerfil = uploadImages({
   uploadDir: 'uploads/fotos_perfil',
   fileName: () => `foto-perfil-${Date.now()}`,
+  allowedMimeTypes: RASTER_IMAGE_MIME_TYPES,
+  maxFileSizeBytes: FOTO_PERFIL_MAX_FILE_SIZE_BYTES,
+});
+
+const validateFotoPerfilUpload = validateUploadedFileType({
+  allowedMimeTypes: RASTER_IMAGE_MIME_TYPES,
 });
 
 router.post(
@@ -189,6 +201,8 @@ router.post(
   verifyToken,
   authorizeRocodromoAccess({ requireAdmin: true }),
   uploadFotoPerfil.single('foto'),
+  validateFotoPerfilUpload,
+  processUploadedRasterToWebp(),
   (req, res, next) => {
     escaladorController.crearFotoPerfil(req, res, next);
   }

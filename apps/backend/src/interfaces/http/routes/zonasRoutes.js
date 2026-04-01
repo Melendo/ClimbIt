@@ -2,7 +2,7 @@ import express from 'express';
 import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyTokenMiddleware from '../middlewares/verifyToken.js';
-import uploadImages from '../middlewares/uploadImages.js';
+import uploadImages, { validateUploadedFileType } from '../middlewares/uploadImages.js';
 import authorizeRocodromoAccess, {
   resolveRocodromoIdFromRocodromoBody,
   resolveRocodromoIdFromZonaParam,
@@ -12,6 +12,9 @@ import containerPromise from '../../../infrastructure/container.js';
 const router = express.Router();
 const container = await containerPromise;
 const { zonaController } = container;
+
+const SVG_MIME_TYPE = 'image/svg+xml';
+const MAPA_ZONA_MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024;
 
 /**
  * POST /zonas/create
@@ -107,6 +110,13 @@ const subirMapaZonaValidators = [
 const uploadMapaZona = uploadImages({
   uploadDir: 'uploads/mapas_zonas',
   fileName: (req) => `mapa-zona-${req.params.id}-${Date.now()}`,
+  allowedMimeTypes: [SVG_MIME_TYPE],
+  maxFileSizeBytes: MAPA_ZONA_MAX_FILE_SIZE_BYTES,
+});
+
+const validateMapaZonaUpload = validateUploadedFileType({
+  allowedMimeTypes: [SVG_MIME_TYPE],
+  allowSvg: true,
 });
 
 router.post(
@@ -116,6 +126,7 @@ router.post(
   validate,
   authorizeRocodromoAccess({ resolveRocodromoId: resolveRocodromoIdFromZonaParam }),
   uploadMapaZona.single('mapa'),
+  validateMapaZonaUpload,
   (req, res, next) => {
     zonaController.subirMapa(req, res, next);
   }
