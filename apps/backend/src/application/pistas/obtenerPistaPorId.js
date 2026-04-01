@@ -1,4 +1,8 @@
 import Pista from '../../domain/pistas/Pista.js';
+import {
+  AppError,
+  InternalServerError,
+} from '../../domain/sharedObjects/AppError.js';
 class ObtenerPistaPorId {
   constructor(pistaRepository, escaladorRepository) {
     this.pistaRepository = pistaRepository;
@@ -42,7 +46,15 @@ class ObtenerPistaPorId {
 
       return { ...pista, estado };
     } catch (error) {
-      throw new Error(`Error al obtener la pista por ID: ${error.message}`);
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      throw new InternalServerError(
+        'Error al obtener la pista por ID',
+        'PISTA_GET_BY_ID_FAILED',
+        error
+      );
     }
   }
 }

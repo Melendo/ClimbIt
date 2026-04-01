@@ -1,4 +1,9 @@
-class ObtenerRocodromos{
+import {
+  AppError,
+  InternalServerError,
+} from '../../domain/sharedObjects/AppError.js';
+
+class ObtenerRocodromos {
     constructor(rocodromoRepository) {
         this.rocodromoRepository = rocodromoRepository;
     }
@@ -7,7 +12,15 @@ class ObtenerRocodromos{
         try {
             return await this.rocodromoRepository.obtenerRocodromos();
         } catch (error) {
-            throw new Error(`Error al obtener los rocodromos: ${error.message}`);
+            if (error instanceof AppError) {
+              throw error;
+            }
+
+            throw new InternalServerError(
+              'Error al obtener los rocódromos',
+              'ROCODROMO_LIST_FAILED',
+              error
+            );
         }
     }
 }

@@ -1,4 +1,9 @@
 import Pista from '../../domain/pistas/Pista.js';
+import {
+  AppError,
+  InternalServerError,
+  NotFoundError,
+} from '../../domain/sharedObjects/AppError.js';
 
 class CrearPista {
   constructor(pistaRepository, zonaModel) {
@@ -12,7 +17,10 @@ class CrearPista {
       if (data.idZona) {
         const zonaExistente = await this.zonaModel.findByPk(data.idZona);
         if (!zonaExistente) {
-          throw new Error(`La zona con ID ${data.idZona} no existe`);
+          throw new NotFoundError(
+            `La zona con ID ${data.idZona} no existe`,
+            'ZONA_NOT_FOUND'
+          );
         }
       }
       
@@ -32,9 +40,16 @@ class CrearPista {
       const pistaCreada = await this.pistaRepository.crear(nuevaPista);
 
       return pistaCreada;
-       
     } catch (error) {
-      throw new Error(`Error al crear la pista: ${error.message}`);
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      throw new InternalServerError(
+        'Error al crear la pista',
+        'PISTA_CREATE_FAILED',
+        error
+      );
     }
   }
 }

@@ -1,4 +1,9 @@
 import Zona from '../../domain/zonas/Zona.js';
+import {
+  AppError,
+  InternalServerError,
+  NotFoundError,
+} from '../../domain/sharedObjects/AppError.js';
 
 class CrearZona {
   constructor(zonaRepository, rocodromoModel) {
@@ -14,7 +19,10 @@ class CrearZona {
           data.idRoco
         );
         if (!rocodromoExistente) {
-          throw new Error(`El rocodromo con ID ${data.idRoco} no existe`);
+          throw new NotFoundError(
+            `El rocódromo con ID ${data.idRoco} no existe`,
+            'ROCODROMO_NOT_FOUND'
+          );
         }
       }
 
@@ -23,7 +31,15 @@ class CrearZona {
 
       return zonaCreada;
     } catch (error) {
-      throw new Error(`Error al crear la zona: ${error.message}`);
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      throw new InternalServerError(
+        'Error al crear la zona',
+        'ZONA_CREATE_FAILED',
+        error
+      );
     }
   }
 }
