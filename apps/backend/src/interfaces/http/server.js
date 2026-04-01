@@ -3,6 +3,7 @@ import cors from 'cors';
 import multer from 'multer';
 
 import sequelize from '../../infrastructure/db/postgres/sequelize.js';
+import { AppError } from '../../domain/sharedObjects/AppError.js';
 
 const app = express();
 
@@ -41,6 +42,42 @@ async function setupRoutes() {
     }
 
     return next(err);
+  });
+
+  app.use((err, req, res, _next) => {
+    if (!err) {
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+
+    const isAppError = err instanceof AppError;
+    const statusCode = isAppError
+      ? err.statusCode
+      : Number.isInteger(err.status)
+        ? err.status
+        : 500;
+
+    const response = {
+      error: isAppError ? err.message : 'Error interno del servidor',
+    };
+
+    if (isAppError && err.code) {
+      response.code = err.code;
+    }
+
+    if (!isAppError && process.env.NODE_ENV !== 'production' && err.message) {
+      response.details = err.message;
+    }
+
+    if (statusCode >= 500) {
+      console.error('Unhandled error:', {
+        message: err.message,
+        name: err.name,
+        path: req.path,
+        method: req.method,
+      });
+    }
+
+    return res.status(statusCode).json(response);
   });
 }
 

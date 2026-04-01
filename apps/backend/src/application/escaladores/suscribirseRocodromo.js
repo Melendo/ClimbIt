@@ -1,3 +1,10 @@
+import {
+  AppError,
+  ConflictError,
+  InternalServerError,
+  NotFoundError,
+} from '../../domain/sharedObjects/AppError.js';
+
 class SuscribirseRocodromo {
     constructor(escaladorRepository, rocodromoRepository) {
         this.escaladorRepository = escaladorRepository;
@@ -7,19 +14,33 @@ class SuscribirseRocodromo {
         try {
             const rocodromoEncontrado = await this.rocodromoRepository.encontrarPorId(idRocodromo);
             if (!rocodromoEncontrado) {
-                throw new Error(`Rocódromo con ID ${idRocodromo} no encontrado`);
+                throw new NotFoundError(
+                  `Rocódromo con ID ${idRocodromo} no encontrado`,
+                  'ROCODROMO_NOT_FOUND'
+                );
             }
 
             // Verificar si ya está suscrito
             const yaSuscrito = await this.escaladorRepository.estaSuscrito(escaladorApodo, idRocodromo);
             if (yaSuscrito) {
-                throw new Error(`El escalador ${escaladorApodo} ya está suscrito al rocódromo ${rocodromoEncontrado.nombre}`);
+                throw new ConflictError(
+                  `El escalador ${escaladorApodo} ya está suscrito al rocódromo ${rocodromoEncontrado.nombre}`,
+                  'ESCALADOR_ALREADY_SUBSCRIBED'
+                );
             }
             
             await this.escaladorRepository.suscribirse(escaladorApodo, rocodromoEncontrado);
             return { mensaje: `Escalador ${escaladorApodo} suscrito al rocódromo ${rocodromoEncontrado.nombre} exitosamente.` };
         } catch (error) {
-            throw new Error(`Error al suscribirse al rocódromo: ${error.message}`);
+            if (error instanceof AppError) {
+              throw error;
+            }
+
+            throw new InternalServerError(
+              'Error al suscribirse al rocódromo',
+              'ROCODROMO_SUBSCRIPTION_FAILED',
+              error
+            );
         }
     }
 }

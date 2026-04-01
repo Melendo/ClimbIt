@@ -81,7 +81,9 @@ describe('E2E: Pistas', () => {
         .send(pistaTest)
         .expect(401);
 
-      expect(response.body.message).toMatch(/Acceso denegado/);
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
+      expect(response.body.error).toMatch(/Acceso denegado/);
     });
 
     it('debería fallar al crear una pista con token inválido', async () => {
@@ -91,7 +93,9 @@ describe('E2E: Pistas', () => {
         .send(pistaTest)
         .expect(401);
 
-      expect(response.body.message).toMatch(/Token inválido/);
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_INVALID');
+      expect(response.body.error).toMatch(/Token inválido/);
     });
 
     it('debería fallar con formato de cabecera inválido (No Bearer)', async () => {
@@ -101,19 +105,22 @@ describe('E2E: Pistas', () => {
         .send(pistaTest)
         .expect(400);
 
-      expect(response.body.message).toMatch(/Formato inválido/);
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_HEADER_INVALID_FORMAT');
+      expect(response.body.error).toMatch(/Formato inválido/);
     });
 
     it('debería fallar si la cabecera tiene Bearer pero no token', async () => {
-      // Al enviar 'Bearer ', es posible que se haga trim y quede 'Bearer', fallando el check de formato.
-      // O que se mantenga el espacio y falle el check de token vacío.
       const response = await request(app)
         .post('/pistas/create')
         .set('Authorization', 'Bearer ')
         .send(pistaTest)
         .expect(400);
 
-      expect(response.body.message).toMatch(/Formato inválido|Token no encontrado/);
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code');
+      expect(['AUTH_HEADER_INVALID_FORMAT', 'AUTH_TOKEN_EMPTY']).toContain(response.body.code);
+      expect(response.body.error).toMatch(/Formato inválido|Token no encontrado/);
     });
 
     it('debería fallar con token expirado', async () => {
@@ -127,7 +134,9 @@ describe('E2E: Pistas', () => {
         .send(pistaTest)
         .expect(401);
 
-      expect(response.body.message).toMatch(/El token ha expirado/);
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_EXPIRED');
+      expect(response.body.error).toMatch(/El token ha expirado/);
     });
   });
 
@@ -274,8 +283,9 @@ describe('E2E: Pistas', () => {
         .send({ estado: 'completado' })
         .expect(401);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain('Acceso denegado');
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
+      expect(response.body.error).toContain('Acceso denegado');
     });
 
     it('debería retornar 500 si la pista no existe', async () => {

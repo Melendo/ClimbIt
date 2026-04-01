@@ -67,7 +67,7 @@ describe('obtenerPistasZonaUseCase', () => {
 
     // Act & Assert
     await expect(obtenerPistasZona.execute(zonaId)).rejects.toThrow(
-      `Error al obtener la zona por ID: ${errorMsg}`
+      `Error al obtener las pistas de la zona`
     );
   });
 });

@@ -1,5 +1,7 @@
 import RocodromoRepository from '../../domain/rocodromos/rocodromoRepository.js';
 import Rocodromo from '../../domain/rocodromos/Rocodromo.js';
+import { ValidationError } from '../../domain/sharedObjects/AppError.js';
+import mapRepositoryError from './dbErrorHandler.js';
 
 class RocodromoRepositoryPostgres extends RocodromoRepository {
   constructor(rocodromoModel) {
@@ -21,21 +23,28 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
         rocodromoModel.activo
       );
     } catch (error) {
-      throw new Error(error.message);
+      throw new ValidationError(error.message, 'ROCODROMO_MODEL_MAPPING_FAILED', error);
     }
   }
 
   async crearRocodromo(rocodromo) {
-    const data = {
-      nombre: rocodromo.nombre,
-      ubicacion: rocodromo.ubicacion,
-      logoUrl: rocodromo.logoUrl,
-      descripcion: rocodromo.descripcion,
-      horarios: rocodromo.horarios,
-    };
-    const rocodromoModel = await this.RocodromoModel.create(data);
+    try {
+      const data = {
+        nombre: rocodromo.nombre,
+        ubicacion: rocodromo.ubicacion,
+        logoUrl: rocodromo.logoUrl,
+        descripcion: rocodromo.descripcion,
+        horarios: rocodromo.horarios,
+      };
+      const rocodromoModel = await this.RocodromoModel.create(data);
 
-    return this._toDomain(rocodromoModel);
+      return this._toDomain(rocodromoModel);
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al crear rocódromo en persistencia',
+        internalCode: 'ROCODROMO_CREATE_DB_FAILED',
+      });
+    }
   }
 
   async obtenerZonasDeRocodromo(idRocodromo) {
@@ -57,9 +66,10 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
 
       return zonas;
     } catch (error) {
-      throw new Error(
-        `Error al obtener las zonas del rocódromo: ${error.message}`
-      );
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al obtener las zonas del rocódromo',
+        internalCode: 'ROCODROMO_GET_ZONES_DB_FAILED',
+      });
     }
   }
 
@@ -69,7 +79,10 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
 
       return rocodromosData.map((rocodromo) => this._toDomain(rocodromo));
     } catch (error) {
-      throw new Error(`Error al obtener los rocodromos: ${error.message}`);
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al obtener los rocodromos',
+        internalCode: 'ROCODROMO_LIST_DB_FAILED',
+      });
     }
   }
 
@@ -79,9 +92,10 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
 
       return this._toDomain(rocodromoData);
     } catch (error) {
-      throw new Error(
-        `Error al encontrar el rocódromo por ID: ${error.message}`
-      );
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al encontrar el rocódromo por ID',
+        internalCode: 'ROCODROMO_FIND_BY_ID_DB_FAILED',
+      });
     }
   }
 
@@ -98,9 +112,10 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
 
       return this._toDomain(rocodromoModel);
     } catch (error) {
-      throw new Error(
-        `Error al actualizar el logo del rocódromo: ${error.message}`
-      );
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al actualizar el logo del rocódromo',
+        internalCode: 'ROCODROMO_UPDATE_LOGO_DB_FAILED',
+      });
     }
   }
 }

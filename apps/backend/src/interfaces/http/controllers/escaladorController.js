@@ -16,7 +16,7 @@ class EscaladorController {
       });
       res.status(201).json(nuevoEscalador);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -31,7 +31,7 @@ class EscaladorController {
 
       res.status(200).json(resultado);
     } catch (error) {
-      res.status(401).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -43,7 +43,7 @@ class EscaladorController {
 
       res.status(200).json(perfilEscalador);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -58,7 +58,7 @@ class EscaladorController {
 
       res.status(200).json(resultado);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -73,7 +73,7 @@ class EscaladorController {
 
       res.status(200).json(resultado);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -86,7 +86,7 @@ class EscaladorController {
 
       res.status(200).json(rocodromos);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -115,12 +115,12 @@ class EscaladorController {
           await fs.unlink(uploadedPath);
         } catch (unlinkError) {
           if (unlinkError.code !== 'ENOENT') {
-            return res.status(500).json({ error: unlinkError.message });
+            return next(unlinkError);
           }
         }
       }
 
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -130,7 +130,7 @@ class EscaladorController {
 
       res.status(200).json(fotosPerfil);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -160,7 +160,7 @@ class EscaladorController {
         return res.status(404).json({ error: 'Imagen no encontrada' });
       }
 
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -176,7 +176,7 @@ class EscaladorController {
 
       res.status(200).json(resultado);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 }

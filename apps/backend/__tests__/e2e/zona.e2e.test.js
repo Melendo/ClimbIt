@@ -143,8 +143,9 @@ describe('E2E: Zonas', () => {
         })
         .expect(401);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain('Acceso denegado');
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
+      expect(response.body.error).toContain('Acceso denegado');
     });
 
     it('debería retornar 500 si el rocódromo no existe', async () => {

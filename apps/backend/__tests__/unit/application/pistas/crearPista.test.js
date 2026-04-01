@@ -45,7 +45,7 @@ describe('crearPistaUseCase', () => {
 
     const datos = { idZona: 999, nombre: 'Ex1', dificultad: '3a', tipo: 'boulder' };
     await expect(() => crearPista.execute(datos)).rejects.toThrow(
-      `Error al crear la pista: La zona con ID 999 no existe`
+      `La zona con ID 999 no existe`
     );
   });
   

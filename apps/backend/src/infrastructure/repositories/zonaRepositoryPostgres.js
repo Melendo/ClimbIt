@@ -1,5 +1,7 @@
 import ZonaRepository from '../../domain/zonas/zonaRepository.js';
 import Zona from '../../domain/zonas/Zona.js';
+import { ValidationError } from '../../domain/sharedObjects/AppError.js';
+import mapRepositoryError from './dbErrorHandler.js';
 
 class ZonaRepositoryPostgres extends ZonaRepository {
   constructor(zonaModel) {
@@ -19,19 +21,26 @@ class ZonaRepositoryPostgres extends ZonaRepository {
         zonaModel.activo
       );
     } catch (error) {
-      throw new Error(error.message);
+      throw new ValidationError(error.message, 'ZONA_MODEL_MAPPING_FAILED', error);
     }
   }
 
   async crearZona(zona) {
-    const data = {
-      idRoco: zona.idRoco,
-      nombre: zona.nombre,
-      mapa: zona.mapa,
-    };
-    const zonaModel = await this.ZonaModel.create(data);
+    try {
+      const data = {
+        idRoco: zona.idRoco,
+        nombre: zona.nombre,
+        mapa: zona.mapa,
+      };
+      const zonaModel = await this.ZonaModel.create(data);
 
-    return this._toDomain(zonaModel);
+      return this._toDomain(zonaModel);
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al crear zona en persistencia',
+        internalCode: 'ZONA_CREATE_DB_FAILED',
+      });
+    }
   }
 
   async obtenerPistasDeZona(idZona, idEscalador) {
@@ -84,7 +93,10 @@ class ZonaRepositoryPostgres extends ZonaRepository {
 
       return pistas;
     } catch (error) {
-      throw new Error(`Error al obtener las pistas de la zona: ${error.message}`);
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al obtener las pistas de la zona',
+        internalCode: 'ZONA_GET_PISTAS_DB_FAILED',
+      });
     }
   }
 
@@ -93,7 +105,10 @@ class ZonaRepositoryPostgres extends ZonaRepository {
       const zonaModel = await this.ZonaModel.findByPk(idZona);
       return this._toDomain(zonaModel);
     } catch (error) {
-      throw new Error(`Error al encontrar la zona por ID: ${error.message}`);
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al encontrar la zona por ID',
+        internalCode: 'ZONA_FIND_BY_ID_DB_FAILED',
+      });
     }
   }
 
@@ -110,7 +125,10 @@ class ZonaRepositoryPostgres extends ZonaRepository {
 
       return this._toDomain(zonaModel);
     } catch (error) {
-      throw new Error(`Error al actualizar el mapa de la zona: ${error.message}`);
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al actualizar el mapa de la zona',
+        internalCode: 'ZONA_UPDATE_MAP_DB_FAILED',
+      });
     }
   }
 

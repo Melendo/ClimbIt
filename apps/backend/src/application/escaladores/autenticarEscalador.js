@@ -1,3 +1,10 @@
+import {
+  AppError,
+  AuthenticationError,
+  InternalServerError,
+  NotFoundError,
+} from '../../domain/sharedObjects/AppError.js';
+
 class AutenticarEscalador {
   constructor(escaladorRepository, passwordService, tokenService) {
     this.escaladorRepository = escaladorRepository;
@@ -10,7 +17,10 @@ class AutenticarEscalador {
       const escaladorExistente =
         await this.escaladorRepository.encontrarPorCorreo(data.correo);
       if (!escaladorExistente) {
-        throw new Error('Escalador no registrado');
+        throw new NotFoundError(
+          'Escalador no registrado',
+          'ESCALADOR_NOT_FOUND'
+        );
       }
 
       const passwordMatch = await this.passwordService.compare(
@@ -18,7 +28,10 @@ class AutenticarEscalador {
         escaladorExistente.contrasena
       );
       if (!passwordMatch) {
-        throw new Error('Contraseña incorrecta');
+        throw new AuthenticationError(
+          'Contraseña incorrecta',
+          'INVALID_CREDENTIALS'
+        );
       }
       const esAdmin = Boolean(escaladorExistente.isAdmin);
       let rocodromosGestionados = [];
@@ -43,7 +56,15 @@ class AutenticarEscalador {
       const token = this.tokenService.crear(payload);
       return { token };
     } catch (error) {
-      throw new Error(`Error al autenticar al escalador: ${error.message}`);
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      throw new InternalServerError(
+        'Error al autenticar al escalador',
+        'ESCALADOR_AUTH_FAILED',
+        error
+      );
     }
   }
 }

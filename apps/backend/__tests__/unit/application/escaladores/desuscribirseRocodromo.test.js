@@ -63,7 +63,7 @@ describe('DesuscribirseRocodromoUseCase', () => {
 
     await expect(
       desuscribirseRocodromo.execute(datosEntrada)
-    ).rejects.toThrow('Error al desuscribirse del rocódromo: Rocódromo con ID 999 no encontrado');
+    ).rejects.toThrow('Rocódromo con ID 999 no encontrado');
 
     expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(datosEntrada.idRocodromo);
     expect(mockEscaladorRepository.estaSuscrito).not.toHaveBeenCalled();
@@ -88,7 +88,7 @@ describe('DesuscribirseRocodromoUseCase', () => {
 
     await expect(
       desuscribirseRocodromo.execute(datosEntrada)
-    ).rejects.toThrow('Error al desuscribirse del rocódromo: El escalador TestClimber no está suscrito al rocódromo con ID 1');
+    ).rejects.toThrow('El escalador TestClimber no está suscrito al rocódromo con ID 1');
 
     expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(datosEntrada.idRocodromo);
     expect(mockEscaladorRepository.estaSuscrito).toHaveBeenCalledWith(
@@ -119,7 +119,7 @@ describe('DesuscribirseRocodromoUseCase', () => {
 
     await expect(
       desuscribirseRocodromo.execute(datosEntrada)
-    ).rejects.toThrow('Error al desuscribirse del rocódromo: Error al eliminar la suscripción');
+    ).rejects.toThrow('Error al desuscribirse del rocódromo');
 
     expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(datosEntrada.idRocodromo);
     expect(mockEscaladorRepository.estaSuscrito).toHaveBeenCalledWith(

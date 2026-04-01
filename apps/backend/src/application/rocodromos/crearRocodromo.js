@@ -1,4 +1,8 @@
 import Rocodromo from '../../domain/rocodromos/Rocodromo.js';
+import {
+  AppError,
+  InternalServerError,
+} from '../../domain/sharedObjects/AppError.js';
 
 class CrearRocodromo {
   constructor(rocodromoRepository) {
@@ -19,7 +23,15 @@ class CrearRocodromo {
         await this.rocodromoRepository.crearRocodromo(nuevoRocodromo);
       return creado;
     } catch (error) {
-      throw new Error(`Error al crear el rocodromo: ${error.message}`);
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      throw new InternalServerError(
+        'Error al crear el rocódromo',
+        'ROCODROMO_CREATE_FAILED',
+        error
+      );
     }
   }
 }

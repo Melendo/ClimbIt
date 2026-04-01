@@ -66,8 +66,8 @@ describe('crearEscaladorUseCase', () => {
     );
 
     const datos = { correo: '', contrasena: '123', apodo: 'Juan' };
-    await expect(() => crearEscalador.execute(datos)).rejects.toThrow(
-      `Error al crear el escalador`
+    await expect(crearEscalador.execute(datos)).rejects.toThrow(
+      /correo inválido/i
     );
   });
 });

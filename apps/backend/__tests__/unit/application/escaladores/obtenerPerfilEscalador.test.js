@@ -40,7 +40,7 @@ describe('ObtenerPerfilEscalador', () => {
 
     // Act & Assert
     await expect(obtenerPerfil.execute(apodo)).rejects.toThrow(
-      'Error al obtener perfil del escalador: Escalador no encontrado'
+      'Escalador no encontrado'
     );
   });
 
@@ -58,7 +58,7 @@ describe('ObtenerPerfilEscalador', () => {
 
     // Act & Assert
     await expect(obtenerPerfil.execute(apodo)).rejects.toThrow(
-      `Error al obtener perfil del escalador: ${errorMsg}`
+      `Error al obtener perfil del escalador`
     );
   });
 });

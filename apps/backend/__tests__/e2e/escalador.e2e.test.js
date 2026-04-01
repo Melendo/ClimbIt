@@ -113,18 +113,19 @@ describe('E2E: Escalador', () => {
         .send({ idRocodromo: rocodromoTest.id })
         .expect(401);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain('Acceso denegado');
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
+      expect(response.body.error).toContain('Acceso denegado');
     });
 
-    it('debería retornar 500 si el rocódromo no existe', async () => {
+    it('debería retornar 404 si el rocódromo no existe', async () => {
       const fakeIdRocodromo = 999999;
       
       const response = await request(app)
         .post('/escaladores/suscribirse')
         .set('Authorization', `Bearer ${tokenSuscripcion}`)
         .send({ idRocodromo: fakeIdRocodromo })
-        .expect(500);
+        .expect(404);
 
       expect(response.body).toHaveProperty('error');
       expect(response.body.error).toContain('no encontrado');
@@ -140,13 +141,13 @@ describe('E2E: Escalador', () => {
       expect(response.body).toHaveProperty('status', 'invalid_request');
     });
 
-    it('debería retornar 500 si el escalador ya está suscrito al rocódromo', async () => {
+    it('debería retornar 409 si el escalador ya está suscrito al rocódromo', async () => {
       // Intentar suscribirse nuevamente al mismo rocódromo
       const response = await request(app)
         .post('/escaladores/suscribirse')
         .set('Authorization', `Bearer ${tokenSuscripcion}`)
         .send({ idRocodromo: rocodromoTest.id })
-        .expect(500);
+        .expect(409);
 
       expect(response.body).toHaveProperty('error');
       expect(response.body.error).toContain('ya está suscrito');
@@ -179,30 +180,31 @@ describe('E2E: Escalador', () => {
         .send({ idRocodromo: rocodromoTest.id })
         .expect(401);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain('Acceso denegado');
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
+      expect(response.body.error).toContain('Acceso denegado');
     });
 
-    it('debería retornar 500 si el rocódromo no existe', async () => {
+    it('debería retornar 404 si el rocódromo no existe', async () => {
       const fakeIdRocodromo = 999999;
       
       const response = await request(app)
         .post('/escaladores/desuscribirse')
         .set('Authorization', `Bearer ${tokenSuscripcion}`)
         .send({ idRocodromo: fakeIdRocodromo })
-        .expect(500);
+        .expect(404);
 
       expect(response.body).toHaveProperty('error');
       expect(response.body.error).toContain('no encontrado');
     });
 
-    it('debería retornar 500 si el escalador no está suscrito al rocódromo', async () => {
+    it('debería retornar 404 si el escalador no está suscrito al rocódromo', async () => {
       // El escalador ya fue desuscrito en el primer test, intentar desuscribirse nuevamente
       const response = await request(app)
         .post('/escaladores/desuscribirse')
         .set('Authorization', `Bearer ${tokenSuscripcion}`)
         .send({ idRocodromo: rocodromoTest.id })
-        .expect(500);
+        .expect(404);
 
       expect(response.body).toHaveProperty('error');
       expect(response.body.error).toContain('no está suscrito');
@@ -238,8 +240,9 @@ describe('E2E: Escalador', () => {
         .get('/escaladores/perfil')
         .expect(401);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain('Acceso denegado');
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
+      expect(response.body.error).toContain('Acceso denegado');
     });
   });
 
@@ -296,8 +299,9 @@ describe('E2E: Escalador', () => {
         .get('/escaladores/mis-rocodromos')
         .expect(401);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain('Acceso denegado');
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
+      expect(response.body.error).toContain('Acceso denegado');
     });
   });
 });

@@ -56,6 +56,6 @@ describe('ObtenerInformacionRocodromo', () => {
     const obtenerInfo = new ObtenerInformacionRocodromo(mockRepository);
 
     // Act & Assert
-    await expect(obtenerInfo.execute(rocodromoId)).rejects.toThrow(errorMsg);
+    await expect(obtenerInfo.execute(rocodromoId)).rejects.toThrow('Error al obtener la información del rocódromo');
   });
 });
