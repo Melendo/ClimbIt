@@ -45,17 +45,18 @@ describe('Unit: EscaladorController', () => {
   });
 
   it('crear: responde 500 ante errores', async () => {
+    const expectedError = new Error('falló');
     const useCases = {
-      crear: { execute: jest.fn().mockRejectedValue(new Error('falló')) },
+      crear: { execute: jest.fn().mockRejectedValue(expectedError) },
     };
     const controller = new EscaladorController(useCases);
     const req = { body: { correo: 'a@b.com', contrasena: '123', apodo: 'Tester' } };
     const res = createResMock();
+    const next = jest.fn();
 
-    await controller.crear(req, res, () => {});
+    await controller.crear(req, res, next);
 
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.body).toEqual({ error: 'falló' });
+    expect(next).toHaveBeenCalledWith(expectedError);
   });
 
   describe('autenticar', () => {
@@ -79,17 +80,18 @@ describe('Unit: EscaladorController', () => {
 
     it('responde 401 si el caso de uso lanza un error (credenciales inválidas)', async () => {
         const errorMessage = 'Credenciales inválidas';
+      const expectedError = new Error(errorMessage);
         const useCases = {
-            autenticar: { execute: jest.fn().mockRejectedValue(new Error(errorMessage)) }
+            autenticar: { execute: jest.fn().mockRejectedValue(expectedError) }
         };
         const controller = new EscaladorController(useCases);
         const req = { body: { correo: 'test@example.com', contrasena: 'wrong' } };
         const res = createResMock();
+        const next = jest.fn();
 
-        await controller.autenticar(req, res, () => {});
+        await controller.autenticar(req, res, next);
 
-        expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.body).toEqual({ error: errorMessage });
+        expect(next).toHaveBeenCalledWith(expectedError);
     });
   });
 
@@ -123,9 +125,10 @@ describe('Unit: EscaladorController', () => {
 
     it('responde 500 si el caso de uso lanza un error', async () => {
       const errorMessage = 'Error al suscribirse al rocódromo: Rocódromo con ID 999 no encontrado';
+      const expectedError = new Error(errorMessage);
       const useCases = {
         suscribirseRocodromo: { 
-          execute: jest.fn().mockRejectedValue(new Error(errorMessage)) 
+          execute: jest.fn().mockRejectedValue(expectedError) 
         }
       };
       const controller = new EscaladorController(useCases);
@@ -134,11 +137,11 @@ describe('Unit: EscaladorController', () => {
         body: { idRocodromo: 999 } 
       };
       const res = createResMock();
+      const next = jest.fn();
 
-      await controller.suscribirse(req, res, () => {});
+      await controller.suscribirse(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.body).toEqual({ error: errorMessage });
+      expect(next).toHaveBeenCalledWith(expectedError);
     });
   });
 
@@ -172,9 +175,10 @@ describe('Unit: EscaladorController', () => {
 
     it('responde 500 si el caso de uso lanza un error', async () => {
       const errorMessage = 'Error al desuscribirse del rocódromo: El escalador TestClimber no está suscrito al rocódromo con ID 1';
+      const expectedError = new Error(errorMessage);
       const useCases = {
         desuscribirseRocodromo: { 
-          execute: jest.fn().mockRejectedValue(new Error(errorMessage)) 
+          execute: jest.fn().mockRejectedValue(expectedError) 
         }
       };
       const controller = new EscaladorController(useCases);
@@ -183,11 +187,11 @@ describe('Unit: EscaladorController', () => {
         body: { idRocodromo: 1 } 
       };
       const res = createResMock();
+      const next = jest.fn();
 
-      await controller.desuscribirse(req, res, () => {});
+      await controller.desuscribirse(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.body).toEqual({ error: errorMessage });
+      expect(next).toHaveBeenCalledWith(expectedError);
     });
   });
 
