@@ -58,7 +58,7 @@ describe('CrearZona', () => {
 
     // Act & Assert
     await expect(crearZona.execute(datosZona)).rejects.toThrow(
-      `Error al crear la zona: El rocodromo con ID ${datosZona.idRoco} no existe`
+      `El rocódromo con ID ${datosZona.idRoco} no existe`
     );
 
     expect(mockZonaRepository.crearZona).not.toHaveBeenCalled();
@@ -78,7 +78,7 @@ describe('CrearZona', () => {
 
     // Act & Assert
     await expect(crearZona.execute(datosZona)).rejects.toThrow(
-      `Error al crear la zona: ${errorMsg}`
+      `Error al crear la zona`
     );
   });
 });

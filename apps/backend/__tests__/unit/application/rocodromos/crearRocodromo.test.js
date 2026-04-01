@@ -73,7 +73,7 @@ describe('CrearRocodromo', () => {
 
     // Act & Assert
     await expect(crearRoco.execute(datosRocodromo)).rejects.toThrow(
-      `Error al crear el rocodromo: ${errorMsg}`
+      `Error al crear el rocódromo`
     );
   });
 });

@@ -25,7 +25,19 @@ describe('ActualizarMapaZona', () => {
     expect(resultado).toEqual(zonaActualizada);
   });
 
-  it('debería propagar el error del repositorio', async () => {
+  it('debera lanzar un error si la zona no existe', async () => {
+    const mockZonaRepository = {
+      actualizarMapaZona: jest.fn().mockResolvedValue(null),
+    };
+
+    const useCase = new ActualizarMapaZona(mockZonaRepository);
+
+    await expect(
+      useCase.execute(999, '/uploads/mapas_zonas/mapa-1.svg')
+    ).rejects.toThrow('Zona con ID 999 no encontrada');
+  });
+
+  it('deberia propagar el error del repositorio', async () => {
     const mockZonaRepository = {
       actualizarMapaZona: jest.fn().mockRejectedValue(new Error('Error BD')),
     };
@@ -34,6 +46,6 @@ describe('ActualizarMapaZona', () => {
 
     await expect(
       useCase.execute(1, '/uploads/mapas_zonas/mapa-1.svg')
-    ).rejects.toThrow('Error BD');
+    ).rejects.toThrow('Error al actualizar el mapa de la zona');
   });
 });

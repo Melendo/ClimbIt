@@ -24,19 +24,15 @@ describe('ActualizarLogoRocodromo', () => {
     expect(resultado).toEqual(rocodromoActualizado);
   });
 
-  it('debería devolver null si el rocodromo no existe', async () => {
+  it('debera lanzar un error si el rocodromo no existe', async () => {
     const mockRocodromoRepository = {
       actualizarLogoRocodromo: jest.fn().mockResolvedValue(null),
     };
 
     const useCase = new ActualizarLogoRocodromo(mockRocodromoRepository);
 
-    const resultado = await useCase.execute(999, '/uploads/logos_rocodromos/logo-999.jpg');
-
-    expect(mockRocodromoRepository.actualizarLogoRocodromo).toHaveBeenCalledWith(
-      999,
-      '/uploads/logos_rocodromos/logo-999.jpg'
-    );
-    expect(resultado).toBeNull();
+    await expect(
+      useCase.execute(999, '/uploads/logos_rocodromos/logo-999.jpg')
+    ).rejects.toThrow('Rocódromo con ID 999 no encontrado');
   });
 });

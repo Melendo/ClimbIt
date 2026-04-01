@@ -36,7 +36,7 @@ describe('ObtenerRocodromos', () => {
 
     // Act & Assert
     await expect(obtenerRocodromos.execute()).rejects.toThrow(
-      `Error al obtener los rocodromos: ${errorMsg}`
+      `Error al obtener los rocódromos`
     );
   });
 });

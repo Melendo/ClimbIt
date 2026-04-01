@@ -55,7 +55,7 @@ describe('ObtenerZonasRocodromo', () => {
 
     // Act & Assert
     await expect(obtenerZonasRocodromo.execute(rocodromoId)).rejects.toThrow(
-      `Error al obtener el rocodromo por ID: ${errorMsg}`
+      `Error al obtener las zonas del rocódromo`
     );
   });
 });

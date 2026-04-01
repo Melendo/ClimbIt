@@ -69,7 +69,7 @@ describe('CambiarEstadoPistaUseCase', () => {
 
     await expect(
       cambiarEstadoPista.execute(datosEntrada)
-    ).rejects.toThrow('Error al cambiar el estado de la pista: Pista con ID 999 no encontrada');
+    ).rejects.toThrow('Pista con ID 999 no encontrada');
 
     expect(mockPistaRepository.obtenerPorId).toHaveBeenCalledWith(datosEntrada.idPista);
     expect(mockEscaladorRepository.encontrarPorApodo).not.toHaveBeenCalled();
@@ -95,7 +95,7 @@ describe('CambiarEstadoPistaUseCase', () => {
 
     await expect(
       cambiarEstadoPista.execute(datosEntrada)
-    ).rejects.toThrow('Error al cambiar el estado de la pista: Escalador con apodo NoExiste no encontrado');
+    ).rejects.toThrow('Escalador con apodo NoExiste no encontrado');
 
     expect(mockPistaRepository.obtenerPorId).toHaveBeenCalledWith(datosEntrada.idPista);
     expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(datosEntrada.escaladorApodo);
@@ -130,7 +130,7 @@ describe('CambiarEstadoPistaUseCase', () => {
 
     await expect(
       cambiarEstadoPista.execute(datosEntrada)
-    ).rejects.toThrow('Error al cambiar el estado de la pista: Error al actualizar el estado');
+    ).rejects.toThrow('Error al cambiar el estado de la pista');
 
     expect(mockPistaRepository.obtenerPorId).toHaveBeenCalledWith(datosEntrada.idPista);
     expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(datosEntrada.escaladorApodo);
