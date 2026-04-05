@@ -6,37 +6,6 @@ const DEFAULT_CLICK_THRESHOLD = 10;
 
 const svgCache = new Map();
 
-function clamp(value, min, max) {
-    return Math.min(Math.max(value, min), max);
-}
-
-function toNumberOrNull(value) {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : null;
-}
-
-async function loadSvg(svgAssetUrl) {
-    if (!svgCache.has(svgAssetUrl)) {
-        const response = await fetch(svgAssetUrl);
-        if (!response.ok) {
-            throw new Error('No se pudo cargar el mapa SVG del rocódromo');
-        }
-
-        const rawSvg = await response.text();
-        svgCache.set(svgAssetUrl, rawSvg);
-    }
-
-    return svgCache.get(svgAssetUrl);
-}
-
-function buildSvgWithBackground(backgroundImageUrl, svgSize) {
-    return `
-        <svg xmlns="${SVG_NS}" viewBox="0 0 ${svgSize} ${svgSize}" preserveAspectRatio="xMidYMid slice">
-            <image href="${backgroundImageUrl}" x="0" y="0" width="${svgSize}" height="${svgSize}" preserveAspectRatio="xMidYMid slice" />
-        </svg>
-    `;
-}
-
 /**
  * Crea un mapa SVG interactivo reusable con pan y zoom.
  * @param {Object} options
@@ -371,4 +340,38 @@ export function createSvgPanzoomMap(options) {
         getSelectedPoint,
         clearSelectedPoint,
     };
+}
+
+// Función auxiliar para limitar un valor dentro de un rango mínimo y máximo
+function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+}
+
+// Función auxiliar para convertir un valor a número o devolver null si no es válido
+function toNumberOrNull(value) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+}
+// Función auxiliar para cargar un SVG desde una URL con caching
+async function loadSvg(svgAssetUrl) {
+    if (!svgCache.has(svgAssetUrl)) {
+        const response = await fetch(svgAssetUrl);
+        if (!response.ok) {
+            throw new Error('No se pudo cargar el mapa SVG del rocódromo');
+        }
+
+        const rawSvg = await response.text();
+        svgCache.set(svgAssetUrl, rawSvg);
+    }
+
+    return svgCache.get(svgAssetUrl);
+}
+
+// Función auxiliar para construir un SVG con una imagen de fondo
+function buildSvgWithBackground(backgroundImageUrl, svgSize) {
+    return `
+        <svg xmlns="${SVG_NS}" viewBox="0 0 ${svgSize} ${svgSize}" preserveAspectRatio="xMidYMid slice">
+            <image href="${backgroundImageUrl}" x="0" y="0" width="${svgSize}" height="${svgSize}" preserveAspectRatio="xMidYMid slice" />
+        </svg>
+    `;
 }

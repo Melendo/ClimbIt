@@ -1,3 +1,4 @@
+// Vista de error 404 - Página no encontrada
 export function error404View() {
   return `
         <div class="card-body text-center py-5">
@@ -10,6 +11,7 @@ export function error404View() {
     `;
 }
 
+// Vista de error 500 - Error del servidor
 export function error500View() {
   return `
         <div class="card-body text-center py-5">
@@ -22,6 +24,7 @@ export function error500View() {
     `;
 }
 
+// Vista de error genérico con mensaje personalizado
 export function errorGenericoView(mensaje = 'Ha ocurrido un error desconocido') {
   return `
         <div class="card-body text-center py-5">

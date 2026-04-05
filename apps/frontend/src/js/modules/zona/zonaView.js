@@ -90,14 +90,6 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
 
     const updateUrl = (idZona) => {
         const currentUrl = new URL(window.location.href);
-        // Usar replaceState para no llenar el historial de navegación con cada cambio de zona
-        // Pero si queremos que el botón "Atrás" funcione entre zonas, usaríamos pushState.
-        // El usuario pidió "cuando entras a una ruta al ir atrás te redirige siempre a la primera zona".
-        // Esto sugiere que quiere que el estado se conserve. replaceState es suficiente para eso.
-        // Si cambia de zona 1 -> zona 2, y luego entra a ruta X, al volver atrás, debería estar en zona 2.
-        // Si usamos replaceState, al cambiar de zona 1 a 2, reemplazamos la entrada actual.
-        // Al entrar a ruta X (nueva entrada), el historial es: [..., zona 2, ruta X].
-        // Al volver, volvemos a zona 2. Correcto.
         currentUrl.hash = `#mapaZona?id=${rocodromo.id}&zona=${idZona}`;
         history.replaceState(null, '', currentUrl.toString());
     };
@@ -203,10 +195,7 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
 
     // Cargar zona inicial (si hay zonas)
     if (zonaInicial) {
-        // No llamamos a loadZonas inmediatamente porque podría sobreescribir la URL
-        // si initialZonaId es null. Solo la cargamos visualmente.
-        // O mejor: simplemente llamamos a loadZonas con el ID inicial.
-        // Si no habia ID en URL, updateUrl lo pondrá. Esto es deseable.
+
         loadZonas(zonaInicial.id);
     }
 }
