@@ -44,9 +44,11 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
           </div>
         </div>
       </div>
+      <div class="position-absolute bottom-0 start-0 p-2 crear-ruta-mapa-overlay" style="z-index: 2;">
+        <small class="badge text-bg-dark bg-opacity-75 text-wrap text-start shadow-sm border-0">Seleccione el inicio de la ruta</small>
+      </div>
       <div class="position-absolute bottom-0 start-0 end-0 px-3 py-2 crear-ruta-mapa-overlay">
-        <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
-          <small class="text-white-50">Selecciona un punto para guardar posX y posY</small>
+        <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
           <span id="coordenadasSeleccionadas" class="badge text-bg-light">Sin punto</span>
         </div>
       </div>
