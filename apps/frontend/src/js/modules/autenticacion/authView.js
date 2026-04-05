@@ -123,41 +123,6 @@ export function renderLogin(container, callbacks) {
   setupAlertClearOnInput(alertBox, emailInput, passwordInput);
 }
 
-// Componente de barra de progreso para el registro
-function renderRegistroProgress(currentStep) {
-  const steps = [
-    { num: 1, label: 'Email' },
-    { num: 2, label: 'Contraseña' },
-    { num: 3, label: 'Apodo' }
-  ];
-
-  const progressPercent = ((currentStep) / steps.length) * 100;
-
-  return `
-      <div class="registro-progress-container">
-        <div class="registro-progress-wrapper">
-          <div class="registro-progress">
-            <div class="registro-progress-bar" style="width: ${progressPercent}%"></div>
-          </div>
-          <div class="registro-steps">
-            ${steps.map(step => {
-    let stepClass = '';
-    if (step.num < currentStep) stepClass = 'completed';
-    else if (step.num === currentStep) stepClass = 'active';
-
-    return `
-                  <div class="registro-step ${stepClass}">
-                    <div class="registro-step-dot"></div>
-                    <span>${step.label}</span>
-                  </div>
-                `;
-  }).join('')}
-          </div>
-        </div>
-      </div>
-    `;
-}
-
 // Vista registro paso 1: Pedir email
 export function renderRegistroEmail(container, callbacks) {
   container.innerHTML = `
@@ -196,8 +161,6 @@ export function renderRegistroEmail(container, callbacks) {
             </p>
           </form>
         </div>
-        
-        ${renderRegistroProgress(1)}
       </div>
     `;
 
@@ -260,8 +223,6 @@ export function renderRegistroPassword(container, email, callbacks) {
             </div>
           </form>
         </div>
-        
-        ${renderRegistroProgress(2)}
       </div>
     `;
 
@@ -334,8 +295,6 @@ export function renderRegistroApodo(container, email, callbacks) {
             </div>
           </form>
         </div>
-        
-        ${renderRegistroProgress(3)}
       </div>
     `;
 
