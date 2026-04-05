@@ -238,7 +238,8 @@ export async function crearRutaCmd(container, params = {}) {
             const {
                 nombreInput,
                 dificultadSelect,
-                tipoSelect,
+                tipoBoulderInput,
+                tipoViaInput,
                 fechaCreacionInput,
                 fechaRetiradaInput,
                 imagenInput,
@@ -260,14 +261,23 @@ export async function crearRutaCmd(container, params = {}) {
             }
 
             clearFormAlert(alertBox);
-            [nombreInput, dificultadSelect, tipoSelect, fechaCreacionInput, fechaRetiradaInput, imagenInput].forEach(clearFieldError);
+            [nombreInput, dificultadSelect, tipoBoulderInput, tipoViaInput, fechaCreacionInput, fechaRetiradaInput, imagenInput].forEach(clearFieldError);
 
             // Validar campos
             const errors = validateFields(values, selectedPoint);
             if (Object.keys(errors).length > 0) {
                 if (errors.nombre) setFieldError(nombreInput, errors.nombre);
                 if (errors.dificultad) setFieldError(dificultadSelect, errors.dificultad);
-                if (errors.tipo) setFieldError(tipoSelect, errors.tipo);
+                if (errors.tipo) {
+                    const tipoWrapper = container.querySelector('#tipo-wrapper');
+                    if (tipoWrapper) {
+                        tipoWrapper.classList.add('is-invalid');
+                        const feedback = tipoWrapper.querySelector('.invalid-feedback');
+                        if (feedback) {
+                            feedback.textContent = errors.tipo;
+                        }
+                    }
+                }
                 if (errors.fechaCreacion) setFieldError(fechaCreacionInput, errors.fechaCreacion);
                 if (errors.fechaRetirada) setFieldError(fechaRetiradaInput, errors.fechaRetirada);
                 if (errors.imagen) setFieldError(imagenInput, errors.imagen);
@@ -338,7 +348,16 @@ export async function crearRutaCmd(container, params = {}) {
 
                             if (field === 'nombre') setFieldError(nombreInput, msg);
                             if (field === 'dificultad') setFieldError(dificultadSelect, msg);
-                            if (field === 'tipo') setFieldError(tipoSelect, msg);
+                            if (field === 'tipo') {
+                                const tipoWrapper = container.querySelector('#tipo-wrapper');
+                                if (tipoWrapper) {
+                                    tipoWrapper.classList.add('is-invalid');
+                                    const feedback = tipoWrapper.querySelector('.invalid-feedback');
+                                    if (feedback) {
+                                        feedback.textContent = msg;
+                                    }
+                                }
+                            }
                             if (field === 'fechaCreacion') setFieldError(fechaCreacionInput, msg);
                             if (field === 'fechaRetirada') setFieldError(fechaRetiradaInput, msg);
                             if (field === 'imagen') setFieldError(imagenInput, msg);
