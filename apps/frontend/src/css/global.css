@@ -23,6 +23,10 @@ body {
   max-width: var(--app-max-width);
 }
 
+#app-container.app-vertical-layout>.app-content.app-shell {
+  min-height: 100dvh;
+}
+
 /* En móvil: contenido a pantalla completa */
 @media (max-width: 576px) {
   #app-container.app-vertical-layout {
@@ -34,15 +38,15 @@ body {
   }
 
   /* Cards a pantalla completa en móvil (solo la card principal) */
-  #app-container.app-vertical-layout .app-content>.card {
+  #app-container.app-vertical-layout>.app-content.app-shell {
     border-radius: 0 !important;
     border-left: none !important;
     border-right: none !important;
     min-height: 100dvh;
   }
 
-  #app-container.app-vertical-layout .card .card-header,
-  #app-container.app-vertical-layout .card .card-footer {
+  #app-container.app-vertical-layout>.app-content.app-shell>.card-header,
+  #app-container.app-vertical-layout>.app-content.app-shell>.card-footer {
     border-radius: 0 !important;
   }
 }

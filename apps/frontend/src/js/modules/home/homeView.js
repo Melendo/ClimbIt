@@ -1,8 +1,6 @@
 // Vista de la página principal (home)
 export function renderHomeView(container, callbacks) {
   container.innerHTML = `
-    <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
-
       <!-- Contenido principal centrado -->
       <div class="card-body flex-grow-1 d-flex flex-column justify-content-center align-items-center text-center">
         <img src="/icons/apple-touch-icon.png" alt="Logo de ClimbIt" class="mb-3" style="width: 64px; height: 64px; object-fit: contain;" />
@@ -24,9 +22,7 @@ export function renderHomeView(container, callbacks) {
         <p class="text-muted small mt-4 mb-0 px-4" style="max-width: 520px;">
           Esta aplicación es un proyecto de universidad y aún sigue en desarrollo. No se recomienda su uso para datos reales o sensibles. ¡Gracias por tu comprensión!
         </p>
-      </div>
-
-    </div>`;
+      </div>`;
 
   // Evento para el botón de login
   const loginBtn = container.querySelector('#login-btn');

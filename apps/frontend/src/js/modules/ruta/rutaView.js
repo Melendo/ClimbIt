@@ -24,7 +24,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
     : '#misRocodromos';
 
   container.innerHTML = `
-  <div class="card shadow-sm d-flex flex-column crear-ruta-card" style="height: 100dvh; overflow: hidden;">
+  <div class="d-flex flex-column crear-ruta-card" style="height: 100dvh; overflow: hidden;">
     <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
       <a href="${backHref}" class="text-dark text-decoration-none">
         <span class="material-icons align-middle">arrow_back</span>

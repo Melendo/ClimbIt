@@ -53,7 +53,6 @@ export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false) 
   const logoSrc = rocodromo?.logoSrc || '/assets/rocodromoDefecto.jpg';
 
   container.innerHTML = `
-  <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
     <div class="card-header bg-white d-flex align-items-center justify-content-between gap-2 py-3">
       <div class="d-flex align-items-center gap-2">
         <a href="#misRocodromos" class="text-dark text-decoration-none">
@@ -93,7 +92,6 @@ export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false) 
     </div>
 
     ${renderNavbar()}
-  </div>
 `;
 
   // Inicializar event listeners para botones de suscripción
@@ -129,8 +127,6 @@ export function renderMisRocodromos(container, rocodromos) {
   }
 
   const content = `
-  <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
-    
     <!-- Cabecera: Logo de la app -->
     <div class="card-header bg-white d-flex align-items-center justify-content-center gap-2 py-3">
       <img src="/icons/apple-touch-icon.png" alt="Logo de ClimbIt" style="width: 32px; height: 32px; object-fit: contain;" />
@@ -147,8 +143,6 @@ export function renderMisRocodromos(container, rocodromos) {
 
     <!-- Menú de navegación inferior -->
     ${renderNavbar()}
-
-  </div>
 `;
 
   container.innerHTML = content;
@@ -172,8 +166,6 @@ export function renderBuscarRocodromos(container, rocodromos, suscritosIds = [])
   }
 
   container.innerHTML = `
-  <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
-    
     <!-- Cabecera: Botón volver + Título -->
     <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
       <a href="#" onclick="history.back(); return false;" class="text-dark">
@@ -189,13 +181,9 @@ export function renderBuscarRocodromos(container, rocodromos, suscritosIds = [])
         ${rocodromosHTML}
       </div>
     </div>
-
-  </div>
 `;
 
   container.innerHTML = `
-  <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
-    
     <!-- Cabecera: Botón volver + Título -->
     <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
       <a href="#" onclick="history.back(); return false;" class="text-dark">
@@ -211,8 +199,6 @@ export function renderBuscarRocodromos(container, rocodromos, suscritosIds = [])
         ${rocodromosHTML}
       </div>
     </div>
-
-  </div>
 `;
 
   initSubscribeButtons(container);
@@ -266,8 +252,6 @@ export function renderMapaRocodromo(container, data) {
   }
 
   container.innerHTML = `
-  <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
-    
     <!-- Cabecera: Icono + Nombre del rocódromo -->
     <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
       <a href="#misRocodromos" class="text-dark text-decoration-none">
@@ -296,8 +280,6 @@ export function renderMapaRocodromo(container, data) {
 
     <!-- Menú de navegación inferior -->
     ${renderNavbar()}
-
-  </div>
 `;
 }
 
@@ -309,7 +291,6 @@ export function renderZonasRocodromo(container, zonas) {
 
   if (zonas.length === 0) {
     container.innerHTML = `
-    <div class="card shadow-sm">
       <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
         <a href="#" onclick="history.back(); return false;" class="text-dark">
           <span class="material-icons align-middle">arrow_back</span>
@@ -319,7 +300,6 @@ export function renderZonasRocodromo(container, zonas) {
       <div class="card-body">
         <div class="alert alert-info mb-0">No hay zonas disponibles en este rocódromo.</div>
       </div>
-    </div>
   `;
     return;
   }
@@ -332,7 +312,6 @@ export function renderZonasRocodromo(container, zonas) {
 `).join('');
 
   container.innerHTML = `
-  <div class="card shadow-sm">
     <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
       <a href="#" onclick="history.back(); return false;" class="text-dark">
         <span class="material-icons align-middle">arrow_back</span>
@@ -344,14 +323,12 @@ export function renderZonasRocodromo(container, zonas) {
         ${zonasHTML}
       </ul>
     </div>
-  </div>
 `;
 }
 
 // Vista para crear un nuevo rocódromo
 export function renderCrearRocodromo(container, callbacks) {
   container.innerHTML = `
-  <div class="card shadow-sm">
     <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
       <a href="#" onclick="history.back(); return false;" class="text-dark">
         <span class="material-icons align-middle">arrow_back</span>
@@ -387,8 +364,7 @@ export function renderCrearRocodromo(container, callbacks) {
         <div id="form-alert" class="alert d-none" role="alert"></div>
         <button type="submit" class="btn btn-primary w-100">Crear Rocódromo</button>
       </form>
-    </div>
-  </div>`;
+    </div>`;
 
   const form = container.querySelector('#form-crear-rocodromo');
   const nombreInput = container.querySelector('#nombre');

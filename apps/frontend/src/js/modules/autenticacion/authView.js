@@ -33,7 +33,6 @@ function setupEmailFormValidation(form, emailInput, alertBox, onValidEmail) {
 // Vista de inicio de sesión (email + contraseña)
 export function renderLogin(container, callbacks) {
   container.innerHTML = `
-      <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
         <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
           <a href="#home" class="text-dark">
             <span class="material-icons align-middle">arrow_back</span>
@@ -74,7 +73,6 @@ export function renderLogin(container, callbacks) {
             </div>
           </form>
         </div>
-      </div>
     `;
 
   const form = container.querySelector('#login-form');
@@ -126,7 +124,6 @@ export function renderLogin(container, callbacks) {
 // Vista registro paso 1: Pedir email
 export function renderRegistroEmail(container, callbacks) {
   container.innerHTML = `
-      <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
         <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
           <a href="#home" class="text-dark">
             <span class="material-icons align-middle">arrow_back</span>
@@ -161,7 +158,6 @@ export function renderRegistroEmail(container, callbacks) {
             </p>
           </form>
         </div>
-      </div>
     `;
 
   const form = container.querySelector('#registro-email-form');
@@ -174,7 +170,6 @@ export function renderRegistroEmail(container, callbacks) {
 // Vista registro paso 2: Pedir contraseña
 export function renderRegistroPassword(container, email, callbacks) {
   container.innerHTML = `
-      <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
         <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
           <a href="#" id="back-btn" class="text-dark">
             <span class="material-icons align-middle">arrow_back</span>
@@ -223,7 +218,6 @@ export function renderRegistroPassword(container, email, callbacks) {
             </div>
           </form>
         </div>
-      </div>
     `;
 
   const toggleBtn = container.querySelector('#toggle-password');
@@ -263,7 +257,6 @@ export function renderRegistroPassword(container, email, callbacks) {
 // Vista registro paso 3: Pedir apodo
 export function renderRegistroApodo(container, email, callbacks) {
   container.innerHTML = `
-      <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
         <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
           <a href="#" id="back-btn" class="text-dark">
             <span class="material-icons align-middle">arrow_back</span>
@@ -295,7 +288,6 @@ export function renderRegistroApodo(container, email, callbacks) {
             </div>
           </form>
         </div>
-      </div>
     `;
 
   const backBtn = container.querySelector('#back-btn');
