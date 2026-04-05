@@ -1,41 +1,16 @@
-import { renderLoginEmail, renderLoginPassword, renderRegistroEmail, renderRegistroPassword, renderRegistroApodo } from './authView.js';
+import { renderLogin, renderRegistroEmail, renderRegistroPassword, renderRegistroApodo } from './authView.js';
 import { fetchClient, saveToken } from '../../core/client.js';
 
-// Estado del login (guardamos el email entre pasos)
-let loginState = {
-    email: ''
-};
-
-// Controlador para el correo electrónico
+// Controlador de login en una sola vista
 export function loginCmd(container) {
-    // Resetear estado al iniciar el flujo
-    loginState = { email: '' };
-
     const callbacks = {
-        onEmailSubmit: (email) => {
-            loginState.email = email;
-            // Ir al paso 2
-            loginPasswordCmd(container);
-        }
-    };
-
-    renderLoginEmail(container, callbacks);
-}
-
-// Controlador para la contraseña
-function loginPasswordCmd(container) {
-    const callbacks = {
-        onBack: () => {
-            // Volver al paso 1
-            loginCmd(container);
-        },
-        onPasswordSubmit: async (password) => {
+        onLoginSubmit: async (email, password) => {
             // Enviar petición de autenticación
             const res = await fetchClient('escaladores/auth', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    correo: loginState.email,
+                    correo: email,
                     contrasena: password
                 })
             });
@@ -58,7 +33,7 @@ function loginPasswordCmd(container) {
         }
     };
 
-    renderLoginPassword(container, loginState.email, callbacks);
+    renderLogin(container, callbacks);
 }
 
 // ===================== REGISTRO =====================

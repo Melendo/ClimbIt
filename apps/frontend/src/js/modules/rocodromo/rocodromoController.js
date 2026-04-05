@@ -203,7 +203,18 @@ export async function infoRocoCmd(container, id) {
         const rocodromo = await response.json();
 
         rocodromo.logoSrc = await resolveRocodromoLogoSrc(rocodromo);
-        renderInfoRocodromo(container, rocodromo);
+
+        // Verificar si el usuario está suscrito a este rocódromo
+        let estaSuscrito = false;
+        try {
+            const suscritosRes = await fetchClient('/escaladores/mis-rocodromos');
+            const suscritos = await suscritosRes.json();
+            estaSuscrito = suscritos.some(r => r.id === rocodromo.id);
+        } catch (err) {
+            console.warn('No se pudieron obtener rocódromos suscritos:', err.message);
+        }
+
+        renderInfoRocodromo(container, rocodromo, estaSuscrito);
     } catch (err) {
         showError(`Error al obtener la información del rocódromo: ${err.message}`);
     }

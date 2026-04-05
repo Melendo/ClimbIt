@@ -1,22 +1,12 @@
 import { renderNavbar } from '../../components/navbar.js';
-import { showConfirmModal } from '../../components/modal.js';
+import { renderSubscribeButton, initSubscribeButtons } from '../../components/subscribeButton.js';
 
 function renderRocodromoListItem(rocodromo, { estaSuscrito = false } = {}) {
   const ubicacion = rocodromo?.ubicacion || 'Ubicación no disponible';
-  const actionClass = estaSuscrito ? 'btn-warning btn-desuscribirse' : 'btn-outline-secondary btn-suscribirse';
-  const actionText = estaSuscrito ? 'Quitar de favoritos' : 'Marcar como favorito';
-  const actionIcon = estaSuscrito ? 'star' : 'star_border';
 
   return `
     <div class="border rounded-3 bg-white p-2 p-md-3 position-relative">
-      <button
-        class="btn ${actionClass} btn-sm position-absolute top-0 end-0 mt-2 me-2 d-flex align-items-center justify-content-center"
-        data-id="${rocodromo.id}"
-        title="${actionText}"
-        aria-label="${actionText}"
-      >
-        <span class="material-icons" style="font-size: 18px; line-height: 1;">${actionIcon}</span>
-      </button>
+      ${renderSubscribeButton(rocodromo.id, estaSuscrito, { position: 'absolute' })}
 
       <a
         href="#infoRoco?id=${rocodromo.id}"
@@ -54,7 +44,7 @@ function renderValueOrFallback(value, fallback = 'No disponible') {
 }
 
 // Vista para mostrar la información completa de un rocódromo
-export function renderInfoRocodromo(container, rocodromo) {
+export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false) {
   const id = rocodromo?.id;
   const nombre = renderValueOrFallback(rocodromo?.nombre, 'Rocódromo sin nombre');
   const ubicacion = renderValueOrFallback(rocodromo?.ubicacion);
@@ -63,12 +53,14 @@ export function renderInfoRocodromo(container, rocodromo) {
   const logoSrc = rocodromo?.logoSrc || '/assets/rocodromoDefecto.jpg';
 
   container.innerHTML = `
-  <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
-    <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
-      <a href="#misRocodromos" class="text-dark text-decoration-none">
-        <span class="material-icons align-middle">arrow_back</span>
-      </a>
-      <span class="fw-medium">Información del rocódromo</span>
+    <div class="card-header bg-white d-flex align-items-center justify-content-between gap-2 py-3">
+      <div class="d-flex align-items-center gap-2">
+        <a href="#misRocodromos" class="text-dark text-decoration-none">
+          <span class="material-icons align-middle">arrow_back</span>
+        </a>
+        <span class="fw-medium">Información del rocódromo</span>
+      </div>
+      ${renderSubscribeButton(id, estaSuscrito, { size: 'md' })}
     </div>
 
     <div class="card-body flex-grow-1 overflow-auto">
@@ -100,8 +92,10 @@ export function renderInfoRocodromo(container, rocodromo) {
     </div>
 
     ${renderNavbar()}
-  </div>
 `;
+
+  // Inicializar event listeners para botones de suscripción
+  initSubscribeButtons(container);
 }
 
 // Vista para mostrar "Mis Rocódromos" (rocódromos suscritos del usuario)
@@ -132,12 +126,10 @@ export function renderMisRocodromos(container, rocodromos) {
           </div>`;
   }
 
-  container.innerHTML = `
-  <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
-    
+  const content = `
     <!-- Cabecera: Logo de la app -->
     <div class="card-header bg-white d-flex align-items-center justify-content-center gap-2 py-3">
-      <span class="material-icons text-primary" style="font-size: 32px;">terrain</span>
+      <img src="/icons/apple-touch-icon.png" alt="Logo de ClimbIt" style="width: 32px; height: 32px; object-fit: contain;" />
       <span class="fw-bold" style="font-size: 1.5rem;">ClimbIt</span>
     </div>
 
@@ -151,28 +143,10 @@ export function renderMisRocodromos(container, rocodromos) {
 
     <!-- Menú de navegación inferior -->
     ${renderNavbar()}
-
-  </div>
 `;
 
-  // Añadir event listeners para los botones de desuscribirse
-  container.querySelectorAll('.btn-desuscribirse').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const idRocodromo = parseInt(btn.dataset.id);
-      const confirmed = await showConfirmModal({
-        title: 'Desuscribirse del rocódromo',
-        message: '¿Estás seguro de que deseas desuscribirte de este rocódromo?',
-        confirmText: 'Desuscribirse',
-        cancelText: 'Cancelar',
-        confirmClass: 'btn-danger'
-      });
-      if (confirmed) {
-        await window.desuscribirseRocodromo(idRocodromo);
-      }
-    });
-  });
+  container.innerHTML = content;
+  initSubscribeButtons(container);
 }
 
 // Vista para buscar rocódromos (todos los disponibles, sin navbar)
@@ -192,8 +166,6 @@ export function renderBuscarRocodromos(container, rocodromos, suscritosIds = [])
   }
 
   container.innerHTML = `
-  <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
-    
     <!-- Cabecera: Botón volver + Título -->
     <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
       <a href="#" onclick="history.back(); return false;" class="text-dark">
@@ -209,38 +181,27 @@ export function renderBuscarRocodromos(container, rocodromos, suscritosIds = [])
         ${rocodromosHTML}
       </div>
     </div>
-
-  </div>
 `;
 
-  // Añadir event listeners para los botones de suscribirse
-  container.querySelectorAll('.btn-suscribirse').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const idRocodromo = parseInt(btn.dataset.id);
-      await window.suscribirseRocodromo(idRocodromo);
-    });
-  });
+  container.innerHTML = `
+    <!-- Cabecera: Botón volver + Título -->
+    <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
+      <a href="#" onclick="history.back(); return false;" class="text-dark">
+        <span class="material-icons align-middle">arrow_back</span>
+      </a>
+      <span class="fw-medium">Buscar rocódromos</span>
+    </div>
 
-  // Añadir event listeners para los botones de desuscribirse
-  container.querySelectorAll('.btn-desuscribirse').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const idRocodromo = parseInt(btn.dataset.id);
-      const confirmed = await showConfirmModal({
-        title: 'Desuscribirse del rocódromo',
-        message: '¿Estás seguro de que deseas desuscribirte de este rocódromo?',
-        confirmText: 'Desuscribirse',
-        cancelText: 'Cancelar',
-        confirmClass: 'btn-danger'
-      });
-      if (confirmed) {
-        await window.desuscribirseRocodromo(idRocodromo);
-      }
-    });
-  });
+    <!-- Listado de rocódromos (scrollable) -->
+    <div class="card-body flex-grow-1 overflow-auto">
+      <h6 class="text-muted mb-3">Rocódromos disponibles</h6>
+      <div class="d-flex flex-column gap-2">
+        ${rocodromosHTML}
+      </div>
+    </div>
+`;
+
+  initSubscribeButtons(container);
 }
 
 // Vista para mostrar el mapa de un rocódromo con sus zonas y rutas
@@ -291,8 +252,6 @@ export function renderMapaRocodromo(container, data) {
   }
 
   container.innerHTML = `
-  <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
-    
     <!-- Cabecera: Icono + Nombre del rocódromo -->
     <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
       <a href="#misRocodromos" class="text-dark text-decoration-none">
@@ -321,8 +280,6 @@ export function renderMapaRocodromo(container, data) {
 
     <!-- Menú de navegación inferior -->
     ${renderNavbar()}
-
-  </div>
 `;
 }
 
@@ -334,7 +291,6 @@ export function renderZonasRocodromo(container, zonas) {
 
   if (zonas.length === 0) {
     container.innerHTML = `
-    <div class="card shadow-sm">
       <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
         <a href="#" onclick="history.back(); return false;" class="text-dark">
           <span class="material-icons align-middle">arrow_back</span>
@@ -344,7 +300,6 @@ export function renderZonasRocodromo(container, zonas) {
       <div class="card-body">
         <div class="alert alert-info mb-0">No hay zonas disponibles en este rocódromo.</div>
       </div>
-    </div>
   `;
     return;
   }
@@ -357,7 +312,6 @@ export function renderZonasRocodromo(container, zonas) {
 `).join('');
 
   container.innerHTML = `
-  <div class="card shadow-sm">
     <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
       <a href="#" onclick="history.back(); return false;" class="text-dark">
         <span class="material-icons align-middle">arrow_back</span>
@@ -369,14 +323,12 @@ export function renderZonasRocodromo(container, zonas) {
         ${zonasHTML}
       </ul>
     </div>
-  </div>
 `;
 }
 
 // Vista para crear un nuevo rocódromo
 export function renderCrearRocodromo(container, callbacks) {
   container.innerHTML = `
-  <div class="card shadow-sm">
     <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
       <a href="#" onclick="history.back(); return false;" class="text-dark">
         <span class="material-icons align-middle">arrow_back</span>
@@ -412,8 +364,7 @@ export function renderCrearRocodromo(container, callbacks) {
         <div id="form-alert" class="alert d-none" role="alert"></div>
         <button type="submit" class="btn btn-primary w-100">Crear Rocódromo</button>
       </form>
-    </div>
-  </div>`;
+    </div>`;
 
   const form = container.querySelector('#form-crear-rocodromo');
   const nombreInput = container.querySelector('#nombre');

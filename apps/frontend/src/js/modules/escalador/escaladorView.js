@@ -6,11 +6,9 @@ export function renderPerfil(container, escalador, callbacks) {
   const avatar = fotoSrc || '/assets/johnDoe.png';
 
   container.innerHTML = `
-    <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
-
       <!-- Cabecera -->
       <div class="card-header bg-white d-flex align-items-center justify-content-center gap-2 py-3">
-        <span class="material-icons text-primary" style="font-size: 32px;">terrain</span>
+        <img src="/icons/apple-touch-icon.png" alt="Logo de ClimbIt" style="width: 32px; height: 32px; object-fit: contain;" />
         <span class="fw-bold" style="font-size: 1.5rem;">ClimbIt</span>
       </div>
 
@@ -82,8 +80,6 @@ export function renderPerfil(container, escalador, callbacks) {
 
       <!-- Menú de navegación inferior -->
       ${renderNavbar()}
-
-    </div>
     `;
 
   // Evento para abrir el modal de confirmación

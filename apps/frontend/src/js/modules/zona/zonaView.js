@@ -1,5 +1,3 @@
-import { renderNavbar } from '../../components/navbar.js';
-
 export function renderMapaZona(container, data, onZonaSelect, initialZonaId = null, onMapaRender = null, onMapaToggle = null) {
     const { rocodromo, zonas, canCreateRuta = false } = data;
     const nombreRocodromo = rocodromo?.nombre || 'Rocódromo';
@@ -11,7 +9,7 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
 
     // Crear estructura básica
     container.innerHTML = `
-        <div id="mapaZonaCard" class="card shadow-sm d-flex flex-column" style="height: 100dvh; overflow: hidden;">
+        <div id="mapaZonaCard" class="d-flex flex-column" style="height: 100dvh; overflow: hidden;">
             
             <!-- Cabecera -->
             <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
@@ -66,9 +64,6 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                 </div>
                 `}
             </div>
-
-            <!-- Navbar -->
-            ${renderNavbar()}
         </div>
     `;
 
@@ -171,6 +166,9 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
             <div class="row g-3 ${animationClass}">
                 ${rutas.map(ruta => {
             const status = ruta.statusConfig;
+            const hasDificultad = typeof ruta.dificultad === 'string'
+                ? ruta.dificultad.trim().length > 0
+                : Boolean(ruta.dificultad);
             return `
                     <div class="col-6 fade-in">
                         <a href="#infoRuta?id=${ruta.id}" class="text-decoration-none text-dark">
@@ -183,9 +181,10 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                                         <span class="material-icons" style="color: ${status.color}; font-size: 20px;">${status.icon}</span>
                                     </div>
 
+                                    ${hasDificultad ? `
                                     <div class="position-absolute top-0 end-0 m-2">
                                         <span class="badge bg-primary shadow-sm">${ruta.dificultad}</span>
-                                    </div>
+                                    </div>` : ''}
                                     <div class="position-absolute bottom-0 start-0 end-0 p-3 zona-card-overlay">
                                         <h6 class="text-white mb-0 fw-bold text-truncate">${ruta.nombre}</h6>
                                     </div>
@@ -215,15 +214,14 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
 // Vista para crear una nueva zona
 export function renderCrearZona(container, callbacks) {
     container.innerHTML = `
-  <div class="card shadow-sm">
-    <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
-      <a href="#" onclick="history.back(); return false;" class="text-dark">
-        <span class="material-icons align-middle">arrow_back</span>
-      </a>
-      <span class="fw-medium">Nueva Zona</span>
-    </div>
-    <div class="card-body">
-      <form id="form-crear-zona" novalidate>
+        <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
+            <a href="#" onclick="history.back(); return false;" class="text-dark">
+                <span class="material-icons align-middle">arrow_back</span>
+            </a>
+            <span class="fw-medium">Nueva Zona</span>
+        </div>
+        <div class="card-body">
+            <form id="form-crear-zona" novalidate>
         <div class="mb-3">
           <label for="idRocodromo" class="form-label">ID Rocódromo</label>
           <input
@@ -250,9 +248,8 @@ export function renderCrearZona(container, callbacks) {
         </div>
         <div id="form-alert" class="alert d-none" role="alert"></div>
         <button type="submit" class="btn btn-primary w-100">Crear Zona</button>
-      </form>
-    </div>
-  </div>`;
+            </form>
+        </div>`;
 
     const form = container.querySelector('#form-crear-zona');
     const idRocodromoInput = container.querySelector('#idRocodromo');

@@ -1,7 +1,7 @@
 import { renderCrearRuta, renderInfoRuta } from './rutaView.js';
 
 import { createSvgPanzoomMap } from '../../components/svgPanzoomMap.js';
-import { fetchClient, canManageRocodromo, fetchImageObjectUrl, fetchSvgText } from '../../core/client.js';
+import { fetchClient, canManageRocodromo, fetchImageObjectUrl, fetchSvgText, getTokenPayload } from '../../core/client.js';
 import { showError, showLoading, showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
 
 const RUTA_IMAGE_PLACEHOLDER = '/assets/placeholder.jpg';
@@ -34,6 +34,38 @@ const ESTADOS_BACKEND = {
     'en-progreso': 'Proyecto',
     'nada': 'S/N'
 };
+
+async function canManageRutaByZonaId(idZona) {
+    const payload = getTokenPayload();
+    if (!payload || !idZona) return false;
+
+    if (payload.rol === 'Admin') {
+        return true;
+    }
+
+    if (payload.rol !== 'Gestor') {
+        return false;
+    }
+
+    const managedIds = Array.isArray(payload.rocodromosGestionados)
+        ? payload.rocodromosGestionados.map((id) => Number(id)).filter((id) => Number.isInteger(id) && id > 0)
+        : [];
+
+    for (const idRocodromo of managedIds) {
+        try {
+            const zonasRes = await fetchClient(`/rocodromos/zonas/${idRocodromo}`);
+            const zonas = await zonasRes.json();
+            const match = Array.isArray(zonas) && zonas.some((zona) => Number(zona.id) === Number(idZona));
+            if (match) {
+                return true;
+            }
+        } catch (err) {
+            console.warn(`No se pudieron cargar zonas para validar permisos del rocódromo ${idRocodromo}:`, err.message);
+        }
+    }
+
+    return false;
+}
 
 function toIsoDateOrNull(value) {
     if (!value) return null;
@@ -402,6 +434,7 @@ export async function infoRutaCmd(container, id) {
     try {
         const res = await fetchClient(`/pistas/${id}`);
         const ruta = await res.json();
+        ruta.canManage = await canManageRutaByZonaId(ruta.idZona);
 
         if (ruta?.imagenUrl) {
             try {
