@@ -55,14 +55,16 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
     <div class="card-body flex-grow-1 overflow-auto bg-light">
       ${contextError ? `<div id="crear-ruta-context-error" class="alert alert-warning">${contextError}</div>` : ''}
       <form id="form-crear-ruta" novalidate>
-        <div class="mb-3">
-          <label for="tipo" class="form-label">Tipo</label>
-          <select class="form-select" name="tipo" id="tipo" required>
-            <option value="">Selecciona un tipo</option>
-            <option value="boulder">Boulder</option>
-            <option value="via">Via</option>
-          </select>
-          <div class="invalid-feedback"></div>
+        <div class="mb-3" id="tipo-wrapper">
+          <label class="form-label d-block">Tipo</label>
+          <div id="tipo-segmented" class="btn-group w-100" role="group" aria-label="Selecciona tipo">
+            <input type="radio" class="btn-check" name="tipo" id="tipo-boulder" value="boulder" required>
+            <label class="btn btn-outline-primary w-50 rounded-start" for="tipo-boulder">Boulder</label>
+            
+            <input type="radio" class="btn-check" name="tipo" id="tipo-via" value="via" required>
+            <label class="btn btn-outline-primary w-50 rounded-end" for="tipo-via">Vía</label>
+          </div>
+          <div class="invalid-feedback d-block"></div>
         </div>
 
         <p class="text-muted small fw-semibold text-uppercase mb-2">Opcionales</p>
@@ -86,16 +88,17 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
           <div class="invalid-feedback"></div>
         </div>
 
-        <div class="mb-3">
-          <label for="fechaCreacion" class="form-label">Fecha de creacion (opcional)</label>
-          <input type="datetime-local" class="form-control" name="fechaCreacion" id="fechaCreacion" />
-          <div class="invalid-feedback"></div>
-        </div>
-
-        <div class="mb-3">
-          <label for="fechaRetirada" class="form-label">Fecha de retirada (opcional)</label>
-          <input type="datetime-local" class="form-control" name="fechaRetirada" id="fechaRetirada" />
-          <div class="invalid-feedback"></div>
+        <div class="row g-2">
+          <div class="col-6">
+            <label for="fechaCreacion" class="form-label">Fecha de creación</label>
+            <input type="datetime-local" class="form-control" name="fechaCreacion" id="fechaCreacion" />
+            <div class="invalid-feedback"></div>
+          </div>
+          <div class="col-6">
+            <label for="fechaRetirada" class="form-label">Fecha de retirada</label>
+            <input type="datetime-local" class="form-control" name="fechaRetirada" id="fechaRetirada" />
+            <div class="invalid-feedback"></div>
+          </div>
         </div>
 
         <div class="mb-3">
@@ -114,7 +117,8 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
   const form = container.querySelector('#form-crear-ruta');
   const nombreInput = container.querySelector('#nombre');
   const dificultadSelect = container.querySelector('#dificultad');
-  const tipoSelect = container.querySelector('#tipo');
+  const tipoBoulderInput = container.querySelector('#tipo-boulder');
+  const tipoViaInput = container.querySelector('#tipo-via');
   const fechaCreacionInput = container.querySelector('#fechaCreacion');
   const fechaRetiradaInput = container.querySelector('#fechaRetirada');
   const imagenInput = container.querySelector('#imagen');
@@ -123,12 +127,21 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
   const submitButton = container.querySelector('#crear-ruta-submit');
   const alertBox = container.querySelector('#form-alert');
 
+  // Establecer fecha de creación por defecto a ahora
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  fechaCreacionInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+
   dificultadSelect.innerHTML = [
     '<option value="">Sin dificultad</option>',
     ...GRADOS_FRANCESES.map((grado) => `<option value="${grado}">${grado}</option>`),
   ].join('');
 
-  [nombreInput, dificultadSelect, tipoSelect, fechaCreacionInput, fechaRetiradaInput, imagenInput].forEach((el) => {
+  [nombreInput, dificultadSelect, tipoBoulderInput, tipoViaInput, fechaCreacionInput, fechaRetiradaInput, imagenInput].forEach((el) => {
     el.addEventListener('input', () => callbacks.onFieldChange(el, alertBox));
     el.addEventListener('change', () => callbacks.onFieldChange(el, alertBox));
   });
@@ -141,7 +154,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
       idZona,
       nombre: nombreInput.value,
       dificultad: dificultadSelect.value,
-      tipo: tipoSelect.value,
+      tipo: tipoBoulderInput.checked ? 'boulder' : tipoViaInput.checked ? 'via' : '',
       fechaCreacion: fechaCreacionInput.value,
       fechaRetirada: fechaRetiradaInput.value,
       imagen: imagenInput.files?.[0] || null,
@@ -150,7 +163,8 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
     callbacks.onSubmit(values, {
       nombreInput,
       dificultadSelect,
-      tipoSelect,
+      tipoBoulderInput,
+      tipoViaInput,
       fechaCreacionInput,
       fechaRetiradaInput,
       imagenInput,
