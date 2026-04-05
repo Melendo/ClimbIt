@@ -1,4 +1,10 @@
-import { renderMapaRocodromo, renderMisRocodromos, renderBuscarRocodromos, renderCrearRocodromo } from './rocodromoView.js';
+import {
+    renderMapaRocodromo,
+    renderMisRocodromos,
+    renderBuscarRocodromos,
+    renderCrearRocodromo,
+    renderInfoRocodromo,
+} from './rocodromoView.js';
 import { fetchClient, fetchImageObjectUrl } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
 
@@ -180,6 +186,26 @@ export async function mapaRocodromoCmd(container, id) {
         renderMapaRocodromo(container, { rocodromo, zonas: zonasConRutas });
     } catch (err) {
         showError(`Error al obtener o procesar el rocódromo: ${err.message}`);
+    }
+}
+
+// Controlador para la vista de información completa de un rocódromo
+export async function infoRocoCmd(container, id) {
+    if (!id) {
+        showError('ID de rocódromo no válido o no proporcionado');
+        return;
+    }
+
+    showLoading();
+
+    try {
+        const response = await fetchClient(`/rocodromos/${id}`);
+        const rocodromo = await response.json();
+
+        rocodromo.logoSrc = await resolveRocodromoLogoSrc(rocodromo);
+        renderInfoRocodromo(container, rocodromo);
+    } catch (err) {
+        showError(`Error al obtener la información del rocódromo: ${err.message}`);
     }
 }
 

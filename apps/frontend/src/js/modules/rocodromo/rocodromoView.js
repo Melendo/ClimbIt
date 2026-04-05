@@ -10,13 +10,23 @@ function renderRocodromoListItem(rocodromo, { estaSuscrito = false } = {}) {
   return `
     <div class="border rounded-3 bg-white p-2 p-md-3 position-relative">
       <button
-        class="btn ${actionClass} btn-sm position-absolute top-0 end-0 mt-2 me-2 flex-shrink-0"
+        class="btn ${actionClass} btn-sm position-absolute top-0 end-0 mt-2 me-2 d-flex align-items-center justify-content-center"
         data-id="${rocodromo.id}"
         title="${actionText}"
         aria-label="${actionText}"
       >
         <span class="material-icons" style="font-size: 18px; line-height: 1;">${actionIcon}</span>
       </button>
+
+      <a
+        href="#infoRoco?id=${rocodromo.id}"
+        class="btn btn-sm position-absolute bottom-0 end-0 mb-2 me-2 d-flex align-items-center justify-content-center"
+        style="background-color: #1d4ed8; border-color: #1d4ed8; color: #ffffff;"
+        title="Más información"
+        aria-label="Más información"
+      >
+        <span class="material-icons" style="font-size: 18px; line-height: 1;">info</span>
+      </a>
 
       <div class="d-flex align-items-center gap-3">
         <a href="#mapaZona?id=${rocodromo.id}" class="text-decoration-none flex-shrink-0">
@@ -35,6 +45,63 @@ function renderRocodromoListItem(rocodromo, { estaSuscrito = false } = {}) {
       </div>
     </div>
   `;
+}
+
+function renderValueOrFallback(value, fallback = 'No disponible') {
+  if (value === null || value === undefined) return fallback;
+  const normalized = String(value).trim();
+  return normalized || fallback;
+}
+
+// Vista para mostrar la información completa de un rocódromo
+export function renderInfoRocodromo(container, rocodromo) {
+  const id = rocodromo?.id;
+  const nombre = renderValueOrFallback(rocodromo?.nombre, 'Rocódromo sin nombre');
+  const ubicacion = renderValueOrFallback(rocodromo?.ubicacion);
+  const descripcion = renderValueOrFallback(rocodromo?.descripcion);
+  const horarios = renderValueOrFallback(rocodromo?.horarios);
+  const logoSrc = rocodromo?.logoSrc || '/assets/rocodromoDefecto.jpg';
+
+  container.innerHTML = `
+  <div class="card shadow-sm d-flex flex-column" style="min-height: 100dvh;">
+    <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
+      <a href="#misRocodromos" class="text-dark text-decoration-none">
+        <span class="material-icons align-middle">arrow_back</span>
+      </a>
+      <span class="fw-medium">Información del rocódromo</span>
+    </div>
+
+    <div class="card-body flex-grow-1 overflow-auto">
+      <div class="d-flex flex-column align-items-center mb-4">
+        <img
+          src="${logoSrc}"
+          alt="Logo de ${nombre}"
+          class="rounded-4 border"
+          style="width: 140px; height: 140px; object-fit: cover;"
+        >
+        <h4 class="mt-3 mb-1 text-center">${nombre}</h4>
+        <p class="text-muted mb-0 text-center">${ubicacion}</p>
+      </div>
+
+      <div class="list-group list-group-flush border rounded-3 overflow-hidden">
+        <div class="list-group-item">
+          <p class="text-muted small text-uppercase fw-semibold mb-1">Descripción</p>
+          <p class="mb-0">${descripcion}</p>
+        </div>
+        <div class="list-group-item">
+          <p class="text-muted small text-uppercase fw-semibold mb-1">Horarios</p>
+          <p class="mb-0">${horarios}</p>
+        </div>
+      </div>
+
+      <div class="d-grid mt-4">
+        <a href="#mapaZona?id=${id}" class="btn btn-primary">Ver mapa del rocódromo</a>
+      </div>
+    </div>
+
+    ${renderNavbar()}
+  </div>
+`;
 }
 
 // Vista para mostrar "Mis Rocódromos" (rocódromos suscritos del usuario)

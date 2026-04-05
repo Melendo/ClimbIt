@@ -3,7 +3,12 @@ import { mainContainer, showLoading, showError } from './ui.js';
 import { isAuthenticated, canManageRocodromo } from './client.js';
 import { perfilCmd } from '../modules/escalador/escaladorController.js';
 import { crearRutaCmd, infoRutaCmd } from '../modules/ruta/rutaController.js';
-import { misRocodromosCmd, buscarRocodromosCmd, crearRocodromoCmd } from '../modules/rocodromo/rocodromoController.js';
+import {
+    misRocodromosCmd,
+    buscarRocodromosCmd,
+    crearRocodromoCmd,
+    infoRocoCmd,
+} from '../modules/rocodromo/rocodromoController.js';
 import { mapaZonaCmd, crearZonaCmd } from '../modules/zona/zonaController.js';
 import { homeCmd } from '../modules/home/homeController.js';
 import { error404Cmd } from '../modules/error/errorController.js';
@@ -71,6 +76,10 @@ export async function handleNavigation() {
         }
         else if (hash === '#buscarRocodromos') {
             await buscarRocodromosCmd(mainContainer);
+        }
+        else if (hash.startsWith('#infoRoco')) {
+            const id = obtenerParametroDesdeHash('id');
+            await infoRocoCmd(mainContainer, id);
         }
         else if (hash === '#crearRocodromo') {
             crearRocodromoCmd(mainContainer);
