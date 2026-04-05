@@ -48,10 +48,6 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                     </button>
                 </div>
                 
-                <!-- Título del Mapa (Fondo) -->
-                <div class="position-absolute bottom-0 start-0 end-0 p-3" style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
-                    <h5 id="mapaTitulo" class="text-white mb-0 text-shadow">Mapa General</h5>
-                </div>
             </div>
 
 
@@ -124,13 +120,6 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
 
         // Actualizar URL
         updateUrl(idZona);
-
-        // Actualizar título del mapa
-        const zonaObj = zonas.find(z => z.id == idZona);
-        const textoZona = zonaObj ? `Zona ${zonaObj.nombre || zonaObj.id}` : 'Mapa General';
-
-        const mapaTitulo = container.querySelector('#mapaTitulo');
-        if (mapaTitulo) mapaTitulo.textContent = `Mapa ${textoZona}`;
 
         // Mostrar loading en el contenedor de rutas
         let animationClass = '';
