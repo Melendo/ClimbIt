@@ -5,7 +5,7 @@ export function renderHomeView(container, callbacks) {
 
       <!-- Contenido principal centrado -->
       <div class="card-body flex-grow-1 d-flex flex-column justify-content-center align-items-center text-center">
-        <span class="material-icons text-primary mb-3" style="font-size: 64px;">terrain</span>
+        <img src="/icons/apple-touch-icon.png" alt="Logo de ClimbIt" class="mb-3" style="width: 64px; height: 64px; object-fit: contain;" />
         <h1 class="fw-bold mb-2" style="font-size: 2.5rem;">ClimbIt</h1>
         <p class="text-muted fs-5 mb-4">Marca tu progreso</p>
         
