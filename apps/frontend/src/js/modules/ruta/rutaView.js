@@ -228,6 +228,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
   const fechaRetiradaLabel = formatDateTime(fechaRetirada);
   const activoLabel = activo ? 'Activa' : 'Retirada';
   const activoBadgeClass = activo ? 'text-bg-success' : 'text-bg-secondary';
+  const canManage = Boolean(ruta?.canManage);
 
   container.innerHTML = `
 <div class="d-flex flex-column" style="min-height: 100dvh; background: #f8f9fa;">
@@ -246,6 +247,16 @@ export function renderInfoRuta(container, ruta, callbacks) {
     <a href="#" onclick="history.back(); return false;" class="position-absolute top-0 start-0 m-3 text-white d-flex align-items-center justify-content-center rounded-circle text-decoration-none" style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); backdrop-filter: blur(4px);">
       <span class="material-icons">arrow_back</span>
     </a>
+
+    ${canManage ? `
+    <div class="position-absolute top-0 end-0 m-3 d-flex gap-2">
+      <button type="button" class="btn btn-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(255,255,255,0.85);" aria-label="Modificar ruta" title="Modificar ruta">
+        <span class="material-icons" style="font-size: 20px;">edit</span>
+      </button>
+      <button type="button" class="btn btn-danger d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;" aria-label="Eliminar ruta" title="Eliminar ruta">
+        <span class="material-icons" style="font-size: 20px;">delete</span>
+      </button>
+    </div>` : ''}
     
     <!-- Info sobre la imagen -->
     <div class="position-absolute bottom-0 start-0 end-0 p-4 text-white">
