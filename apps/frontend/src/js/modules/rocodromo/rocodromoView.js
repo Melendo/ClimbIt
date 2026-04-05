@@ -1,6 +1,42 @@
 import { renderNavbar } from '../../components/navbar.js';
 import { showConfirmModal } from '../../components/modal.js';
 
+function renderRocodromoListItem(rocodromo, { estaSuscrito = false } = {}) {
+  const ubicacion = rocodromo?.ubicacion || 'Ubicación no disponible';
+  const actionClass = estaSuscrito ? 'btn-warning btn-desuscribirse' : 'btn-outline-secondary btn-suscribirse';
+  const actionText = estaSuscrito ? 'Quitar de favoritos' : 'Marcar como favorito';
+  const actionIcon = estaSuscrito ? 'star' : 'star_border';
+
+  return `
+    <div class="border rounded-3 bg-white p-2 p-md-3 position-relative">
+      <button
+        class="btn ${actionClass} btn-sm position-absolute top-0 end-0 mt-2 me-2 flex-shrink-0"
+        data-id="${rocodromo.id}"
+        title="${actionText}"
+        aria-label="${actionText}"
+      >
+        <span class="material-icons" style="font-size: 18px; line-height: 1;">${actionIcon}</span>
+      </button>
+
+      <div class="d-flex align-items-center gap-3">
+        <a href="#mapaZona?id=${rocodromo.id}" class="text-decoration-none flex-shrink-0">
+          <img
+            src="${rocodromo.logoSrc || '/assets/rocodromoDefecto.jpg'}"
+            alt="${rocodromo.nombre}"
+            class="rounded-3"
+            style="width: 72px; height: 72px; object-fit: cover;"
+          >
+        </a>
+
+        <div class="d-flex flex-column flex-grow-1 min-w-0 pe-5">
+          <a href="#mapaZona?id=${rocodromo.id}" class="d-block text-decoration-none text-dark fw-semibold text-truncate">${rocodromo.nombre}</a>
+          <small class="d-block text-muted text-truncate">${ubicacion}</small>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 // Vista para mostrar "Mis Rocódromos" (rocódromos suscritos del usuario)
 export function renderMisRocodromos(container, rocodromos) {
   let rocodromosHTML = '';
@@ -15,27 +51,13 @@ export function renderMisRocodromos(container, rocodromos) {
             </a>
           </div>`;
   } else {
-    rocodromosHTML = rocodromos.map(rocodromo => `
-          <div class="col-6 col-md-4">
-            <div class="zona-card position-relative rounded overflow-hidden" style="aspect-ratio: 1;">
-              <a href="#mapaZona?id=${rocodromo.id}" class="text-decoration-none">
-                <img src="${rocodromo.logoSrc || '/assets/rocodromoDefecto.jpg'}" alt="${rocodromo.nombre}" class="w-100 h-100" style="object-fit: cover;">
-                <div class="zona-card-overlay position-absolute bottom-0 start-0 end-0 p-2 text-white">
-                  <small class="d-block fw-medium">${rocodromo.nombre}</small>
-                </div>
-              </a>
-              <button class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 btn-desuscribirse" 
-                      data-id="${rocodromo.id}" 
-                      title="Desuscribirse">
-                <span class="material-icons" style="font-size: 16px;">favorite</span>
-              </button>
-            </div>
-          </div>
-        `).join('');
+    rocodromosHTML = rocodromos
+      .map((rocodromo) => renderRocodromoListItem(rocodromo, { estaSuscrito: true }))
+      .join('');
 
-    // Añadir botón de buscar rocódromos al final
+    // Añadir botón de buscar rocódromos al final.
     rocodromosHTML += `
-          <div class="col-12 d-flex justify-content-center mt-3">
+          <div class="d-flex justify-content-center mt-3">
             <a href="#buscarRocodromos" class="btn btn-outline-primary">
               <span class="material-icons align-middle me-1">search</span>
               Buscar más rocódromos
@@ -52,10 +74,10 @@ export function renderMisRocodromos(container, rocodromos) {
       <span class="fw-bold" style="font-size: 1.5rem;">ClimbIt</span>
     </div>
 
-    <!-- Grid de rocódromos (scrollable) -->
+    <!-- Listado de rocódromos (scrollable) -->
     <div class="card-body flex-grow-1 overflow-auto">
       <h6 class="text-muted mb-3">Mis rocódromos</h6>
-      <div class="row g-2">
+      <div class="d-flex flex-column gap-2">
         ${rocodromosHTML}
       </div>
     </div>
@@ -96,25 +118,9 @@ export function renderBuscarRocodromos(container, rocodromos, suscritosIds = [])
             <div class="alert alert-info">No hay rocódromos disponibles.</div>
           </div>`;
   } else {
-    rocodromosHTML = rocodromos.map(rocodromo => {
+    rocodromosHTML = rocodromos.map((rocodromo) => {
       const estaSuscrito = suscritosIds.includes(rocodromo.id);
-      return `
-          <div class="col-6 col-md-4">
-            <div class="zona-card position-relative rounded overflow-hidden" style="aspect-ratio: 1;">
-              <a href="#mapaZona?id=${rocodromo.id}" class="text-decoration-none">
-                <img src="${rocodromo.logoSrc || '/assets/rocodromoDefecto.jpg'}" alt="${rocodromo.nombre}" class="w-100 h-100" style="object-fit: cover;">
-                <div class="zona-card-overlay position-absolute bottom-0 start-0 end-0 p-2 text-white">
-                  <small class="d-block fw-medium">${rocodromo.nombre}</small>
-                </div>
-              </a>
-              <button class="btn ${estaSuscrito ? 'btn-danger btn-desuscribirse' : 'btn-outline-light btn-suscribirse'} btn-sm position-absolute top-0 end-0 m-1" 
-                      data-id="${rocodromo.id}" 
-                      title="${estaSuscrito ? 'Desuscribirse' : 'Suscribirse'}">
-                <span class="material-icons" style="font-size: 16px;">${estaSuscrito ? 'favorite' : 'favorite_border'}</span>
-              </button>
-            </div>
-          </div>
-        `;
+      return renderRocodromoListItem(rocodromo, { estaSuscrito });
     }).join('');
   }
 
@@ -129,10 +135,10 @@ export function renderBuscarRocodromos(container, rocodromos, suscritosIds = [])
       <span class="fw-medium">Buscar rocódromos</span>
     </div>
 
-    <!-- Grid de rocódromos (scrollable) -->
+    <!-- Listado de rocódromos (scrollable) -->
     <div class="card-body flex-grow-1 overflow-auto">
       <h6 class="text-muted mb-3">Rocódromos disponibles</h6>
-      <div class="row g-2">
+      <div class="d-flex flex-column gap-2">
         ${rocodromosHTML}
       </div>
     </div>
