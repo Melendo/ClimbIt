@@ -1,46 +1,20 @@
 import {
-    renderMapaRocodromo,
     renderMisRocodromos,
     renderBuscarRocodromos,
     renderCrearRocodromo,
-    renderInfoRocodromo,
+    renderInfoRocodromo
 } from './rocodromoView.js';
 import { fetchClient, fetchImageObjectUrl } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
 
 const ROCODROMO_LOGO_PLACEHOLDER = '/assets/rocodromoDefecto.jpg';
-const RUTA_IMAGE_PLACEHOLDER = '/assets/placeholder.jpg';
 
-async function resolveRocodromoLogoSrc(rocodromo) {
-    if (!rocodromo?.logoUrl) {
-        return ROCODROMO_LOGO_PLACEHOLDER;
-    }
 
-    try {
-        return await fetchImageObjectUrl(`/rocodromos/${rocodromo.id}/logo`);
-    } catch (err) {
-        console.warn('No se pudo cargar el logo del rocódromo:', err.message);
-        return ROCODROMO_LOGO_PLACEHOLDER;
-    }
-}
-
-async function resolveRutaImageSrc(ruta) {
-    if (!ruta?.imagenUrl) {
-        return RUTA_IMAGE_PLACEHOLDER;
-    }
-
-    try {
-        return await fetchImageObjectUrl(`/pistas/${ruta.id}/imagen`);
-    } catch (err) {
-        console.warn('No se pudo cargar la imagen de la ruta:', err.message);
-        return RUTA_IMAGE_PLACEHOLDER;
-    }
-}
 
 // Controlador para la vista de "Mis Rocódromos" (rocodromos suscritos del usuario)
 export async function misRocodromosCmd(container) {
     showLoading();
-
+    
     try {
         const response = await fetchClient('/escaladores/mis-rocodromos');
         const rocodromos = await response.json();
@@ -61,12 +35,12 @@ export async function misRocodromosCmd(container) {
 // Controlador para la vista de buscar rocódromos (todos los disponibles)
 export async function buscarRocodromosCmd(container) {
     showLoading();
-
+    
     try {
         // Obtener todos los rocódromos disponibles
         const response = await fetchClient('/rocodromos');
         const rocodromos = await response.json();
-
+        
         // Obtener los rocódromos suscritos para marcarlos
         let suscritosIds = [];
         try {
@@ -76,20 +50,101 @@ export async function buscarRocodromosCmd(container) {
         } catch (err) {
             console.warn('No se pudieron obtener rocódromos suscritos:', err.message);
         }
-
+        
         const rocodromosConLogo = await Promise.all(
             rocodromos.map(async (rocodromo) => ({
                 ...rocodromo,
                 logoSrc: await resolveRocodromoLogoSrc(rocodromo),
             }))
         );
-
+        
         renderBuscarRocodromos(container, rocodromosConLogo, suscritosIds);
     } catch (err) {
         console.warn('Error al obtener rocódromos:', err.message);
         // Mostrar vista con lista vacía si hay error
         renderBuscarRocodromos(container, [], []);
     }
+}
+
+// Controlador para la vista de información completa de un rocódromo
+export async function infoRocoCmd(container, id) {
+    if (!id) {
+        showError('ID de rocódromo no válido o no proporcionado');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const response = await fetchClient(`/rocodromos/${id}`);
+        const rocodromo = await response.json();
+        
+        rocodromo.logoSrc = await resolveRocodromoLogoSrc(rocodromo);
+        
+        // Verificar si el usuario está suscrito a este rocódromo
+        let estaSuscrito = false;
+        try {
+            const suscritosRes = await fetchClient('/escaladores/mis-rocodromos');
+            const suscritos = await suscritosRes.json();
+            estaSuscrito = suscritos.some(r => r.id === rocodromo.id);
+        } catch (err) {
+            console.warn('No se pudieron obtener rocódromos suscritos:', err.message);
+        }
+        
+        renderInfoRocodromo(container, rocodromo, estaSuscrito);
+    } catch (err) {
+        showError(`Error al obtener la información del rocódromo: ${err.message}`);
+    }
+}
+
+// Controlador para la vista de crear un nuevo rocódromo
+export function crearRocodromoCmd(container) {
+    const callbacks = {
+        onSubmit: async (values, fields) => {
+            const { nombreInput, ubicacionInput } = fields;
+            
+            // Simple validación frontend
+            if (!values.nombre) {
+                nombreInput.classList.add('is-invalid');
+                return;
+            }
+            if (!values.ubicacion) {
+                ubicacionInput.classList.add('is-invalid');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const res = await fetchClient('/rocodromos/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(values),
+                });
+                const rocodromo = await res.json();
+                
+                // Redirigir al nuevo rocódromo
+                window.location.hash = `#mapaZona?id=${rocodromo.id}`;
+            } catch (err) {
+                // Restaurar la vista del formulario (el loading lo quita)
+                // Como showLoading reemplaza el contenido, tendríamos que volver a renderizar
+                // pero por simplicidad, mostraremos el error en una alerta general por ahora
+                // o idealmente, no usar showLoading fullscreen si queremos mantener el formulario
+                // Para este MVP, recargamos el formulario
+                renderCrearRocodromo(container, callbacks);
+                
+                // Recuperar referencias
+                const newAlertBox = container.querySelector('#form-alert');
+                if (newAlertBox) {
+                    newAlertBox.textContent = `Error: ${err.message}`;
+                    newAlertBox.classList.remove('d-none');
+                    newAlertBox.classList.add('alert-danger');
+                }
+            }
+        }
+    };
+    
+    renderCrearRocodromo(container, callbacks);
 }
 
 // Función para suscribirse a un rocódromo
@@ -102,7 +157,7 @@ export async function suscribirseRocodromo(idRocodromo) {
             },
             body: JSON.stringify({ idRocodromo })
         });
-
+        
         // Recargar la vista actual
         window.location.reload();
     } catch (err) {
@@ -121,7 +176,7 @@ export async function desuscribirseRocodromo(idRocodromo) {
             },
             body: JSON.stringify({ idRocodromo })
         });
-
+        
         // Recargar la vista actual
         window.location.reload();
     } catch (err) {
@@ -134,138 +189,16 @@ export async function desuscribirseRocodromo(idRocodromo) {
 window.suscribirseRocodromo = suscribirseRocodromo;
 window.desuscribirseRocodromo = desuscribirseRocodromo;
 
-// Controlador para la vista de mapa de un rocódromo
-export async function mapaRocodromoCmd(container, id) {
-    if (!id) {
-        showError('ID de rocódromo no válido o no proporcionado');
-        return;
+// Función auxiliar para resolver la URL de la imagen del logo de un rocódromo
+async function resolveRocodromoLogoSrc(rocodromo) {
+    if (!rocodromo?.logoUrl) {
+        return ROCODROMO_LOGO_PLACEHOLDER;
     }
-
-    showLoading();
-
+    
     try {
-        // Intentar obtener datos del rocódromo
-        let rocodromo = { id, nombre: `Rocódromo ${id}` };
-        let zonas = [];
-
-        try {
-            const rocodromoRes = await fetchClient(`/rocodromos/${id}`);
-            rocodromo = await rocodromoRes.json();
-        } catch (err) {
-            console.warn('No se pudo obtener info del rocódromo:', err.message);
-        }
-
-        rocodromo.logoSrc = await resolveRocodromoLogoSrc(rocodromo);
-
-        try {
-            const zonasRes = await fetchClient(`/rocodromos/zonas/${id}`);
-            zonas = await zonasRes.json();
-        } catch (err) {
-            console.warn('No se pudieron obtener las zonas:', err.message);
-        }
-
-        // Para cada zona, intentar obtener sus rutas
-        const zonasConRutas = await Promise.all(
-            zonas.map(async (zona) => {
-                try {
-                    const rutasRes = await fetchClient(`/zonas/pistas/${zona.id}`);
-                    const rutas = await rutasRes.json();
-                    const rutasConImagen = await Promise.all(
-                        rutas.map(async (ruta) => ({
-                            ...ruta,
-                            imagenSrc: await resolveRutaImageSrc(ruta),
-                        }))
-                    );
-                    return { ...zona, rutas: rutasConImagen };
-                } catch {
-                    return { ...zona, rutas: [] };
-                }
-            })
-        );
-
-        renderMapaRocodromo(container, { rocodromo, zonas: zonasConRutas });
+        return await fetchImageObjectUrl(`/rocodromos/${rocodromo.id}/logo`);
     } catch (err) {
-        showError(`Error al obtener o procesar el rocódromo: ${err.message}`);
+        console.warn('No se pudo cargar el logo del rocódromo:', err.message);
+        return ROCODROMO_LOGO_PLACEHOLDER;
     }
-}
-
-// Controlador para la vista de información completa de un rocódromo
-export async function infoRocoCmd(container, id) {
-    if (!id) {
-        showError('ID de rocódromo no válido o no proporcionado');
-        return;
-    }
-
-    showLoading();
-
-    try {
-        const response = await fetchClient(`/rocodromos/${id}`);
-        const rocodromo = await response.json();
-
-        rocodromo.logoSrc = await resolveRocodromoLogoSrc(rocodromo);
-
-        // Verificar si el usuario está suscrito a este rocódromo
-        let estaSuscrito = false;
-        try {
-            const suscritosRes = await fetchClient('/escaladores/mis-rocodromos');
-            const suscritos = await suscritosRes.json();
-            estaSuscrito = suscritos.some(r => r.id === rocodromo.id);
-        } catch (err) {
-            console.warn('No se pudieron obtener rocódromos suscritos:', err.message);
-        }
-
-        renderInfoRocodromo(container, rocodromo, estaSuscrito);
-    } catch (err) {
-        showError(`Error al obtener la información del rocódromo: ${err.message}`);
-    }
-}
-
-// Controlador para la vista de crear un nuevo rocódromo
-export function crearRocodromoCmd(container) {
-    const callbacks = {
-        onSubmit: async (values, fields) => {
-            const { nombreInput, ubicacionInput } = fields;
-
-            // Simple validación frontend
-            if (!values.nombre) {
-                nombreInput.classList.add('is-invalid');
-                return;
-            }
-            if (!values.ubicacion) {
-                ubicacionInput.classList.add('is-invalid');
-                return;
-            }
-
-            showLoading();
-
-            try {
-                const res = await fetchClient('/rocodromos/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(values),
-                });
-                const rocodromo = await res.json();
-
-                // Redirigir al nuevo rocódromo
-                window.location.hash = `#mapaZona?id=${rocodromo.id}`;
-            } catch (err) {
-                // Restaurar la vista del formulario (el loading lo quita)
-                // Como showLoading reemplaza el contenido, tendríamos que volver a renderizar
-                // pero por simplicidad, mostraremos el error en una alerta general por ahora
-                // o idealmente, no usar showLoading fullscreen si queremos mantener el formulario
-                // Para este MVP, recargamos el formulario
-                renderCrearRocodromo(container, callbacks);
-
-                // Recuperar referencias
-                const newAlertBox = container.querySelector('#form-alert');
-                if (newAlertBox) {
-                    newAlertBox.textContent = `Error: ${err.message}`;
-                    newAlertBox.classList.remove('d-none');
-                    newAlertBox.classList.add('alert-danger');
-                }
-            }
-        }
-    };
-
-    renderCrearRocodromo(container, callbacks);
 }

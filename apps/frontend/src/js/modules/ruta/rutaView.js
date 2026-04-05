@@ -1,4 +1,6 @@
 // Escala de grados (falta traerla con peticion al backend)
+import { renderRutaEstadoButtons, setupRutaEstadoButtons } from '../../components/rutaEstadoButtons.js';
+
 const GRADOS_FRANCESES = [
   '3',
   '4',
@@ -186,29 +188,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
   }
 }
 
-// Vista para la información de una ruta
-function formatDateTime(value) {
-  if (!value) return 'No definida';
-
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return 'No definida';
-
-  return parsed.toLocaleString('es-ES', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-function formatTipo(tipo) {
-  if (!tipo) return 'No definido';
-  if (tipo === 'via') return 'Via';
-  if (tipo === 'boulder') return 'Boulder';
-  return tipo;
-}
-
+// Función para renderizar la vista de información de una ruta
 export function renderInfoRuta(container, ruta, callbacks) {
   const {
     nombre,
@@ -284,47 +264,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
 
       <p class="text-muted small mb-3 text-uppercase" style="letter-spacing: 0.5px;">Marcar como</p>
       <div class="row g-2">
-        
-        <div class="col-6">
-          <button class="btn estado-btn d-flex flex-column align-items-center justify-content-center gap-2 w-100 py-3 rounded-3 border-0 position-relative" data-estado="flash" style="background: #fffbeb;">
-            <span class="material-icons info-btn position-absolute" data-tooltip="Completado al primer intento" style="top: 8px; right: 8px; font-size: 16px; color: #d97706; cursor: pointer;">info_outline</span>
-            <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: #fef3c7;">
-              <span class="material-icons" style="color: #d97706; font-size: 28px;">bolt</span>
-            </div>
-            <span class="fw-medium">Flash</span>
-          </button>
-        </div>
-
-        <div class="col-6">
-          <button class="btn estado-btn d-flex flex-column align-items-center justify-content-center gap-2 w-100 py-3 rounded-3 border-0 position-relative" data-estado="completado" style="background: #f0fdf4;">
-            <span class="material-icons info-btn position-absolute" data-tooltip="Has superado la vía" style="top: 8px; right: 8px; font-size: 16px; color: #16a34a; cursor: pointer;">info_outline</span>
-            <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: #dcfce7;">
-              <span class="material-icons" style="color: #16a34a; font-size: 28px;">done</span>
-            </div>
-            <span class="fw-medium">Completado</span>
-          </button>
-        </div>
-
-        <div class="col-6">
-          <button class="btn estado-btn d-flex flex-column align-items-center justify-content-center gap-2 w-100 py-3 rounded-3 border-0 position-relative" data-estado="en-progreso" style="background: #eff6ff;">
-            <span class="material-icons info-btn position-absolute" data-tooltip="Trabajando en esta vía" style="top: 8px; right: 8px; font-size: 16px; color: #2563eb; cursor: pointer;">info_outline</span>
-            <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: #dbeafe;">
-              <span class="material-icons" style="color: #2563eb; font-size: 28px;">sync</span>
-            </div>
-            <span class="fw-medium">Proyecto</span>
-          </button>
-        </div>
-
-        <div class="col-6">
-          <button class="btn estado-btn d-flex flex-column align-items-center justify-content-center gap-2 w-100 py-3 rounded-3 border-0 position-relative" data-estado="nada" style="background: #f3f4f6;">
-            <span class="material-icons info-btn position-absolute" data-tooltip="Quitar registro" style="top: 8px; right: 8px; font-size: 16px; color: #6b7280; cursor: pointer;">info_outline</span>
-            <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: #e5e7eb;">
-              <span class="material-icons" style="color: #6b7280; font-size: 28px;">remove</span>
-            </div>
-            <span class="fw-medium">Desmarcar</span>
-          </button>
-        </div>
-
+        ${renderRutaEstadoButtons()}
       </div>
     </div>
 
@@ -357,74 +297,29 @@ export function renderInfoRuta(container, ruta, callbacks) {
   </div>
 </div>`;
 
-  // Configurar eventos para los botones de estado
-  const estadoActual = container.querySelector('#estado-actual');
-  const estadoTexto = container.querySelector('#estado-texto');
-  const estadoBtns = container.querySelectorAll('.estado-btn');
+  setupRutaEstadoButtons(container, callbacks.onEstadoChange);
+}
 
-  const estadosTexto = {
-    'flash': 'Flash',
-    'completado': 'Completado',
-    'en-progreso': 'Proyecto',
-    'nada': 'Sin registrar'
-  };
+// Función auxiliar para formatear una fecha/hora a un formato legible o mostrar un texto de fallback si no es válida
+function formatDateTime(value) {
+  if (!value) return 'No definida';
 
-  estadoBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      // Ignorar si se hizo clic en el icono de info
-      if (e.target.classList.contains('info-btn')) return;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return 'No definida';
 
-      const estado = btn.dataset.estado;
-
-      // Actualizar texto del estado
-      estadoTexto.textContent = estadosTexto[estado] || 'Sin registrar';
-
-      // Delegar actualización visual del icono y llamada API al controlador
-      callbacks.onEstadoChange(estado, estadoActual, estadoTexto);
-    });
+  return parsed.toLocaleString('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
+}
 
-  // Tooltips para los iconos de información
-  const infoBtns = container.querySelectorAll('.info-btn');
-  let activeTooltip = null;
-
-  infoBtns.forEach(infoBtn => {
-    infoBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-
-      // Cerrar tooltip activo si existe
-      if (activeTooltip) {
-        activeTooltip.remove();
-        activeTooltip = null;
-      }
-
-      // Crear tooltip
-      const tooltip = document.createElement('div');
-      tooltip.className = 'position-absolute px-3 py-2 rounded-3 shadow-sm';
-      tooltip.style.cssText = 'background: #1f2937; color: white; font-size: 0.8rem; z-index: 1000; top: 30px; right: 0; white-space: nowrap; animation: fadeIn 0.15s ease;';
-      tooltip.textContent = infoBtn.dataset.tooltip;
-
-      infoBtn.parentElement.appendChild(tooltip);
-      activeTooltip = tooltip;
-
-      // Cerrar al hacer clic fuera
-      setTimeout(() => {
-        document.addEventListener('click', function closeTooltip() {
-          if (activeTooltip) {
-            activeTooltip.remove();
-            activeTooltip = null;
-          }
-          document.removeEventListener('click', closeTooltip);
-        }, { once: true });
-      }, 10);
-
-      // Auto-cerrar después de 3 segundos
-      setTimeout(() => {
-        if (activeTooltip === tooltip) {
-          tooltip.remove();
-          activeTooltip = null;
-        }
-      }, 3000);
-    });
-  });
+// Función auxiliar para formatear el tipo de ruta a un texto legible
+function formatTipo(tipo) {
+  if (!tipo) return 'No definido';
+  if (tipo === 'via') return 'Via';
+  if (tipo === 'boulder') return 'Boulder';
+  return tipo;
 }

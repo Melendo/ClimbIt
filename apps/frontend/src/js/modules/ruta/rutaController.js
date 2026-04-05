@@ -35,6 +35,15 @@ const ESTADOS_BACKEND = {
     'nada': 'S/N'
 };
 
+// Mapeo de estados del backend a estados del frontend
+const ESTADOS_FRONTEND = {
+    'flash': 'flash',
+    'completado': 'completado',
+    'proyecto': 'en-progreso',
+    'S/N': 'nada'
+};
+
+// Función para verificar si el usuario puede gestionar la ruta basada en el ID de la zona
 async function canManageRutaByZonaId(idZona) {
     const payload = getTokenPayload();
     if (!payload || !idZona) return false;
@@ -47,6 +56,7 @@ async function canManageRutaByZonaId(idZona) {
         return false;
     }
 
+    // Validar que el gestor tiene permisos sobre el rocódromo al que pertenece la zona de la ruta
     const managedIds = Array.isArray(payload.rocodromosGestionados)
         ? payload.rocodromosGestionados.map((id) => Number(id)).filter((id) => Number.isInteger(id) && id > 0)
         : [];
@@ -67,6 +77,7 @@ async function canManageRutaByZonaId(idZona) {
     return false;
 }
 
+// Función auxiliar para convertir una fecha a ISO o retornar null si no es válida
 function toIsoDateOrNull(value) {
     if (!value) return null;
 
@@ -78,6 +89,7 @@ function toIsoDateOrNull(value) {
     return parsedDate.toISOString();
 }
 
+// Configuración de estados para los botones de la vista de ruta 
 function updateCoordinatesBadge(coordsBadge, point) {
     if (!coordsBadge) return;
 
@@ -413,14 +425,6 @@ export async function crearRutaCmd(container, params = {}) {
         contextError,
     });
 }
-
-// Mapeo de estados del backend a estados del frontend
-const ESTADOS_FRONTEND = {
-    'flash': 'flash',
-    'completado': 'completado',
-    'proyecto': 'en-progreso',
-    'S/N': 'nada'
-};
 
 // Controlador para la vista de información de una ruta
 export async function infoRutaCmd(container, id) {
