@@ -171,6 +171,9 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
             <div class="row g-3 ${animationClass}">
                 ${rutas.map(ruta => {
             const status = ruta.statusConfig;
+            const hasDificultad = typeof ruta.dificultad === 'string'
+                ? ruta.dificultad.trim().length > 0
+                : Boolean(ruta.dificultad);
             return `
                     <div class="col-6 fade-in">
                         <a href="#infoRuta?id=${ruta.id}" class="text-decoration-none text-dark">
@@ -183,9 +186,10 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                                         <span class="material-icons" style="color: ${status.color}; font-size: 20px;">${status.icon}</span>
                                     </div>
 
+                                    ${hasDificultad ? `
                                     <div class="position-absolute top-0 end-0 m-2">
                                         <span class="badge bg-primary shadow-sm">${ruta.dificultad}</span>
-                                    </div>
+                                    </div>` : ''}
                                     <div class="position-absolute bottom-0 start-0 end-0 p-3 zona-card-overlay">
                                         <h6 class="text-white mb-0 fw-bold text-truncate">${ruta.nombre}</h6>
                                     </div>

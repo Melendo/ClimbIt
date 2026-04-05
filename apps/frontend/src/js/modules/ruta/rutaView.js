@@ -185,8 +185,49 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
 }
 
 // Vista para la información de una ruta
+function formatDateTime(value) {
+  if (!value) return 'No definida';
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return 'No definida';
+
+  return parsed.toLocaleString('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function formatTipo(tipo) {
+  if (!tipo) return 'No definido';
+  if (tipo === 'via') return 'Via';
+  if (tipo === 'boulder') return 'Boulder';
+  return tipo;
+}
+
 export function renderInfoRuta(container, ruta, callbacks) {
-  const { nombre, dificultad } = ruta || {};
+  const {
+    nombre,
+    dificultad,
+    tipo,
+    colorPresas,
+    fechaCreacion,
+    fechaRetirada,
+    activo,
+  } = ruta || {};
+
+  const hasDificultad = typeof dificultad === 'string'
+    ? dificultad.trim().length > 0
+    : Boolean(dificultad);
+  const tipoLabel = formatTipo(tipo);
+  const dificultadLabel = dificultad || 'Sin dificultad';
+  const colorPresasLabel = colorPresas || 'No definido';
+  const fechaCreacionLabel = formatDateTime(fechaCreacion);
+  const fechaRetiradaLabel = formatDateTime(fechaRetirada);
+  const activoLabel = activo ? 'Activa' : 'Retirada';
+  const activoBadgeClass = activo ? 'text-bg-success' : 'text-bg-secondary';
 
   container.innerHTML = `
 <div class="d-flex flex-column" style="min-height: 100dvh; background: #f8f9fa;">
@@ -208,7 +249,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
     
     <!-- Info sobre la imagen -->
     <div class="position-absolute bottom-0 start-0 end-0 p-4 text-white">
-      <span class="badge mb-2" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); font-size: 0.9rem; padding: 6px 12px;">${dificultad || '-'}</span>
+      ${hasDificultad ? `<span class="badge mb-2" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); font-size: 0.9rem; padding: 6px 12px;">${dificultad}</span>` : ''}
       <h1 class="fs-4 fw-semibold mb-0">${nombre || 'Sin nombre'}</h1>
     </div>
   </div>
@@ -216,9 +257,9 @@ export function renderInfoRuta(container, ruta, callbacks) {
   <!-- Contenido principal -->
   <div class="flex-grow-1 d-flex flex-column">
     
-    <!-- Estado actual -->
+    <!-- Tu progreso y acciones -->
     <div class="bg-white px-4 py-4 border-bottom">
-      <div class="d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center justify-content-between mb-3">
         <div>
           <p class="text-muted small mb-1 text-uppercase" style="letter-spacing: 0.5px;">Tu progreso</p>
           <p class="mb-0 fw-medium" id="estado-texto">Sin registrar</p>
@@ -227,10 +268,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
           <span class="material-icons" style="color: #6b7280; font-size: 28px;">remove</span>
         </div>
       </div>
-    </div>
 
-    <!-- Acciones -->
-    <div class="bg-white mt-2 px-4 py-3">
       <p class="text-muted small mb-3 text-uppercase" style="letter-spacing: 0.5px;">Marcar como</p>
       <div class="row g-2">
         
@@ -274,6 +312,32 @@ export function renderInfoRuta(container, ruta, callbacks) {
           </button>
         </div>
 
+      </div>
+    </div>
+
+    <!-- Detalles de la ruta -->
+    <div class="bg-white mt-2 px-4 py-4">
+      <p class="text-muted small mb-3 text-uppercase" style="letter-spacing: 0.5px;">Detalles de la ruta</p>
+
+      <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+        <span class="badge bg-primary">${tipoLabel}</span>
+        <span class="badge text-bg-light">${dificultadLabel}</span>
+        <span class="badge ${activoBadgeClass}">${activoLabel}</span>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-12">
+          <div class="small text-muted text-uppercase">Color de presas</div>
+          <div class="fw-medium">${colorPresasLabel}</div>
+        </div>
+        <div class="col-12">
+          <div class="small text-muted text-uppercase">Fecha de creación</div>
+          <div class="fw-medium">${fechaCreacionLabel}</div>
+        </div>
+        <div class="col-12">
+          <div class="small text-muted text-uppercase">Fecha de retirada</div>
+          <div class="fw-medium">${fechaRetiradaLabel}</div>
+        </div>
       </div>
     </div>
 
