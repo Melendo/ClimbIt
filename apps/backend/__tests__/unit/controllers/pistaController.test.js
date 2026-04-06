@@ -253,4 +253,64 @@ describe('Unit: PistaController', () => {
       expect(res.body).toEqual({ error: 'Error al eliminar la pista' });
     });
   });
+
+  describe('actualizar', () => {
+    it('responde 200 con la pista actualizada', async () => {
+      const useCases = {
+        actualizar: {
+          execute: jest.fn().mockResolvedValue({
+            id: 1,
+            nombre: 'Pista Actualizada',
+            dificultad: '6b',
+          }),
+        },
+      };
+      const controller = new PistaController(useCases);
+      const req = {
+        params: { id: '1' },
+        body: {
+          nombre: 'Pista Actualizada',
+          dificultad: '6b',
+        },
+      };
+      const res = createResMock();
+
+      await controller.actualizar(req, res, () => {});
+
+      expect(useCases.actualizar.execute).toHaveBeenCalledWith({
+        idPista: '1',
+        idZona: undefined,
+        nombre: 'Pista Actualizada',
+        tipo: undefined,
+        dificultad: '6b',
+        colorPresas: undefined,
+        posX: undefined,
+        posY: undefined,
+        fechaCreacion: undefined,
+        fechaRetirada: undefined,
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.body).toEqual({
+        id: 1,
+        nombre: 'Pista Actualizada',
+        dificultad: '6b',
+      });
+    });
+
+    it('responde 500 si el caso de uso lanza un error', async () => {
+      const useCases = {
+        actualizar: {
+          execute: jest.fn().mockRejectedValue(new Error('Error al actualizar la pista')),
+        },
+      };
+      const controller = new PistaController(useCases);
+      const req = { params: { id: '999' }, body: { nombre: 'Nueva' } };
+      const res = createResMock();
+
+      await controller.actualizar(req, res, () => {});
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.body).toEqual({ error: 'Error al actualizar la pista' });
+    });
+  });
 });

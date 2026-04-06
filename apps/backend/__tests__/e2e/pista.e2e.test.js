@@ -348,4 +348,60 @@ describe('E2E: Pistas', () => {
       expect(response.body.error).toContain('Acceso denegado');
     });
   });
+
+  describe('E2E: Actualizar pista', () => {
+    let pistaTest;
+    let token;
+
+    beforeAll(async () => {
+      pistaTest = await db.Pista.create({
+        idZona: zona.id,
+        nombre: 'Pista Actualizar E2E',
+        dificultad: '6a',
+        tipo: 'via',
+        fechaCreacion: new Date(),
+        activo: true,
+      });
+      token = tokenService.crear({ id: 1, correo: 'admin@e2e.com', rol: 'Admin' });
+    });
+
+    afterAll(async () => {
+      if (pistaTest) {
+        await db.Pista.destroy({ where: { id: pistaTest.id } });
+      }
+    });
+
+    it('deberia actualizar la informacion de la pista', async () => {
+      const payload = {
+        nombre: 'Pista Actualizada E2E',
+        dificultad: '6b',
+        tipo: 'via',
+      };
+
+      const response = await request(app)
+        .put(`/pistas/${pistaTest.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(payload)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('id', pistaTest.id);
+      expect(response.body).toHaveProperty('nombre', payload.nombre);
+      expect(response.body).toHaveProperty('dificultad', payload.dificultad);
+
+      const pistaActualizada = await db.Pista.findByPk(pistaTest.id);
+      expect(pistaActualizada.nombre).toBe(payload.nombre);
+      expect(pistaActualizada.dificultad).toBe(payload.dificultad);
+    });
+
+    it('deberia retornar 401 si no se proporciona token', async () => {
+      const response = await request(app)
+        .put(`/pistas/${pistaTest.id}`)
+        .send({ nombre: 'Sin Token' })
+        .expect(401);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
+      expect(response.body.error).toContain('Acceso denegado');
+    });
+  });
 });

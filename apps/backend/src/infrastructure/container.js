@@ -30,6 +30,7 @@ import ObtenerFotoPerfil from '../application/escaladores/obtenerFotoPerfil.js';
 import ActualizarFotoPerfilEscalador from '../application/escaladores/actualizarFotoPerfilEscalador.js';
 
 import CrearPista from '../application/pistas/crearPista.js';
+import ActualizarPista from '../application/pistas/actualizarPista.js';
 import ActualizarImagenPista from '../application/pistas/actualizarImagenPista.js';
 import ObtenerPistaPorId from '../application/pistas/obtenerPistaPorId.js';
 import CambiarEstadoPista from '../application/pistas/cambiarEstadoPista.js';
@@ -99,6 +100,7 @@ async function inicializarContainer() {
   );
 
   const crearPistaUseCase = new CrearPista(pistaRepository, db.Zona);
+  const actualizarPistaUseCase = new ActualizarPista(pistaRepository, db.Zona);
   const actualizarImagenPistaUseCase = new ActualizarImagenPista(pistaRepository);
   const obtenerPistaPorIdUseCase = new ObtenerPistaPorId(pistaRepository, escaladorRepository);
   const cambiarEstadoPistaUseCase = new CambiarEstadoPista(
@@ -142,6 +144,7 @@ async function inicializarContainer() {
   };
   const pistaUseCases = {
     crear: crearPistaUseCase,
+    actualizar: actualizarPistaUseCase,
     actualizarImagen: actualizarImagenPistaUseCase,
     obtenerPistaPorId: obtenerPistaPorIdUseCase,
     cambiarEstado: cambiarEstadoPistaUseCase,
