@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 import fs from 'fs/promises';
 import path from 'path';
 import PistaController from '../../../src/interfaces/http/controllers/pistaController.js';
+import { BadRequestError, NotFoundError } from '../../../src/domain/sharedObjects/AppError.js';
 
 function createResMock() {
   const res = {
@@ -39,7 +40,9 @@ describe('Unit: PistaController', () => {
 
     await controller.crear(req, res, () => {});
 
-    expect(useCases.crear.execute).toHaveBeenCalledWith({ idZona: 2, nombre: 'Pista', dificultad: '6a' });
+    expect(useCases.crear.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ idZona: 2, nombre: 'Pista', dificultad: '6a' })
+    );
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.body).toEqual({ id: 1, idZona: 2, nombre: 'Pista', dificultad: '6a' });
   });
@@ -52,10 +55,80 @@ describe('Unit: PistaController', () => {
     const req = { body: { idZona: 2, nombre: 'Pista', dificultad: '6a' } };
     const res = createResMock();
 
+    const next = jest.fn();
+
+    await controller.crear(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(expect.any(Error));
+    expect(next.mock.calls[0][0].message).toBe('falló');
+  });
+
+  it('crear: sube imagen y actualiza la pista', async () => {
+    const useCases = {
+      crear: { execute: jest.fn().mockResolvedValue({ id: 1 }) },
+      actualizarImagen: { execute: jest.fn().mockResolvedValue({ id: 1, imagenUrl: '/uploads/imagenes_pistas/new.png' }) },
+    };
+    const controller = new PistaController(useCases);
+    const req = {
+      body: { idZona: 2, nombre: 'Pista', dificultad: '6a', imagenUrl: '/old.png' },
+      file: { path: '/tmp/new.png', filename: 'new.png' },
+    };
+    const res = createResMock();
+
+    jest.spyOn(fs, 'mkdir').mockResolvedValue();
+    jest.spyOn(fs, 'rename').mockResolvedValue();
+    jest.spyOn(fs, 'unlink').mockResolvedValue();
+
     await controller.crear(req, res, () => {});
 
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.body).toEqual({ error: 'falló' });
+    expect(useCases.crear.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ imagenUrl: null })
+    );
+    expect(useCases.actualizarImagen.execute).toHaveBeenCalledWith(1, '/uploads/imagenes_pistas/new.png');
+    expect(res.status).toHaveBeenCalledWith(201);
+  });
+
+  it('crear: usa next con error de limpieza', async () => {
+    const useCases = {
+      crear: { execute: jest.fn().mockRejectedValue(new Error('falló')) },
+    };
+    const controller = new PistaController(useCases);
+    const req = {
+      body: { idZona: 2 },
+      file: { path: '/tmp/new.png', filename: 'new.png' },
+    };
+    const res = createResMock();
+    const next = jest.fn();
+
+    const unlinkError = new Error('unlink fail');
+    unlinkError.code = 'EACCES';
+    jest.spyOn(fs, 'unlink').mockRejectedValue(unlinkError);
+
+    await controller.crear(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(unlinkError);
+  });
+
+  it('crear: propaga el error original si no hay archivo para limpiar', async () => {
+    const useCases = {
+      crear: { execute: jest.fn().mockRejectedValue(new Error('falló')) },
+    };
+    const controller = new PistaController(useCases);
+    const req = {
+      body: { idZona: 2 },
+      file: { path: '/tmp/new.png', filename: 'new.png' },
+    };
+    const res = createResMock();
+    const next = jest.fn();
+
+    const unlinkError = new Error('no file');
+    unlinkError.code = 'ENOENT';
+    jest.spyOn(fs, 'unlink').mockRejectedValue(unlinkError);
+
+    await controller.crear(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(expect.any(Error));
+    expect(next.mock.calls[0][0].message).toBe('falló');
   });
 
   it('obtenerPistaPorId: 200 cuando existe', async () => {
@@ -95,10 +168,14 @@ describe('Unit: PistaController', () => {
     const req = { params: { id: 999 }, user: { apodo: 'TestClimber' } };
     const res = createResMock();
 
-    await controller.obtenerPistaPorId(req, res, () => {});
+    const next = jest.fn();
 
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.body).toEqual({ error: 'Pista con ID 999 no encontrada' });
+    await controller.obtenerPistaPorId(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(expect.any(NotFoundError));
+    const error = next.mock.calls[0][0];
+    expect(error.message).toBe('Pista con ID 999 no encontrada');
+    expect(error.code).toBe('PISTA_NOT_FOUND');
   });
 
   it('actualizarImagen: actualiza la imagen y elimina la anterior', async () => {
@@ -157,10 +234,70 @@ describe('Unit: PistaController', () => {
     const req = { params: { id: 7 } };
     const res = createResMock();
 
-    await controller.obtenerImagen(req, res, () => {});
+    const next = jest.fn();
 
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.body).toEqual({ error: 'La pista no tiene imagen asignada' });
+    await controller.obtenerImagen(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(expect.any(NotFoundError));
+    const error = next.mock.calls[0][0];
+    expect(error.message).toBe('La pista no tiene imagen asignada');
+    expect(error.code).toBe('PISTA_IMAGEN_NO_ASIGNADA');
+  });
+
+  it('actualizarImagen: responde 400 si falta la imagen', async () => {
+    const useCases = {
+      obtenerPistaPorId: { execute: jest.fn() },
+      actualizarImagen: { execute: jest.fn() },
+    };
+    const controller = new PistaController(useCases);
+    const req = { params: { id: 7 } };
+    const res = createResMock();
+    const next = jest.fn();
+
+    await controller.actualizarImagen(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(expect.any(BadRequestError));
+    const error = next.mock.calls[0][0];
+    expect(error.code).toBe('PISTA_IMAGEN_REQUERIDA');
+  });
+
+  it('actualizarImagen: responde 404 si la pista no existe', async () => {
+    const useCases = {
+      obtenerPistaPorId: { execute: jest.fn().mockResolvedValue(null) },
+      actualizarImagen: { execute: jest.fn() },
+    };
+    const controller = new PistaController(useCases);
+    const req = { params: { id: 7 }, file: { path: '/tmp/new.png', filename: 'new.png' } };
+    const res = createResMock();
+    const next = jest.fn();
+
+    jest.spyOn(fs, 'unlink').mockResolvedValue();
+
+    await controller.actualizarImagen(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(expect.any(NotFoundError));
+    const error = next.mock.calls[0][0];
+    expect(error.code).toBe('PISTA_NOT_FOUND');
+  });
+
+  it('obtenerImagen: responde 404 si el archivo no existe', async () => {
+    const useCases = {
+      obtenerPistaPorId: { execute: jest.fn().mockResolvedValue({ id: 7, imagenUrl: '/uploads/imagenes_pistas/existing.png' }) },
+    };
+    const controller = new PistaController(useCases);
+    const req = { params: { id: 7 } };
+    const res = createResMock();
+    const next = jest.fn();
+
+    const accessError = new Error('no file');
+    accessError.code = 'ENOENT';
+    jest.spyOn(fs, 'access').mockRejectedValue(accessError);
+
+    await controller.obtenerImagen(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(expect.any(NotFoundError));
+    const error = next.mock.calls[0][0];
+    expect(error.code).toBe('PISTA_IMAGEN_NOT_FOUND');
   });
 
   describe('cambiarEstado', () => {
@@ -208,10 +345,12 @@ describe('Unit: PistaController', () => {
       };
       const res = createResMock();
 
-      await controller.cambiarEstado(req, res, () => {});
+      const next = jest.fn();
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.body).toEqual({ error: errorMessage });
+      await controller.cambiarEstado(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(expect.any(Error));
+      expect(next.mock.calls[0][0].message).toBe(errorMessage);
     });
   });
 
@@ -247,10 +386,12 @@ describe('Unit: PistaController', () => {
       const req = { params: { id: '999' } };
       const res = createResMock();
 
-      await controller.eliminar(req, res, () => {});
+      const next = jest.fn();
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.body).toEqual({ error: 'Error al eliminar la pista' });
+      await controller.eliminar(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(expect.any(Error));
+      expect(next.mock.calls[0][0].message).toBe('Error al eliminar la pista');
     });
   });
 
@@ -307,10 +448,12 @@ describe('Unit: PistaController', () => {
       const req = { params: { id: '999' }, body: { nombre: 'Nueva' } };
       const res = createResMock();
 
-      await controller.actualizar(req, res, () => {});
+      const next = jest.fn();
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.body).toEqual({ error: 'Error al actualizar la pista' });
+      await controller.actualizar(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(expect.any(Error));
+      expect(next.mock.calls[0][0].message).toBe('Error al actualizar la pista');
     });
   });
 });

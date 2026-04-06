@@ -9,12 +9,19 @@ const db = await dbPromise;
 describe('E2E: Pistas', () => {
   let rocodromo;
   let zona;
+  let escalaVia;
 
   beforeAll(async () => {
     rocodromo = await db.Rocodromo.create({
       nombre: 'Roco Test',
       ubicacion: 'Test Location',
     });
+    escalaVia = await db.EscalaDificultad.create({
+      nombre: 'Escala Via Test',
+      dificultades: ['6a', '6b', '6c'],
+      isColor: false,
+    });
+    await rocodromo.update({ dificultadVia: escalaVia.id });
     zona = await db.Zona.create({
       idRoco: rocodromo.id,
       nombre: 'Zona Bloque Test',
@@ -24,6 +31,7 @@ describe('E2E: Pistas', () => {
   afterAll(async () => {
     if (zona) await zona.destroy();
     if (rocodromo) await rocodromo.destroy();
+    if (escalaVia) await escalaVia.destroy();
     await db.sequelize.close();
   });
 
@@ -295,9 +303,10 @@ describe('E2E: Pistas', () => {
         .post(`/pistas/cambiar-estado/${fakeIdPista}`)
         .set('Authorization', `Bearer ${token}`)
         .send({ estado: 'Completado' })
-        .expect(500);
+        .expect(404);
 
       expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'PISTA_NOT_FOUND');
       expect(response.body.error).toContain('no encontrada');
     });
   });

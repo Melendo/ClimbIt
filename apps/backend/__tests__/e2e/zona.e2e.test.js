@@ -148,7 +148,7 @@ describe('E2E: Zonas', () => {
       expect(response.body.error).toContain('Acceso denegado');
     });
 
-    it('debería retornar 500 si el rocódromo no existe', async () => {
+    it('debería retornar 404 si el rocódromo no existe', async () => {
       const response = await request(app)
         .post('/zonas/create')
         .set('Authorization', `Bearer ${token}`)
@@ -156,9 +156,10 @@ describe('E2E: Zonas', () => {
           idRoco: 999999,
           nombre: 'Zona Nueva',
         })
-        .expect(500);
+        .expect(404);
 
       expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'ROCODROMO_NOT_FOUND');
       expect(response.body.error).toContain('no existe');
     });
   });

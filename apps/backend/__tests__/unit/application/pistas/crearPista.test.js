@@ -14,12 +14,24 @@ describe('crearPistaUseCase', () => {
       findByPk: jest.fn(async (id) => ({ id, idRoco: 1, tipo: 'Boulder' })),
     };
 
-    const crearPista = new CrearPistaUseCase(mockRepository, mockZonaModel);
+    const mockRocodromoRepository = {
+      obtenerEscalasDificultad: jest.fn(async () => ({
+        escalaDificultadBloque: { dificultades: ['3a', '3b'] },
+        escalaDificultadVia: { dificultades: ['5a', '6a'] },
+      })),
+    };
+
+    const crearPista = new CrearPistaUseCase(
+      mockRepository,
+      mockZonaModel,
+      mockRocodromoRepository
+    );
 
     const datos = { idZona: 1, nombre: 'Ex1', dificultad: '3a', tipo: 'boulder' };
     const resultado = await crearPista.execute(datos);
 
     expect(mockZonaModel.findByPk).toHaveBeenCalledWith(1);
+    expect(mockRocodromoRepository.obtenerEscalasDificultad).toHaveBeenCalledWith(1);
     expect(resultado).toMatchObject({
       idZona: 1,
       nombre: 'Ex1',
@@ -41,7 +53,15 @@ describe('crearPistaUseCase', () => {
       findByPk: jest.fn(async () => null),
     };
 
-    const crearPista = new CrearPistaUseCase(mockRepository, mockZonaModel);
+    const mockRocodromoRepository = {
+      obtenerEscalasDificultad: jest.fn(),
+    };
+
+    const crearPista = new CrearPistaUseCase(
+      mockRepository,
+      mockZonaModel,
+      mockRocodromoRepository
+    );
 
     const datos = { idZona: 999, nombre: 'Ex1', dificultad: '3a', tipo: 'boulder' };
     await expect(() => crearPista.execute(datos)).rejects.toThrow(
@@ -61,7 +81,18 @@ describe('crearPistaUseCase', () => {
       findByPk: jest.fn(async (id) => ({ id, idRoco: 1, tipo: 'Boulder' })),
     };
 
-    const crearPista = new CrearPistaUseCase(mockRepository, mockZonaModel);
+    const mockRocodromoRepository = {
+      obtenerEscalasDificultad: jest.fn(async () => ({
+        escalaDificultadBloque: { dificultades: ['3a', '3b'] },
+        escalaDificultadVia: { dificultades: ['5a', '6a'] },
+      })),
+    };
+
+    const crearPista = new CrearPistaUseCase(
+      mockRepository,
+      mockZonaModel,
+      mockRocodromoRepository
+    );
 
     const datos = {};
     await expect(() => crearPista.execute(datos)).rejects.toThrow(
