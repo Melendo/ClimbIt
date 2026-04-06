@@ -1,4 +1,5 @@
 import { isValidEmail } from '../../core/ui.js';
+import { isOnline, OFFLINE_READ_ONLY_ERROR_CODE } from '../../core/client.js';
 import {
   hideAlert,
   setupAlertClearOnInput,
@@ -89,6 +90,11 @@ export function renderLogin(container, callbacks) {
     const email = emailInput.value.trim();
     const password = passwordInput.value;
 
+    if (!isOnline()) {
+      showAlert(alertBox, 'Sin conexión. No puedes iniciar sesión hasta recuperar Internet.');
+      return;
+    }
+
     if (!isValidEmail(email)) {
       showAlert(alertBox, 'El email debe tener el formato correcto (ej: usuario@dominio.com)');
       return;
@@ -104,10 +110,13 @@ export function renderLogin(container, callbacks) {
     try {
       await callbacks.onLoginSubmit(email, password);
     }
-    // eslint-disable-next-line no-unused-vars
     catch (error) {
-      // Mostrar error
-      showAlert(alertBox, 'El usuario y la contraseña no coinciden');
+      if (error.code === OFFLINE_READ_ONLY_ERROR_CODE) {
+        showAlert(alertBox, 'Sin conexión. No puedes iniciar sesión hasta recuperar Internet.');
+      }
+      else {
+        showAlert(alertBox, 'El usuario y la contraseña no coinciden');
+      }
 
       // Rehabilitar botón
       submitBtn.disabled = false;
@@ -304,6 +313,11 @@ export function renderRegistroApodo(container, email, callbacks) {
     const apodo = apodoInput.value.trim();
     const validationMessage = validateRegistroApodo(apodo);
 
+    if (!isOnline()) {
+      showAlert(alertBox, 'Sin conexión. No puedes crear una cuenta hasta recuperar Internet.');
+      return;
+    }
+
     if (validationMessage) {
       showAlert(alertBox, validationMessage);
       apodoInput.classList.add('is-invalid');
@@ -320,8 +334,12 @@ export function renderRegistroApodo(container, email, callbacks) {
     try {
       await callbacks.onApodoSubmit(apodo);
     } catch (error) {
-      // Mostrar error
-      showAlert(alertBox, error.message || 'Error al crear la cuenta');
+      if (error.code === OFFLINE_READ_ONLY_ERROR_CODE) {
+        showAlert(alertBox, 'Sin conexión. No puedes crear una cuenta hasta recuperar Internet.');
+      }
+      else {
+        showAlert(alertBox, error.message || 'Error al crear la cuenta');
+      }
 
       // Rehabilitar botón
       submitBtn.disabled = false;

@@ -18,11 +18,6 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                 </a>
                 <img src="${rocodromo?.logoSrc || '/assets/rocodromoDefecto.jpg'}" alt="Icono rocódromo" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
                 <span class="fw-medium text-truncate">${nombreRocodromo}</span>
-                <div class="ms-auto" style="max-width: 170px;">
-                   <select id="zonaSelector" class="form-select form-select-sm shadow-sm fw-bold border-0" style="min-width: 150px; background-color: rgba(255, 255, 255, 0.95);">
-                        ${zonas.map((z) => `<option value="${z.id}" ${z.id == (zonaInicial?.id) ? 'selected' : ''}>Zona ${z.nombre || z.id}</option>`).join('')}
-                    </select>
-                </div>
             </div>
 
             <!-- Componente de mapa SVG interactivo -->
@@ -48,6 +43,17 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                 
             </div>
 
+            <div id="zonaToolbar" class="card-body bg-light py-2 border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                    <select id="zonaSelector" class="form-select form-select-sm shadow-sm fw-bold" aria-label="Seleccionar zona">
+                        ${zonas.map((z) => `<option value="${z.id}" ${z.id == (zonaInicial?.id) ? 'selected' : ''}>Zona ${z.nombre || z.id}</option>`).join('')}
+                    </select>
+                    <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center" aria-label="Filtros" title="Filtros (próximamente)">
+                        <span class="material-icons" style="font-size: 20px;">filter_alt</span>
+                    </button>
+                </div>
+            </div>
+
 
 
             <!-- Contenedor de Rutas (Dinámico) -->
@@ -69,6 +75,7 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
 
     // Lógica del selector
     const selector = container.querySelector('#zonaSelector');
+    const zonaToolbar = container.querySelector('#zonaToolbar');
     const rutasContainer = container.querySelector('#rutasContainer');
     const mapaContainer = container.querySelector('#mapaRocodromoContainer');
     const btnMapaExpandir = container.querySelector('#btnMapaExpandir');
@@ -76,6 +83,7 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
 
     const setMapaExpandido = (expandido) => {
         mapaContainer.classList.toggle('mapa-rocodromo-fullscreen', expandido);
+        zonaToolbar.classList.toggle('d-none', expandido);
         rutasContainer.classList.toggle('d-none', expandido);
         btnMapaExpandir.classList.toggle('d-none', expandido);
         btnMapaContraer.classList.toggle('d-none', !expandido);
