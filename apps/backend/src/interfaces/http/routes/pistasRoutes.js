@@ -265,6 +265,31 @@ router.post(
 );
 
 /**
+ * DELETE /pistas/:id
+ * Inactiva una pista (borrado logico)
+ *
+ * Parametros esperados (URL Path):
+ * - id (@param {number} , requerido): ID de la pista (entero positivo)
+ *
+ * Requiere: Token JWT valido en header Authorization
+ * Rol de Administrador o Gestor del Rocodromo propietario
+ *
+ * Respuesta esperada: @return {String} Confirmacion de inactivacion exitosa
+ */
+router.delete(
+  '/:id',
+  verifyTokenMiddleware,
+  obtenerPistaPorIdValidators,
+  validate,
+  authorizeRocodromoAccess({
+    resolveRocodromoId: resolveRocodromoIdFromPistaParam,
+  }),
+  (req, res, next) => {
+    pistaController.eliminar(req, res, next);
+  }
+);
+
+/**
  * PUT /pistas/:id/imagen
  * Actualiza la imagen de una pista
  *

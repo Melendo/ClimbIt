@@ -107,6 +107,20 @@ class PistaController {
     }
   }
 
+  async eliminar(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const resultado = await this.useCases.eliminar.execute({
+        idPista: id,
+      });
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   async actualizarImagen(req, res, next) {
     let finalPath = null;
 

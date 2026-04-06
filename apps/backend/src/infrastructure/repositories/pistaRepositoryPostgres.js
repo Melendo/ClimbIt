@@ -123,6 +123,30 @@ class PistaRepositoryPostgres extends pistaRepository {
     }
   }
 
+  async desactivar(idPista) {
+    try {
+      const pistaModel = await this.PistaModel.findByPk(idPista);
+      if (!pistaModel) {
+        throw new NotFoundError(
+          `Pista con ID ${idPista} no encontrada`,
+          'PISTA_NOT_FOUND'
+        );
+      }
+
+      if (pistaModel.activo) {
+        await pistaModel.update({ activo: false });
+        await pistaModel.save();
+      }
+
+      return this._toDomain(pistaModel);
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al inactivar pista',
+        internalCode: 'PISTA_DISABLE_DB_FAILED',
+      });
+    }
+  }
+
   async eliminarEstadoPista(idPista, idEscalador) {
     try {
       const pistaModel = await this.PistaModel.findByPk(idPista);
