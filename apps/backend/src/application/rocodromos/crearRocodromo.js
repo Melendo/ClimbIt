@@ -17,7 +17,9 @@ class CrearRocodromo {
         rocodromoData.ubicacion,
         rocodromoData.logoUrl,
         rocodromoData.descripcion,
-        rocodromoData.horarios
+        rocodromoData.horarios,
+        rocodromoData.dificultadBloque,
+        rocodromoData.dificultadVia
       );
       const creado =
         await this.rocodromoRepository.crearRocodromo(nuevoRocodromo);

@@ -206,4 +206,32 @@ router.get(
   }
 );
 
+/**
+ * GET /rocodromos/:id/escalasDificultad
+ * Obtiene las escalas de dificultad de un rocódromo específico
+ *
+ * Parámetros esperados (URL Path):
+ * - id (@param {number} , requerido): ID del rocodromo (entero positivo)
+ *
+ * Requiere: Token JWT válido en header Authorization
+ *
+ * Respuesta esperada: @return {Array} Array de escalas de dificultad
+ */
+const obtenerEscalasDificultadRocodromoValidators = [
+  param('id')
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('El id del rocodromo debe ser un entero positivo'),
+];
+
+router.get(
+  '/:id/escalasDificultad',
+  verifyTokenMiddleware,
+  obtenerEscalasDificultadRocodromoValidators,
+  validate,
+  (req, res, next) => {
+    rocodromoController.obtenerEscalasDificultad(req, res, next);
+  }
+);
+
 export default router;

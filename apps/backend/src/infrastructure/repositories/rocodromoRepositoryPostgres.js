@@ -20,6 +20,8 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
         rocodromoModel.logoUrl,
         rocodromoModel.descripcion,
         rocodromoModel.horarios,
+        rocodromoModel.dificultadBloque,
+        rocodromoModel.dificultadVia,
         rocodromoModel.activo
       );
     } catch (error) {
@@ -35,6 +37,8 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
         logoUrl: rocodromo.logoUrl,
         descripcion: rocodromo.descripcion,
         horarios: rocodromo.horarios,
+        dificultadBloque: rocodromo.dificultadBloque,
+        dificultadVia: rocodromo.dificultadVia,
       };
       const rocodromoModel = await this.RocodromoModel.create(data);
 
@@ -115,6 +119,36 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
       throw mapRepositoryError(error, {
         fallbackMessage: 'Error al actualizar el logo del rocódromo',
         internalCode: 'ROCODROMO_UPDATE_LOGO_DB_FAILED',
+      });
+    }
+  }
+
+  async obtenerEscalasDificultad(idRocodromo) {
+    try {
+      const rocodromoData = await this.RocodromoModel.findByPk(idRocodromo, {
+        include: ['escalaDificultadBloque', 'escalaDificultadVia'],
+      });
+
+      if (!rocodromoData) {
+        return null;
+      }
+      const toEscalaDTO = (escala) => {
+        if (!escala) return null;
+        return {
+          id: escala.id,
+          nombre: escala.nombre,
+          dificultades: escala.dificultades,
+          isColor: escala.isColor,
+        };
+      };
+      return {
+        escalaDificultadBloque: toEscalaDTO(rocodromoData.escalaDificultadBloque),
+        escalaDificultadVia: toEscalaDTO(rocodromoData.escalaDificultadVia),
+      };
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al obtener las escalas de dificultad del rocódromo',
+        internalCode: 'ROCODROMO_GET_DIFFICULTY_SCALES_DB_FAILED',
       });
     }
   }

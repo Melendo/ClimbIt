@@ -44,6 +44,7 @@ import ActualizarLogoRocodromo from '../application/rocodromos/actualizarLogoRoc
 import ObtenerZonasRocodromo from '../application/rocodromos/obtenerZonasRocodromo.js';
 import ObtenerRocodromos from '../application/rocodromos/obtenerRocodromos.js';
 import ObtenerInformacionRocodromo from '../application/rocodromos/obtenerInformacionRocodromo.js';
+import ObtenerEscalasDificultad from '../application/rocodromos/obtenerEscalasDificultad.js';
 
 // Controladores (interfaces HTTP)
 import EscaladorController from '../interfaces/http/controllers/escaladorController.js';
@@ -120,6 +121,9 @@ async function inicializarContainer() {
   const obtenerInformacionRocodromoUseCase = new ObtenerInformacionRocodromo(
     rocodromoRepository
   );
+  const obtenerEscalasDificultadUseCase = new ObtenerEscalasDificultad(
+    rocodromoRepository
+  );
 
   // 3) Instancia del caso de uso con el repositorio inyectado
   const escaladorUseCases = {
@@ -152,6 +156,7 @@ async function inicializarContainer() {
     obtenerZonasRocodromo: obtenerZonasRocodromoUseCase,
     obtenerRocodromos: obtenerRocodromosUseCase,
     obtenerInformacion: obtenerInformacionRocodromoUseCase,
+    obtenerEscalasDificultad: obtenerEscalasDificultadUseCase,
   };
 
   // 4) Instancia del controlador con los casos de uso inyectados
