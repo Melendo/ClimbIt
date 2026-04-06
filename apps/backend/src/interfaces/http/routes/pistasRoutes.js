@@ -11,9 +11,6 @@ import authorizeRocodromoAccess, {
   resolveRocodromoIdFromZonaBody,
 } from '../middlewares/authorizeRocodromoAccess.js';
 
-import escalaDificultadJSON from '../../../domain/sharedObjects/escalaDificultadFrancesa.json' with { type: 'json' };
-const GRADOS_FRANCESES = escalaDificultadJSON.escala_francesa_escalada.grados;
-
 import containerPromise from '../../../infrastructure/container.js';
 
 const router = express.Router();
@@ -83,11 +80,7 @@ const crearPistaValidators = [
     .withMessage('El nombre de la pista debe tener entre 1 y 100 caracteres'),
   body('dificultad')
     .optional({ nullable: true, checkFalsy: true })
-    .trim()
-    .isIn(GRADOS_FRANCESES)
-    .withMessage(
-      `La dificultad debe ser uno de: ${GRADOS_FRANCESES.join(', ')}`
-    ),
+    .trim(),
   body('posX')
     .optional({ nullable: true })
     .toInt()
@@ -327,11 +320,7 @@ const actualizarPistaValidators = [
     .withMessage('El nombre de la pista debe tener entre 0 y 100 caracteres'),
   body('dificultad')
     .optional({ nullable: true, checkFalsy: true })
-    .trim()
-    .isIn(GRADOS_FRANCESES)
-    .withMessage(
-      `La dificultad debe ser uno de: ${GRADOS_FRANCESES.join(', ')}`
-    ),
+    .trim(),
   body('tipo')
     .optional({ nullable: true })
     .isIn(['boulder', 'via'])
