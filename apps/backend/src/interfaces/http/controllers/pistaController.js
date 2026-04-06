@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { BadRequestError, NotFoundError } from '../../../domain/sharedObjects/AppError.js';
 
 class PistaController {
   constructor(pistaUseCases) {
@@ -52,7 +53,7 @@ class PistaController {
           await fs.unlink(req.file.path);
         } catch (unlinkError) {
           if (unlinkError.code !== 'ENOENT') {
-            return res.status(500).json({ error: unlinkError.message });
+            return next(unlinkError);
           }
         }
       }
@@ -62,12 +63,12 @@ class PistaController {
           await fs.unlink(finalPath);
         } catch (unlinkError) {
           if (unlinkError.code !== 'ENOENT') {
-            return res.status(500).json({ error: unlinkError.message });
+            return next(unlinkError);
           }
         }
       }
 
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -78,14 +79,17 @@ class PistaController {
       const pista = await this.useCases.obtenerPistaPorId.execute(id, escaladorApodo);
 
       if (!pista) {
-        return res
-          .status(404)
-          .json({ error: `Pista con ID ${id} no encontrada` });
+        return next(
+          new NotFoundError(
+            `Pista con ID ${id} no encontrada`,
+            'PISTA_NOT_FOUND'
+          )
+        );
       }
 
       res.status(200).json(pista);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -103,7 +107,7 @@ class PistaController {
 
       res.status(200).json(resultado);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -117,7 +121,7 @@ class PistaController {
 
       res.status(200).json(resultado);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -151,7 +155,7 @@ class PistaController {
 
       res.status(200).json(resultado);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -162,7 +166,9 @@ class PistaController {
       const { id } = req.params;
 
       if (!req.file) {
-        return res.status(400).json({ error: 'La imagen es requerida' });
+        return next(
+          new BadRequestError('La imagen es requerida', 'PISTA_IMAGEN_REQUERIDA')
+        );
       }
 
       const pista = await this.useCases.obtenerPistaPorId.execute(id, null);
@@ -178,9 +184,12 @@ class PistaController {
           }
         }
 
-        return res
-          .status(404)
-          .json({ error: `Pista con ID ${id} no encontrada` });
+        return next(
+          new NotFoundError(
+            `Pista con ID ${id} no encontrada`,
+            'PISTA_NOT_FOUND'
+          )
+        );
       }
 
       if (pista.imagenUrl) {
@@ -225,7 +234,7 @@ class PistaController {
           await fs.unlink(req.file.path);
         } catch (unlinkError) {
           if (unlinkError.code !== 'ENOENT') {
-            return res.status(500).json({ error: unlinkError.message });
+            return next(unlinkError);
           }
         }
       }
@@ -235,12 +244,12 @@ class PistaController {
           await fs.unlink(finalPath);
         } catch (unlinkError) {
           if (unlinkError.code !== 'ENOENT') {
-            return res.status(500).json({ error: unlinkError.message });
+            return next(unlinkError);
           }
         }
       }
 
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -250,15 +259,21 @@ class PistaController {
       const pista = await this.useCases.obtenerPistaPorId.execute(id, null);
 
       if (!pista) {
-        return res
-          .status(404)
-          .json({ error: `Pista con ID ${id} no encontrada` });
+        return next(
+          new NotFoundError(
+            `Pista con ID ${id} no encontrada`,
+            'PISTA_NOT_FOUND'
+          )
+        );
       }
 
       if (!pista.imagenUrl) {
-        return res
-          .status(404)
-          .json({ error: 'La pista no tiene imagen asignada' });
+        return next(
+          new NotFoundError(
+            'La pista no tiene imagen asignada',
+            'PISTA_IMAGEN_NO_ASIGNADA'
+          )
+        );
       }
 
       const fileName = path.basename(pista.imagenUrl);
@@ -273,10 +288,12 @@ class PistaController {
       return res.sendFile(filePath);
     } catch (error) {
       if (error.code === 'ENOENT') {
-        return res.status(404).json({ error: 'Imagen no encontrada' });
+        return next(
+          new NotFoundError('Imagen no encontrada', 'PISTA_IMAGEN_NOT_FOUND', error)
+        );
       }
 
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 }

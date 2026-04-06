@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { BadRequestError, NotFoundError } from '../../../domain/sharedObjects/AppError.js';
 
 class ZonaController {
   constructor(zonaUseCases) {
@@ -13,7 +14,7 @@ class ZonaController {
       const nuevaZona = await this.useCases.crear.execute({ idRoco, nombre, mapa });
       res.status(201).json(nuevaZona);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
   async obtenerPistasDeZona(req, res, next) {
@@ -23,14 +24,14 @@ class ZonaController {
       const pistas = await this.useCases.obtenerPistasDeZona.execute(id, apodo);
 
       if (!pistas) {
-        return res
-          .status(404)
-          .json({ error: `Zona con ID ${id} no encontrada` });
+        return next(
+          new NotFoundError(`Zona con ID ${id} no encontrada`, 'ZONA_NOT_FOUND')
+        );
       }
 
       res.status(200).json(pistas);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -39,7 +40,7 @@ class ZonaController {
       const { id } = req.params;
 
       if (!req.file) {
-        return res.status(400).json({ error: 'El mapa es requerido' });
+        return next(new BadRequestError('El mapa es requerido', 'ZONA_MAPA_REQUERIDO'));
       }
 
       const zona = await this.useCases.obtenerZonaPorId.execute(id);
@@ -60,9 +61,9 @@ class ZonaController {
           }
         }
 
-        return res
-          .status(404)
-          .json({ error: `Zona con ID ${id} no encontrada` });
+        return next(
+          new NotFoundError(`Zona con ID ${id} no encontrada`, 'ZONA_NOT_FOUND')
+        );
       }
 
       if (zona.mapa) {
@@ -91,7 +92,7 @@ class ZonaController {
 
       res.status(200).json({ mapa: updatedZona.mapa });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -101,9 +102,12 @@ class ZonaController {
       const zona = await this.useCases.obtenerZonaPorId.execute(id);
 
       if (!zona || !zona.mapa) {
-        return res
-          .status(404)
-          .json({ error: `Mapa de la zona ${id} no encontrado` });
+        return next(
+          new NotFoundError(
+            `Mapa de la zona ${id} no encontrado`,
+            'ZONA_MAPA_NOT_FOUND'
+          )
+        );
       }
 
       const fileName = path.basename(zona.mapa);
@@ -116,11 +120,11 @@ class ZonaController {
 
       res.sendFile(mapaPath, (err) => {
         if (err && !res.headersSent) {
-          res.status(404).json({ error: 'Mapa no encontrado' });
+          next(new NotFoundError('Mapa no encontrado', 'ZONA_MAPA_NOT_FOUND', err));
         }
       });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 }
