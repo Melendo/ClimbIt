@@ -8,8 +8,28 @@ class RocodromoController {
 
   async crearRocodromo(req, res, next) {
     try {
-      const { nombre, ubicacion, logoUrl, descripcion, horarios } = req.body;
-      const nuevoRocodromo = await this.useCases.crear.execute({ nombre, ubicacion, logoUrl, descripcion, horarios });
+      const {
+        nombre,
+        ubicacion,
+        logoUrl,
+        descripcion,
+        horarios,
+        dificultadBloque,
+        dificultadVia,
+      } = req.body;
+      const toNullableInt = (value) => {
+        if (value === undefined || value === null || value === '') return null;
+        return Number(value);
+      };
+      const nuevoRocodromo = await this.useCases.crear.execute({
+        nombre,
+        ubicacion,
+        logoUrl,
+        descripcion,
+        horarios,
+        dificultadBloque: toNullableInt(dificultadBloque),
+        dificultadVia: toNullableInt(dificultadVia),
+      });
       res.status(201).json(nuevoRocodromo);
     } catch (error) {
       res.status(500).json({ error: error.message });

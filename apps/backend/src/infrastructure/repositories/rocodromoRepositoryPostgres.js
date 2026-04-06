@@ -20,6 +20,8 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
         rocodromoModel.logoUrl,
         rocodromoModel.descripcion,
         rocodromoModel.horarios,
+        rocodromoModel.dificultadBloque,
+        rocodromoModel.dificultadVia,
         rocodromoModel.activo
       );
     } catch (error) {
@@ -35,6 +37,8 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
         logoUrl: rocodromo.logoUrl,
         descripcion: rocodromo.descripcion,
         horarios: rocodromo.horarios,
+        dificultadBloque: rocodromo.dificultadBloque,
+        dificultadVia: rocodromo.dificultadVia,
       };
       const rocodromoModel = await this.RocodromoModel.create(data);
 
