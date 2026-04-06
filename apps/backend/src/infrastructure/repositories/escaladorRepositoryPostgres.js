@@ -168,6 +168,8 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
           rocodromoModel.logoUrl,
           rocodromoModel.descripcion,
           rocodromoModel.horarios,
+          rocodromoModel.dificultadBloque,
+          rocodromoModel.dificultadVia,
           rocodromoModel.activo
         );
       });
