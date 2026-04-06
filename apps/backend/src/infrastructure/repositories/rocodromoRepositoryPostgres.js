@@ -122,6 +122,36 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
       });
     }
   }
+
+  async obtenerEscalasDificultad(idRocodromo) {
+    try {
+      const rocodromoData = await this.RocodromoModel.findByPk(idRocodromo, {
+        include: ['escalaDificultadBloque', 'escalaDificultadVia'],
+      });
+
+      if (!rocodromoData) {
+        return null;
+      }
+      const toEscalaDTO = (escala) => {
+        if (!escala) return null;
+        return {
+          id: escala.id,
+          nombre: escala.nombre,
+          dificultades: escala.dificultades,
+          isColor: escala.isColor,
+        };
+      };
+      return {
+        escalaDificultadBloque: toEscalaDTO(rocodromoData.escalaDificultadBloque),
+        escalaDificultadVia: toEscalaDTO(rocodromoData.escalaDificultadVia),
+      };
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al obtener las escalas de dificultad del rocódromo',
+        internalCode: 'ROCODROMO_GET_DIFFICULTY_SCALES_DB_FAILED',
+      });
+    }
+  }
 }
 
 export default RocodromoRepositoryPostgres;

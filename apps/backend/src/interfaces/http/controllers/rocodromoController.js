@@ -165,6 +165,23 @@ class RocodromoController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  async obtenerEscalasDificultad(req, res, next) {
+    try {
+      const { id } = req.params;
+      const escalas = await this.useCases.obtenerEscalasDificultad.execute(id);
+
+      if (!escalas) {
+        return res
+          .status(404)
+          .json({ error: `Rocódromo con ID ${id} no encontrado` });
+      }
+
+      res.status(200).json(escalas);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 export default RocodromoController;
