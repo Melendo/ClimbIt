@@ -121,6 +121,40 @@ class PistaController {
     }
   }
 
+  async actualizar(req, res, next) {
+    try {
+      const { id } = req.params;
+      const {
+        idZona,
+        nombre,
+        tipo,
+        dificultad,
+        colorPresas,
+        posX,
+        posY,
+        fechaCreacion,
+        fechaRetirada,
+      } = req.body;
+
+      const resultado = await this.useCases.actualizar.execute({
+        idPista: id,
+        idZona,
+        nombre,
+        tipo,
+        dificultad,
+        colorPresas,
+        posX,
+        posY,
+        fechaCreacion,
+        fechaRetirada,
+      });
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   async actualizarImagen(req, res, next) {
     let finalPath = null;
 

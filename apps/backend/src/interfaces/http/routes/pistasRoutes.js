@@ -290,6 +290,110 @@ router.delete(
 );
 
 /**
+ * PUT /pistas/:id
+ * Actualiza informacion de una pista
+ *
+ * Parametros esperados (URL Path):
+ * - id (@param {number} , requerido): ID de la pista (entero positivo)
+ *
+ * Parametros esperados (body) opcionales:
+ * - idZona (@param {int}): ID de la zona a la que pertenece la pista
+ * - nombre (@param {string}): Nombre descriptivo de la pista (0-100 caracteres)
+ * - dificultad (@param {string}): Grado de dificultad en escala francesa
+ * - tipo (@param {string}): Tipo de la pista ("boulder" o "via")
+ * - colorPresas (@param {string}): Color de las presas de la pista
+ * - posX (@param {int}): Coordenada X en el mapa de la pista
+ * - posY (@param {int}): Coordenada Y en el mapa de la pista
+ * - fechaCreacion (@param {Date}): Fecha de creacion de la pista
+ * - fechaRetirada (@param {Date}): Fecha de retirada de la pista
+ *
+ * Requiere: Token JWT valido en header Authorization
+ * Rol de Administrador o Gestor del Rocodromo propietario
+ */
+const actualizarPistaValidators = [
+  param('id')
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('El id de la pista debe ser un entero positivo'),
+  body('idZona')
+    .optional({ nullable: true })
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('idZona debe ser un entero positivo'),
+  body('nombre')
+    .optional({ nullable: true })
+    .trim()
+    .isLength({ min: 0, max: 100 })
+    .withMessage('El nombre de la pista debe tener entre 0 y 100 caracteres'),
+  body('dificultad')
+    .optional({ nullable: true, checkFalsy: true })
+    .trim()
+    .isIn(GRADOS_FRANCESES)
+    .withMessage(
+      `La dificultad debe ser uno de: ${GRADOS_FRANCESES.join(', ')}`
+    ),
+  body('tipo')
+    .optional({ nullable: true })
+    .isIn(['boulder', 'via'])
+    .withMessage('El tipo debe ser uno de: "Boulder", "Via"'),
+  body('colorPresas')
+    .optional({ nullable: true })
+    .isString()
+    .trim()
+    .isLength({ min: 1, max: 50 })
+    .withMessage(
+      'El color de las presas debe ser una cadena de 1 a 50 caracteres'
+    ),
+  body('posX')
+    .optional({ nullable: true })
+    .toInt()
+    .isInt()
+    .withMessage('posX debe ser un numero entero valido'),
+  body('posY')
+    .optional({ nullable: true })
+    .toInt()
+    .isInt()
+    .withMessage('posY debe ser un numero entero valido'),
+  body('fechaCreacion')
+    .optional({ nullable: true, checkFalsy: true })
+    .toDate()
+    .custom((value) => {
+      if (!value) {
+        return true;
+      }
+      if (value > new Date()) {
+        throw new Error('La fecha de creacion no puede ser futura');
+      }
+      return true;
+    }),
+  body('fechaRetirada')
+    .optional({ nullable: true, checkFalsy: true })
+    .toDate()
+    .custom((value) => {
+      if (!value) {
+        return true;
+      }
+      if (value <= new Date()) {
+        throw new Error('La fecha de retirada no puede ser anterior a la fecha actual');
+      }
+      return true;
+    }),
+];
+
+router.put(
+  '/:id',
+  verifyTokenMiddleware,
+  actualizarPistaValidators,
+  validate,
+  authorizeRocodromoAccess({
+    resolveRocodromoId: resolveRocodromoIdFromPistaParam,
+  }),
+  (req, res, next) => {
+    pistaController.actualizar(req, res, next);
+  }
+);
+
+/**
  * PUT /pistas/:id/imagen
  * Actualiza la imagen de una pista
  *

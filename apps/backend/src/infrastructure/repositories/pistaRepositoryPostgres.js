@@ -123,6 +123,39 @@ class PistaRepositoryPostgres extends pistaRepository {
     }
   }
 
+  async actualizar(pista) {
+    try {
+      const pistaModel = await this.PistaModel.findByPk(pista.id);
+      if (!pistaModel) {
+        throw new NotFoundError(
+          `Pista con ID ${pista.id} no encontrada`,
+          'PISTA_NOT_FOUND'
+        );
+      }
+
+      const data = {
+        idZona: pista.idZona,
+        nombre: pista.nombre,
+        dificultad: pista.dificultad,
+        tipo: pista.tipo,
+        colorPresas: pista.colorPresas,
+        posX: pista.posX,
+        posY: pista.posY,
+        fechaCreacion: pista.fechaCreacion,
+        fechaRetirada: pista.fechaRetirada,
+      };
+
+      await pistaModel.update(data);
+      await pistaModel.save();
+      return this._toDomain(pistaModel);
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al actualizar pista',
+        internalCode: 'PISTA_UPDATE_DB_FAILED',
+      });
+    }
+  }
+
   async desactivar(idPista) {
     try {
       const pistaModel = await this.PistaModel.findByPk(idPista);
