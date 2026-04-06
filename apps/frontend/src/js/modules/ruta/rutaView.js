@@ -231,7 +231,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
     </a>
 
     ${canManage ? `
-    <div class="position-absolute top-0 end-0 m-3 d-flex gap-2">
+    <div class="position-absolute bottom-0 end-0 m-3 d-flex gap-2" style="z-index: 3;">
       <button type="button" class="btn btn-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(255,255,255,0.85);" aria-label="Modificar ruta" title="Modificar ruta">
         <span class="material-icons" style="font-size: 20px;">edit</span>
       </button>

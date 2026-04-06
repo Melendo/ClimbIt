@@ -1,5 +1,6 @@
 import { registerSW } from 'virtual:pwa-register';
 import { initRouter } from './core/router.js';
+import { initConnectivityBanner } from './core/ui.js';
 
 registerSW({ immediate: true });
 
@@ -20,4 +21,5 @@ async function lockPortraitOrientation() {
 
 // EntryPonint -> Inicializa el router
 lockPortraitOrientation();
+initConnectivityBanner();
 initRouter();

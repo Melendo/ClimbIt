@@ -1,6 +1,23 @@
 // Centralizacion de las peticiones fetch con manejo de errores
 
 const TOKEN_KEY = 'jwt_token';
+export const OFFLINE_READ_ONLY_ERROR_CODE = 'OFFLINE_READ_ONLY';
+export const OFFLINE_UNAVAILABLE_ERROR_CODE = 'OFFLINE_UNAVAILABLE';
+
+
+export function isOnline() {
+    return typeof navigator === 'undefined' ? true : navigator.onLine;
+}
+
+function buildClientError(message, code) {
+    const error = new Error(message);
+    error.code = code;
+    return error;
+}
+
+function isReadOnlyMethod(method) {
+    return ['GET', 'HEAD', 'OPTIONS'].includes(method);
+}
 
 // Guardar el token después del login
 export function saveToken(token) {
@@ -80,6 +97,15 @@ export function isAuthenticated() {
 }
 
 export async function fetchClient(url, options = {}) {
+    const method = (options.method || 'GET').toUpperCase();
+
+    if (!isOnline() && !isReadOnlyMethod(method)) {
+        throw buildClientError(
+            'Sin conexión: la app está en modo lectura y no puedes realizar cambios.',
+            OFFLINE_READ_ONLY_ERROR_CODE
+        );
+    }
+
     const token = getToken();
     const isFormDataBody = options.body instanceof FormData;
 
@@ -97,7 +123,21 @@ export async function fetchClient(url, options = {}) {
         headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(url, { ...options, headers });
+    let response;
+
+    try {
+        response = await fetch(url, { ...options, method, headers });
+    }
+    catch {
+        if (!isOnline()) {
+            throw buildClientError(
+                'Sin conexión y sin datos almacenados para esta solicitud.',
+                OFFLINE_UNAVAILABLE_ERROR_CODE
+            );
+        }
+
+        throw new Error('No se pudo completar la solicitud. Inténtalo de nuevo.');
+    }
 
     // Si el servidor responde 401, el token expiró o es inválido
     if (response.status === 401) {
