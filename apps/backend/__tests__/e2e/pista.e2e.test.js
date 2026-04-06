@@ -301,4 +301,51 @@ describe('E2E: Pistas', () => {
       expect(response.body.error).toContain('no encontrada');
     });
   });
+
+  describe('E2E: Eliminar pista (borrado logico)', () => {
+    let pistaTest;
+    let token;
+
+    beforeAll(async () => {
+      pistaTest = await db.Pista.create({
+        idZona: zona.id,
+        nombre: 'Pista Eliminar E2E',
+        dificultad: '6a',
+        tipo: 'via',
+        fechaCreacion: new Date(),
+        activo: true,
+      });
+      token = tokenService.crear({ id: 1, correo: 'admin@e2e.com', rol: 'Admin' });
+    });
+
+    afterAll(async () => {
+      if (pistaTest) {
+        await db.Pista.destroy({ where: { id: pistaTest.id } });
+      }
+    });
+
+    it('deberia inactivar una pista existente', async () => {
+      const response = await request(app)
+        .delete(`/pistas/${pistaTest.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('mensaje');
+      expect(response.body.mensaje).toContain('inactivada');
+
+      const pistaActualizada = await db.Pista.findByPk(pistaTest.id);
+      expect(pistaActualizada).not.toBeNull();
+      expect(pistaActualizada.activo).toBe(false);
+    });
+
+    it('deberia retornar 401 si no se proporciona token', async () => {
+      const response = await request(app)
+        .delete(`/pistas/${pistaTest.id}`)
+        .expect(401);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
+      expect(response.body.error).toContain('Acceso denegado');
+    });
+  });
 });
