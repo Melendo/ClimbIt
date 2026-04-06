@@ -214,4 +214,43 @@ describe('Unit: PistaController', () => {
       expect(res.body).toEqual({ error: errorMessage });
     });
   });
+
+  describe('eliminar', () => {
+    it('responde 200 con mensaje de exito cuando inactiva la pista', async () => {
+      const useCases = {
+        eliminar: {
+          execute: jest.fn().mockResolvedValue({
+            mensaje: 'Pista con ID 1 inactivada exitosamente.',
+          }),
+        },
+      };
+      const controller = new PistaController(useCases);
+      const req = { params: { id: '1' } };
+      const res = createResMock();
+
+      await controller.eliminar(req, res, () => {});
+
+      expect(useCases.eliminar.execute).toHaveBeenCalledWith({ idPista: '1' });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.body).toEqual({
+        mensaje: 'Pista con ID 1 inactivada exitosamente.',
+      });
+    });
+
+    it('responde 500 si el caso de uso lanza un error', async () => {
+      const useCases = {
+        eliminar: {
+          execute: jest.fn().mockRejectedValue(new Error('Error al eliminar la pista')),
+        },
+      };
+      const controller = new PistaController(useCases);
+      const req = { params: { id: '999' } };
+      const res = createResMock();
+
+      await controller.eliminar(req, res, () => {});
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.body).toEqual({ error: 'Error al eliminar la pista' });
+    });
+  });
 });
