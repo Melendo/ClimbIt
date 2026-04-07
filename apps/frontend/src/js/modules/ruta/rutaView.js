@@ -1,13 +1,5 @@
 import { renderRutaEstadoButtons, setupRutaEstadoButtons } from '../../components/rutaEstadoButtons.js';
-
-function escapeHtml(value) {
-  return String(value)
-  .replace(/&/g, '&amp;')
-  .replace(/</g, '&lt;')
-  .replace(/>/g, '&gt;')
-  .replace(/"/g, '&quot;')
-  .replace(/'/g, '&#39;');
-}
+import { escapeHtml } from '../../components/formHelpers.js';
 
 function toDateInputValue(value) {
   if (!value) return '';
