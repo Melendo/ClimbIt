@@ -9,8 +9,6 @@ describe('E2E: Rocodromos', () => {
   let rocodromoConZonas;
   let rocodromoSinZonas;
   let rocodromoParaActualizar;
-  let escalaBloque;
-  let escalaVia;
   const zonasCreadas = [];
   let token;
 
@@ -32,18 +30,6 @@ describe('E2E: Rocodromos', () => {
       ubicacion: 'Test Location 3',
     });
 
-    escalaBloque = await db.EscalaDificultad.create({
-      nombre: 'Escala Bloque E2E',
-      dificultades: ['V0', 'V1'],
-      isColor: false,
-    });
-
-    escalaVia = await db.EscalaDificultad.create({
-      nombre: 'Escala Via E2E',
-      dificultades: ['5a', '5b'],
-      isColor: false,
-    });
-
     zonasCreadas.push(await db.Zona.create({
       idRoco: rocodromoConZonas.id,
       nombre: 'Zona Boulder',
@@ -62,8 +48,6 @@ describe('E2E: Rocodromos', () => {
     if (rocodromoConZonas) await rocodromoConZonas.destroy();
     if (rocodromoSinZonas) await rocodromoSinZonas.destroy();
     if (rocodromoParaActualizar) await rocodromoParaActualizar.destroy();
-    if (escalaBloque) await escalaBloque.destroy();
-    if (escalaVia) await escalaVia.destroy();
     
     await db.sequelize.close();
   });
@@ -241,8 +225,6 @@ describe('E2E: Rocodromos', () => {
           ubicacion: 'Ubicacion Actualizada E2E',
           descripcion: 'Descripcion actualizada',
           horarios: 'L-V 10-22',
-          dificultadBloque: escalaBloque.id,
-          dificultadVia: escalaVia.id,
         })
         .expect(200);
 
@@ -251,20 +233,6 @@ describe('E2E: Rocodromos', () => {
       expect(response.body).toHaveProperty('ubicacion', 'Ubicacion Actualizada E2E');
       expect(response.body).toHaveProperty('descripcion', 'Descripcion actualizada');
       expect(response.body).toHaveProperty('horarios', 'L-V 10-22');
-      expect(response.body).toHaveProperty('dificultadBloque', escalaBloque.id);
-      expect(response.body).toHaveProperty('dificultadVia', escalaVia.id);
-    });
-
-    it('deberia retornar 404 si la escala de bloque no existe', async () => {
-      const response = await request(app)
-        .put(`/rocodromos/${rocodromoParaActualizar.id}`)
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          dificultadBloque: 9999999,
-        })
-        .expect(404);
-
-      expect(response.body).toHaveProperty('code', 'ESCALA_DIFICULTAD_BLOQUE_NOT_FOUND');
     });
   });
 });

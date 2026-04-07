@@ -9,7 +9,7 @@ function renderValueOrFallback(value, fallback = 'No disponible') {
 }
 
 // Vista para mostrar la información completa de un rocódromo
-export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false) {
+export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false, canManage = false) {
   const id = rocodromo?.id;
   const nombre = renderValueOrFallback(rocodromo?.nombre, 'Rocódromo sin nombre');
   const ubicacion = renderValueOrFallback(rocodromo?.ubicacion);
@@ -18,6 +18,7 @@ export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false) 
   const logoSrc = rocodromo?.logoSrc || '/assets/rocodromoDefecto.jpg';
 
   container.innerHTML = `
+    <div class="d-flex flex-column" style="height: 100dvh; overflow: hidden;">
     <div class="card-header bg-white d-flex align-items-center justify-content-between gap-2 py-3">
       <div class="d-flex align-items-center gap-2">
         <a href="#misRocodromos" class="text-dark text-decoration-none">
@@ -25,17 +26,34 @@ export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false) 
         </a>
         <span class="fw-medium">Información del rocódromo</span>
       </div>
-      ${renderSubscribeButton(id, estaSuscrito, { size: 'md' })}
+      <div class="d-flex align-items-center gap-2">
+        ${canManage ? `
+          <a href="#modificarRocodromo?id=${id}" class="btn btn-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;" aria-label="Modificar rocódromo" title="Modificar rocódromo">
+            <span class="material-icons" style="font-size: 20px;">edit</span>
+          </a>
+        ` : ''}
+        <div class="d-flex align-items-center justify-content-center">
+          ${renderSubscribeButton(id, estaSuscrito, { size: 'md', position: 'inline' })}
+        </div>
+      </div>
     </div>
 
     <div class="card-body flex-grow-1 overflow-auto">
       <div class="d-flex flex-column align-items-center mb-4">
-        <img
-          src="${logoSrc}"
-          alt="Logo de ${nombre}"
-          class="rounded-4 border"
-          style="width: 140px; height: 140px; object-fit: cover;"
-        >
+        <div class="position-relative" style="width: 140px; height: 140px;">
+          <img
+            src="${logoSrc}"
+            alt="Logo de ${nombre}"
+            class="rounded-4 border"
+            style="width: 140px; height: 140px; object-fit: cover;"
+          >
+          ${canManage ? `
+            <button type="button" id="btn-actualizar-logo-roco" class="btn btn-dark btn-sm position-absolute bottom-0 end-0 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; border-radius: 999px;" aria-label="Actualizar logo" title="Actualizar logo">
+              <span class="material-icons" style="font-size: 18px; line-height: 1;">photo_camera</span>
+            </button>
+            <input type="file" id="input-logo-roco" class="d-none" accept="image/*" />
+          ` : ''}
+        </div>
         <h4 class="mt-3 mb-1 text-center">${nombre}</h4>
         <p class="text-muted mb-0 text-center">${ubicacion}</p>
       </div>
@@ -57,10 +75,91 @@ export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false) 
     </div>
 
     ${renderNavbar()}
+  </div>
 `;
 
   // Inicializar event listeners para botones de suscripción
   initSubscribeButtons(container);
+}
+
+export function renderModificarRocodromo(container, callbacks, initialValues = {}) {
+  container.innerHTML = `
+    <div class="d-flex flex-column" style="height: 100dvh; overflow: hidden;">
+      <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
+        <a href="#" onclick="history.back(); return false;" class="text-dark text-decoration-none">
+          <span class="material-icons align-middle">arrow_back</span>
+        </a>
+        <span class="fw-medium">Modificar rocódromo</span>
+      </div>
+      <div class="card-body flex-grow-1 overflow-auto bg-light">
+        <form id="form-modificar-rocodromo" novalidate>
+          <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input type="text" class="form-control" name="nombre" id="nombre" maxlength="100" placeholder="Ej: ClimbIt Center" />
+            <div class="invalid-feedback"></div>
+          </div>
+
+          <div class="mb-3">
+            <label for="ubicacion" class="form-label">Ubicación</label>
+            <input type="text" class="form-control" name="ubicacion" id="ubicacion" maxlength="255" placeholder="Ej: Calle Principal 123, Madrid" />
+            <div class="invalid-feedback"></div>
+          </div>
+
+          <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <textarea class="form-control" name="descripcion" id="descripcion" rows="4" placeholder="Describe el rocódromo"></textarea>
+            <div class="invalid-feedback"></div>
+          </div>
+
+          <div class="mb-3">
+            <label for="horarios" class="form-label">Horario</label>
+            <textarea class="form-control" name="horarios" id="horarios" rows="3" placeholder="Ej: L-V 09:00-22:00"></textarea>
+            <div class="invalid-feedback"></div>
+          </div>
+
+          <div id="form-alert" class="alert d-none" role="alert"></div>
+
+          <button type="submit" id="modificar-roco-submit" class="btn btn-primary w-100">Guardar cambios</button>
+        </form>
+      </div>
+    </div>
+  `;
+
+  const form = container.querySelector('#form-modificar-rocodromo');
+  const nombreInput = container.querySelector('#nombre');
+  const ubicacionInput = container.querySelector('#ubicacion');
+  const descripcionInput = container.querySelector('#descripcion');
+  const horariosInput = container.querySelector('#horarios');
+  const alertBox = container.querySelector('#form-alert');
+  const submitButton = container.querySelector('#modificar-roco-submit');
+
+  nombreInput.value = String(initialValues?.nombre || '');
+  ubicacionInput.value = String(initialValues?.ubicacion || '');
+  descripcionInput.value = String(initialValues?.descripcion || '');
+  horariosInput.value = String(initialValues?.horarios || '');
+
+  [nombreInput, ubicacionInput, descripcionInput, horariosInput].forEach((el) => {
+    el.addEventListener('input', () => callbacks.onFieldChange(el, alertBox));
+    el.addEventListener('change', () => callbacks.onFieldChange(el, alertBox));
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    callbacks.onSubmit({
+      nombre: nombreInput.value,
+      ubicacion: ubicacionInput.value,
+      descripcion: descripcionInput.value,
+      horarios: horariosInput.value,
+    }, {
+      nombreInput,
+      ubicacionInput,
+      descripcionInput,
+      horariosInput,
+      alertBox,
+      submitButton,
+    });
+  });
 }
 
 // Vista para mostrar "Mis Rocódromos" (rocódromos suscritos del usuario)

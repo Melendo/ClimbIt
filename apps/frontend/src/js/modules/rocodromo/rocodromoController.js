@@ -2,12 +2,35 @@ import {
     renderMisRocodromos,
     renderBuscarRocodromos,
     renderCrearRocodromo,
-    renderInfoRocodromo
+    renderInfoRocodromo,
+    renderModificarRocodromo,
 } from './rocodromoView.js';
-import { fetchClient, fetchImageObjectUrl } from '../../core/client.js';
-import { showLoading, showError } from '../../core/ui.js';
+import { fetchClient, fetchImageObjectUrl, canManageRocodromo } from '../../core/client.js';
+import { showLoading, showError, showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
 
 const ROCODROMO_LOGO_PLACEHOLDER = '/assets/rocodromoDefecto.jpg';
+const MAX_LOGO_SIZE_BYTES = 3 * 1024 * 1024;
+
+function applyRocodromoServerValidationErrors(validationErrors, fields) {
+    if (!Array.isArray(validationErrors)) return;
+
+    const {
+        nombreInput,
+        ubicacionInput,
+        descripcionInput,
+        horariosInput,
+    } = fields;
+
+    validationErrors.forEach((errorItem) => {
+        const field = errorItem.field;
+        const msg = errorItem.msg || 'Valor invalido';
+
+        if (field === 'nombre') setFieldError(nombreInput, msg);
+        if (field === 'ubicacion') setFieldError(ubicacionInput, msg);
+        if (field === 'descripcion') setFieldError(descripcionInput, msg);
+        if (field === 'horarios') setFieldError(horariosInput, msg);
+    });
+}
 
 
 
@@ -80,6 +103,7 @@ export async function infoRocoCmd(container, id) {
         const rocodromo = await response.json();
         
         rocodromo.logoSrc = await resolveRocodromoLogoSrc(rocodromo);
+        const canManage = canManageRocodromo(rocodromo?.id);
         
         // Verificar si el usuario está suscrito a este rocódromo
         let estaSuscrito = false;
@@ -91,9 +115,148 @@ export async function infoRocoCmd(container, id) {
             console.warn('No se pudieron obtener rocódromos suscritos:', err.message);
         }
         
-        renderInfoRocodromo(container, rocodromo, estaSuscrito);
+        renderInfoRocodromo(container, rocodromo, estaSuscrito, canManage);
+
+        if (canManage) {
+            const updateLogoBtn = container.querySelector('#btn-actualizar-logo-roco');
+            const logoInput = container.querySelector('#input-logo-roco');
+
+            if (updateLogoBtn && logoInput) {
+                updateLogoBtn.addEventListener('click', () => {
+                    logoInput.click();
+                });
+
+                logoInput.addEventListener('change', async () => {
+                    const logoFile = logoInput.files?.[0] || null;
+                    if (!logoFile) return;
+
+                    if (!logoFile.type.startsWith('image/')) {
+                        showError('El logo debe ser un archivo de tipo imagen.');
+                        return;
+                    }
+
+                    if (logoFile.size > MAX_LOGO_SIZE_BYTES) {
+                        showError('El logo no puede superar los 3MB.');
+                        return;
+                    }
+
+                    updateLogoBtn.setAttribute('disabled', 'disabled');
+
+                    try {
+                        const formData = new FormData();
+                        formData.append('logo', logoFile);
+
+                        await fetchClient(`/rocodromos/${rocodromo.id}/logo`, {
+                            method: 'POST',
+                            body: formData,
+                        });
+
+                        await infoRocoCmd(container, rocodromo.id);
+                    } catch (err) {
+                        showError(`Error al actualizar el logo del rocódromo: ${err.message}`);
+                    } finally {
+                        logoInput.value = '';
+                        updateLogoBtn.removeAttribute('disabled');
+                    }
+                });
+            }
+        }
     } catch (err) {
         showError(`Error al obtener la información del rocódromo: ${err.message}`);
+    }
+}
+
+export async function modificarRocodromoCmd(container, id) {
+    const idRocodromo = Number(id);
+    if (!Number.isInteger(idRocodromo) || idRocodromo < 1) {
+        showError('ID de rocódromo no válido');
+        return;
+    }
+
+    if (!canManageRocodromo(idRocodromo)) {
+        showError('No tienes permisos para modificar este rocódromo.');
+        return;
+    }
+
+    showLoading();
+
+    try {
+        const response = await fetchClient(`/rocodromos/${idRocodromo}`);
+        const rocodromo = await response.json();
+
+        const callbacks = {
+            onFieldChange: (field, alertBox) => {
+                clearFieldError(field);
+                clearFormAlert(alertBox);
+            },
+            onSubmit: async (values, fields) => {
+                const {
+                    nombreInput,
+                    ubicacionInput,
+                    descripcionInput,
+                    horariosInput,
+                    alertBox,
+                    submitButton,
+                } = fields;
+
+                clearFormAlert(alertBox);
+                [nombreInput, ubicacionInput, descripcionInput, horariosInput].forEach(clearFieldError);
+
+                const payload = {};
+                const nombre = String(values.nombre || '').trim();
+                const ubicacion = String(values.ubicacion || '').trim();
+                const descripcion = String(values.descripcion || '').trim();
+                const horarios = String(values.horarios || '').trim();
+
+                if (nombre) payload.nombre = nombre;
+                if (ubicacion) payload.ubicacion = ubicacion;
+                if (descripcion) payload.descripcion = descripcion;
+                if (horarios) payload.horarios = horarios;
+
+                if (Object.keys(payload).length === 0) {
+                    showFormAlert(alertBox, 'warning', 'Debes introducir al menos un campo para actualizar.');
+                    return;
+                }
+
+                submitButton.setAttribute('disabled', 'disabled');
+
+                try {
+                    await fetchClient(`/rocodromos/${idRocodromo}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                    });
+
+                    showFormAlert(alertBox, 'success', 'Rocódromo actualizado correctamente.');
+                    window.location.hash = `#infoRoco?id=${idRocodromo}`;
+                } catch (err) {
+                    if (err.response && err.response.status === 422) {
+                        const body = await err.response.json();
+                        applyRocodromoServerValidationErrors(body.errors, {
+                            nombreInput,
+                            ubicacionInput,
+                            descripcionInput,
+                            horariosInput,
+                        });
+                        showFormAlert(alertBox, 'danger', 'Solicitud invalida. Revisa los campos.');
+                        return;
+                    }
+
+                    showFormAlert(alertBox, 'danger', `Error al modificar rocódromo: ${err.message}`);
+                } finally {
+                    submitButton.removeAttribute('disabled');
+                }
+            },
+        };
+
+        renderModificarRocodromo(container, callbacks, {
+            nombre: rocodromo?.nombre || '',
+            ubicacion: rocodromo?.ubicacion || '',
+            descripcion: rocodromo?.descripcion || '',
+            horarios: rocodromo?.horarios || '',
+        });
+    } catch (err) {
+        showError(`Error al cargar el rocódromo para modificar: ${err.message}`);
     }
 }
 

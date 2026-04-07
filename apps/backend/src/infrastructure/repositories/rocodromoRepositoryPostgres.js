@@ -138,9 +138,7 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
         nombre: rocodromo.nombre,
         ubicacion: rocodromo.ubicacion,
         descripcion: rocodromo.descripcion,
-        horarios: rocodromo.horarios,
-        dificultadBloque: rocodromo.dificultadBloque,
-        dificultadVia: rocodromo.dificultadVia,
+        horarios: rocodromo.horarios
       };
 
       await rocodromoModel.update(data);
