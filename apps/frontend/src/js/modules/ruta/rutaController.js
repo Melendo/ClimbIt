@@ -1,6 +1,7 @@
 import { renderCrearRuta, renderInfoRuta } from './rutaView.js';
 
 import { createSvgPanzoomMap } from '../../components/svgPanzoomMap.js';
+import { showConfirmModal } from '../../components/modal.js';
 import { fetchClient, canManageRocodromo, fetchImageObjectUrl, fetchSvgText, getTokenPayload } from '../../core/client.js';
 import { showError, showLoading, showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
 
@@ -473,6 +474,36 @@ export async function infoRutaCmd(container, id) {
                     estadoElement.innerHTML = `<span class="material-icons" style="color: ${prevConfig.color}; font-size: 28px;">${prevConfig.icon}</span>`;
                     estadoTextoElement.textContent = 'Sin registrar';
                     showError(`Error al cambiar estado: ${err.message}`);
+                }
+            },
+            onDeleteRoute: async (rutaData, deleteButton) => {
+                const confirmed = await showConfirmModal({
+                    title: 'Eliminar ruta',
+                    message: `¿Estás seguro de que deseas eliminar la ruta ${rutaData?.nombre || 'sin nombre'}? Esta acción no se puede deshacer.`,
+                    confirmText: 'Eliminar',
+                    cancelText: 'Cancelar',
+                    confirmClass: 'btn-danger',
+                });
+
+                if (!confirmed) {
+                    return;
+                }
+
+                if (deleteButton) {
+                    deleteButton.disabled = true;
+                }
+
+                try {
+                    await fetchClient(`/pistas/${ruta.id}`, {
+                        method: 'DELETE',
+                    });
+
+                    window.location.hash = '#misRocodromos';
+                } catch (err) {
+                    if (deleteButton) {
+                        deleteButton.disabled = false;
+                    }
+                    showError(`Error al eliminar la ruta: ${err.message}`);
                 }
             }
         };
