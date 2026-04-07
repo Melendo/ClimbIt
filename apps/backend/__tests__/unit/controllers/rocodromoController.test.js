@@ -255,4 +255,53 @@ describe('Unit: RocodromoController', () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.body).toEqual({ error: 'falló' });
   });
+
+  it('actualizarInformacion: 200 cuando actualiza correctamente', async () => {
+    const actualizado = { id: 1, nombre: 'Roco Actualizado' };
+    const useCases = {
+      actualizarInformacion: { execute: jest.fn().mockResolvedValue(actualizado) },
+    };
+    const controller = new RocodromoController(useCases);
+    const req = {
+      params: { id: 1 },
+      body: {
+        nombre: 'Roco Actualizado',
+        ubicacion: 'Nueva Ubicacion',
+        descripcion: 'Descripcion',
+        horarios: 'L-V 10-22',
+        dificultadBloque: '3',
+        dificultadVia: '',
+      },
+    };
+    const res = createResMock();
+
+    await controller.actualizarInformacion(req, res, () => {});
+
+    expect(useCases.actualizarInformacion.execute).toHaveBeenCalledWith({
+      idRocodromo: 1,
+      nombre: 'Roco Actualizado',
+      ubicacion: 'Nueva Ubicacion',
+      descripcion: 'Descripcion',
+      horarios: 'L-V 10-22',
+      dificultadBloque: 3,
+      dificultadVia: null,
+    });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.body).toEqual(actualizado);
+  });
+
+  it('actualizarInformacion: 500 ante errores', async () => {
+    const useCases = {
+      actualizarInformacion: { execute: jest.fn().mockRejectedValue(new Error('falló')) },
+    };
+    const controller = new RocodromoController(useCases);
+    const req = { params: { id: 1 }, body: {} };
+    const res = createResMock();
+    const next = jest.fn();
+
+    await controller.actualizarInformacion(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(expect.any(Error));
+    expect(next.mock.calls[0][0].message).toBe('falló');
+  });
 });

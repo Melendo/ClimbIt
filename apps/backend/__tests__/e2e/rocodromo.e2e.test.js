@@ -8,6 +8,9 @@ const db = await dbPromise;
 describe('E2E: Rocodromos', () => {
   let rocodromoConZonas;
   let rocodromoSinZonas;
+  let rocodromoParaActualizar;
+  let escalaBloque;
+  let escalaVia;
   const zonasCreadas = [];
   let token;
 
@@ -22,6 +25,23 @@ describe('E2E: Rocodromos', () => {
     rocodromoSinZonas = await db.Rocodromo.create({
       nombre: 'Roco Sin Zonas Integration',
       ubicacion: 'Test Location 2',
+    });
+
+    rocodromoParaActualizar = await db.Rocodromo.create({
+      nombre: 'Roco Actualizar Integration',
+      ubicacion: 'Test Location 3',
+    });
+
+    escalaBloque = await db.EscalaDificultad.create({
+      nombre: 'Escala Bloque E2E',
+      dificultades: ['V0', 'V1'],
+      isColor: false,
+    });
+
+    escalaVia = await db.EscalaDificultad.create({
+      nombre: 'Escala Via E2E',
+      dificultades: ['5a', '5b'],
+      isColor: false,
     });
 
     zonasCreadas.push(await db.Zona.create({
@@ -41,6 +61,9 @@ describe('E2E: Rocodromos', () => {
     }
     if (rocodromoConZonas) await rocodromoConZonas.destroy();
     if (rocodromoSinZonas) await rocodromoSinZonas.destroy();
+    if (rocodromoParaActualizar) await rocodromoParaActualizar.destroy();
+    if (escalaBloque) await escalaBloque.destroy();
+    if (escalaVia) await escalaVia.destroy();
     
     await db.sequelize.close();
   });
@@ -205,6 +228,43 @@ describe('E2E: Rocodromos', () => {
       expect(response.body).toHaveProperty('error');
       expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
       expect(response.body.error).toContain('Acceso denegado');
+    });
+  });
+
+  describe('PUT /rocodromos/:id', () => {
+    it('deberia actualizar la informacion del rocodromo', async () => {
+      const response = await request(app)
+        .put(`/rocodromos/${rocodromoParaActualizar.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          nombre: 'Roco Actualizado E2E',
+          ubicacion: 'Ubicacion Actualizada E2E',
+          descripcion: 'Descripcion actualizada',
+          horarios: 'L-V 10-22',
+          dificultadBloque: escalaBloque.id,
+          dificultadVia: escalaVia.id,
+        })
+        .expect(200);
+
+      expect(response.body).toHaveProperty('id', rocodromoParaActualizar.id);
+      expect(response.body).toHaveProperty('nombre', 'Roco Actualizado E2E');
+      expect(response.body).toHaveProperty('ubicacion', 'Ubicacion Actualizada E2E');
+      expect(response.body).toHaveProperty('descripcion', 'Descripcion actualizada');
+      expect(response.body).toHaveProperty('horarios', 'L-V 10-22');
+      expect(response.body).toHaveProperty('dificultadBloque', escalaBloque.id);
+      expect(response.body).toHaveProperty('dificultadVia', escalaVia.id);
+    });
+
+    it('deberia retornar 404 si la escala de bloque no existe', async () => {
+      const response = await request(app)
+        .put(`/rocodromos/${rocodromoParaActualizar.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          dificultadBloque: 9999999,
+        })
+        .expect(404);
+
+      expect(response.body).toHaveProperty('code', 'ESCALA_DIFICULTAD_BLOQUE_NOT_FOUND');
     });
   });
 });

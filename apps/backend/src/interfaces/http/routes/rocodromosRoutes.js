@@ -23,8 +23,12 @@ const LOGO_MAX_FILE_SIZE_BYTES = 3 * 1024 * 1024;
  * Crea un nuevo rocodromo en el sistema
  *
  * Parámetros esperados (body):
- * - nombre (@param {string} , requerido): Nombre del rocodromo (1-100 caracteres)
- * - ubicacion (@param {string} , requerido): Ubicación o dirección física del rocodromo (1-255 caracteres)
+ * - nombre (@param {string}): Nombre del rocodromo (1-100 caracteres)
+ * - ubicacion (@param {string}): Ubicacion o direccion (1-255 caracteres)
+ * - descripcion (@param {string}): Descripcion del rocodromo
+ * - horarios (@param {string}): Horarios del rocodromo
+ * - dificultadBloque (@param {int}): ID de la escala de dificultad de bloque
+ * - dificultadVia (@param {int}): ID de la escala de dificultad de via
  *
  * Requiere: Token JWT válido en header Authorization
  *
@@ -35,17 +39,35 @@ const LOGO_MAX_FILE_SIZE_BYTES = 3 * 1024 * 1024;
  */
 const crearRocodromoValidators = [
   body('nombre')
+    .optional({ nullable: true })
     .trim()
-    .notEmpty()
-    .withMessage('El nombre del rocodromo es requerido')
     .isLength({ min: 1, max: 100 })
     .withMessage('El nombre del rocodromo debe tener entre 1 y 100 caracteres'),
   body('ubicacion')
+    .optional({ nullable: true })
     .trim()
-    .notEmpty()
-    .withMessage('La ubicación del rocodromo es requerida')
     .isLength({ min: 1, max: 255 })
-    .withMessage('La ubicación debe tener entre 1 y 255 caracteres'),
+    .withMessage('La ubicacion debe tener entre 1 y 255 caracteres'),
+  body('descripcion')
+    .optional({ nullable: true })
+    .trim()
+    .isString()
+    .withMessage('La descripcion debe ser una cadena valida'),
+  body('horarios')
+    .optional({ nullable: true })
+    .trim()
+    .isString()
+    .withMessage('Los horarios deben ser una cadena valida'),
+  body('dificultadBloque')
+    .optional({ nullable: true, checkFalsy: true })
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('dificultadBloque debe ser un entero positivo'),
+  body('dificultadVia')
+    .optional({ nullable: true, checkFalsy: true })
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('dificultadVia debe ser un entero positivo'),
 ];
 
 router.post(
@@ -130,6 +152,72 @@ router.get(
   validate,
   (req, res, next) => {
     rocodromoController.obtenerInformacionRocodromo(req, res, next);
+  }
+);
+
+/**
+ * PUT /rocodromos/:id
+ * Actualiza la informacion de un rocodromo
+ *
+ * Parametros esperados (URL Path):
+ * - id (@param {number} , requerido): ID del rocodromo (entero positivo)
+ *
+ * Parametros esperados (body) opcionales:
+ * - nombre (@param {string}): Nombre del rocodromo (1-100 caracteres)
+ * - ubicacion (@param {string}): Ubicacion o direccion (1-255 caracteres)
+ * - descripcion (@param {string}): Descripcion del rocodromo
+ * - horarios (@param {string}): Horarios del rocodromo
+ * - dificultadBloque (@param {int}): ID de la escala de dificultad de bloque
+ * - dificultadVia (@param {int}): ID de la escala de dificultad de via
+ *
+ * Requiere: Token JWT valido en header Authorization
+ * Rol de Administrador o Gestor del Rocodromo propietario
+ */
+const actualizarRocodromoValidators = [
+  param('id')
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('El id del rocodromo debe ser un entero positivo'),
+  body('nombre')
+    .optional({ nullable: true })
+    .trim()
+    .isLength({ min: 1, max: 100 })
+    .withMessage('El nombre del rocodromo debe tener entre 1 y 100 caracteres'),
+  body('ubicacion')
+    .optional({ nullable: true })
+    .trim()
+    .isLength({ min: 1, max: 255 })
+    .withMessage('La ubicacion debe tener entre 1 y 255 caracteres'),
+  body('descripcion')
+    .optional({ nullable: true })
+    .trim()
+    .isString()
+    .withMessage('La descripcion debe ser una cadena valida'),
+  body('horarios')
+    .optional({ nullable: true })
+    .trim()
+    .isString()
+    .withMessage('Los horarios deben ser una cadena valida'),
+  body('dificultadBloque')
+    .optional({ nullable: true, checkFalsy: true })
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('dificultadBloque debe ser un entero positivo'),
+  body('dificultadVia')
+    .optional({ nullable: true, checkFalsy: true })
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('dificultadVia debe ser un entero positivo'),
+];
+
+router.put(
+  '/:id',
+  verifyTokenMiddleware,
+  actualizarRocodromoValidators,
+  validate,
+  authorizeRocodromoAccess({ resolveRocodromoId: resolveRocodromoIdFromRocodromoParam }),
+  (req, res, next) => {
+    rocodromoController.actualizarInformacion(req, res, next);
   }
 );
 
