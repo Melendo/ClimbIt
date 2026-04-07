@@ -4,6 +4,7 @@ import ActualizarPista from '../../../../src/application/pistas/actualizarPista.
 describe('ActualizarPistaUseCase', () => {
   let mockPistaRepository;
   let mockZonaModel;
+  let mockRocodromoRepository;
   let actualizarPista;
 
   beforeEach(() => {
@@ -14,7 +15,14 @@ describe('ActualizarPistaUseCase', () => {
     mockZonaModel = {
       findByPk: jest.fn(),
     };
-    actualizarPista = new ActualizarPista(mockPistaRepository, mockZonaModel);
+    mockRocodromoRepository = {
+      obtenerEscalasDificultad: jest.fn(),
+    };
+    actualizarPista = new ActualizarPista(
+      mockPistaRepository,
+      mockZonaModel,
+      mockRocodromoRepository
+    );
   });
 
   it('deberia actualizar la pista con los nuevos datos', async () => {
@@ -38,6 +46,11 @@ describe('ActualizarPistaUseCase', () => {
       ...pistaActual,
       nombre: 'Pista Actualizada',
       dificultad: '6b',
+    });
+    mockZonaModel.findByPk.mockResolvedValue({ id: 2, idRoco: 1 });
+    mockRocodromoRepository.obtenerEscalasDificultad.mockResolvedValue({
+      escalaDificultadBloque: { dificultades: ['5a'] },
+      escalaDificultadVia: { dificultades: ['6a', '6b'] },
     });
 
     const resultado = await actualizarPista.execute({

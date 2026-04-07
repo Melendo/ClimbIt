@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { BadRequestError, NotFoundError } from '../../../domain/sharedObjects/AppError.js';
 
 class EscaladorController {
   constructor(escaladorUseCases) {
@@ -95,7 +96,9 @@ class EscaladorController {
 
     try {
       if (!req.file) {
-        return res.status(400).json({ error: 'La imagen es requerida' });
+        return next(
+          new BadRequestError('La imagen es requerida', 'FOTO_PERFIL_REQUERIDA')
+        );
       }
 
       uploadedPath = req.file.path;
@@ -140,9 +143,12 @@ class EscaladorController {
       const fotoPerfil = await this.useCases.obtenerFotoPerfil.execute(id);
 
       if (!fotoPerfil) {
-        return res
-          .status(404)
-          .json({ error: `Foto de perfil con ID ${id} no encontrada` });
+        return next(
+          new NotFoundError(
+            `Foto de perfil con ID ${id} no encontrada`,
+            'FOTO_PERFIL_NOT_FOUND'
+          )
+        );
       }
 
       const fileName = path.basename(fotoPerfil.urlFoto);
@@ -157,7 +163,9 @@ class EscaladorController {
       return res.sendFile(filePath);
     } catch (error) {
       if (error.code === 'ENOENT') {
-        return res.status(404).json({ error: 'Imagen no encontrada' });
+        return next(
+          new NotFoundError('Imagen no encontrada', 'FOTO_PERFIL_NOT_FOUND', error)
+        );
       }
 
       return next(error);

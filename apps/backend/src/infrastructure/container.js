@@ -99,8 +99,16 @@ async function inicializarContainer() {
     fotosPerfilRepository
   );
 
-  const crearPistaUseCase = new CrearPista(pistaRepository, db.Zona);
-  const actualizarPistaUseCase = new ActualizarPista(pistaRepository, db.Zona);
+  const crearPistaUseCase = new CrearPista(
+    pistaRepository,
+    db.Zona,
+    rocodromoRepository
+  );
+  const actualizarPistaUseCase = new ActualizarPista(
+    pistaRepository,
+    db.Zona,
+    rocodromoRepository
+  );
   const actualizarImagenPistaUseCase = new ActualizarImagenPista(pistaRepository);
   const obtenerPistaPorIdUseCase = new ObtenerPistaPorId(pistaRepository, escaladorRepository);
   const cambiarEstadoPistaUseCase = new CambiarEstadoPista(

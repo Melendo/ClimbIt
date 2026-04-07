@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { BadRequestError, NotFoundError } from '../../../domain/sharedObjects/AppError.js';
 
 class RocodromoController {
   constructor(rocodromoUseCases) {
@@ -32,7 +33,7 @@ class RocodromoController {
       });
       res.status(201).json(nuevoRocodromo);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -42,14 +43,17 @@ class RocodromoController {
       const zonas = await this.useCases.obtenerZonasRocodromo.execute(id);
 
       if (!zonas) {
-        return res
-          .status(404)
-          .json({ error: `Rocódromo con ID ${id} no encontrado` });
+        return next(
+          new NotFoundError(
+            `Rocódromo con ID ${id} no encontrado`,
+            'ROCODROMO_NOT_FOUND'
+          )
+        );
       }
 
       res.status(200).json(zonas);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -58,7 +62,7 @@ class RocodromoController {
       const rocodromos = await this.useCases.obtenerRocodromos.execute();
       res.status(200).json(rocodromos);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -68,14 +72,17 @@ class RocodromoController {
       const rocodromo = await this.useCases.obtenerInformacion.execute(id);
 
       if (!rocodromo) {
-        return res
-          .status(404)
-          .json({ error: `Rocódromo con ID ${id} no encontrado` });
+        return next(
+          new NotFoundError(
+            `Rocódromo con ID ${id} no encontrado`,
+            'ROCODROMO_NOT_FOUND'
+          )
+        );
       }
 
       res.status(200).json(rocodromo);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -84,7 +91,9 @@ class RocodromoController {
       const { id } = req.params;
 
       if (!req.file) {
-        return res.status(400).json({ error: 'El logo es requerido' });
+        return next(
+          new BadRequestError('El logo es requerido', 'ROCODROMO_LOGO_REQUERIDO')
+        );
       }
 
       const existingRocodromo = await this.useCases.obtenerInformacion.execute(id);
@@ -105,9 +114,12 @@ class RocodromoController {
           }
         }
 
-        return res
-          .status(404)
-          .json({ error: `Rocódromo con ID ${id} no encontrado` });
+        return next(
+          new NotFoundError(
+            `Rocódromo con ID ${id} no encontrado`,
+            'ROCODROMO_NOT_FOUND'
+          )
+        );
       }
 
       if (existingRocodromo.logoUrl) {
@@ -133,7 +145,7 @@ class RocodromoController {
 
       res.status(200).json({ logoUrl: rocodromo.logoUrl });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -143,9 +155,12 @@ class RocodromoController {
       const rocodromo = await this.useCases.obtenerInformacion.execute(id);
 
       if (!rocodromo || !rocodromo.logoUrl) {
-        return res
-          .status(404)
-          .json({ error: `Logo del rocódromo ${id} no encontrado` });
+        return next(
+          new NotFoundError(
+            `Logo del rocódromo ${id} no encontrado`,
+            'ROCODROMO_LOGO_NOT_FOUND'
+          )
+        );
       }
 
       const fileName = path.basename(rocodromo.logoUrl);
@@ -158,11 +173,13 @@ class RocodromoController {
 
       res.sendFile(logoPath, (err) => {
         if (err && !res.headersSent) {
-          res.status(404).json({ error: 'Logo no encontrado' });
+          next(
+            new NotFoundError('Logo no encontrado', 'ROCODROMO_LOGO_NOT_FOUND', err)
+          );
         }
       });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
@@ -172,9 +189,12 @@ class RocodromoController {
       const escalas = await this.useCases.obtenerEscalasDificultad.execute(id);
 
       if (!escalas) {
-        return res
-          .status(404)
-          .json({ error: `Rocódromo con ID ${id} no encontrado` });
+        return next(
+          new NotFoundError(
+            `Rocódromo con ID ${id} no encontrado`,
+            'ROCODROMO_NOT_FOUND'
+          )
+        );
       }
 
       res.status(200).json(escalas);

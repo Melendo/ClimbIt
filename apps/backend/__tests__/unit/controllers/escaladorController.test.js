@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 import fs from 'fs/promises';
 import path from 'path';
 import EscaladorController from '../../../src/interfaces/http/controllers/escaladorController.js';
+import { BadRequestError, NotFoundError } from '../../../src/domain/sharedObjects/AppError.js';
 
 function createResMock() {
   const res = {
@@ -224,6 +225,53 @@ describe('Unit: EscaladorController', () => {
       });
     });
 
+    it('crearFotoPerfil usa next si falla el guardado y la limpieza', async () => {
+      const useCases = {
+        crearFotoPerfil: { execute: jest.fn().mockRejectedValue(new Error('falló')) },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = {
+        file: {
+          path: '/tmp/foto.png',
+          filename: 'foto.png',
+        },
+      };
+      const res = createResMock();
+      const next = jest.fn();
+
+      const unlinkError = new Error('unlink fail');
+      unlinkError.code = 'EACCES';
+      jest.spyOn(fs, 'unlink').mockRejectedValue(unlinkError);
+
+      await controller.crearFotoPerfil(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(unlinkError);
+    });
+
+    it('crearFotoPerfil propaga el error original si no hay archivo para limpiar', async () => {
+      const useCases = {
+        crearFotoPerfil: { execute: jest.fn().mockRejectedValue(new Error('falló')) },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = {
+        file: {
+          path: '/tmp/foto.png',
+          filename: 'foto.png',
+        },
+      };
+      const res = createResMock();
+      const next = jest.fn();
+
+      const unlinkError = new Error('no file');
+      unlinkError.code = 'ENOENT';
+      jest.spyOn(fs, 'unlink').mockRejectedValue(unlinkError);
+
+      await controller.crearFotoPerfil(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(expect.any(Error));
+      expect(next.mock.calls[0][0].message).toBe('falló');
+    });
+
     it('crearFotoPerfil responde 400 si no se envía imagen', async () => {
       const useCases = {
         crearFotoPerfil: { execute: jest.fn() },
@@ -231,11 +279,14 @@ describe('Unit: EscaladorController', () => {
       const controller = new EscaladorController(useCases);
       const req = {};
       const res = createResMock();
+      const next = jest.fn();
 
-      await controller.crearFotoPerfil(req, res, () => {});
+      await controller.crearFotoPerfil(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.body).toEqual({ error: 'La imagen es requerida' });
+      expect(next).toHaveBeenCalledWith(expect.any(BadRequestError));
+      const error = next.mock.calls[0][0];
+      expect(error.message).toBe('La imagen es requerida');
+      expect(error.code).toBe('FOTO_PERFIL_REQUERIDA');
     });
 
     it('obtenerFotosPerfil responde 200 con el listado', async () => {
@@ -278,11 +329,36 @@ describe('Unit: EscaladorController', () => {
       const controller = new EscaladorController(useCases);
       const req = { params: { id: 4 } };
       const res = createResMock();
+      const next = jest.fn();
 
-      await controller.obtenerFotoPerfil(req, res, () => {});
+      await controller.obtenerFotoPerfil(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.body).toEqual({ error: 'Foto de perfil con ID 4 no encontrada' });
+      expect(next).toHaveBeenCalledWith(expect.any(NotFoundError));
+      const error = next.mock.calls[0][0];
+      expect(error.message).toBe('Foto de perfil con ID 4 no encontrada');
+      expect(error.code).toBe('FOTO_PERFIL_NOT_FOUND');
+    });
+
+    it('obtenerFotoPerfil responde 404 si el archivo no existe', async () => {
+      const useCases = {
+        obtenerFotoPerfil: {
+          execute: jest.fn().mockResolvedValue({ id: 4, urlFoto: '/uploads/fotos_perfil/foto.png' }),
+        },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = { params: { id: 4 } };
+      const res = createResMock();
+      const next = jest.fn();
+
+      const accessError = new Error('no file');
+      accessError.code = 'ENOENT';
+      jest.spyOn(fs, 'access').mockRejectedValue(accessError);
+
+      await controller.obtenerFotoPerfil(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(expect.any(NotFoundError));
+      const error = next.mock.calls[0][0];
+      expect(error.code).toBe('FOTO_PERFIL_NOT_FOUND');
     });
 
     it('actualizarFotoPerfil responde 200 con el resultado del caso de uso', async () => {
