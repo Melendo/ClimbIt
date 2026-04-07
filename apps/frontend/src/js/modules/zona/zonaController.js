@@ -1,5 +1,5 @@
 import { renderMapaZona, renderCrearZona } from './zonaView.js';
-import { ESTADOS_CONFIG } from '../../components/climbingConfig.js';
+import { ESTADOS_CONFIG, loadColorScaleMap, normalizeColorName } from '../../components/climbingConfig.js';
 import { createSvgPanzoomMap } from '../../components/svgPanzoomMap.js';
 import { fetchClient, canManageRocodromo, fetchImageObjectUrl, fetchSvgText } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
@@ -11,6 +11,163 @@ import { showLoading, showError } from '../../core/ui.js';
 * @param {number} idRocodromo ID del rocódromo
 */
 const RUTA_IMAGE_PLACEHOLDER = '/assets/placeholder.jpg';
+const ZONA_FILTERS_STORAGE_PREFIX = 'mapaZona:filtros';
+
+function normalizeDificultades(dificultades) {
+    if (!Array.isArray(dificultades)) return [];
+
+    return dificultades
+        .map((value) => String(value ?? '').trim())
+        .filter((value) => value.length > 0);
+}
+
+function buildDificultadOptions(escala, colorMap) {
+    const dificultades = normalizeDificultades(escala?.dificultades);
+
+    return dificultades.map((dificultad) => {
+        if (!escala?.isColor) {
+            return { value: dificultad, label: dificultad };
+        }
+
+        const colorHex = colorMap[normalizeColorName(dificultad)] || null;
+        return {
+            value: dificultad,
+            label: colorHex ? `${dificultad} (${colorHex})` : dificultad,
+        };
+    });
+}
+
+function normalizeTipo(tipo) {
+    const normalized = String(tipo || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim()
+        .toLowerCase();
+
+    if (normalized === 'bloque' || normalized === 'boulder') return 'boulder';
+    if (normalized === 'via') return 'via';
+    return normalized;
+}
+
+function buildZonaFiltersStorageKey(idRocodromo) {
+    return `${ZONA_FILTERS_STORAGE_PREFIX}:${idRocodromo}`;
+}
+
+function normalizeFiltrosState(rawFiltros, dificultadOrderByTipo = null) {
+    const rawTipo = normalizeTipo(rawFiltros?.tipo || 'all');
+    const tipo = rawTipo === 'boulder' || rawTipo === 'via' ? rawTipo : 'all';
+
+    if (tipo === 'all') {
+        return {
+            tipo: 'all',
+            dificultadMin: '',
+            dificultadMax: '',
+        };
+    }
+
+    let dificultadMin = String(rawFiltros?.dificultadMin || '').trim();
+    let dificultadMax = String(rawFiltros?.dificultadMax || '').trim();
+
+    const order = Array.isArray(dificultadOrderByTipo?.[tipo])
+        ? dificultadOrderByTipo[tipo]
+        : null;
+
+    if (order) {
+        const validValues = new Set(order);
+        if (dificultadMin && !validValues.has(dificultadMin)) {
+            dificultadMin = '';
+        }
+        if (dificultadMax && !validValues.has(dificultadMax)) {
+            dificultadMax = '';
+        }
+
+        if (dificultadMin && dificultadMax) {
+            const minIndex = order.indexOf(dificultadMin);
+            const maxIndex = order.indexOf(dificultadMax);
+
+            if (minIndex > -1 && maxIndex > -1 && minIndex > maxIndex) {
+                dificultadMax = dificultadMin;
+            }
+        }
+    }
+
+    return {
+        tipo,
+        dificultadMin,
+        dificultadMax,
+    };
+}
+
+function loadZonaFilters(idRocodromo) {
+    try {
+        const key = buildZonaFiltersStorageKey(idRocodromo);
+        const storedValue = localStorage.getItem(key);
+
+        if (!storedValue) {
+            return normalizeFiltrosState(null);
+        }
+
+        const parsed = JSON.parse(storedValue);
+        return normalizeFiltrosState(parsed);
+    } catch {
+        return normalizeFiltrosState(null);
+    }
+}
+
+function saveZonaFilters(idRocodromo, filtros) {
+    try {
+        const key = buildZonaFiltersStorageKey(idRocodromo);
+        localStorage.setItem(key, JSON.stringify(filtros));
+    } catch {
+        // Ignorar errores de persistencia (modo privado, quota, etc.).
+    }
+}
+
+function buildFilterIndexByTipo(dificultadOrderByTipo) {
+    return {
+        boulder: new Map((dificultadOrderByTipo.boulder || []).map((value, index) => [value, index])),
+        via: new Map((dificultadOrderByTipo.via || []).map((value, index) => [value, index])),
+    };
+}
+
+function filterRutas(rutas, filtros, dificultadIndexByTipo) {
+    const tipoFiltro = normalizeTipo(filtros?.tipo || 'all');
+    const dificultadMin = String(filtros?.dificultadMin || '').trim();
+    const dificultadMax = String(filtros?.dificultadMax || '').trim();
+
+    return (Array.isArray(rutas) ? rutas : []).filter((ruta) => {
+        const tipoRuta = normalizeTipo(ruta?.tipo);
+
+        if (tipoFiltro !== 'all' && tipoFiltro !== tipoRuta) {
+            return false;
+        }
+
+        if (tipoFiltro === 'all' || (!dificultadMin && !dificultadMax)) {
+            return true;
+        }
+
+        const dificultadRuta = String(ruta?.dificultad || '').trim();
+        const difficultyMap = dificultadIndexByTipo[tipoFiltro] || new Map();
+        const routeIndex = difficultyMap.get(dificultadRuta);
+
+        if (!Number.isInteger(routeIndex)) {
+            return false;
+        }
+
+        const minIndex = dificultadMin ? difficultyMap.get(dificultadMin) : null;
+        const maxIndex = dificultadMax ? difficultyMap.get(dificultadMax) : null;
+
+        if (Number.isInteger(minIndex) && routeIndex < minIndex) {
+            return false;
+        }
+
+        if (Number.isInteger(maxIndex) && routeIndex > maxIndex) {
+            return false;
+        }
+
+        return true;
+    });
+}
 
 async function resolveRutaImageSrc(ruta) {
     if (!ruta?.imagenUrl) {
@@ -62,16 +219,68 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
             console.warn('No se pudieron obtener las zonas:', err.message);
         }
         
+        const colorScaleMap = await loadColorScaleMap();
+
         let mapaInteractivo = null;
         let mapaSourceKey = null;
         const mapaCache = new Map();
+        const rutasCache = new Map();
+        let dificultadOptionsByTipo = {
+            boulder: [],
+            via: [],
+        };
+        const filtrosActivos = loadZonaFilters(idRocodromo);
+
+        try {
+            const escalasRes = await fetchClient(`/rocodromos/${idRocodromo}/escalasDificultad`);
+            const escalas = await escalasRes.json();
+
+            dificultadOptionsByTipo = {
+                boulder: buildDificultadOptions(escalas?.escalaDificultadBloque, colorScaleMap),
+                via: buildDificultadOptions(escalas?.escalaDificultadVia, colorScaleMap),
+            };
+        } catch (err) {
+            console.warn('No se pudieron cargar las escalas de dificultad del rocódromo:', err.message);
+        }
+
+        const dificultadOrderByTipo = {
+            boulder: dificultadOptionsByTipo.boulder.map((item) => item.value),
+            via: dificultadOptionsByTipo.via.map((item) => item.value),
+        };
+
+        Object.assign(filtrosActivos, normalizeFiltrosState(filtrosActivos, dificultadOrderByTipo));
+        saveZonaFilters(idRocodromo, filtrosActivos);
+
+        const dificultadIndexByTipo = buildFilterIndexByTipo(dificultadOrderByTipo);
+
+        const getRutasZonaRaw = async (idZona) => {
+            if (!idZona) return [];
+
+            if (!rutasCache.has(idZona)) {
+                const rutas = await cargarRutasZona(idZona);
+                rutasCache.set(idZona, rutas);
+            }
+
+            return rutasCache.get(idZona) || [];
+        };
+
+        const getRutasZonaFiltradas = async (idZona) => {
+            const rutasRaw = await getRutasZonaRaw(idZona);
+            return filterRutas(rutasRaw, filtrosActivos, dificultadIndexByTipo);
+        };
         
         // Renderizar la vista inicial
         renderMapaZona(
             container,
-            { rocodromo, zonas, canCreateRuta },
+            {
+                rocodromo,
+                zonas,
+                canCreateRuta,
+                dificultadOptionsByTipo,
+                filtrosActivos,
+            },
             async (idZona) => {
-                return await cargarRutasZona(idZona);
+                return await getRutasZonaFiltradas(idZona);
             },
             initialZonaId,
             async (idZona, rutas) => {
@@ -124,6 +333,11 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
                         }
                     });
                 });
+            },
+            async (nextFiltros) => {
+                // Estado de filtros centralizado para mantener mapa y tarjetas sincronizados.
+                Object.assign(filtrosActivos, normalizeFiltrosState(nextFiltros, dificultadOrderByTipo));
+                saveZonaFilters(idRocodromo, filtrosActivos);
             }
         );
         

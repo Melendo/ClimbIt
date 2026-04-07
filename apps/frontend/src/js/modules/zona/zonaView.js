@@ -1,5 +1,13 @@
-export function renderMapaZona(container, data, onZonaSelect, initialZonaId = null, onMapaRender = null, onMapaToggle = null) {
-    const { rocodromo, zonas, canCreateRuta = false } = data;
+import { escapeHtml } from '../../components/formHelpers.js';
+
+export function renderMapaZona(container, data, onZonaSelect, initialZonaId = null, onMapaRender = null, onMapaToggle = null, onFiltersApply = null) {
+    const {
+        rocodromo,
+        zonas,
+        canCreateRuta = false,
+        dificultadOptionsByTipo = { boulder: [], via: [] },
+        filtrosActivos = { tipo: 'all', dificultadMin: '', dificultadMax: '' },
+    } = data;
     const nombreRocodromo = rocodromo?.nombre || 'Rocódromo';
 
     // Determinar zona inicial
@@ -46,8 +54,9 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                     <select id="zonaSelector" class="form-select form-select-sm shadow-sm fw-bold" aria-label="Seleccionar zona">
                         ${zonas.map((z) => `<option value="${z.id}" ${z.id == (zonaInicial?.id) ? 'selected' : ''}>Zona ${z.nombre || z.id}</option>`).join('')}
                     </select>
-                    <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center" aria-label="Filtros" title="Filtros (próximamente)">
+                    <button id="btnZonaFiltros" type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center position-relative" aria-label="Filtros" title="Filtrar rutas">
                         <span class="material-icons" style="font-size: 20px;">filter_alt</span>
+                        <span id="filtrosActivosBadge" class="position-absolute top-0 start-100 translate-middle p-1 bg-primary border border-light rounded-circle d-none" style="width: 10px; height: 10px;"></span>
                     </button>
                 </div>
             </div>
@@ -69,6 +78,48 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                 `}
             </div>
         </div>
+
+        <div class="modal fade" id="zonaFiltrosModal" tabindex="-1" aria-labelledby="zonaFiltrosModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="zonaFiltrosModalLabel">Filtrar rutas</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="filtroTipoRuta" class="form-label">Tipo de ruta</label>
+                            <select id="filtroTipoRuta" class="form-select">
+                                <option value="all">Todas</option>
+                                <option value="via">Vía</option>
+                                <option value="boulder">Boulder</option>
+                            </select>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label for="filtroDificultadMin" class="form-label">Dificultad mínima</label>
+                                <select id="filtroDificultadMin" class="form-select">
+                                    <option value="">Sin mínimo</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label for="filtroDificultadMax" class="form-label">Dificultad máxima</label>
+                                <select id="filtroDificultadMax" class="form-select">
+                                    <option value="">Sin máximo</option>
+                                </select>
+                            </div>
+                        </div>
+                        <small id="filtroHint" class="text-muted d-block mt-2">
+                            Selecciona tipo para habilitar el rango de dificultad.
+                        </small>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="btnLimpiarFiltros" class="btn btn-outline-secondary">Limpiar</button>
+                        <button type="button" id="btnAplicarFiltros" class="btn btn-primary">Aplicar filtros</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     `;
 
     // Lógica del selector
@@ -78,6 +129,23 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
     const mapaContainer = container.querySelector('#mapaRocodromoContainer');
     const btnMapaExpandir = container.querySelector('#btnMapaExpandir');
     const btnMapaContraer = container.querySelector('#btnMapaContraer');
+    const btnZonaFiltros = container.querySelector('#btnZonaFiltros');
+    const filtrosActivosBadge = container.querySelector('#filtrosActivosBadge');
+    const zonaFiltrosModalEl = container.querySelector('#zonaFiltrosModal');
+    const filtroTipoRuta = container.querySelector('#filtroTipoRuta');
+    const filtroDificultadMin = container.querySelector('#filtroDificultadMin');
+    const filtroDificultadMax = container.querySelector('#filtroDificultadMax');
+    const filtroHint = container.querySelector('#filtroHint');
+    const btnAplicarFiltros = container.querySelector('#btnAplicarFiltros');
+    const btnLimpiarFiltros = container.querySelector('#btnLimpiarFiltros');
+
+    const filterState = {
+        tipo: filtrosActivos?.tipo || 'all',
+        dificultadMin: filtrosActivos?.dificultadMin || '',
+        dificultadMax: filtrosActivos?.dificultadMax || '',
+    };
+
+    let currentZonaId = zonaInicial?.id || null;
 
     const setMapaExpandido = (expandido) => {
         mapaContainer.classList.toggle('mapa-rocodromo-fullscreen', expandido);
@@ -93,6 +161,83 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
 
     btnMapaExpandir.addEventListener('click', () => setMapaExpandido(true));
     btnMapaContraer.addEventListener('click', () => setMapaExpandido(false));
+
+    const setSelectOptions = (selectEl, options, emptyLabel) => {
+        selectEl.innerHTML = [
+            `<option value="">${escapeHtml(emptyLabel)}</option>`,
+            ...options.map((option) => {
+                const value = escapeHtml(option.value);
+                const label = escapeHtml(option.label || option.value);
+                return `<option value="${value}">${label}</option>`;
+            }),
+        ].join('');
+    };
+
+    const getActiveDificultadOptions = () => {
+        if (filterState.tipo !== 'boulder' && filterState.tipo !== 'via') {
+            return [];
+        }
+
+        return Array.isArray(dificultadOptionsByTipo[filterState.tipo])
+            ? dificultadOptionsByTipo[filterState.tipo]
+            : [];
+    };
+
+    const updateFilterBadge = () => {
+        const hasTipo = filterState.tipo === 'boulder' || filterState.tipo === 'via';
+        const hasRango = Boolean(filterState.dificultadMin || filterState.dificultadMax);
+        const hasFilters = hasTipo || hasRango;
+
+        filtrosActivosBadge.classList.toggle('d-none', !hasFilters);
+        btnZonaFiltros.classList.toggle('btn-outline-secondary', !hasFilters);
+        btnZonaFiltros.classList.toggle('btn-primary', hasFilters);
+    };
+
+    const syncDificultadRange = () => {
+        const options = getActiveDificultadOptions();
+        const indexMap = new Map(options.map((opt, idx) => [opt.value, idx]));
+        const minIndex = filterState.dificultadMin ? indexMap.get(filterState.dificultadMin) : null;
+        const maxIndex = filterState.dificultadMax ? indexMap.get(filterState.dificultadMax) : null;
+
+        if (Number.isInteger(minIndex) && Number.isInteger(maxIndex) && minIndex > maxIndex) {
+            filterState.dificultadMax = filterState.dificultadMin;
+        }
+    };
+
+    const updateFilterForm = () => {
+        const options = getActiveDificultadOptions();
+        const hasTipo = filterState.tipo === 'boulder' || filterState.tipo === 'via';
+
+        filtroTipoRuta.value = filterState.tipo;
+        setSelectOptions(filtroDificultadMin, options, 'Sin mínimo');
+        setSelectOptions(filtroDificultadMax, options, 'Sin máximo');
+
+        filtroDificultadMin.disabled = !hasTipo;
+        filtroDificultadMax.disabled = !hasTipo;
+
+        if (!hasTipo) {
+            filterState.dificultadMin = '';
+            filterState.dificultadMax = '';
+            filtroHint.textContent = 'Selecciona tipo para habilitar el rango de dificultad.';
+        } else if (options.length === 0) {
+            filterState.dificultadMin = '';
+            filterState.dificultadMax = '';
+            filtroHint.textContent = 'No hay escala de dificultad configurada para este tipo.';
+        } else {
+            syncDificultadRange();
+            filtroHint.textContent = 'Se usa el orden de la escala del rocódromo (de más fácil a más difícil).';
+        }
+
+        if (filterState.dificultadMin && options.some((opt) => opt.value === filterState.dificultadMin)) {
+            filtroDificultadMin.value = filterState.dificultadMin;
+        }
+
+        if (filterState.dificultadMax && options.some((opt) => opt.value === filterState.dificultadMax)) {
+            filtroDificultadMax.value = filterState.dificultadMax;
+        }
+
+        updateFilterBadge();
+    };
 
     const updateUrl = (idZona) => {
         const currentUrl = new URL(window.location.href);
@@ -113,6 +258,7 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
 
         // Actualizar URL
         updateUrl(idZona);
+        currentZonaId = idZona;
 
         // Mostrar loading en el contenedor de rutas
         let animationClass = '';
@@ -198,6 +344,80 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
     };
 
     selector.addEventListener('change', (e) => loadZonas(e.target.value));
+
+    const modalInstance = zonaFiltrosModalEl && window.bootstrap
+        ? new window.bootstrap.Modal(zonaFiltrosModalEl)
+        : null;
+
+    if (btnZonaFiltros && modalInstance) {
+        btnZonaFiltros.addEventListener('click', () => {
+            updateFilterForm();
+            modalInstance.show();
+        });
+    }
+
+    if (filtroTipoRuta) {
+        filtroTipoRuta.addEventListener('change', () => {
+            filterState.tipo = filtroTipoRuta.value;
+            updateFilterForm();
+        });
+    }
+
+    if (filtroDificultadMin) {
+        filtroDificultadMin.addEventListener('change', () => {
+            filterState.dificultadMin = filtroDificultadMin.value;
+            syncDificultadRange();
+            updateFilterForm();
+        });
+    }
+
+    if (filtroDificultadMax) {
+        filtroDificultadMax.addEventListener('change', () => {
+            filterState.dificultadMax = filtroDificultadMax.value;
+            syncDificultadRange();
+            updateFilterForm();
+        });
+    }
+
+    if (btnLimpiarFiltros) {
+        btnLimpiarFiltros.addEventListener('click', async () => {
+            filterState.tipo = 'all';
+            filterState.dificultadMin = '';
+            filterState.dificultadMax = '';
+
+            updateFilterForm();
+
+            if (typeof onFiltersApply === 'function') {
+                await onFiltersApply({ ...filterState });
+            }
+
+            if (currentZonaId) {
+                await loadZonas(currentZonaId);
+            }
+
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+        });
+    }
+
+    if (btnAplicarFiltros) {
+        btnAplicarFiltros.addEventListener('click', async () => {
+            if (typeof onFiltersApply === 'function') {
+                await onFiltersApply({ ...filterState });
+            }
+
+            if (currentZonaId) {
+                await loadZonas(currentZonaId);
+            }
+
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+        });
+    }
+
+    updateFilterForm();
 
     // Cargar zona inicial (si hay zonas)
     if (zonaInicial) {

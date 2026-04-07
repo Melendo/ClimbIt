@@ -1,5 +1,14 @@
 // Utilidades reutilizables para formularios
 
+export function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 export function showAlert(alertBox, message) {
     alertBox.className = 'alert alert-danger';
     alertBox.textContent = message;
