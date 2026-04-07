@@ -9,6 +9,7 @@ import { fetchClient, fetchImageObjectUrl, canManageRocodromo } from '../../core
 import { showLoading, showError, showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
 
 const ROCODROMO_LOGO_PLACEHOLDER = '/assets/rocodromoDefecto.jpg';
+const MAX_LOGO_SIZE_BYTES = 3 * 1024 * 1024;
 
 function applyRocodromoServerValidationErrors(validationErrors, fields) {
     if (!Array.isArray(validationErrors)) return;
@@ -115,6 +116,51 @@ export async function infoRocoCmd(container, id) {
         }
         
         renderInfoRocodromo(container, rocodromo, estaSuscrito, canManage);
+
+        if (canManage) {
+            const updateLogoBtn = container.querySelector('#btn-actualizar-logo-roco');
+            const logoInput = container.querySelector('#input-logo-roco');
+
+            if (updateLogoBtn && logoInput) {
+                updateLogoBtn.addEventListener('click', () => {
+                    logoInput.click();
+                });
+
+                logoInput.addEventListener('change', async () => {
+                    const logoFile = logoInput.files?.[0] || null;
+                    if (!logoFile) return;
+
+                    if (!logoFile.type.startsWith('image/')) {
+                        showError('El logo debe ser un archivo de tipo imagen.');
+                        return;
+                    }
+
+                    if (logoFile.size > MAX_LOGO_SIZE_BYTES) {
+                        showError('El logo no puede superar los 3MB.');
+                        return;
+                    }
+
+                    updateLogoBtn.setAttribute('disabled', 'disabled');
+
+                    try {
+                        const formData = new FormData();
+                        formData.append('logo', logoFile);
+
+                        await fetchClient(`/rocodromos/${rocodromo.id}/logo`, {
+                            method: 'POST',
+                            body: formData,
+                        });
+
+                        await infoRocoCmd(container, rocodromo.id);
+                    } catch (err) {
+                        showError(`Error al actualizar el logo del rocódromo: ${err.message}`);
+                    } finally {
+                        logoInput.value = '';
+                        updateLogoBtn.removeAttribute('disabled');
+                    }
+                });
+            }
+        }
     } catch (err) {
         showError(`Error al obtener la información del rocódromo: ${err.message}`);
     }

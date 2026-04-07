@@ -40,12 +40,20 @@ export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false, 
 
     <div class="card-body flex-grow-1 overflow-auto">
       <div class="d-flex flex-column align-items-center mb-4">
-        <img
-          src="${logoSrc}"
-          alt="Logo de ${nombre}"
-          class="rounded-4 border"
-          style="width: 140px; height: 140px; object-fit: cover;"
-        >
+        <div class="position-relative" style="width: 140px; height: 140px;">
+          <img
+            src="${logoSrc}"
+            alt="Logo de ${nombre}"
+            class="rounded-4 border"
+            style="width: 140px; height: 140px; object-fit: cover;"
+          >
+          ${canManage ? `
+            <button type="button" id="btn-actualizar-logo-roco" class="btn btn-dark btn-sm position-absolute bottom-0 end-0 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; border-radius: 999px;" aria-label="Actualizar logo" title="Actualizar logo">
+              <span class="material-icons" style="font-size: 18px; line-height: 1;">photo_camera</span>
+            </button>
+            <input type="file" id="input-logo-roco" class="d-none" accept="image/*" />
+          ` : ''}
+        </div>
         <h4 class="mt-3 mb-1 text-center">${nombre}</h4>
         <p class="text-muted mb-0 text-center">${ubicacion}</p>
       </div>
