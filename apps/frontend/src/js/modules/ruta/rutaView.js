@@ -22,6 +22,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
     contextError = '',
     mode = 'create',
     initialValues = {},
+    colorPresasOptions = [],
   } = viewData;
   
   const isEditMode = mode === 'edit';
@@ -98,6 +99,12 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
           <select class="form-select" name="dificultad" id="dificultad"></select>
           <div class="invalid-feedback"></div>
         </div>
+
+        <div class="mb-3">
+          <label for="colorPresas" class="form-label">Color de presas</label>
+          <select class="form-select" name="colorPresas" id="colorPresas"></select>
+          <div class="invalid-feedback"></div>
+        </div>
   
         <div class="row g-2">
           <div class="col-6">
@@ -128,6 +135,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
   const form = container.querySelector('#form-crear-ruta');
   const nombreInput = container.querySelector('#nombre');
   const dificultadSelect = container.querySelector('#dificultad');
+  const colorPresasSelect = container.querySelector('#colorPresas');
   const tipoBoulderInput = container.querySelector('#tipo-boulder');
   const tipoViaInput = container.querySelector('#tipo-via');
   const fechaCreacionInput = container.querySelector('#fechaCreacion');
@@ -150,9 +158,27 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
       }),
     ].join('');
   };
+
+  const setColorPresasOptions = (options = [], placeholder = 'Sin color de presas') => {
+    const safeOptions = Array.isArray(options) ? options : [];
+
+    colorPresasSelect.innerHTML = [
+      `<option value="">${escapeHtml(placeholder)}</option>`,
+      ...safeOptions.map((option) => {
+        const value = escapeHtml(option?.value ?? '');
+        const label = escapeHtml(option?.label ?? option?.value ?? '');
+        return `<option value="${value}">${label}</option>`;
+      }),
+    ].join('');
+  };
   
   if (typeof initialValues.nombre === 'string') {
     nombreInput.value = initialValues.nombre;
+  }
+
+  setColorPresasOptions(colorPresasOptions, 'Sin color de presas');
+  if (typeof initialValues.colorPresas === 'string') {
+    colorPresasSelect.value = initialValues.colorPresas;
   }
   
   if (initialValues.tipo === 'boulder') {
@@ -176,7 +202,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
   dificultadSelect.disabled = true;
   setDificultadOptions([], 'Selecciona tipo de ruta');
   
-  [nombreInput, dificultadSelect, tipoBoulderInput, tipoViaInput, fechaCreacionInput, fechaRetiradaInput, imagenInput].forEach((el) => {
+  [nombreInput, dificultadSelect, colorPresasSelect, tipoBoulderInput, tipoViaInput, fechaCreacionInput, fechaRetiradaInput, imagenInput].forEach((el) => {
     el.addEventListener('input', () => callbacks.onFieldChange(el, alertBox));
     el.addEventListener('change', () => callbacks.onFieldChange(el, alertBox));
   });
@@ -203,6 +229,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
       idZona,
       nombre: nombreInput.value,
       dificultad: dificultadSelect.value,
+      colorPresas: colorPresasSelect.value,
       tipo: tipoBoulderInput.checked ? 'boulder' : tipoViaInput.checked ? 'via' : '',
       fechaCreacion: fechaCreacionInput.value,
       fechaRetirada: fechaRetiradaInput.value,
@@ -212,6 +239,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
     callbacks.onSubmit(values, {
       nombreInput,
       dificultadSelect,
+      colorPresasSelect,
       tipoBoulderInput,
       tipoViaInput,
       fechaCreacionInput,

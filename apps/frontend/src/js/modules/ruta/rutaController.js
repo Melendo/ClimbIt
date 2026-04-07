@@ -25,6 +25,10 @@ function normalizeDificultades(dificultades) {
         .filter((value) => value.length > 0);
 }
 
+function formatColorLabel(value) {
+    return normalizeColorName(value);
+}
+
 function buildDificultadOptions(escala, colorScaleMap) {
     const dificultades = normalizeDificultades(escala?.dificultades);
 
@@ -35,13 +39,60 @@ function buildDificultadOptions(escala, colorScaleMap) {
         }));
     }
 
-    return dificultades.map((colorName) => {
-        const colorHex = colorScaleMap[normalizeColorName(colorName)];
-        return {
-            value: colorName,
-            label: colorHex ? `${colorName} (${colorHex})` : colorName,
-        };
+    return dificultades.map((colorName) => ({
+        value: colorName,
+        label: formatColorLabel(colorName) || colorName,
+    }));
+}
+
+function buildColorPresasOptions(colorScaleMap) {
+    return Object.keys(colorScaleMap || {})
+        .map((colorName) => ({
+            value: normalizeColorName(colorName),
+            label: normalizeColorName(colorName),
+        }))
+        .filter((option) => option.value.length > 0);
+}
+
+function setTipoFieldError(container, message) {
+    const tipoWrapper = container.querySelector('#tipo-wrapper');
+    if (!tipoWrapper) return;
+
+    tipoWrapper.classList.add('is-invalid');
+    const feedback = tipoWrapper.querySelector('.invalid-feedback');
+    if (feedback) {
+        feedback.textContent = message;
+    }
+}
+
+function applyServerValidationErrors(validationErrors, fields, container) {
+    if (!Array.isArray(validationErrors)) return;
+
+    const {
+        nombreInput,
+        dificultadSelect,
+        colorPresasSelect,
+        fechaCreacionInput,
+        fechaRetiradaInput,
+        imagenInput,
+    } = fields;
+
+    validationErrors.forEach((errorItem) => {
+        const field = errorItem.field;
+        const msg = errorItem.msg || 'Valor invalido';
+
+        if (field === 'nombre') setFieldError(nombreInput, msg);
+        if (field === 'dificultad') setFieldError(dificultadSelect, msg);
+        if (field === 'colorPresas') setFieldError(colorPresasSelect, msg);
+        if (field === 'tipo') setTipoFieldError(container, msg);
+        if (field === 'fechaCreacion') setFieldError(fechaCreacionInput, msg);
+        if (field === 'fechaRetirada') setFieldError(fechaRetiradaInput, msg);
+        if (field === 'imagen') setFieldError(imagenInput, msg);
     });
+}
+
+function clearRouteFormFieldErrors(fields) {
+    fields.forEach((field) => clearFieldError(field));
 }
 
 async function resolveRocodromoContextByZonaId(idZona) {
@@ -149,7 +200,7 @@ function updateCoordinatesBadge(coordsBadge, point) {
 }
 
 // Validación de campos del formulario
-function validateFields(values, selectedPoint, allowedDificultades = []) {
+function validateFields(values, selectedPoint, allowedDificultades = [], allowedColorPresas = []) {
     const errors = {};
     const idZonaNum = Number(values.idZona);
     if (!Number.isInteger(idZonaNum) || idZonaNum < 1) {
@@ -164,6 +215,11 @@ function validateFields(values, selectedPoint, allowedDificultades = []) {
     const dificultad = (values.dificultad || '').trim();
     if (dificultad && !allowedDificultades.includes(dificultad)) {
         errors.dificultad = 'La dificultad seleccionada no pertenece a la escala del tipo elegido';
+    }
+
+    const colorPresas = (values.colorPresas || '').trim();
+    if (colorPresas && !allowedColorPresas.includes(colorPresas)) {
+        errors.colorPresas = 'Selecciona un color de presas valido';
     }
 
     const tipo = (values.tipo || '').trim();
@@ -227,6 +283,7 @@ export async function crearRutaCmd(container, params = {}) {
         via: [],
     };
     const colorScaleMap = await loadColorScaleMap();
+    const colorPresasOptions = buildColorPresasOptions(colorScaleMap);
 
     if (!hasValidParams) {
         contextError = 'La URL debe incluir idRocodromo e idZona validos para crear una ruta.';
@@ -369,6 +426,7 @@ export async function crearRutaCmd(container, params = {}) {
             const {
                 nombreInput,
                 dificultadSelect,
+                colorPresasSelect,
                 tipoBoulderInput,
                 tipoViaInput,
                 fechaCreacionInput,
@@ -392,23 +450,27 @@ export async function crearRutaCmd(container, params = {}) {
             }
 
             clearFormAlert(alertBox);
-            [nombreInput, dificultadSelect, tipoBoulderInput, tipoViaInput, fechaCreacionInput, fechaRetiradaInput, imagenInput].forEach(clearFieldError);
+            clearRouteFormFieldErrors([
+                nombreInput,
+                dificultadSelect,
+                colorPresasSelect,
+                tipoBoulderInput,
+                tipoViaInput,
+                fechaCreacionInput,
+                fechaRetiradaInput,
+                imagenInput,
+            ]);
 
             // Validar campos
             const allowedDificultades = (dificultadOptionsByTipo[values.tipo] || []).map((option) => option.value);
-            const errors = validateFields(values, selectedPoint, allowedDificultades);
+            const allowedColorPresas = colorPresasOptions.map((option) => option.value);
+            const errors = validateFields(values, selectedPoint, allowedDificultades, allowedColorPresas);
             if (Object.keys(errors).length > 0) {
                 if (errors.nombre) setFieldError(nombreInput, errors.nombre);
                 if (errors.dificultad) setFieldError(dificultadSelect, errors.dificultad);
+                if (errors.colorPresas) setFieldError(colorPresasSelect, errors.colorPresas);
                 if (errors.tipo) {
-                    const tipoWrapper = container.querySelector('#tipo-wrapper');
-                    if (tipoWrapper) {
-                        tipoWrapper.classList.add('is-invalid');
-                        const feedback = tipoWrapper.querySelector('.invalid-feedback');
-                        if (feedback) {
-                            feedback.textContent = errors.tipo;
-                        }
-                    }
+                    setTipoFieldError(container, errors.tipo);
                 }
                 if (errors.fechaCreacion) setFieldError(fechaCreacionInput, errors.fechaCreacion);
                 if (errors.fechaRetirada) setFieldError(fechaRetiradaInput, errors.fechaRetirada);
@@ -439,6 +501,11 @@ export async function crearRutaCmd(container, params = {}) {
             const nombre = (values.nombre || '').trim();
             if (nombre) {
                 formData.append('nombre', nombre);
+            }
+
+            const colorPresas = (values.colorPresas || '').trim();
+            if (colorPresas) {
+                formData.append('colorPresas', colorPresas);
             }
 
             const fechaCreacionIso = toIsoDateOrNull(values.fechaCreacion);
@@ -473,28 +540,14 @@ export async function crearRutaCmd(container, params = {}) {
                 // Manejar errores de validación del servidor (422)
                 if (err.response && err.response.status === 422) {
                     const body = await err.response.json();
-                    if (Array.isArray(body.errors)) {
-                        body.errors.forEach((e) => {
-                            const field = e.field;
-                            const msg = e.msg || 'Valor invalido';
-
-                            if (field === 'nombre') setFieldError(nombreInput, msg);
-                            if (field === 'dificultad') setFieldError(dificultadSelect, msg);
-                            if (field === 'tipo') {
-                                const tipoWrapper = container.querySelector('#tipo-wrapper');
-                                if (tipoWrapper) {
-                                    tipoWrapper.classList.add('is-invalid');
-                                    const feedback = tipoWrapper.querySelector('.invalid-feedback');
-                                    if (feedback) {
-                                        feedback.textContent = msg;
-                                    }
-                                }
-                            }
-                            if (field === 'fechaCreacion') setFieldError(fechaCreacionInput, msg);
-                            if (field === 'fechaRetirada') setFieldError(fechaRetiradaInput, msg);
-                            if (field === 'imagen') setFieldError(imagenInput, msg);
-                        });
-                    }
+                    applyServerValidationErrors(body.errors, {
+                        nombreInput,
+                        dificultadSelect,
+                        colorPresasSelect,
+                        fechaCreacionInput,
+                        fechaRetiradaInput,
+                        imagenInput,
+                    }, container);
                     showFormAlert(alertBox, 'danger', 'Solicitud invalida. Revisa los campos.');
                     return;
                 }
@@ -511,6 +564,7 @@ export async function crearRutaCmd(container, params = {}) {
         nombreRocodromo,
         nombreZona,
         contextError,
+        colorPresasOptions,
     });
 }
 
@@ -660,6 +714,7 @@ export async function modificarRutaCmd(container, id) {
         }
 
         const colorScaleMap = await loadColorScaleMap();
+        const colorPresasOptions = buildColorPresasOptions(colorScaleMap);
         let dificultadOptionsByTipo = {
             boulder: [],
             via: [],
@@ -775,6 +830,7 @@ export async function modificarRutaCmd(container, id) {
                 const {
                     nombreInput,
                     dificultadSelect,
+                    colorPresasSelect,
                     tipoBoulderInput,
                     tipoViaInput,
                     fechaCreacionInput,
@@ -798,22 +854,26 @@ export async function modificarRutaCmd(container, id) {
                 }
 
                 clearFormAlert(alertBox);
-                [nombreInput, dificultadSelect, tipoBoulderInput, tipoViaInput, fechaCreacionInput, fechaRetiradaInput, imagenInput].forEach(clearFieldError);
+                clearRouteFormFieldErrors([
+                    nombreInput,
+                    dificultadSelect,
+                    colorPresasSelect,
+                    tipoBoulderInput,
+                    tipoViaInput,
+                    fechaCreacionInput,
+                    fechaRetiradaInput,
+                    imagenInput,
+                ]);
 
                 const allowedDificultades = (dificultadOptionsByTipo[values.tipo] || []).map((option) => option.value);
-                const errors = validateFields(values, selectedPoint, allowedDificultades);
+                const allowedColorPresas = colorPresasOptions.map((option) => option.value);
+                const errors = validateFields(values, selectedPoint, allowedDificultades, allowedColorPresas);
                 if (Object.keys(errors).length > 0) {
                     if (errors.nombre) setFieldError(nombreInput, errors.nombre);
                     if (errors.dificultad) setFieldError(dificultadSelect, errors.dificultad);
+                    if (errors.colorPresas) setFieldError(colorPresasSelect, errors.colorPresas);
                     if (errors.tipo) {
-                        const tipoWrapper = container.querySelector('#tipo-wrapper');
-                        if (tipoWrapper) {
-                            tipoWrapper.classList.add('is-invalid');
-                            const feedback = tipoWrapper.querySelector('.invalid-feedback');
-                            if (feedback) {
-                                feedback.textContent = errors.tipo;
-                            }
-                        }
+                        setTipoFieldError(container, errors.tipo);
                     }
                     if (errors.fechaCreacion) setFieldError(fechaCreacionInput, errors.fechaCreacion);
                     if (errors.fechaRetirada) setFieldError(fechaRetiradaInput, errors.fechaRetirada);
@@ -845,6 +905,11 @@ export async function modificarRutaCmd(container, id) {
                 const nombre = (values.nombre || '').trim();
                 if (nombre) {
                     body.nombre = nombre;
+                }
+
+                const colorPresas = (values.colorPresas || '').trim();
+                if (colorPresas) {
+                    body.colorPresas = colorPresas;
                 }
 
                 const fechaCreacionIso = toIsoDateOrNull(values.fechaCreacion);
@@ -879,17 +944,14 @@ export async function modificarRutaCmd(container, id) {
                 } catch (err) {
                     if (err.response && err.response.status === 422) {
                         const bodyError = await err.response.json();
-                        if (Array.isArray(bodyError.errors)) {
-                            bodyError.errors.forEach((e) => {
-                                const field = e.field;
-                                const msg = e.msg || 'Valor invalido';
-                                if (field === 'nombre') setFieldError(nombreInput, msg);
-                                if (field === 'dificultad') setFieldError(dificultadSelect, msg);
-                                if (field === 'fechaCreacion') setFieldError(fechaCreacionInput, msg);
-                                if (field === 'fechaRetirada') setFieldError(fechaRetiradaInput, msg);
-                                if (field === 'imagen') setFieldError(imagenInput, msg);
-                            });
-                        }
+                        applyServerValidationErrors(bodyError.errors, {
+                            nombreInput,
+                            dificultadSelect,
+                            colorPresasSelect,
+                            fechaCreacionInput,
+                            fechaRetiradaInput,
+                            imagenInput,
+                        }, container);
                         showFormAlert(alertBox, 'danger', 'Solicitud invalida. Revisa los campos.');
                         return;
                     }
@@ -911,10 +973,12 @@ export async function modificarRutaCmd(container, id) {
             initialValues: {
                 nombre: ruta.nombre || '',
                 dificultad: ruta.dificultad || '',
+                colorPresas: ruta.colorPresas || '',
                 tipo: ruta.tipo || '',
                 fechaCreacion: ruta.fechaCreacion || null,
                 fechaRetirada: ruta.fechaRetirada || null,
             },
+            colorPresasOptions,
         });
     } catch (err) {
         showError(`Error al cargar la ruta para modificar: ${err.message}`);
