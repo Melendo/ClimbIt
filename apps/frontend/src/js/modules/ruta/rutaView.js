@@ -2,18 +2,18 @@ import { renderRutaEstadoButtons, setupRutaEstadoButtons } from '../../component
 
 function escapeHtml(value) {
   return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;');
 }
 
 function toDateInputValue(value) {
   if (!value) return '';
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return '';
-
+  
   const year = parsed.getFullYear();
   const month = String(parsed.getMonth() + 1).padStart(2, '0');
   const day = String(parsed.getDate()).padStart(2, '0');
@@ -31,15 +31,15 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
     mode = 'create',
     initialValues = {},
   } = viewData;
-
+  
   const isEditMode = mode === 'edit';
   const cardBadgeText = isEditMode ? 'Modificar ruta' : 'Nueva ruta';
   const submitText = isEditMode ? 'Guardar cambios' : 'Crear ruta';
-
+  
   const backHref = (idRocodromo && idZona)
-    ? `#mapaZona?id=${idRocodromo}&zona=${idZona}`
-    : '#misRocodromos';
-
+  ? `#mapaZona?id=${idRocodromo}&zona=${idZona}`
+  : '#misRocodromos';
+  
   container.innerHTML = `
   <div class="d-flex flex-column crear-ruta-card" style="height: 100dvh; overflow: hidden;">
     <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
@@ -52,7 +52,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
       </div>
       <span class="badge text-bg-light ms-auto">${cardBadgeText}</span>
     </div>
-
+  
     <div class="crear-ruta-mapa-wrap position-relative bg-dark flex-shrink-0">
       <div id="crearRutaMapaViewport" class="mapa-svg-viewport w-100 h-100" aria-label="Seleccion de posicion de ruta">
         <div class="d-flex justify-content-center align-items-center h-100 text-white-50">
@@ -70,7 +70,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
         </div>
       </div>
     </div>
-
+  
     <div class="card-body flex-grow-1 overflow-auto bg-light">
       ${contextError ? `<div id="crear-ruta-context-error" class="alert alert-warning">${contextError}</div>` : ''}
       <form id="form-crear-ruta" novalidate>
@@ -85,9 +85,9 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
           </div>
           <div class="invalid-feedback d-block"></div>
         </div>
-
+  
         <p class="text-muted small fw-semibold text-uppercase mb-2">Opcionales</p>
-
+  
         <div class="mb-3">
           <label for="nombre" class="form-label">Nombre</label>
           <input
@@ -100,13 +100,13 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
           />
           <div class="invalid-feedback"></div>
         </div>
-
+  
         <div class="mb-3">
           <label for="dificultad" class="form-label">Dificultad</label>
           <select class="form-select" name="dificultad" id="dificultad"></select>
           <div class="invalid-feedback"></div>
         </div>
-
+  
         <div class="row g-2">
           <div class="col-6">
             <label for="fechaCreacion" class="form-label">Fecha de creación</label>
@@ -119,20 +119,20 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
             <div class="invalid-feedback"></div>
           </div>
         </div>
-
+  
         <div class="mb-3">
           <label for="imagen" class="form-label">Imagen (opcional)</label>
           <input type="file" class="form-control" name="imagen" id="imagen" accept="image/*" />
           <div class="invalid-feedback"></div>
         </div>
-
+  
         <div id="form-alert" class="alert d-none" role="alert"></div>
-
+  
         <button type="submit" id="crear-ruta-submit" class="btn btn-primary w-100" ${contextError ? 'disabled' : ''}>${submitText}</button>
       </form>
     </div>
   </div>`;
-
+  
   const form = container.querySelector('#form-crear-ruta');
   const nombreInput = container.querySelector('#nombre');
   const dificultadSelect = container.querySelector('#dificultad');
@@ -145,10 +145,10 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
   const coordsBadge = container.querySelector('#coordenadasSeleccionadas');
   const submitButton = container.querySelector('#crear-ruta-submit');
   const alertBox = container.querySelector('#form-alert');
-
+  
   const setDificultadOptions = (options = [], placeholder = 'Sin dificultad') => {
     const safeOptions = Array.isArray(options) ? options : [];
-
+    
     dificultadSelect.innerHTML = [
       `<option value="">${escapeHtml(placeholder)}</option>`,
       ...safeOptions.map((option) => {
@@ -158,20 +158,20 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
       }),
     ].join('');
   };
-
+  
   if (typeof initialValues.nombre === 'string') {
     nombreInput.value = initialValues.nombre;
   }
-
+  
   if (initialValues.tipo === 'boulder') {
     tipoBoulderInput.checked = true;
   } else if (initialValues.tipo === 'via') {
     tipoViaInput.checked = true;
   }
-
+  
   fechaCreacionInput.value = toDateInputValue(initialValues.fechaCreacion);
   fechaRetiradaInput.value = toDateInputValue(initialValues.fechaRetirada);
-
+  
   if (!fechaCreacionInput.value) {
     // Establecer fecha de creación por defecto al día actual
     const now = new Date();
@@ -180,18 +180,18 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
     const day = String(now.getDate()).padStart(2, '0');
     fechaCreacionInput.value = `${year}-${month}-${day}`;
   }
-
+  
   dificultadSelect.disabled = true;
   setDificultadOptions([], 'Selecciona tipo de ruta');
-
+  
   [nombreInput, dificultadSelect, tipoBoulderInput, tipoViaInput, fechaCreacionInput, fechaRetiradaInput, imagenInput].forEach((el) => {
     el.addEventListener('input', () => callbacks.onFieldChange(el, alertBox));
     el.addEventListener('change', () => callbacks.onFieldChange(el, alertBox));
   });
-
+  
   const handleTipoChange = () => {
     if (typeof callbacks.onTipoChange !== 'function') return;
-
+    
     const selectedTipo = tipoBoulderInput.checked ? 'boulder' : tipoViaInput.checked ? 'via' : '';
     callbacks.onTipoChange(selectedTipo, {
       dificultadSelect,
@@ -199,13 +199,13 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
       alertBox,
     });
   };
-
+  
   tipoBoulderInput.addEventListener('change', handleTipoChange);
   tipoViaInput.addEventListener('change', handleTipoChange);
-
+  
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-
+    
     const values = {
       idRocodromo,
       idZona,
@@ -216,7 +216,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
       fechaRetirada: fechaRetiradaInput.value,
       imagen: imagenInput.files?.[0] || null,
     };
-
+    
     callbacks.onSubmit(values, {
       nombreInput,
       dificultadSelect,
@@ -230,7 +230,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
       coordsBadge,
     });
   });
-
+  
   if (typeof callbacks.onViewReady === 'function') {
     callbacks.onViewReady({
       mapaViewport,
@@ -257,10 +257,10 @@ export function renderInfoRuta(container, ruta, callbacks) {
     fechaRetirada,
     activo,
   } = ruta || {};
-
+  
   const hasDificultad = typeof dificultad === 'string'
-    ? dificultad.trim().length > 0
-    : Boolean(dificultad);
+  ? dificultad.trim().length > 0
+  : Boolean(dificultad);
   const tipoLabel = formatTipo(tipo);
   const dificultadLabel = dificultad || 'Sin dificultad';
   const colorPresasLabel = colorPresas || 'No definido';
@@ -269,7 +269,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
   const activoLabel = activo ? 'Activa' : 'Retirada';
   const activoBadgeClass = activo ? 'text-bg-success' : 'text-bg-secondary';
   const canManage = Boolean(ruta?.canManage);
-
+  
   container.innerHTML = `
 <div class="d-flex flex-column" style="min-height: 100dvh; background: #f8f9fa;">
   
@@ -287,7 +287,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
     <a href="#" onclick="history.back(); return false;" class="position-absolute top-0 start-0 m-3 text-white d-flex align-items-center justify-content-center rounded-circle text-decoration-none" style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); backdrop-filter: blur(4px);">
       <span class="material-icons">arrow_back</span>
     </a>
-
+  
     ${canManage ? `
     <div class="position-absolute bottom-0 end-0 m-3 d-flex gap-2" style="z-index: 3;">
       <button type="button" id="btn-modificar-ruta" class="btn btn-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(255,255,255,0.85);" aria-label="Modificar ruta" title="Modificar ruta">
@@ -304,7 +304,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
       <h1 class="fs-4 fw-semibold mb-0">${nombre || 'Sin nombre'}</h1>
     </div>
   </div>
-
+  
   <!-- Contenido principal -->
   <div class="flex-grow-1 d-flex flex-column">
     
@@ -319,23 +319,23 @@ export function renderInfoRuta(container, ruta, callbacks) {
           <span class="material-icons" style="color: #6b7280; font-size: 28px;">remove</span>
         </div>
       </div>
-
+  
       <p class="text-muted small mb-3 text-uppercase" style="letter-spacing: 0.5px;">Marcar como</p>
       <div class="row g-2">
         ${renderRutaEstadoButtons()}
       </div>
     </div>
-
+  
     <!-- Detalles de la ruta -->
     <div class="bg-white mt-2 px-4 py-4">
       <p class="text-muted small mb-3 text-uppercase" style="letter-spacing: 0.5px;">Detalles de la ruta</p>
-
+  
       <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
         <span class="badge bg-primary">${tipoLabel}</span>
         <span class="badge text-bg-light">${dificultadLabel}</span>
         <span class="badge ${activoBadgeClass}">${activoLabel}</span>
       </div>
-
+  
       <div class="row g-3">
         <div class="col-12">
           <div class="small text-muted text-uppercase">Color de presas</div>
@@ -351,43 +351,46 @@ export function renderInfoRuta(container, ruta, callbacks) {
         </div>
       </div>
     </div>
-
+  
   </div>
 </div>`;
-
+  
   setupRutaEstadoButtons(container, callbacks.onEstadoChange);
-
+  
   const editButton = container.querySelector('#btn-modificar-ruta');
   if (editButton && typeof callbacks.onEdit === 'function') {
     editButton.addEventListener('click', callbacks.onEdit);
-  const eliminarRutaBtn = container.querySelector('#eliminar-ruta-btn');
-  if (eliminarRutaBtn && typeof callbacks.onDeleteRoute === 'function') {
-    eliminarRutaBtn.addEventListener('click', () => {
-      callbacks.onDeleteRoute(ruta, eliminarRutaBtn);
+  }
+    const eliminarRutaBtn = container.querySelector('#eliminar-ruta-btn');
+    if (eliminarRutaBtn && typeof callbacks.onDeleteRoute === 'function') {
+      eliminarRutaBtn.addEventListener('click', () => {
+        callbacks.onDeleteRoute(ruta, eliminarRutaBtn);
+      });
+    }
+  }
+
+  
+  // Función auxiliar para formatear una fecha/hora a un formato legible o mostrar un texto de fallback si no es válida
+  function formatDateTime(value) {
+    if (!value) return 'No definida';
+    
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return 'No definida';
+    
+    return parsed.toLocaleString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   }
-}
-
-// Función auxiliar para formatear una fecha/hora a un formato legible o mostrar un texto de fallback si no es válida
-function formatDateTime(value) {
-  if (!value) return 'No definida';
-
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return 'No definida';
-
-  return parsed.toLocaleString('es-ES', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-// Función auxiliar para formatear el tipo de ruta a un texto legible
-function formatTipo(tipo) {
-  if (!tipo) return 'No definido';
-  if (tipo === 'via') return 'Via';
-  if (tipo === 'boulder') return 'Boulder';
-  return tipo;
-}
+  
+  // Función auxiliar para formatear el tipo de ruta a un texto legible
+  function formatTipo(tipo) {
+    if (!tipo) return 'No definido';
+    if (tipo === 'via') return 'Via';
+    if (tipo === 'boulder') return 'Boulder';
+    return tipo;
+  }
+  

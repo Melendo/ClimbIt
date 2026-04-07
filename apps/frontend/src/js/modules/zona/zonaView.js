@@ -33,11 +33,9 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                 <div class="position-absolute end-0 bottom-0 m-3 d-flex gap-2" style="z-index: 12;">
                     <button id="btnMapaExpandir" type="button" class="btn btn-sm btn-light shadow-sm d-flex align-items-center gap-1 mapa-toggle-btn" aria-label="Expandir mapa">
                         <span class="material-icons" style="font-size: 18px;">fullscreen</span>
-                        <span class="small fw-semibold">Expandir</span>
                     </button>
                     <button id="btnMapaContraer" type="button" class="btn btn-sm btn-light shadow-sm d-none d-flex align-items-center gap-1 mapa-toggle-btn" aria-label="Contraer mapa">
                         <span class="material-icons" style="font-size: 18px;">fullscreen_exit</span>
-                        <span class="small fw-semibold">Contraer</span>
                     </button>
                 </div>
                 
