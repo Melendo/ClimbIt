@@ -1,4 +1,5 @@
 import { renderMapaZona, renderCrearZona } from './zonaView.js';
+import { ESTADOS_CONFIG } from '../../components/climbingConfig.js';
 import { createSvgPanzoomMap } from '../../components/svgPanzoomMap.js';
 import { fetchClient, canManageRocodromo, fetchImageObjectUrl, fetchSvgText } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
@@ -9,13 +10,6 @@ import { showLoading, showError } from '../../core/ui.js';
 * @param {HTMLElement} container Contenedor donde renderizar la vista
 * @param {number} idRocodromo ID del rocódromo
 */
-const ESTADOS_CONFIG = {
-    'flash': { icon: 'bolt', color: '#ffba0c', bg: '#fef3c7' },
-    'completado': { icon: 'done', color: '#16a34a', bg: '#dcfce7' },
-    'proyecto': { icon: 'sync', color: '#2563eb', bg: '#dbeafe' },
-    'S/N': { icon: 'remove', color: '#6b7280', bg: '#e5e7eb' }
-};
-
 const RUTA_IMAGE_PLACEHOLDER = '/assets/placeholder.jpg';
 
 async function resolveRutaImageSrc(ruta) {
@@ -152,7 +146,7 @@ async function cargarRutasZona(idZona) {
         const rutasConImagen = await Promise.all(
             rutas.map(async (ruta) => ({
                 ...ruta,
-                statusConfig: ESTADOS_CONFIG[ruta.estado] || ESTADOS_CONFIG['S/N'],
+                statusConfig: ESTADOS_CONFIG[ruta.estado] || ESTADOS_CONFIG.nada,
                 imagenSrc: await resolveRutaImageSrc(ruta),
             }))
         );

@@ -1,15 +1,24 @@
-// Escala de grados (falta traerla con peticion al backend)
 import { renderRutaEstadoButtons, setupRutaEstadoButtons } from '../../components/rutaEstadoButtons.js';
 
-const GRADOS_FRANCESES = [
-  '3',
-  '4',
-  '5a', '5a+', '5b', '5b+', '5c', '5c+',
-  '6a', '6a+', '6b', '6b+', '6c', '6c+',
-  '7a', '7a+', '7b', '7b+', '7c', '7c+',
-  '8a', '8a+', '8b', '8b+', '8c', '8c+',
-  '9a', '9a+', '9b', '9b+', '9c', '9c+',
-];
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function toDateInputValue(value) {
+  if (!value) return '';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return '';
+
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, '0');
+  const day = String(parsed.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 // Vista para la creación de rutas
 export function renderCrearRuta(container, callbacks, viewData = {}) {
@@ -19,7 +28,13 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
     nombreRocodromo = 'Rocódromo',
     nombreZona = 'Zona',
     contextError = '',
+    mode = 'create',
+    initialValues = {},
   } = viewData;
+
+  const isEditMode = mode === 'edit';
+  const cardBadgeText = isEditMode ? 'Modificar ruta' : 'Nueva ruta';
+  const submitText = isEditMode ? 'Guardar cambios' : 'Crear ruta';
 
   const backHref = (idRocodromo && idZona)
     ? `#mapaZona?id=${idRocodromo}&zona=${idZona}`
@@ -35,7 +50,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
         <span class="fw-semibold">${nombreRocodromo}</span>
         <small class="text-muted">Zona ${nombreZona}</small>
       </div>
-      <span class="badge text-bg-light ms-auto">Nueva ruta</span>
+      <span class="badge text-bg-light ms-auto">${cardBadgeText}</span>
     </div>
 
     <div class="crear-ruta-mapa-wrap position-relative bg-dark flex-shrink-0">
@@ -95,12 +110,12 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
         <div class="row g-2">
           <div class="col-6">
             <label for="fechaCreacion" class="form-label">Fecha de creación</label>
-            <input type="datetime-local" class="form-control" name="fechaCreacion" id="fechaCreacion" />
+            <input type="date" class="form-control" name="fechaCreacion" id="fechaCreacion" />
             <div class="invalid-feedback"></div>
           </div>
           <div class="col-6">
             <label for="fechaRetirada" class="form-label">Fecha de retirada</label>
-            <input type="datetime-local" class="form-control" name="fechaRetirada" id="fechaRetirada" />
+            <input type="date" class="form-control" name="fechaRetirada" id="fechaRetirada" />
             <div class="invalid-feedback"></div>
           </div>
         </div>
@@ -113,7 +128,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
 
         <div id="form-alert" class="alert d-none" role="alert"></div>
 
-        <button type="submit" id="crear-ruta-submit" class="btn btn-primary w-100" ${contextError ? 'disabled' : ''}>Crear ruta</button>
+        <button type="submit" id="crear-ruta-submit" class="btn btn-primary w-100" ${contextError ? 'disabled' : ''}>${submitText}</button>
       </form>
     </div>
   </div>`;
@@ -131,24 +146,62 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
   const submitButton = container.querySelector('#crear-ruta-submit');
   const alertBox = container.querySelector('#form-alert');
 
-  // Establecer fecha de creación por defecto a ahora
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  fechaCreacionInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+  const setDificultadOptions = (options = [], placeholder = 'Sin dificultad') => {
+    const safeOptions = Array.isArray(options) ? options : [];
 
-  dificultadSelect.innerHTML = [
-    '<option value="">Sin dificultad</option>',
-    ...GRADOS_FRANCESES.map((grado) => `<option value="${grado}">${grado}</option>`),
-  ].join('');
+    dificultadSelect.innerHTML = [
+      `<option value="">${escapeHtml(placeholder)}</option>`,
+      ...safeOptions.map((option) => {
+        const value = escapeHtml(option?.value ?? '');
+        const label = escapeHtml(option?.label ?? option?.value ?? '');
+        return `<option value="${value}">${label}</option>`;
+      }),
+    ].join('');
+  };
+
+  if (typeof initialValues.nombre === 'string') {
+    nombreInput.value = initialValues.nombre;
+  }
+
+  if (initialValues.tipo === 'boulder') {
+    tipoBoulderInput.checked = true;
+  } else if (initialValues.tipo === 'via') {
+    tipoViaInput.checked = true;
+  }
+
+  fechaCreacionInput.value = toDateInputValue(initialValues.fechaCreacion);
+  fechaRetiradaInput.value = toDateInputValue(initialValues.fechaRetirada);
+
+  if (!fechaCreacionInput.value) {
+    // Establecer fecha de creación por defecto al día actual
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    fechaCreacionInput.value = `${year}-${month}-${day}`;
+  }
+
+  dificultadSelect.disabled = true;
+  setDificultadOptions([], 'Selecciona tipo de ruta');
 
   [nombreInput, dificultadSelect, tipoBoulderInput, tipoViaInput, fechaCreacionInput, fechaRetiradaInput, imagenInput].forEach((el) => {
     el.addEventListener('input', () => callbacks.onFieldChange(el, alertBox));
     el.addEventListener('change', () => callbacks.onFieldChange(el, alertBox));
   });
+
+  const handleTipoChange = () => {
+    if (typeof callbacks.onTipoChange !== 'function') return;
+
+    const selectedTipo = tipoBoulderInput.checked ? 'boulder' : tipoViaInput.checked ? 'via' : '';
+    callbacks.onTipoChange(selectedTipo, {
+      dificultadSelect,
+      setDificultadOptions,
+      alertBox,
+    });
+  };
+
+  tipoBoulderInput.addEventListener('change', handleTipoChange);
+  tipoViaInput.addEventListener('change', handleTipoChange);
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -184,6 +237,11 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
       coordsBadge,
       submitButton,
       alertBox,
+      dificultadSelect,
+      tipoBoulderInput,
+      tipoViaInput,
+      setDificultadOptions,
+      initialValues,
     });
   }
 }
@@ -232,7 +290,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
 
     ${canManage ? `
     <div class="position-absolute bottom-0 end-0 m-3 d-flex gap-2" style="z-index: 3;">
-      <button type="button" class="btn btn-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(255,255,255,0.85);" aria-label="Modificar ruta" title="Modificar ruta">
+      <button type="button" id="btn-modificar-ruta" class="btn btn-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(255,255,255,0.85);" aria-label="Modificar ruta" title="Modificar ruta">
         <span class="material-icons" style="font-size: 20px;">edit</span>
       </button>
       <button type="button" class="btn btn-danger d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;" aria-label="Eliminar ruta" title="Eliminar ruta">
@@ -298,6 +356,11 @@ export function renderInfoRuta(container, ruta, callbacks) {
 </div>`;
 
   setupRutaEstadoButtons(container, callbacks.onEstadoChange);
+
+  const editButton = container.querySelector('#btn-modificar-ruta');
+  if (editButton && typeof callbacks.onEdit === 'function') {
+    editButton.addEventListener('click', callbacks.onEdit);
+  }
 }
 
 // Función auxiliar para formatear una fecha/hora a un formato legible o mostrar un texto de fallback si no es válida
