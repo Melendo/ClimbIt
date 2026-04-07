@@ -235,7 +235,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
       <button type="button" class="btn btn-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(255,255,255,0.85);" aria-label="Modificar ruta" title="Modificar ruta">
         <span class="material-icons" style="font-size: 20px;">edit</span>
       </button>
-      <button type="button" class="btn btn-danger d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;" aria-label="Eliminar ruta" title="Eliminar ruta">
+      <button type="button" id="eliminar-ruta-btn" class="btn btn-danger d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;" aria-label="Eliminar ruta" title="Eliminar ruta">
         <span class="material-icons" style="font-size: 20px;">delete</span>
       </button>
     </div>` : ''}
@@ -298,6 +298,13 @@ export function renderInfoRuta(container, ruta, callbacks) {
 </div>`;
 
   setupRutaEstadoButtons(container, callbacks.onEstadoChange);
+
+  const eliminarRutaBtn = container.querySelector('#eliminar-ruta-btn');
+  if (eliminarRutaBtn && typeof callbacks.onDeleteRoute === 'function') {
+    eliminarRutaBtn.addEventListener('click', () => {
+      callbacks.onDeleteRoute(ruta, eliminarRutaBtn);
+    });
+  }
 }
 
 // Función auxiliar para formatear una fecha/hora a un formato legible o mostrar un texto de fallback si no es válida
