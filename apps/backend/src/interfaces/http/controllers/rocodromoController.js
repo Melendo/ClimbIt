@@ -94,24 +94,14 @@ class RocodromoController {
         ubicacion,
         descripcion,
         horarios,
-        dificultadBloque,
-        dificultadVia,
       } = req.body;
-
-      const toOptionalInt = (value) => {
-        if (value === undefined) return undefined;
-        if (value === null || value === '') return null;
-        return Number(value);
-      };
 
       const rocodromoActualizado = await this.useCases.actualizarInformacion.execute({
         idRocodromo: id,
         nombre,
         ubicacion,
         descripcion,
-        horarios,
-        dificultadBloque: toOptionalInt(dificultadBloque),
-        dificultadVia: toOptionalInt(dificultadVia),
+        horarios
       });
 
       res.status(200).json(rocodromoActualizado);

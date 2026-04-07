@@ -167,8 +167,6 @@ router.get(
  * - ubicacion (@param {string}): Ubicacion o direccion (1-255 caracteres)
  * - descripcion (@param {string}): Descripcion del rocodromo
  * - horarios (@param {string}): Horarios del rocodromo
- * - dificultadBloque (@param {int}): ID de la escala de dificultad de bloque
- * - dificultadVia (@param {int}): ID de la escala de dificultad de via
  *
  * Requiere: Token JWT valido en header Authorization
  * Rol de Administrador o Gestor del Rocodromo propietario
@@ -198,16 +196,6 @@ const actualizarRocodromoValidators = [
     .trim()
     .isString()
     .withMessage('Los horarios deben ser una cadena valida'),
-  body('dificultadBloque')
-    .optional({ nullable: true, checkFalsy: true })
-    .toInt()
-    .isInt({ min: 1 })
-    .withMessage('dificultadBloque debe ser un entero positivo'),
-  body('dificultadVia')
-    .optional({ nullable: true, checkFalsy: true })
-    .toInt()
-    .isInt({ min: 1 })
-    .withMessage('dificultadVia debe ser un entero positivo'),
 ];
 
 router.put(
