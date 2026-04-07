@@ -42,6 +42,7 @@ import ActualizarMapaZona from '../application/zonas/actualizarMapaZona.js';
 import ObtenerZonaPorId from '../application/zonas/obtenerZonaPorId.js';
 
 import CrearRocodromo from '../application/rocodromos/crearRocodromo.js';
+import ActualizarInformacionRocodromo from '../application/rocodromos/actualizarInformacionRocodromo.js';
 import ActualizarLogoRocodromo from '../application/rocodromos/actualizarLogoRocodromo.js';
 import ObtenerZonasRocodromo from '../application/rocodromos/obtenerZonasRocodromo.js';
 import ObtenerRocodromos from '../application/rocodromos/obtenerRocodromos.js';
@@ -123,6 +124,10 @@ async function inicializarContainer() {
   const obtenerZonaPorIdUseCase = new ObtenerZonaPorId(zonaRepository);
 
   const crearRocodromoUseCase = new CrearRocodromo(rocodromoRepository);
+  const actualizarInformacionRocodromoUseCase = new ActualizarInformacionRocodromo(
+    rocodromoRepository,
+    db.EscalaDificultad
+  );
   const actualizarLogoRocodromoUseCase = new ActualizarLogoRocodromo(
     rocodromoRepository
   );
@@ -166,6 +171,7 @@ async function inicializarContainer() {
   };
   const rocodromoUseCases = {
     crear: crearRocodromoUseCase,
+    actualizarInformacion: actualizarInformacionRocodromoUseCase,
     actualizarLogo: actualizarLogoRocodromoUseCase,
     obtenerZonasRocodromo: obtenerZonasRocodromoUseCase,
     obtenerRocodromos: obtenerRocodromosUseCase,

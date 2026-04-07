@@ -17,6 +17,10 @@ class RocodromoRepository {
     throw new Error('Método "actualizarLogoRocodromo" no implementado');
   }
 
+  async actualizarInformacion(rocodromo) {
+    throw new Error('Método "actualizarInformacion" no implementado');
+  }
+
   async obtenerEscalasDificultad(idRocodromo) {
     throw new Error('Método "obtenerEscalasDificultad" no implementado');
   }

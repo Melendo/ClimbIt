@@ -86,6 +86,40 @@ class RocodromoController {
     }
   }
 
+  async actualizarInformacion(req, res, next) {
+    try {
+      const { id } = req.params;
+      const {
+        nombre,
+        ubicacion,
+        descripcion,
+        horarios,
+        dificultadBloque,
+        dificultadVia,
+      } = req.body;
+
+      const toOptionalInt = (value) => {
+        if (value === undefined) return undefined;
+        if (value === null || value === '') return null;
+        return Number(value);
+      };
+
+      const rocodromoActualizado = await this.useCases.actualizarInformacion.execute({
+        idRocodromo: id,
+        nombre,
+        ubicacion,
+        descripcion,
+        horarios,
+        dificultadBloque: toOptionalInt(dificultadBloque),
+        dificultadVia: toOptionalInt(dificultadVia),
+      });
+
+      res.status(200).json(rocodromoActualizado);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
   async subirLogo(req, res, next) {
     try {
       const { id } = req.params;

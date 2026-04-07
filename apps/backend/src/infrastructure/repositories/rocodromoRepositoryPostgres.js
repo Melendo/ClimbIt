@@ -1,6 +1,6 @@
 import RocodromoRepository from '../../domain/rocodromos/rocodromoRepository.js';
 import Rocodromo from '../../domain/rocodromos/Rocodromo.js';
-import { ValidationError } from '../../domain/sharedObjects/AppError.js';
+import { NotFoundError, ValidationError } from '../../domain/sharedObjects/AppError.js';
 import mapRepositoryError from './dbErrorHandler.js';
 
 class RocodromoRepositoryPostgres extends RocodromoRepository {
@@ -119,6 +119,38 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
       throw mapRepositoryError(error, {
         fallbackMessage: 'Error al actualizar el logo del rocódromo',
         internalCode: 'ROCODROMO_UPDATE_LOGO_DB_FAILED',
+      });
+    }
+  }
+
+  async actualizarInformacion(rocodromo) {
+    try {
+      const rocodromoModel = await this.RocodromoModel.findByPk(rocodromo.id);
+
+      if (!rocodromoModel) {
+        throw new NotFoundError(
+          `Rocodromo con ID ${rocodromo.id} no encontrado`,
+          'ROCODROMO_NOT_FOUND'
+        );
+      }
+
+      const data = {
+        nombre: rocodromo.nombre,
+        ubicacion: rocodromo.ubicacion,
+        descripcion: rocodromo.descripcion,
+        horarios: rocodromo.horarios,
+        dificultadBloque: rocodromo.dificultadBloque,
+        dificultadVia: rocodromo.dificultadVia,
+      };
+
+      await rocodromoModel.update(data);
+      await rocodromoModel.save();
+
+      return this._toDomain(rocodromoModel);
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al actualizar la informacion del rocodromo',
+        internalCode: 'ROCODROMO_UPDATE_DB_FAILED',
       });
     }
   }
