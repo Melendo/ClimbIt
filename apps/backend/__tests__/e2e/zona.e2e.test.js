@@ -71,14 +71,14 @@ describe('E2E: Zonas', () => {
       expect(nombres).toContain('Pista Test 2');
     });
 
-    it('debería obtener una lista vacía para una zona existente sin pistas', async () => {
+    it('debería retornar 404 para una zona existente sin pistas activas', async () => {
       const response = await request(app)
         .get(`/zonas/pistas/${zonaSinPistas.id}`)
         .set('Authorization', `Bearer ${token}`)
-        .expect(200);
+        .expect(404);
 
-      expect(response.body).toBeInstanceOf(Array);
-      expect(response.body).toHaveLength(0);
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.error).toMatch(/no encontrada|sin pistas/i);
     });
 
     it('debería retornar 404 para una zona que no existe', async () => {
