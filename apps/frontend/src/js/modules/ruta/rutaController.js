@@ -1,48 +1,92 @@
 import { renderCrearRuta, renderInfoRuta } from './rutaView.js';
 
 import { createSvgPanzoomMap } from '../../components/svgPanzoomMap.js';
+import {
+    ESTADOS_BACKEND,
+    ESTADOS_CONFIG,
+    ESTADOS_FRONTEND,
+    loadColorScaleMap,
+    getEstadoConfig,
+    normalizeColorName,
+} from '../../components/climbingConfig.js';
 import { showConfirmModal } from '../../components/modal.js';
 import { fetchClient, canManageRocodromo, fetchImageObjectUrl, fetchSvgText, getTokenPayload } from '../../core/client.js';
 import { showError, showLoading, showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
 
 const RUTA_IMAGE_PLACEHOLDER = '/assets/placeholder.jpg';
 
-// Escala de grados para validación
-const GRADOS_FRANCESES = [
-    '3', '4',
-    '5a', '5a+', '5b', '5b+', '5c', '5c+',
-    '6a', '6a+', '6b', '6b+', '6c', '6c+',
-    '7a', '7a+', '7b', '7b+', '7c', '7c+',
-    '8a', '8a+', '8b', '8b+', '8c', '8c+',
-    '9a', '9a+', '9b', '9b+', '9c', '9c+',
-];
-
 const TIPOS_PISTA = ['boulder', 'via'];
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 
-// Configuración de estados para la vista de ruta
-const ESTADOS_CONFIG = {
-    'flash': { icon: 'bolt', color: '#d97706', bg: '#fef3c7', texto: 'Flash' },
-    'completado': { icon: 'done', color: '#16a34a', bg: '#dcfce7', texto: 'Completado' },
-    'en-progreso': { icon: 'sync', color: '#2563eb', bg: '#dbeafe', texto: 'En proyecto' },
-    'nada': { icon: 'remove', color: '#6b7280', bg: '#e5e7eb', texto: 'Sin registrar' }
-};
+function normalizeDificultades(dificultades) {
+    if (!Array.isArray(dificultades)) return [];
+    return dificultades
+        .map((value) => String(value ?? '').trim())
+        .filter((value) => value.length > 0);
+}
 
-// Mapeo de estados del frontend a estados del backend
-const ESTADOS_BACKEND = {
-    'flash': 'Flash',
-    'completado': 'Completado',
-    'en-progreso': 'Proyecto',
-    'nada': 'S/N'
-};
+function buildDificultadOptions(escala, colorScaleMap) {
+    const dificultades = normalizeDificultades(escala?.dificultades);
 
-// Mapeo de estados del backend a estados del frontend
-const ESTADOS_FRONTEND = {
-    'flash': 'flash',
-    'completado': 'completado',
-    'proyecto': 'en-progreso',
-    'S/N': 'nada'
-};
+    if (!escala?.isColor) {
+        return dificultades.map((dificultad) => ({
+            value: dificultad,
+            label: dificultad,
+        }));
+    }
+
+    return dificultades.map((colorName) => {
+        const colorHex = colorScaleMap[normalizeColorName(colorName)];
+        return {
+            value: colorName,
+            label: colorHex ? `${colorName} (${colorHex})` : colorName,
+        };
+    });
+}
+
+async function resolveRocodromoContextByZonaId(idZona) {
+    const zonaIdNum = Number(idZona);
+    if (!Number.isInteger(zonaIdNum) || zonaIdNum < 1) {
+        return null;
+    }
+
+    try {
+        const rocodromosRes = await fetchClient('/rocodromos');
+        const rocodromos = await rocodromosRes.json();
+        const rocodromosList = Array.isArray(rocodromos) ? rocodromos : [];
+
+        for (const rocodromo of rocodromosList) {
+            const idRocodromo = Number(rocodromo?.id);
+            if (!Number.isInteger(idRocodromo) || idRocodromo < 1) {
+                continue;
+            }
+
+            try {
+                const zonasRes = await fetchClient(`/rocodromos/zonas/${idRocodromo}`);
+                const zonas = await zonasRes.json();
+                const zonaMatch = Array.isArray(zonas)
+                    ? zonas.find((zona) => Number(zona.id) === zonaIdNum)
+                    : null;
+
+                if (zonaMatch) {
+                    return {
+                        idRocodromo,
+                        nombreRocodromo: rocodromo?.nombre || `Rocodromo ${idRocodromo}`,
+                        nombreZona: zonaMatch.nombre || `${zonaIdNum}`,
+                        zonaMapaDisponible: Boolean(zonaMatch.mapa),
+                    };
+                }
+            } catch (err) {
+                console.warn(`No se pudieron cargar zonas del rocodromo ${idRocodromo}:`, err.message);
+            }
+        }
+    } catch (err) {
+        console.warn('No se pudieron cargar los rocodromos para resolver la zona:', err.message);
+    }
+
+    return null;
+}
+
 
 // Función para verificar si el usuario puede gestionar la ruta basada en el ID de la zona
 async function canManageRutaByZonaId(idZona) {
@@ -105,7 +149,7 @@ function updateCoordinatesBadge(coordsBadge, point) {
 }
 
 // Validación de campos del formulario
-function validateFields(values, selectedPoint) {
+function validateFields(values, selectedPoint, allowedDificultades = []) {
     const errors = {};
     const idZonaNum = Number(values.idZona);
     if (!Number.isInteger(idZonaNum) || idZonaNum < 1) {
@@ -118,8 +162,8 @@ function validateFields(values, selectedPoint) {
     }
 
     const dificultad = (values.dificultad || '').trim();
-    if (dificultad && !GRADOS_FRANCESES.includes(dificultad)) {
-        errors.dificultad = `dificultad debe ser uno de: ${GRADOS_FRANCESES.join(', ')}`;
+    if (dificultad && !allowedDificultades.includes(dificultad)) {
+        errors.dificultad = 'La dificultad seleccionada no pertenece a la escala del tipo elegido';
     }
 
     const tipo = (values.tipo || '').trim();
@@ -178,6 +222,11 @@ export async function crearRutaCmd(container, params = {}) {
     let nombreZona = hasValidParams ? `${idZona}` : 'N/D';
     let contextError = '';
     let zonaMapaSvg = null;
+    let dificultadOptionsByTipo = {
+        boulder: [],
+        via: [],
+    };
+    const colorScaleMap = await loadColorScaleMap();
 
     if (!hasValidParams) {
         contextError = 'La URL debe incluir idRocodromo e idZona validos para crear una ruta.';
@@ -213,10 +262,35 @@ export async function crearRutaCmd(container, params = {}) {
         } catch (err) {
             contextError = `No se pudo validar la zona indicada: ${err.message}`;
         }
+
+        try {
+            const escalasRes = await fetchClient(`/rocodromos/${idRocodromo}/escalasDificultad`);
+            const escalas = await escalasRes.json();
+            dificultadOptionsByTipo = {
+                boulder: buildDificultadOptions(escalas?.escalaDificultadBloque, colorScaleMap),
+                via: buildDificultadOptions(escalas?.escalaDificultadVia, colorScaleMap),
+            };
+        } catch (err) {
+            console.warn('No se pudieron cargar las escalas de dificultad del rocodromo:', err.message);
+        }
     }
 
     let selectedPoint = null;
     let mapaSelector = null;
+
+    const applyDificultadOptionsByTipo = (tipo, { dificultadSelect, setDificultadOptions }) => {
+        const options = dificultadOptionsByTipo[tipo] || [];
+        const hasTipo = tipo === 'boulder' || tipo === 'via';
+
+        if (!hasTipo) {
+            dificultadSelect.disabled = true;
+            setDificultadOptions([], 'Selecciona tipo de ruta');
+            return;
+        }
+
+        dificultadSelect.disabled = false;
+        setDificultadOptions(options, 'Sin dificultad');
+    };
 
     const callbacks = {
         // Limpiar errores al modificar un campo
@@ -225,8 +299,14 @@ export async function crearRutaCmd(container, params = {}) {
             clearFormAlert(alertBox);
         },
 
-        onViewReady: ({ mapaViewport, coordsBadge, alertBox, submitButton }) => {
+        onViewReady: ({ mapaViewport, coordsBadge, alertBox, submitButton, dificultadSelect, tipoBoulderInput, tipoViaInput, setDificultadOptions, initialValues }) => {
             updateCoordinatesBadge(coordsBadge, selectedPoint);
+
+            const selectedTipo = tipoBoulderInput.checked ? 'boulder' : tipoViaInput.checked ? 'via' : '';
+            applyDificultadOptionsByTipo(selectedTipo, { dificultadSelect, setDificultadOptions });
+            if (initialValues?.dificultad) {
+                dificultadSelect.value = String(initialValues.dificultad);
+            }
 
             if (contextError || !mapaViewport) {
                 if (contextError) {
@@ -278,6 +358,12 @@ export async function crearRutaCmd(container, params = {}) {
                 });
         },
 
+        onTipoChange: (tipo, { dificultadSelect, setDificultadOptions, alertBox }) => {
+            applyDificultadOptionsByTipo(tipo, { dificultadSelect, setDificultadOptions });
+            clearFieldError(dificultadSelect);
+            clearFormAlert(alertBox);
+        },
+
         // Enviar formulario
         onSubmit: async (values, fields) => {
             const {
@@ -309,7 +395,8 @@ export async function crearRutaCmd(container, params = {}) {
             [nombreInput, dificultadSelect, tipoBoulderInput, tipoViaInput, fechaCreacionInput, fechaRetiradaInput, imagenInput].forEach(clearFieldError);
 
             // Validar campos
-            const errors = validateFields(values, selectedPoint);
+            const allowedDificultades = (dificultadOptionsByTipo[values.tipo] || []).map((option) => option.value);
+            const errors = validateFields(values, selectedPoint, allowedDificultades);
             if (Object.keys(errors).length > 0) {
                 if (errors.nombre) setFieldError(nombreInput, errors.nombre);
                 if (errors.dificultad) setFieldError(dificultadSelect, errors.dificultad);
@@ -453,9 +540,12 @@ export async function infoRutaCmd(container, id) {
         }
 
         const callbacks = {
+            onEdit: () => {
+                window.location.hash = `#modificarRuta?id=${ruta.id}`;
+            },
             onEstadoChange: async (estado, estadoElement, estadoTextoElement) => {
-                const config = ESTADOS_CONFIG[estado] || ESTADOS_CONFIG['nada'];
-                const estadoBackend = ESTADOS_BACKEND[estado] || 'S/N';
+                const config = getEstadoConfig(estado);
+                const estadoBackend = ESTADOS_BACKEND[ESTADOS_FRONTEND[estado] || estado] || 'S/N';
 
                 // Actualizar UI inmediatamente para mejor UX
                 estadoElement.style.background = config.bg;
@@ -469,7 +559,7 @@ export async function infoRutaCmd(container, id) {
                     });
                 } catch (err) {
                     // Revertir UI en caso de error
-                    const prevConfig = ESTADOS_CONFIG['nada'];
+                    const prevConfig = ESTADOS_CONFIG.nada;
                     estadoElement.style.background = prevConfig.bg;
                     estadoElement.innerHTML = `<span class="material-icons" style="color: ${prevConfig.color}; font-size: 28px;">${prevConfig.icon}</span>`;
                     estadoTextoElement.textContent = 'Sin registrar';
@@ -513,7 +603,7 @@ export async function infoRutaCmd(container, id) {
         // Inicializar el estado actual del escalador en la UI
         if (ruta.estado) {
             const estadoFrontend = ESTADOS_FRONTEND[ruta.estado] || 'nada';
-            const config = ESTADOS_CONFIG[estadoFrontend] || ESTADOS_CONFIG['nada'];
+            const config = getEstadoConfig(estadoFrontend);
             const estadoActual = container.querySelector('#estado-actual');
             const estadoTexto = container.querySelector('#estado-texto');
 
@@ -527,5 +617,306 @@ export async function infoRutaCmd(container, id) {
         }
     } catch (err) {
         showError(`Error al obtener o procesar la ruta: ${err.message}`);
+    }
+}
+
+export async function modificarRutaCmd(container, id) {
+    const idRuta = Number(id);
+    if (!Number.isInteger(idRuta) || idRuta < 1) {
+        showError('ID de ruta no válido');
+        return;
+    }
+
+    showLoading();
+
+    try {
+        const rutaRes = await fetchClient(`/pistas/${idRuta}`);
+        const ruta = await rutaRes.json();
+
+        const canManage = await canManageRutaByZonaId(ruta.idZona);
+        if (!canManage) {
+            showError('No tienes permisos para modificar esta ruta.');
+            return;
+        }
+
+        const zonaContext = await resolveRocodromoContextByZonaId(ruta.idZona);
+        const idRocodromo = zonaContext?.idRocodromo;
+        const idZona = Number(ruta.idZona);
+
+        const nombreRocodromo = zonaContext?.nombreRocodromo || 'Rocodromo';
+        const nombreZona = zonaContext?.nombreZona || `${idZona}`;
+        let contextError = '';
+        let zonaMapaSvg = null;
+
+        const hasValidParams = Number.isInteger(idRocodromo) && idRocodromo > 0 && Number.isInteger(idZona) && idZona > 0;
+        if (!hasValidParams) {
+            contextError = 'No se pudo resolver el rocódromo/zona de la ruta a modificar.';
+        } else if (zonaContext?.zonaMapaDisponible) {
+            try {
+                zonaMapaSvg = await fetchSvgText(`/zonas/${idZona}/mapa`);
+            } catch (err) {
+                console.warn('No se pudo cargar el mapa de la zona:', err.message);
+            }
+        }
+
+        const colorScaleMap = await loadColorScaleMap();
+        let dificultadOptionsByTipo = {
+            boulder: [],
+            via: [],
+        };
+
+        if (hasValidParams) {
+            try {
+                const escalasRes = await fetchClient(`/rocodromos/${idRocodromo}/escalasDificultad`);
+                const escalas = await escalasRes.json();
+                dificultadOptionsByTipo = {
+                    boulder: buildDificultadOptions(escalas?.escalaDificultadBloque, colorScaleMap),
+                    via: buildDificultadOptions(escalas?.escalaDificultadVia, colorScaleMap),
+                };
+            } catch (err) {
+                console.warn('No se pudieron cargar las escalas de dificultad del rocodromo:', err.message);
+            }
+        }
+
+        let selectedPoint = null;
+        if (Number.isFinite(Number(ruta.posX)) && Number.isFinite(Number(ruta.posY))) {
+            selectedPoint = {
+                x: Number(ruta.posX),
+                y: Number(ruta.posY),
+            };
+        }
+
+        const applyDificultadOptionsByTipo = (tipo, { dificultadSelect, setDificultadOptions }) => {
+            const options = dificultadOptionsByTipo[tipo] || [];
+            const hasTipo = tipo === 'boulder' || tipo === 'via';
+
+            if (!hasTipo) {
+                dificultadSelect.disabled = true;
+                setDificultadOptions([], 'Selecciona tipo de ruta');
+                return;
+            }
+
+            dificultadSelect.disabled = false;
+            setDificultadOptions(options, 'Sin dificultad');
+        };
+
+        const callbacks = {
+            onFieldChange: (field, alertBox) => {
+                clearFieldError(field);
+                clearFormAlert(alertBox);
+            },
+
+            onViewReady: ({ mapaViewport, coordsBadge, alertBox, submitButton, dificultadSelect, tipoBoulderInput, tipoViaInput, setDificultadOptions, initialValues }) => {
+                updateCoordinatesBadge(coordsBadge, selectedPoint);
+
+                const selectedTipo = tipoBoulderInput.checked ? 'boulder' : tipoViaInput.checked ? 'via' : '';
+                applyDificultadOptionsByTipo(selectedTipo, { dificultadSelect, setDificultadOptions });
+                if (initialValues?.dificultad) {
+                    dificultadSelect.value = String(initialValues.dificultad);
+                }
+
+                if (contextError || !mapaViewport) {
+                    if (contextError) {
+                        showFormAlert(alertBox, 'warning', contextError);
+                    }
+                    return;
+                }
+
+                if (!zonaMapaSvg) {
+                    mapaViewport.innerHTML = `
+                        <div class="d-flex flex-column justify-content-center align-items-center h-100 text-white-50 text-center px-3">
+                            <span class="material-icons mb-2" style="font-size: 32px;">map</span>
+                            <p class="mb-1">No hay mapa para esta zona.</p>
+                            <small>No se puede seleccionar la ubicacion.</small>
+                        </div>
+                    `;
+                    if (coordsBadge) {
+                        coordsBadge.className = 'badge text-bg-secondary';
+                        coordsBadge.textContent = 'Sin mapa';
+                    }
+                    if (submitButton) {
+                        submitButton.disabled = true;
+                    }
+                    return;
+                }
+
+                const mapaSelector = createSvgPanzoomMap({
+                    viewport: mapaViewport,
+                    svgContent: zonaMapaSvg,
+                    enablePointSelection: true,
+                    onMapPointSelect: (point) => {
+                        selectedPoint = point;
+                        updateCoordinatesBadge(coordsBadge, point);
+                        clearFormAlert(alertBox);
+                    },
+                });
+
+                mapaSelector
+                    .renderMarkers([])
+                    .then(() => {
+                        if (selectedPoint) {
+                            mapaSelector.setSelectedPoint(selectedPoint);
+                            updateCoordinatesBadge(coordsBadge, selectedPoint);
+                        }
+                    })
+                    .catch((err) => {
+                        console.error('No se pudo inicializar el mapa para modificar ruta:', err);
+                        showFormAlert(alertBox, 'danger', 'No se pudo cargar el mapa para seleccionar la posicion.');
+                    });
+            },
+
+            onTipoChange: (tipo, { dificultadSelect, setDificultadOptions, alertBox }) => {
+                applyDificultadOptionsByTipo(tipo, { dificultadSelect, setDificultadOptions });
+                clearFieldError(dificultadSelect);
+                clearFormAlert(alertBox);
+            },
+
+            onSubmit: async (values, fields) => {
+                const {
+                    nombreInput,
+                    dificultadSelect,
+                    tipoBoulderInput,
+                    tipoViaInput,
+                    fechaCreacionInput,
+                    fechaRetiradaInput,
+                    imagenInput,
+                    alertBox,
+                    submitButton,
+                } = fields;
+
+                if (contextError) {
+                    showFormAlert(alertBox, 'warning', contextError);
+                    return;
+                }
+
+                if (!zonaMapaSvg) {
+                    showFormAlert(alertBox, 'warning', 'No hay mapa para esta zona, no se puede seleccionar la ubicacion.');
+                    if (submitButton) {
+                        submitButton.disabled = true;
+                    }
+                    return;
+                }
+
+                clearFormAlert(alertBox);
+                [nombreInput, dificultadSelect, tipoBoulderInput, tipoViaInput, fechaCreacionInput, fechaRetiradaInput, imagenInput].forEach(clearFieldError);
+
+                const allowedDificultades = (dificultadOptionsByTipo[values.tipo] || []).map((option) => option.value);
+                const errors = validateFields(values, selectedPoint, allowedDificultades);
+                if (Object.keys(errors).length > 0) {
+                    if (errors.nombre) setFieldError(nombreInput, errors.nombre);
+                    if (errors.dificultad) setFieldError(dificultadSelect, errors.dificultad);
+                    if (errors.tipo) {
+                        const tipoWrapper = container.querySelector('#tipo-wrapper');
+                        if (tipoWrapper) {
+                            tipoWrapper.classList.add('is-invalid');
+                            const feedback = tipoWrapper.querySelector('.invalid-feedback');
+                            if (feedback) {
+                                feedback.textContent = errors.tipo;
+                            }
+                        }
+                    }
+                    if (errors.fechaCreacion) setFieldError(fechaCreacionInput, errors.fechaCreacion);
+                    if (errors.fechaRetirada) setFieldError(fechaRetiradaInput, errors.fechaRetirada);
+                    if (errors.imagen) setFieldError(imagenInput, errors.imagen);
+
+                    if (errors.idZona) {
+                        showFormAlert(alertBox, 'danger', errors.idZona);
+                    } else if (errors.posicion) {
+                        showFormAlert(alertBox, 'danger', errors.posicion);
+                    } else {
+                        showFormAlert(alertBox, 'danger', 'Por favor, corrige los campos marcados.');
+                    }
+
+                    return;
+                }
+
+                const body = {
+                    idZona: Number(values.idZona),
+                    tipo: values.tipo.trim(),
+                    posX: Number(selectedPoint.x),
+                    posY: Number(selectedPoint.y),
+                };
+
+                const dificultad = (values.dificultad || '').trim();
+                if (dificultad) {
+                    body.dificultad = dificultad;
+                }
+
+                const nombre = (values.nombre || '').trim();
+                if (nombre) {
+                    body.nombre = nombre;
+                }
+
+                const fechaCreacionIso = toIsoDateOrNull(values.fechaCreacion);
+                const fechaRetiradaIso = toIsoDateOrNull(values.fechaRetirada);
+                if (fechaCreacionIso) {
+                    body.fechaCreacion = fechaCreacionIso;
+                }
+                if (fechaRetiradaIso) {
+                    body.fechaRetirada = fechaRetiradaIso;
+                }
+
+                submitButton.setAttribute('disabled', 'disabled');
+
+                try {
+                    await fetchClient(`/pistas/${idRuta}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body),
+                    });
+
+                    if (values.imagen) {
+                        const imageFormData = new FormData();
+                        imageFormData.append('imagen', values.imagen);
+                        await fetchClient(`/pistas/${idRuta}/imagen`, {
+                            method: 'PUT',
+                            body: imageFormData,
+                        });
+                    }
+
+                    showFormAlert(alertBox, 'success', 'Ruta modificada correctamente.');
+                    window.location.hash = `#infoRuta?id=${idRuta}`;
+                } catch (err) {
+                    if (err.response && err.response.status === 422) {
+                        const bodyError = await err.response.json();
+                        if (Array.isArray(bodyError.errors)) {
+                            bodyError.errors.forEach((e) => {
+                                const field = e.field;
+                                const msg = e.msg || 'Valor invalido';
+                                if (field === 'nombre') setFieldError(nombreInput, msg);
+                                if (field === 'dificultad') setFieldError(dificultadSelect, msg);
+                                if (field === 'fechaCreacion') setFieldError(fechaCreacionInput, msg);
+                                if (field === 'fechaRetirada') setFieldError(fechaRetiradaInput, msg);
+                                if (field === 'imagen') setFieldError(imagenInput, msg);
+                            });
+                        }
+                        showFormAlert(alertBox, 'danger', 'Solicitud invalida. Revisa los campos.');
+                        return;
+                    }
+
+                    showFormAlert(alertBox, 'danger', `Error al modificar ruta: ${err.message}`);
+                } finally {
+                    submitButton.removeAttribute('disabled');
+                }
+            },
+        };
+
+        renderCrearRuta(container, callbacks, {
+            idRocodromo,
+            idZona,
+            nombreRocodromo,
+            nombreZona,
+            contextError,
+            mode: 'edit',
+            initialValues: {
+                nombre: ruta.nombre || '',
+                dificultad: ruta.dificultad || '',
+                tipo: ruta.tipo || '',
+                fechaCreacion: ruta.fechaCreacion || null,
+                fechaRetirada: ruta.fechaRetirada || null,
+            },
+        });
+    } catch (err) {
+        showError(`Error al cargar la ruta para modificar: ${err.message}`);
     }
 }

@@ -2,7 +2,7 @@
 import { mainContainer, showLoading, showError } from './ui.js';
 import { isAuthenticated, canManageRocodromo } from './client.js';
 import { perfilCmd } from '../modules/escalador/escaladorController.js';
-import { crearRutaCmd, infoRutaCmd } from '../modules/ruta/rutaController.js';
+import { crearRutaCmd, infoRutaCmd, modificarRutaCmd } from '../modules/ruta/rutaController.js';
 import {
     misRocodromosCmd,
     buscarRocodromosCmd,
@@ -70,6 +70,10 @@ export async function handleNavigation() {
         else if (hash.startsWith('#infoRuta')) {
             const id = obtenerParametroDesdeHash('id');
             await infoRutaCmd(mainContainer, id);
+        }
+        else if (hash.startsWith('#modificarRuta')) {
+            const id = obtenerParametroDesdeHash('id');
+            await modificarRutaCmd(mainContainer, id);
         }
         else if (hash === '#misRocodromos') {
             await misRocodromosCmd(mainContainer);
