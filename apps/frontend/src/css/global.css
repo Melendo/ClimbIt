@@ -44,7 +44,7 @@ body {
 }
 
 #app-container.app-vertical-layout>.app-content.app-shell {
-  min-height: 100dvh;
+  height: 100dvh;
 }
 
 /* En móvil: contenido a pantalla completa */
