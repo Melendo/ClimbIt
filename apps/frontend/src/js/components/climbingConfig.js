@@ -73,6 +73,51 @@ export function normalizeColorName(value) {
     .toLowerCase();
 }
 
+function hexToRgbColor(hexColor) {
+  const normalizedHex = String(hexColor || '').trim().replace('#', '');
+
+  if (!/^[\da-f]{3}([\da-f]{3})?$/i.test(normalizedHex)) {
+    return null;
+  }
+
+  const expandedHex = normalizedHex.length === 3
+    ? normalizedHex
+      .split('')
+      .map((value) => `${value}${value}`)
+      .join('')
+    : normalizedHex;
+
+  const red = Number.parseInt(expandedHex.slice(0, 2), 16);
+  const green = Number.parseInt(expandedHex.slice(2, 4), 16);
+  const blue = Number.parseInt(expandedHex.slice(4, 6), 16);
+
+  return `rgb(${red}, ${green}, ${blue})`;
+}
+
+export function normalizeColorToRgb(colorValue) {
+  const normalizedValue = String(colorValue || '').trim();
+
+  if (!normalizedValue) {
+    return null;
+  }
+
+  if (/^rgba?\(/i.test(normalizedValue)) {
+    return normalizedValue;
+  }
+
+  if (normalizedValue.startsWith('#')) {
+    return hexToRgbColor(normalizedValue);
+  }
+
+  return null;
+}
+
+export function resolveColorScaleRgb(colorName, colorScaleMap = {}, fallbackColor = 'rgb(158, 158, 158)') {
+  const normalizedName = normalizeColorName(colorName);
+  const scaleColor = colorScaleMap?.[normalizedName] || colorName;
+  return normalizeColorToRgb(scaleColor) || fallbackColor;
+}
+
 export async function loadColorScaleMap() {
   return { ...DEFAULT_COLOR_SCALE_MAP };
 }

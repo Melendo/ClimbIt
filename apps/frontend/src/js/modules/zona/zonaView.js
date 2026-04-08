@@ -1,4 +1,5 @@
 import { escapeHtml } from '../../components/formHelpers.js';
+import { renderRutaColorStateIndicator } from '../../components/rutaCardIndicators.js';
 
 export function renderMapaZona(container, data, onZonaSelect, initialZonaId = null, onMapaRender = null, onMapaToggle = null, onFiltersApply = null) {
     const {
@@ -309,10 +310,6 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
             </div>
             <div class="row g-3 ${animationClass}">
                 ${rutas.map(ruta => {
-            const status = ruta.statusConfig;
-            const hasDificultad = typeof ruta.dificultad === 'string'
-                ? ruta.dificultad.trim().length > 0
-                : Boolean(ruta.dificultad);
             return `
                     <div class="col-6 fade-in">
                         <a href="#infoRuta?id=${ruta.id}" class="text-decoration-none text-dark">
@@ -320,18 +317,8 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                                 <div class="position-relative" style="aspect-ratio: 3/4;">
                                     <img src="${ruta.imagenSrc || '/assets/placeholder.jpg'}" class="card-img-top w-100 h-100" style="object-fit: cover;" alt="${ruta.nombre}">
                                     
-                                    <!-- Estado Indicator -->
-                                    <div class="position-absolute top-0 start-0 m-2 rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; background: ${status.bg};">
-                                        <span class="material-icons" style="color: ${status.color}; font-size: 20px;">${status.icon}</span>
-                                    </div>
-
-                                    ${hasDificultad ? `
-                                    <div class="position-absolute top-0 end-0 m-2">
-                                        <span class="badge bg-primary shadow-sm">${ruta.dificultad}</span>
-                                    </div>` : ''}
-                                    <div class="position-absolute bottom-0 start-0 end-0 p-3 zona-card-overlay">
-                                        <h6 class="text-white mb-0 fw-bold text-truncate">${ruta.nombre}</h6>
-                                    </div>
+                                    ${renderRutaColorStateIndicator(ruta)}
+                                    <div class="position-absolute bottom-0 start-0 end-0 p-3 zona-card-overlay"></div>
                                 </div>
                             </div>
 

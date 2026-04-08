@@ -30,6 +30,7 @@ export function createSvgPanzoomMap(options) {
             x: toNumberOrNull(item?.posX),
             y: toNumberOrNull(item?.posY),
             color: item?.statusConfig?.color || '#6b7280',
+            holdColor: item?.colorPresasRgb || null,
             payload: item,
         }),
         onMarkerClick = null,
@@ -192,13 +193,35 @@ export function createSvgPanzoomMap(options) {
                 const touchHitbox = document.createElementNS(SVG_NS, 'circle');
                 touchHitbox.setAttribute('cx', '0');
                 touchHitbox.setAttribute('cy', '0');
-                touchHitbox.setAttribute('r', '50');
+                touchHitbox.setAttribute('r', '58');
                 touchHitbox.setAttribute('class', 'ruta-hitbox');
+
+                const holdColor = typeof marker.holdColor === 'string'
+                    ? marker.holdColor.trim()
+                    : '';
+
+                if (holdColor.length > 0) {
+                    const holdRingRadius = 33;
+                    const holdRingAxisGap = 8;
+                    const holdRingQuarterLength = (2 * Math.PI * holdRingRadius) / 4;
+                    const holdRingDashLength = Math.max(1, holdRingQuarterLength - holdRingAxisGap);
+
+                    const holdColorRing = document.createElementNS(SVG_NS, 'circle');
+                    holdColorRing.setAttribute('cx', '0');
+                    holdColorRing.setAttribute('cy', '0');
+                    holdColorRing.setAttribute('r', String(holdRingRadius));
+                    holdColorRing.setAttribute('fill', 'none');
+                    holdColorRing.setAttribute('stroke', holdColor);
+                    holdColorRing.setAttribute('stroke-width', '6');
+                    holdColorRing.setAttribute('stroke-linecap', 'butt');
+                    holdColorRing.setAttribute('stroke-dasharray', `${holdRingDashLength} ${holdRingAxisGap}`);
+                    markerVisual.appendChild(holdColorRing);
+                }
 
                 const markerCircle = document.createElementNS(SVG_NS, 'circle');
                 markerCircle.setAttribute('cx', '0');
                 markerCircle.setAttribute('cy', '0');
-                markerCircle.setAttribute('r', '20');
+                markerCircle.setAttribute('r', '24');
                 markerCircle.setAttribute('class', 'ruta-dot');
                 markerCircle.setAttribute('fill', marker.color || '#6b7280');
 
