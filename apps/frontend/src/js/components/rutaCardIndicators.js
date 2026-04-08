@@ -34,11 +34,12 @@ export function renderRutaColorStateIndicator(ruta) {
   const holdColor = ruta?.colorPresasRgb || FALLBACK_COLOR;
   const holdColorLabel = escapeHtml(ruta?.colorPresas || 'no definido');
   const dificultad = typeof ruta?.dificultad === 'string' ? ruta.dificultad.trim() : '';
-  const dificultadLabel = escapeHtml(dificultad || 'Sin dificultad');
+  const hasDificultad = dificultad.length > 0 && dificultad.toLowerCase() !== 'sin dificultad';
+  const dificultadLabel = escapeHtml(dificultad);
 
   return `
     <div class="position-absolute d-flex align-items-center gap-2" style="bottom: 10px; left: 10px; z-index: 3;">
-      <span class="badge bg-primary shadow-sm text-truncate" style="font-size: 13px; max-width: 96px;">${dificultadLabel}</span>
+      ${hasDificultad ? `<span class="badge bg-primary shadow-sm text-truncate" style="font-size: 13px; max-width: 96px;">${dificultadLabel}</span>` : ''}
 
       ${renderPresaColorIcon({
         color: holdColor,

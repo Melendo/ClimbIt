@@ -96,6 +96,43 @@ function clearRouteFormFieldErrors(fields) {
     fields.forEach((field) => clearFieldError(field));
 }
 
+function isRutaActiva(ruta) {
+    if (typeof ruta?.activo === 'boolean') {
+        return ruta.activo;
+    }
+
+    if (!ruta?.fechaRetirada) {
+        return true;
+    }
+
+    const retirada = new Date(ruta.fechaRetirada);
+    if (Number.isNaN(retirada.getTime())) {
+        return true;
+    }
+
+    return retirada > new Date();
+}
+
+async function obtenerRutasActivasZona(idZona, colorScaleMap = {}) {
+    if (!idZona) return [];
+
+    try {
+        const rutasRes = await fetchClient(`/zonas/pistas/${idZona}`);
+        const rutas = await rutasRes.json();
+
+        return (Array.isArray(rutas) ? rutas : [])
+            .filter((ruta) => isRutaActiva(ruta))
+            .map((ruta) => ({
+                ...ruta,
+                statusConfig: ESTADOS_CONFIG[ruta.estado] || ESTADOS_CONFIG.nada,
+                colorPresasRgb: resolveColorScaleRgb(ruta?.colorPresas, colorScaleMap),
+            }));
+    } catch (err) {
+        console.warn(`No se pudieron cargar las rutas activas de la zona ${idZona}:`, err.message);
+        return [];
+    }
+}
+
 async function resolveRocodromoContextByZonaId(idZona) {
     const zonaIdNum = Number(idZona);
     if (!Number.isInteger(zonaIdNum) || zonaIdNum < 1) {
@@ -335,6 +372,9 @@ export async function crearRutaCmd(container, params = {}) {
 
     let selectedPoint = null;
     let mapaSelector = null;
+    const rutasActivasZona = hasValidParams
+        ? await obtenerRutasActivasZona(idZona, colorScaleMap)
+        : [];
 
     const applyDificultadOptionsByTipo = (tipo, { dificultadSelect, setDificultadOptions }) => {
         const options = dificultadOptionsByTipo[tipo] || [];
@@ -403,7 +443,7 @@ export async function crearRutaCmd(container, params = {}) {
             });
 
             mapaSelector
-                .renderMarkers([])
+                .renderMarkers(rutasActivasZona)
                 .then(() => {
                     if (selectedPoint) {
                         mapaSelector.setSelectedPoint(selectedPoint);
@@ -743,6 +783,9 @@ export async function modificarRutaCmd(container, id) {
                 y: Number(ruta.posY),
             };
         }
+        const rutasActivasZona = hasValidParams
+            ? await obtenerRutasActivasZona(idZona, colorScaleMap)
+            : [];
 
         const applyDificultadOptionsByTipo = (tipo, { dificultadSelect, setDificultadOptions }) => {
             const options = dificultadOptionsByTipo[tipo] || [];
@@ -810,7 +853,7 @@ export async function modificarRutaCmd(container, id) {
                 });
 
                 mapaSelector
-                    .renderMarkers([])
+                    .renderMarkers(rutasActivasZona)
                     .then(() => {
                         if (selectedPoint) {
                             mapaSelector.setSelectedPoint(selectedPoint);
