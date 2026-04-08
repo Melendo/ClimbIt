@@ -60,10 +60,10 @@ class ActualizarInformacionRocodromo {
       const rocodromoActualizado = new Rocodromo(
         existente.id,
         resolveValue(nombre, existente.nombre),
-        resolveValue(ubicacion, existente.ubicacion),
+        ubicacion,
         existente.logoUrl,
-        resolveValue(descripcion, existente.descripcion),
-        resolveValue(horarios, existente.horarios),
+        descripcion,
+        horarios,
         resolveValue(dificultadBloque, existente.dificultadBloque),
         resolveValue(dificultadVia, existente.dificultadVia),
         existente.activo
