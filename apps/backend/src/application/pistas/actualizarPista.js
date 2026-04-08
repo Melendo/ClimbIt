@@ -100,14 +100,14 @@ class ActualizarPista {
         pistaActual.id,
         resolveValue(idZona, pistaActual.idZona),
         resolveValue(nombre, pistaActual.nombre),
-        resolveValue(dificultad, pistaActual.dificultad),
+        dificultad,
         resolveValue(tipo, pistaActual.tipo),
-        resolveValue(colorPresas, pistaActual.colorPresas),
+        colorPresas, 
         pistaActual.imagenUrl,
         resolveValue(posX, pistaActual.posX),
         resolveValue(posY, pistaActual.posY),
         resolveValue(fechaCreacion, pistaActual.fechaCreacion),
-        resolveValue(fechaRetirada, pistaActual.fechaRetirada),
+        fechaRetirada, pistaActual.fechaRetirada,
         pistaActual.activo
       );
 
