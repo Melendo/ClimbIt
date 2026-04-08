@@ -1,5 +1,5 @@
 import { renderMapaZona, renderCrearZona } from './zonaView.js';
-import { ESTADOS_CONFIG, loadColorScaleMap, normalizeColorName } from '../../components/climbingConfig.js';
+import { ESTADOS_CONFIG, loadColorScaleMap, normalizeColorName, resolveColorScaleRgb } from '../../components/climbingConfig.js';
 import { createSvgPanzoomMap } from '../../components/svgPanzoomMap.js';
 import { fetchClient, canManageRocodromo, fetchImageObjectUrl, fetchSvgText } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
@@ -182,6 +182,11 @@ async function resolveRutaImageSrc(ruta) {
     }
 }
 
+function resolveRutaColorPresasRgb(ruta, colorScaleMap) {
+    const colorName = ruta?.colorPresas || ruta?.color || ruta?.dificultad;
+    return resolveColorScaleRgb(colorName, colorScaleMap);
+}
+
 export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) {
     if (!idRocodromo) {
         showError('ID de rocódromo no válido o no proporcionado');
@@ -257,7 +262,7 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
             if (!idZona) return [];
 
             if (!rutasCache.has(idZona)) {
-                const rutas = await cargarRutasZona(idZona);
+                const rutas = await cargarRutasZona(idZona, colorScaleMap);
                 rutasCache.set(idZona, rutas);
             }
 
@@ -351,7 +356,7 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
 * @param {number} idZona ID de la zona
 * @returns {Promise<Array>} Lista de rutas
 */
-async function cargarRutasZona(idZona) {
+async function cargarRutasZona(idZona, colorScaleMap = {}) {
     try {
         const rutasRes = await fetchClient(`/zonas/pistas/${idZona}`);
         const rutas = await rutasRes.json();
@@ -361,6 +366,7 @@ async function cargarRutasZona(idZona) {
             rutas.map(async (ruta) => ({
                 ...ruta,
                 statusConfig: ESTADOS_CONFIG[ruta.estado] || ESTADOS_CONFIG.nada,
+                colorPresasRgb: resolveRutaColorPresasRgb(ruta, colorScaleMap),
                 imagenSrc: await resolveRutaImageSrc(ruta),
             }))
         );
