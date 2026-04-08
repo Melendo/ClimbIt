@@ -269,8 +269,6 @@ describe('Unit: RocodromoController', () => {
         ubicacion: 'Nueva Ubicacion',
         descripcion: 'Descripcion',
         horarios: 'L-V 10-22',
-        dificultadBloque: '3',
-        dificultadVia: '',
       },
     };
     const res = createResMock();
@@ -283,8 +281,6 @@ describe('Unit: RocodromoController', () => {
       ubicacion: 'Nueva Ubicacion',
       descripcion: 'Descripcion',
       horarios: 'L-V 10-22',
-      dificultadBloque: 3,
-      dificultadVia: null,
     });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.body).toEqual(actualizado);
