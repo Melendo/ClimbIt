@@ -354,12 +354,11 @@ export function renderInfoRuta(container, ruta, callbacks) {
   
       <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
         <span class="badge bg-primary">${tipoLabel}</span>
-        <span class="badge text-bg-light">${dificultadLabel}</span>
         <span class="badge ${activoBadgeClass}">${activoLabel}</span>
       </div>
   
       <div class="row g-3">
-        <div class="col-12">
+        <div class="col-6">
           <div class="small text-muted text-uppercase">Color de presas</div>
           <div class="d-inline-flex align-items-center justify-content-center rounded-3 mt-1" style="width: 38px; height: 38px; background: #f3f4f6;">
             ${renderPresaColorIcon({
@@ -370,6 +369,12 @@ export function renderInfoRuta(container, ruta, callbacks) {
               title: `Color de presas: ${colorPresasLabel}`,
               ariaLabel: `Color de presas ${colorPresasLabel}`,
             })}
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="small text-muted text-uppercase">Dificultad</div>
+          <div class="mt-1">
+            <span class="badge bg-primary shadow-sm border border-light">${escapeHtml(dificultadLabel)}</span>
           </div>
         </div>
         <div class="col-6">
