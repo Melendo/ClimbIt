@@ -1,5 +1,6 @@
 import { renderRutaEstadoButtons, setupRutaEstadoButtons } from '../../components/rutaEstadoButtons.js';
 import { escapeHtml } from '../../components/formHelpers.js';
+import { renderPresaColorIcon } from '../../components/rutaCardIndicators.js';
 
 function toDateInputValue(value) {
   if (!value) return '';
@@ -284,6 +285,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
   const tipoLabel = formatTipo(tipo);
   const dificultadLabel = dificultad || 'Sin dificultad';
   const colorPresasLabel = colorPresas || 'No definido';
+  const colorPresasRgb = ruta?.colorPresasRgb || 'rgb(158, 158, 158)';
   const fechaCreacionLabel = formatDateTime(fechaCreacion);
   const fechaRetiradaLabel = formatDateTime(fechaRetirada);
   const activoLabel = activo ? 'Activa' : 'Retirada';
@@ -359,13 +361,22 @@ export function renderInfoRuta(container, ruta, callbacks) {
       <div class="row g-3">
         <div class="col-12">
           <div class="small text-muted text-uppercase">Color de presas</div>
-          <div class="fw-medium">${colorPresasLabel}</div>
+          <div class="d-inline-flex align-items-center justify-content-center rounded-3 mt-1" style="width: 38px; height: 38px; background: #f3f4f6;">
+            ${renderPresaColorIcon({
+              color: colorPresasRgb,
+              size: 28,
+              inset: 2,
+              withOutline: true,
+              title: `Color de presas: ${colorPresasLabel}`,
+              ariaLabel: `Color de presas ${colorPresasLabel}`,
+            })}
+          </div>
         </div>
-        <div class="col-12">
+        <div class="col-6">
           <div class="small text-muted text-uppercase">Fecha de creación</div>
           <div class="fw-medium">${fechaCreacionLabel}</div>
         </div>
-        <div class="col-12">
+        <div class="col-6">
           <div class="small text-muted text-uppercase">Fecha de retirada</div>
           <div class="fw-medium">${fechaRetiradaLabel}</div>
         </div>

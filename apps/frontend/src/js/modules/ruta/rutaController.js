@@ -8,6 +8,7 @@ import {
     loadColorScaleMap,
     getEstadoConfig,
     normalizeColorName,
+    resolveColorScaleRgb,
 } from '../../components/climbingConfig.js';
 import { showConfirmModal } from '../../components/modal.js';
 import { fetchClient, canManageRocodromo, fetchImageObjectUrl, fetchSvgText, getTokenPayload } from '../../core/client.js';
@@ -580,7 +581,9 @@ export async function infoRutaCmd(container, id) {
     try {
         const res = await fetchClient(`/pistas/${id}`);
         const ruta = await res.json();
+        const colorScaleMap = await loadColorScaleMap();
         ruta.canManage = await canManageRutaByZonaId(ruta.idZona);
+        ruta.colorPresasRgb = resolveColorScaleRgb(ruta?.colorPresas, colorScaleMap);
 
         if (ruta?.imagenUrl) {
             try {
