@@ -6,14 +6,16 @@ import { escapeHtml } from '../../components/formHelpers.js';
 export function renderPerfil(container, escalador, callbacks) {
   const { apodo, descripcion, fotoSrc } = escalador;
   const avatar = fotoSrc || '/assets/johnDoe.png';
-  const descripcionLimpia = typeof descripcion === 'string' ? descripcion.trim() : '';
-  const descripcionVisible = descripcionLimpia && descripcionLimpia.toLowerCase() !== 'null'
-    ? escapeHtml(descripcionLimpia)
-    : '';
+  const descripcionLimpia =
+    typeof descripcion === 'string' ? descripcion.trim() : '';
+  const descripcionVisible =
+    descripcionLimpia && descripcionLimpia.toLowerCase() !== 'null'
+      ? escapeHtml(descripcionLimpia)
+      : '';
 
   container.innerHTML = `
       <!-- Cabecera -->
-      <div class="card-header bg-white d-flex align-items-center justify-content-center gap-2 py-3 position-relative">
+      <div class="card-header bg-white d-flex align-items-center justify-content-center gap-2 py-3 position-relative perfil-header">
         <div class="d-flex align-items-center gap-2">
           <img src="/icons/apple-touch-icon.png" alt="Logo de ClimbIt" style="width: 32px; height: 32px; object-fit: contain;" />
           <span class="fw-bold" style="font-size: 1.5rem;">ClimbIt</span>
@@ -31,7 +33,7 @@ export function renderPerfil(container, escalador, callbacks) {
             <span class="material-icons">more_vert</span>
           </button>
 
-          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="perfil-actions-btn">
+          <ul class="dropdown-menu dropdown-menu-end perfil-header-dropdown-menu" aria-labelledby="perfil-actions-btn">
             <li>
               <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-menu-placeholder="editar-perfil">
                 <span class="material-icons" style="font-size: 18px;">person</span>
@@ -60,12 +62,23 @@ export function renderPerfil(container, escalador, callbacks) {
         
         <!-- Sección de información del perfil -->
         <div class="text-center mb-4">
-          <img 
-            src="${avatar}" 
-            alt="Foto de perfil" 
-            class="rounded-circle mb-3" 
-            style="width: 100px; height: 100px; object-fit: cover;"
-          />
+          <div class="position-relative d-inline-block mb-3">
+            <img 
+              src="${avatar}" 
+              alt="Foto de perfil" 
+              class="rounded-circle" 
+              style="width: 100px; height: 100px; object-fit: cover;"
+            />
+            <button
+              type="button"
+              id="open-change-photo-btn"
+              class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center perfil-photo-edit-btn"
+              aria-label="Cambiar foto de perfil"
+              title="Cambiar foto de perfil"
+            >
+              <span class="material-icons" style="font-size: 18px;">photo_camera</span>
+            </button>
+          </div>
           <h5 class="fw-bold mb-1">${apodo}</h5>
           ${descripcionVisible ? `<p class="text-muted mb-0">${descripcionVisible}</p>` : ''}
         </div>
@@ -75,7 +88,9 @@ export function renderPerfil(container, escalador, callbacks) {
       ${renderNavbar()}
     `;
 
-  const menuPlaceholders = container.querySelectorAll('[data-menu-placeholder]');
+  const menuPlaceholders = container.querySelectorAll(
+    '[data-menu-placeholder]'
+  );
   menuPlaceholders.forEach((item) => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
@@ -90,11 +105,16 @@ export function renderPerfil(container, escalador, callbacks) {
       message: '¿Estás seguro de que quieres cerrar sesión?',
       confirmText: 'Cerrar sesión',
       cancelText: 'Cancelar',
-      confirmClass: 'btn-danger'
+      confirmClass: 'btn-danger',
     });
 
     if (confirmed) {
       callbacks.onLogout();
     }
+  });
+
+  const openChangePhotoBtn = container.querySelector('#open-change-photo-btn');
+  openChangePhotoBtn.addEventListener('click', () => {
+    callbacks.onOpenChangePhoto();
   });
 }

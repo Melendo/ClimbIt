@@ -310,3 +310,141 @@ body {
 .crear-ruta-mapa-overlay {
   background: linear-gradient(to top, rgba(0, 0, 0, 0.78), transparent);
 }
+
+/* ========================================
+   Perfil - cambio de foto
+   ======================================== */
+.perfil-header {
+  z-index: 20;
+}
+
+.perfil-header-dropdown-menu {
+  z-index: 1080;
+}
+
+.perfil-photo-edit-btn {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 34px;
+  height: 34px;
+  background-color: #000;
+  border-color: #000;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.perfil-photo-edit-btn:hover,
+.perfil-photo-edit-btn:focus,
+.perfil-photo-edit-btn:active {
+  background-color: #000 !important;
+  border-color: #000 !important;
+}
+
+.perfil-photo-modal-content {
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.perfil-photo-modal-header {
+  position: relative;
+}
+
+.perfil-photo-modal-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.perfil-photo-preview-section {
+  flex: 0 0 auto;
+}
+
+.perfil-photo-section-divider {
+  height: 1px;
+  background-color: #dee2e6;
+}
+
+.perfil-photo-modal-body>.perfil-photo-section-divider {
+  margin-bottom: 0.5rem;
+}
+
+.perfil-photo-preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #dee2e6;
+}
+
+.perfil-photo-options-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+  padding: 0.25rem 0.25rem 0.5rem;
+}
+
+.perfil-photo-option {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.perfil-photo-radio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.perfil-photo-option-image {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ced4da;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.perfil-photo-option:hover .perfil-photo-option-image {
+  transform: translateY(-1px);
+}
+
+.perfil-photo-option.is-selected .perfil-photo-option-image {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.22);
+}
+
+@media (max-width: 380px) {
+  .perfil-photo-options-wrap {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 576px) {
+  .perfil-photo-modal-content {
+    min-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .modal-fullscreen-sm-down .perfil-photo-modal-body {
+    overflow: hidden;
+  }
+
+  .perfil-photo-modal-body {
+    min-height: 0;
+    height: 100%;
+  }
+
+  .perfil-photo-options-wrap {
+    flex: 1 1 auto;
+    max-height: none;
+  }
+}
