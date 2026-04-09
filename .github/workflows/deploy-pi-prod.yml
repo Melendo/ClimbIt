@@ -37,12 +37,16 @@ jobs:
           rm -f .env
           echo "$ENV_FILE_PROD" > .env
 
+      - name: Ensure persistent uploads volume exists
+        run: |
+          docker volume create ${COMPOSE_PROJECT_NAME}_backend_uploads >/dev/null
+
       - name: Build and Start containers
         run: |
           # --pull asegura que las capas base (node:22-alpine, etc) esten sincronizadas
-          docker compose -p ${{ env.COMPOSE_PROJECT_NAME }} build --pull
-          docker compose -p ${{ env.COMPOSE_PROJECT_NAME }} down --remove-orphans
-          docker compose -p ${{ env.COMPOSE_PROJECT_NAME }} up -d
+          docker compose -p ${COMPOSE_PROJECT_NAME} build --pull
+          docker compose -p ${COMPOSE_PROJECT_NAME} down --remove-orphans
+          docker compose -p ${COMPOSE_PROJECT_NAME} up -d
 
       - name: Clean up unused Docker data
         run: |
