@@ -18,7 +18,7 @@ const container = await containerPromise;
 const { pistaController } = container;
 
 const RASTER_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-const PISTA_MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024;
+const PISTA_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
 const getPistaImageBaseName = (req) => {
   const nombre =
