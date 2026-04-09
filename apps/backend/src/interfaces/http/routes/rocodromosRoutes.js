@@ -16,7 +16,7 @@ const container = await containerPromise;
 const { rocodromoController } = container;
 
 const RASTER_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-const LOGO_MAX_FILE_SIZE_BYTES = 3 * 1024 * 1024;
+const LOGO_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
 /**
  * POST /rocodromos/create

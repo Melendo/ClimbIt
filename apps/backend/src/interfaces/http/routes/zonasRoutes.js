@@ -14,7 +14,7 @@ const container = await containerPromise;
 const { zonaController } = container;
 
 const SVG_MIME_TYPE = 'image/svg+xml';
-const MAPA_ZONA_MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024;
+const MAPA_ZONA_MAX_FILE_SIZE_BYTES = 1 * 1024 * 1024;
 
 /**
  * POST /zonas/create
