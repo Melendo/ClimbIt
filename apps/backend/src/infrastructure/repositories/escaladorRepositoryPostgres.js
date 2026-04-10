@@ -82,7 +82,7 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
   async encontrarPorApodoInsensitive(apodo) {
     try {
       const escaladorModel = await this.EscaladorModel.findOne({
-        where: where(fn('lower', col('apodo')), apodo.toLowerCase()),
+        where: where(fn('lower', col('Apodo')), apodo.toLowerCase()),
       });
       return this._toDomain(escaladorModel);
     } catch (error) {

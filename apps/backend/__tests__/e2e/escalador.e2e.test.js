@@ -15,6 +15,7 @@ describe('E2E: Escalador', () => {
   let escaladorSuscripcion;
   let rocodromoTest;
   let tokenSuscripcion;
+  let escaladorValidacion;
 
   beforeAll(async () => {
     // Crear escalador de prueba para suscripción
@@ -35,6 +36,12 @@ describe('E2E: Escalador', () => {
       correo: escaladorSuscripcion.correo, 
       apodo: escaladorSuscripcion.apodo 
     });
+
+    escaladorValidacion = await db.Escalador.create({
+      correo: 'validacion@test.com',
+      contrasena: 'hashedPassword123',
+      apodo: 'ValidarApodo',
+    });
   });
 
   afterAll(async () => {
@@ -51,6 +58,7 @@ describe('E2E: Escalador', () => {
       }
     }
     if (escaladorSuscripcion) await escaladorSuscripcion.destroy();
+    if (escaladorValidacion) await escaladorValidacion.destroy();
     if (rocodromoTest) await rocodromoTest.destroy();
     
     await db.sequelize.close();
@@ -302,6 +310,64 @@ describe('E2E: Escalador', () => {
       expect(response.body).toHaveProperty('error');
       expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
       expect(response.body.error).toContain('Acceso denegado');
+    });
+  });
+
+  describe('Validar apodo', () => {
+    it('deberia devolver disponible false si el apodo ya existe (case-insensitive)', async () => {
+      const response = await request(app)
+        .get('/escaladores/validarApodo/validarapodo')
+        .expect(200);
+
+      expect(response.body).toEqual({ disponible: false });
+    });
+
+    it('deberia devolver disponible true si el apodo no existe', async () => {
+      const response = await request(app)
+        .get('/escaladores/validarApodo/ApodoNuevo123')
+        .expect(200);
+
+      expect(response.body).toEqual({ disponible: true });
+    });
+
+    it('deberia retornar 422 con apodo invalido', async () => {
+      const response = await request(app)
+        .get('/escaladores/validarApodo/!!!invalid!!!')
+        .expect(422);
+
+      expect(response.body).toHaveProperty('status', 'invalid_request');
+      const fields = response.body.errors.map((e) => e.field);
+      expect(fields).toContain('apodo');
+    });
+  });
+
+  describe('Validar correo', () => {
+    it('deberia devolver disponible false si el correo ya existe', async () => {
+      const correo = encodeURIComponent('validacion@test.com');
+      const response = await request(app)
+        .get(`/escaladores/validarCorreo/${correo}`)
+        .expect(200);
+
+      expect(response.body).toEqual({ disponible: false });
+    });
+
+    it('deberia devolver disponible true si el correo no existe', async () => {
+      const correo = encodeURIComponent('nuevo_correo@test.com');
+      const response = await request(app)
+        .get(`/escaladores/validarCorreo/${correo}`)
+        .expect(200);
+
+      expect(response.body).toEqual({ disponible: true });
+    });
+
+    it('deberia retornar 422 con correo invalido', async () => {
+      const response = await request(app)
+        .get('/escaladores/validarCorreo/no-es-email')
+        .expect(422);
+
+      expect(response.body).toHaveProperty('status', 'invalid_request');
+      const fields = response.body.errors.map((e) => e.field);
+      expect(fields).toContain('correo');
     });
   });
 });
