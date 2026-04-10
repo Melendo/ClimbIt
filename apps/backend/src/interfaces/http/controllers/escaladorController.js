@@ -209,6 +209,39 @@ class EscaladorController {
       return next(error);
     }
   }
+
+  async actualizarDescripcion(req, res, next) {
+    try {
+      const { descripcion } = req.body;
+      const apodo = req.user.apodo;
+
+      const resultado = await this.useCases.actualizarDescripcion.execute({
+        apodo,
+        descripcion,
+      });
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async cambiarApodo(req, res, next) {
+    try {
+      const { apodo } = req.body;
+      const apodoActual = req.user.apodo;
+
+      const resultado = await this.useCases.cambiarApodo.execute({
+        apodoActual,
+        nuevoApodo: apodo,
+        usuario: req.user,
+      });
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      return next(error);
+    }
+  }
 }
 
 export default EscaladorController;

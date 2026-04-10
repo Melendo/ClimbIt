@@ -39,5 +39,13 @@ class EscaladorRepository {
   async actualizarFotoPerfilId(escaladorApodo, idFotoPerfil) {
     throw new Error('Método "actualizarFotoPerfilId" no implementado');
   }
+
+  async actualizarDescripcion(apodo, descripcion) {
+    throw new Error('Método "actualizarDescripcion" no implementado');
+  }
+
+  async actualizarApodo(apodoActual, nuevoApodo) {
+    throw new Error('Método "actualizarApodo" no implementado');
+  }
 }
 export default EscaladorRepository;
