@@ -21,9 +21,12 @@ class CambiarApodoEscalador {
         throw new NotFoundError('Escalador no encontrado', 'ESCALADOR_NOT_FOUND');
       }
 
+      usuario.apodo = escalador.apodo; // Actualiza el apodo en el payload del token
       const payload = {
-        ...usuario,
-        apodo: escalador.apodo,
+        apodo: usuario.apodo,
+        correo: usuario.correo,
+        rol: usuario.rol,
+        ...(usuario.rol === 'Gestor' ? { rocodromosGestionados: usuario.rocodromosGestionados } : {})
       };
       const token = this.tokenService.crear(payload);
 
