@@ -94,6 +94,60 @@ router.post(
 );
 
 /**
+ * GET /escaladores/validarApodo/:apodo
+ * Verifica si el apodo ya esta registrado en el sistema
+ *
+ * Respuesta esperada: @return {Object} { disponible: boolean }
+ */
+const validarApodoValidators = [
+  param('apodo')
+    .trim()
+    .notEmpty()
+    .withMessage('apodo es requerido')
+    .isLength({ min: 1, max: 20 })
+    .withMessage('apodo debe tener entre 1 y 20 caracteres')
+    .matches(/^[a-zA-Z0-9_-]+$/)
+    .withMessage(
+      'apodo solo puede contener letras, numeros, guiones y guiones bajos'
+    )
+    .toLowerCase(),
+];
+
+router.get(
+  '/validarApodo/:apodo',
+  validarApodoValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.validarApodo(req, res, next);
+  }
+);
+
+/**
+ * GET /escaladores/validarCorreo/:correo
+ * Verifica si el correo ya esta registrado en el sistema
+ *
+ * Respuesta esperada: @return {Object} { disponible: boolean }
+ */
+const validarCorreoValidators = [
+  param('correo')
+    .trim()
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('correo debe ser un email valido')
+    .notEmpty()
+    .withMessage('correo es requerido'),
+];
+
+router.get(
+  '/validarCorreo/:correo',
+  validarCorreoValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.validarCorreo(req, res, next);
+  }
+);
+
+/**
  * POST /escaladores/suscribirse
  * Suscribe el escalador autenticado a un rocodromo
  *

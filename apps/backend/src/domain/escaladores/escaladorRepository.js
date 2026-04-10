@@ -12,6 +12,10 @@ class EscaladorRepository {
     throw new Error('Método "encontrarPorApodo" no implementado');
   }
 
+  async encontrarPorApodoInsensitive(apodo) {
+    throw new Error('Método "encontrarPorApodoInsensitive" no implementado');
+  }
+
   async suscribirse(escaladorApodo, rocodromo) {
     throw new Error('Método "suscribirse" no implementado');
   }

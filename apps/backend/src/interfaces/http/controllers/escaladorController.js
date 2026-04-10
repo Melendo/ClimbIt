@@ -187,6 +187,28 @@ class EscaladorController {
       return next(error);
     }
   }
+
+  async validarApodo(req, res, next) {
+    try {
+      const { apodo } = req.params;
+      const resultado = await this.useCases.validarApodo.execute(apodo);
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async validarCorreo(req, res, next) {
+    try {
+      const { correo } = req.params;
+      const resultado = await this.useCases.validarCorreo.execute(correo);
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      return next(error);
+    }
+  }
 }
 
 export default EscaladorController;
