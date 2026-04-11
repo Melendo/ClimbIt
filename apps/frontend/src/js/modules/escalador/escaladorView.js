@@ -19,6 +19,15 @@ export function renderPerfil(container, escalador, callbacks) {
     descripcionLimpia && descripcionLimpia.toLowerCase() !== 'null'
       ? escapeHtml(descripcionLimpia)
       : '';
+  const totalRutas = 18;
+  const totalFlash = 5;
+  const totalBloques = 8;
+  const totalVias = 10;
+  const rutasFlashPct = totalRutas > 0 ? (totalFlash / totalRutas) * 100 : 0;
+  const bloquesPct = totalRutas > 0 ? (totalBloques / totalRutas) * 100 : 0;
+  const viasPct = totalRutas > 0 ? (totalVias / totalRutas) * 100 : 0;
+  const favoritaTexto = totalBloques >= totalVias ? 'Bloque' : 'Via';
+  const formatPct = (value) => `${value.toFixed(2)}%`;
 
   container.innerHTML = `
       <!-- Cabecera -->
@@ -97,8 +106,57 @@ export function renderPerfil(container, escalador, callbacks) {
 
           <div class="perfil-estadisticas-wrap mt-4">
             ${renderSectionDivider({ label: 'Estadisticas' })}
-            <div class="perfil-estadisticas-view text-center text-muted small mt-3">
-              Sin estadisticas por ahora.
+            <div class="perfil-estadisticas-view mt-3">
+              <div class="perfil-stats-section">
+                <p class="perfil-stats-title">Total de Rutas Escaladas</p>
+                <div class="perfil-stats-card">
+                  <div class="perfil-stats-badges">
+                    <div class="perfil-stats-badge is-completed">
+                      <span class="perfil-stats-badge-value">${totalRutas}</span>
+                      <span class="perfil-stats-badge-label">Completado</span>
+                    </div>
+                    <div class="perfil-stats-badge is-flash">
+                      <span class="perfil-stats-badge-value">${totalFlash}</span>
+                      <span class="perfil-stats-badge-label">Flash</span>
+                    </div>
+                  </div>
+                  <p class="perfil-stats-text">
+                    Has escalado un total de ${totalRutas} rutas, de las cuales ${totalFlash} han sido a la primera.
+                  </p>
+                  <div class="perfil-stats-bar">
+                    <span class="perfil-stats-bar-fill is-completed" style="width: 100%;"></span>
+                    <span class="perfil-stats-bar-fill is-flash" style="width: ${formatPct(rutasFlashPct)};"></span>
+                  </div>
+                  <div class="perfil-stats-bar-labels">
+                    <span>${formatPct(rutasFlashPct)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="perfil-stats-section">
+                <p class="perfil-stats-title">Tipos de Rutas Escaladas</p>
+                <div class="perfil-stats-card">
+                  <div class="perfil-stats-choices">
+                    <div class="perfil-stats-pill is-bloque">
+                      <span class="perfil-stats-pill-label">Bloques</span>
+                      <span class="perfil-stats-pill-value">${totalBloques}</span>
+                    </div>
+                    <div class="perfil-stats-pill is-via">
+                      <span class="perfil-stats-pill-label">Vias</span>
+                      <span class="perfil-stats-pill-value">${totalVias}</span>
+                    </div>
+                  </div>
+                  <p class="perfil-stats-text">Tu tipo de ruta favorita es el ${favoritaTexto}.</p>
+                  <div class="perfil-stats-bar is-split">
+                    <span class="perfil-stats-bar-fill is-bloque" style="width: ${formatPct(bloquesPct)};"></span>
+                    <span class="perfil-stats-bar-fill is-via" style="width: ${formatPct(viasPct)};"></span>
+                  </div>
+                  <div class="perfil-stats-bar-labels">
+                    <span>${formatPct(bloquesPct)}</span>
+                    <span>${formatPct(viasPct)}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

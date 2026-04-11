@@ -54,7 +54,9 @@ body {
   line-height: 1.3;
   opacity: 0;
   transform: translateY(6px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
   pointer-events: auto;
 }
 
@@ -82,12 +84,12 @@ body {
 }
 
 /* Contenido centrado con ancho máximo */
-#app-container.app-vertical-layout>.app-content {
+#app-container.app-vertical-layout > .app-content {
   width: 100%;
   max-width: var(--app-max-width);
 }
 
-#app-container.app-vertical-layout>.app-content.app-shell {
+#app-container.app-vertical-layout > .app-content.app-shell {
   height: 100dvh;
 }
 
@@ -97,20 +99,20 @@ body {
     padding: 0;
   }
 
-  #app-container.app-vertical-layout>.app-content {
+  #app-container.app-vertical-layout > .app-content {
     max-width: 100%;
   }
 
   /* Cards a pantalla completa en móvil (solo la card principal) */
-  #app-container.app-vertical-layout>.app-content.app-shell {
+  #app-container.app-vertical-layout > .app-content.app-shell {
     border-radius: 0 !important;
     border-left: none !important;
     border-right: none !important;
     min-height: 100dvh;
   }
 
-  #app-container.app-vertical-layout>.app-content.app-shell>.card-header,
-  #app-container.app-vertical-layout>.app-content.app-shell>.card-footer {
+  #app-container.app-vertical-layout > .app-content.app-shell > .card-header,
+  #app-container.app-vertical-layout > .app-content.app-shell > .card-footer {
     border-radius: 0 !important;
   }
 }
@@ -134,7 +136,9 @@ body {
    ======================================== */
 .zona-card {
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .zona-card:hover {
@@ -204,10 +208,12 @@ body {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg,
-      transparent,
-      rgba(255, 255, 255, 0.4),
-      transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
   animation: shimmer 2s infinite;
 }
 
@@ -274,7 +280,6 @@ body {
   font-size: 0.5rem;
   font-weight: bold;
 }
-
 
 /* ========================================
    Mapa SVG interactivo de zonas
@@ -425,7 +430,7 @@ body {
   background-color: #dee2e6;
 }
 
-.perfil-photo-modal-body>.perfil-photo-section-divider {
+.perfil-photo-modal-body > .perfil-photo-section-divider {
   margin-bottom: 0.5rem;
 }
 
@@ -505,7 +510,6 @@ body {
   margin-bottom: 1.5rem;
 }
 
-
 .perfil-apodo-view,
 .perfil-descripcion-view {
   display: flex;
@@ -525,6 +529,198 @@ body {
   align-items: stretch;
   width: max-content;
   max-width: 100%;
+}
+
+.perfil-estadisticas-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  padding: 0 16px;
+  box-sizing: border-box;
+  text-align: left;
+  color: #212529;
+}
+
+.perfil-stats-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.perfil-stats-title {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #2c2c2c;
+}
+
+.perfil-stats-card {
+  background: #f8f9fa;
+  border: 1px solid #d7d7d7;
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow:
+    0 8px 12px rgba(0, 0, 0, 0.25),
+    0 4px 6px rgba(0, 0, 0, 0.20);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.perfil-stats-badges,
+.perfil-stats-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.perfil-stats-badge {
+  border-radius: 14px;
+  padding: 10px 12px;
+  min-width: 0;
+  text-align: center;
+  border: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.perfil-stats-badge-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.perfil-stats-badge-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.perfil-stats-badge.is-completed {
+  background: #e6f4ea;
+  border-color: #7bcf9a;
+  color: #116530;
+}
+
+.perfil-stats-badge.is-flash {
+  background: #f0f0c9;
+  border-color: #b6b06a;
+  color: #5f5b1a;
+}
+
+.perfil-stats-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  min-width: 0;
+}
+
+.perfil-stats-pill-value {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.perfil-stats-pill.is-bloque {
+  background: #e5f6ea;
+  border-color: #7dcf9a;
+  color: #136a35;
+}
+
+.perfil-stats-pill.is-via {
+  background: #ffe7f1;
+  border-color: #f2a7c7;
+  color: #8c2f54;
+}
+
+.perfil-stats-text {
+  margin: 0;
+  color: #4a4a4a;
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.perfil-stats-bar {
+  position: relative;
+  height: 12px;
+  background: #e2e2e2;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.perfil-stats-bar.is-split {
+  display: flex;
+}
+
+.perfil-stats-bar.is-split .perfil-stats-bar-fill {
+  position: static;
+}
+
+.perfil-stats-bar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px;
+}
+
+.perfil-stats-bar-fill.is-completed {
+  background: #1f9d4a;
+}
+
+.perfil-stats-bar-fill.is-flash {
+  background: #a6a622;
+}
+
+.perfil-stats-bar-fill.is-bloque {
+  background: #28a861;
+}
+
+.perfil-stats-bar-fill.is-via {
+  background: #e35b93;
+}
+
+.perfil-stats-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+@media (max-width: 480px) {
+  .perfil-stats-badges,
+  .perfil-stats-choices {
+    justify-content: center;
+  }
+
+  .perfil-stats-card {
+    text-align: center;
+  }
+}
+
+@media (max-width: 350px) {
+  .perfil-stats-badges,
+  .perfil-stats-choices {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .perfil-stats-card {
+    padding: 12px;
+  }
+
+  .perfil-stats-title {
+    text-align: center;
+  }
 }
 
 .section-divider {
@@ -549,9 +745,6 @@ body {
   height: 1px;
   background-color: #cbcbcb;
 }
-
-
-
 
 .perfil-correo-view,
 .perfil-foto-view {
@@ -647,7 +840,10 @@ body {
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #ced4da;
-  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .perfil-photo-option:hover .perfil-photo-option-image {
