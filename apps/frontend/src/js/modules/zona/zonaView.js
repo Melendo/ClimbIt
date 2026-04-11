@@ -1,5 +1,6 @@
 import { escapeHtml } from '../../components/formHelpers.js';
 import { renderRutaColorStateIndicator } from '../../components/rutaCardIndicators.js';
+import { renderRutasProgressBar, calcularRutasCompletadas } from '../../components/rutasProgressBar.js';
 
 export function renderMapaZona(container, data, onZonaSelect, initialZonaId = null, onMapaRender = null, onMapaToggle = null, onFiltersApply = null) {
     const {
@@ -30,6 +31,10 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                     <img src="${rocodromo?.logoSrc || '/assets/rocodromoDefecto.jpg'}" alt="Icono rocódromo" class="rounded-circle flex-shrink-0" style="width: 32px; height: 32px; object-fit: cover;">
                     <span class="fw-medium text-truncate">${nombreRocodromo}</span>
                 </a>
+                <button type="button" id="btnEstadisticas" class="btn btn-sm btn-light d-flex align-items-center gap-1 flex-shrink-0" aria-label="Ver estadísticas" title="Ver estadísticas disponible pronto">
+                    <span class="material-icons" style="font-size: 20px;">bar_chart</span>
+                    <span class="fw-semibold" style="font-size: 0.72rem; line-height: 1;">Estadísticas</span>
+                </button>
             </div>
 
             <!-- Componente de mapa SVG interactivo -->
@@ -64,8 +69,6 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                     </button>
                 </div>
             </div>
-
-
 
             <!-- Contenedor de Rutas (Dinámico) -->
             <div id="rutasContainer" class="card-body flex-grow-1 overflow-auto bg-light">
@@ -279,6 +282,8 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
 
         // Cargar rutas usando el callback
         const rutas = await onZonaSelect(idZona);
+        const rutasCompletadas = calcularRutasCompletadas(rutas);
+        const progressBarHtml = renderRutasProgressBar(rutas.length, rutasCompletadas);
 
         if (typeof onMapaRender === 'function') {
             await onMapaRender(idZona, rutas || []);
@@ -303,6 +308,9 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
         }
 
         rutasContainer.innerHTML = `
+            <div class="mb-3 ${animationClass}">
+                ${progressBarHtml}
+            </div>
             <div class="d-flex justify-content-between align-items-center mb-3 ${animationClass}">
                 <h6 class="text-muted small fw-bold text-uppercase mb-0">Rutas Disponibles (${rutas.length})</h6>
                 ${canCreateRuta ? `
