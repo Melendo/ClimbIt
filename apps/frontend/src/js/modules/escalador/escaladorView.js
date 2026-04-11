@@ -1,11 +1,13 @@
 import { renderNavbar } from '../../components/navbar.js';
 import { showConfirmModal } from '../../components/modal.js';
 import { escapeHtml } from '../../components/formHelpers.js';
+import { renderEditableField, initEditableField } from '../../components/editableField.js';
 
 // Vista del perfil del escalador
 export function renderPerfil(container, escalador, callbacks) {
   const { apodo, descripcion, fotoSrc } = escalador;
   const avatar = fotoSrc || '/assets/johnDoe.png';
+  const apodoLimpio = typeof apodo === 'string' ? apodo.trim() : '';
   const descripcionLimpia =
     typeof descripcion === 'string' ? descripcion.trim() : '';
   const descripcionVisible =
@@ -79,8 +81,35 @@ export function renderPerfil(container, escalador, callbacks) {
               <span class="material-icons" style="font-size: 18px;">photo_camera</span>
             </button>
           </div>
-          <h5 class="fw-bold mb-1">${apodo}</h5>
-          ${descripcionVisible ? `<p class="text-muted mb-0">${descripcionVisible}</p>` : ''}
+          ${renderEditableField({
+            prefix: 'apodo',
+            wrapperClass: 'perfil-apodo-wrap',
+            viewContent: `<h5 class="fw-bold mb-1">${apodo}</h5>`,
+            inputValue: escapeHtml(apodoLimpio),
+            inputTag: 'input',
+            placeholder: 'Edita tu apodo',
+            ariaLabel: 'Apodo',
+            maxLength: 20,
+            inputAttributes: {
+              autocomplete: 'off',
+              autocapitalize: 'off',
+              autocorrect: 'off',
+              spellcheck: 'false',
+            },
+          })}
+          ${renderEditableField({
+            prefix: 'descripcion',
+            wrapperClass: 'perfil-descripcion-wrap mt-2',
+            viewContent: `<div class="text-center">${descripcionVisible
+              ? `<p class="text-muted mb-0">${descripcionVisible}</p>`
+              : '<p class="text-muted mb-0 small fst-italic">Sin descripcion...</p>'}</div>`,
+            inputValue: escapeHtml(descripcionLimpia),
+            inputTag: 'textarea',
+            placeholder: 'Anade una descripcion',
+            ariaLabel: 'Descripcion',
+            maxLength: 255,
+            rows: 7,
+          })}
         </div>
       </div>
 
@@ -116,5 +145,26 @@ export function renderPerfil(container, escalador, callbacks) {
   const openChangePhotoBtn = container.querySelector('#open-change-photo-btn');
   openChangePhotoBtn.addEventListener('click', () => {
     callbacks.onOpenChangePhoto();
+  });
+
+  let apodoField = null;
+  let descripcionField = null;
+
+  apodoField = initEditableField(container, {
+    prefix: 'apodo',
+    initialValue: apodoLimpio,
+    maxLength: 20,
+    onSave: callbacks?.onUpdateApodo,
+    onOpen: () => descripcionField?.close(),
+    disableWhenEmpty: true,
+  });
+
+  descripcionField = initEditableField(container, {
+    prefix: 'descripcion',
+    initialValue: descripcionLimpia,
+    maxLength: 255,
+    onSave: callbacks?.onUpdateDescripcion,
+    onOpen: () => apodoField?.close(),
+    disableWhenEmpty: false,
   });
 }
