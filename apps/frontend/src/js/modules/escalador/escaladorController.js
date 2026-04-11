@@ -1,4 +1,4 @@
-import { renderPerfil } from './escaladorView.js';
+import { renderPerfil, renderEditarPerfil } from './escaladorView.js';
 import { fetchClient, fetchImageObjectUrl, removeToken, saveToken } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
 import { showToast } from '../../components/toast.js';
@@ -51,7 +51,7 @@ async function actualizarFotoPerfil(idFotoPerfil) {
     });
 }
 
-async function abrirCambioFotoPerfil(container, escalador) {
+async function abrirCambioFotoPerfil(container, escalador, onAfterUpdate) {
     let fotoOptions = [];
 
     try {
@@ -70,7 +70,11 @@ async function abrirCambioFotoPerfil(container, escalador) {
         }
 
         await actualizarFotoPerfil(selectedId);
-        await perfilCmd(container);
+        if (typeof onAfterUpdate === 'function') {
+            await onAfterUpdate();
+        } else {
+            await perfilCmd(container);
+        }
     } catch (err) {
         showError(`Error al cambiar la foto de perfil: ${err.message}`);
     } finally {
@@ -109,39 +113,41 @@ async function extractValidatorMessage(err) {
     }
 }
 
-// Controlador para la vista de perfil del usuario
-export async function perfilCmd(container) {
+async function cargarPerfilEscalador() {
+    const response = await fetchClient('/escaladores/perfil');
+    const escalador = await response.json();
+
+    const idFotoPerfil = Number(escalador?.idFotoPerfil);
+    if (Number.isInteger(idFotoPerfil) && idFotoPerfil > 0) {
+        try {
+            if (perfilPhotoObjectUrl) {
+                revokeObjectUrl(perfilPhotoObjectUrl);
+                perfilPhotoObjectUrl = null;
+            }
+
+            escalador.fotoSrc = await fetchImageObjectUrl(`/escaladores/fotos-perfil/${idFotoPerfil}`);
+            perfilPhotoObjectUrl = escalador.fotoSrc;
+        } catch (err) {
+            console.warn('No se pudo cargar la foto de perfil:', err.message);
+            escalador.fotoSrc = PERFIL_PLACEHOLDER;
+        }
+    } else {
+        escalador.fotoSrc = PERFIL_PLACEHOLDER;
+    }
+
+    return escalador;
+}
+
+async function renderPerfilConDatos(container, renderFn) {
     showLoading();
 
     try {
-        const response = await fetchClient('/escaladores/perfil');
-        const escalador = await response.json();
-
-        const idFotoPerfil = Number(escalador?.idFotoPerfil);
-        if (Number.isInteger(idFotoPerfil) && idFotoPerfil > 0) {
-            try {
-                if (perfilPhotoObjectUrl) {
-                    revokeObjectUrl(perfilPhotoObjectUrl);
-                    perfilPhotoObjectUrl = null;
-                }
-
-                escalador.fotoSrc = await fetchImageObjectUrl(`/escaladores/fotos-perfil/${idFotoPerfil}`);
-                perfilPhotoObjectUrl = escalador.fotoSrc;
-            } catch (err) {
-                console.warn('No se pudo cargar la foto de perfil:', err.message);
-                escalador.fotoSrc = PERFIL_PLACEHOLDER;
-            }
-        } else {
-            escalador.fotoSrc = PERFIL_PLACEHOLDER;
-        }
+        const escalador = await cargarPerfilEscalador();
 
         const callbacks = {
             onLogout: () => {
                 removeToken();
                 window.location.hash = '#home';
-            },
-            onOpenChangePhoto: async () => {
-                await abrirCambioFotoPerfil(container, escalador);
             },
             onUpdateDescripcion: async (descripcion) => {
                 try {
@@ -155,7 +161,7 @@ export async function perfilCmd(container) {
 
                     const updated = await response.json();
                     escalador.descripcion = updated?.descripcion ?? descripcion;
-                    renderPerfil(container, escalador, callbacks);
+                    renderFn(container, escalador, callbacks);
                     showToast('Descripcion actualizada correctamente.', { variant: 'success' });
                 } catch (err) {
                     const errorMsg = await extractValidatorMessage(err);
@@ -183,7 +189,7 @@ export async function perfilCmd(container) {
                         saveToken(updated.token);
                     }
                     escalador.apodo = updated?.apodo ?? apodo;
-                    renderPerfil(container, escalador, callbacks);
+                    renderFn(container, escalador, callbacks);
                     showToast('Apodo actualizado correctamente.', { variant: 'success' });
                 } catch (err) {
                     const errorMsg = await extractValidatorMessage(err);
@@ -192,8 +198,26 @@ export async function perfilCmd(container) {
             }
         };
 
-        renderPerfil(container, escalador, callbacks);
+        if (renderFn === renderEditarPerfil) {
+            callbacks.onOpenChangePhoto = async () => {
+                await abrirCambioFotoPerfil(container, escalador, async () => {
+                    await renderPerfilConDatos(container, renderFn);
+                });
+            };
+        }
+
+        renderFn(container, escalador, callbacks);
     } catch (err) {
         showError(`Error al obtener el perfil: ${err.message}`);
     }
+}
+
+// Controlador para la vista de perfil del usuario
+export async function perfilCmd(container) {
+    await renderPerfilConDatos(container, renderPerfil);
+}
+
+// Controlador para la vista de editar perfil
+export async function editarPerfilCmd(container) {
+    await renderPerfilConDatos(container, renderEditarPerfil);
 }
