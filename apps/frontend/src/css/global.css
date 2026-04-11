@@ -515,6 +515,12 @@ body {
 
 .perfil-descripcion-actions {
   display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.perfil-clear-btn {
   width: 30px;
   min-width: 30px;
   height: 30px;
