@@ -288,7 +288,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
   const colorPresasRgb = ruta?.colorPresasRgb || 'rgb(158, 158, 158)';
   const fechaCreacionLabel = formatDateTime(fechaCreacion);
   const fechaRetiradaLabel = formatDateTime(fechaRetirada);
-  const activoLabel = activo ? 'Activa' : 'Retirada';
+  const activoLabel = activo ? 'Activa' : 'Inactiva';
   const activoBadgeClass = activo ? 'text-bg-success' : 'text-bg-secondary';
   const canManage = Boolean(ruta?.canManage);
   const backHref = ruta?.backHref || '#misRocodromos';
@@ -353,12 +353,19 @@ export function renderInfoRuta(container, ruta, callbacks) {
     <div class="bg-white mt-2 px-4 py-4">
       <p class="text-muted small mb-3 text-uppercase" style="letter-spacing: 0.5px;">Detalles de la ruta</p>
   
-      <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
-        <span class="badge bg-primary">${tipoLabel}</span>
-        <span class="badge ${activoBadgeClass}">${activoLabel}</span>
-      </div>
-  
       <div class="row g-3">
+        <div class="col-6">
+          <div class="small text-muted text-uppercase">Tipo de ruta</div>
+          <div class="mt-1">
+            <span class="badge bg-primary">${tipoLabel}</span>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="small text-muted text-uppercase">Estado de ruta</div>
+          <div class="mt-1">
+            <span class="badge ${activoBadgeClass}">${activoLabel}</span>
+          </div>
+        </div>
         <div class="col-6">
           <div class="small text-muted text-uppercase">Color de presas</div>
           <div class="d-inline-flex align-items-center justify-content-center rounded-3 mt-1" style="width: 38px; height: 38px; background: #f3f4f6;">
@@ -426,8 +433,8 @@ export function renderInfoRuta(container, ruta, callbacks) {
   // Función auxiliar para formatear el tipo de ruta a un texto legible
   function formatTipo(tipo) {
     if (!tipo) return 'No definido';
-    if (tipo === 'via') return 'Via';
-    if (tipo === 'boulder') return 'Boulder';
+    if (tipo === 'via') return 'Vía';
+    if (tipo === 'boulder') return 'Bloque';
     return tipo;
   }
   
