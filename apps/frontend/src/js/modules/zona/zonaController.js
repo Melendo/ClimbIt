@@ -206,6 +206,9 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
         } catch (err) {
             console.warn('No se pudo obtener info del rocódromo:', err.message);
         }
+
+        rocodromo.id = rocodromo?.id || idRocodromo;
+        rocodromo.nombre = rocodromo?.nombre || `Rocódromo ${idRocodromo}`;
         
         if (rocodromo?.logoUrl) {
             try {

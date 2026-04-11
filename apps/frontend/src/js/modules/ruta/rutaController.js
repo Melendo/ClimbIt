@@ -621,6 +621,17 @@ export async function infoRutaCmd(container, id) {
     try {
         const res = await fetchClient(`/pistas/${id}`);
         const ruta = await res.json();
+        const idZonaRuta = Number(ruta?.idZona);
+        const zonaContext = Number.isInteger(idZonaRuta) && idZonaRuta > 0
+            ? await resolveRocodromoContextByZonaId(idZonaRuta)
+            : null;
+
+        if (zonaContext?.idRocodromo && Number.isInteger(idZonaRuta) && idZonaRuta > 0) {
+            ruta.backHref = `#mapaZona?id=${zonaContext.idRocodromo}&zona=${idZonaRuta}`;
+        } else {
+            ruta.backHref = '#misRocodromos';
+        }
+
         const colorScaleMap = await loadColorScaleMap();
         ruta.canManage = await canManageRutaByZonaId(ruta.idZona);
         ruta.colorPresasRgb = resolveColorScaleRgb(ruta?.colorPresas, colorScaleMap);

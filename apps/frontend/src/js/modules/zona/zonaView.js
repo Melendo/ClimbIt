@@ -10,6 +10,7 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
         filtrosActivos = { tipo: 'all', dificultadMin: '', dificultadMax: '' },
     } = data;
     const nombreRocodromo = rocodromo?.nombre || 'Rocódromo';
+    const infoRocodromoHref = `#infoRoco?id=${rocodromo?.id || ''}`;
 
     // Determinar zona inicial
     const zonaInicial = initialZonaId
@@ -25,8 +26,10 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                  <a href="#misRocodromos" class="text-dark text-decoration-none">
                     <span class="material-icons align-middle">arrow_back</span>
                 </a>
-                <img src="${rocodromo?.logoSrc || '/assets/rocodromoDefecto.jpg'}" alt="Icono rocódromo" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
-                <span class="fw-medium text-truncate">${nombreRocodromo}</span>
+                <a href="${infoRocodromoHref}" class="d-flex align-items-center gap-2 text-dark text-decoration-none flex-grow-1 overflow-hidden" aria-label="Ver información del rocódromo">
+                    <img src="${rocodromo?.logoSrc || '/assets/rocodromoDefecto.jpg'}" alt="Icono rocódromo" class="rounded-circle flex-shrink-0" style="width: 32px; height: 32px; object-fit: cover;">
+                    <span class="fw-medium text-truncate">${nombreRocodromo}</span>
+                </a>
             </div>
 
             <!-- Componente de mapa SVG interactivo -->
@@ -50,7 +53,7 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                 
             </div>
 
-            <div id="zonaToolbar" class="card-body bg-light py-2 border-bottom">
+            <div id="zonaToolbar" class="bg-light py-2 px-3 border-bottom flex-shrink-0">
                 <div class="d-flex align-items-center gap-2">
                     <select id="zonaSelector" class="form-select form-select-sm shadow-sm fw-bold" aria-label="Seleccionar zona">
                         ${zonas.map((z) => `<option value="${z.id}" ${z.id == (zonaInicial?.id) ? 'selected' : ''}>Zona ${z.nombre || z.id}</option>`).join('')}
