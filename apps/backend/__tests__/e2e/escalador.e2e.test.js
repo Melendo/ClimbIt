@@ -15,6 +15,11 @@ describe('E2E: Escalador', () => {
   let escaladorSuscripcion;
   let rocodromoTest;
   let tokenSuscripcion;
+  let escaladorValidacion;
+  let escaladorDescripcion;
+  let escaladorCambioApodo;
+  let tokenDescripcion;
+  let tokenCambioApodo;
 
   beforeAll(async () => {
     // Crear escalador de prueba para suscripción
@@ -35,6 +40,35 @@ describe('E2E: Escalador', () => {
       correo: escaladorSuscripcion.correo, 
       apodo: escaladorSuscripcion.apodo 
     });
+
+    escaladorValidacion = await db.Escalador.create({
+      correo: 'validacion@test.com',
+      contrasena: 'hashedPassword123',
+      apodo: 'ValidarApodo',
+    });
+
+    escaladorDescripcion = await db.Escalador.create({
+      correo: 'descripcion@test.com',
+      contrasena: 'hashedPassword123',
+      apodo: 'DescripcionTester',
+      descripcion: null,
+    });
+
+    tokenDescripcion = tokenService.crear({
+      correo: escaladorDescripcion.correo,
+      apodo: escaladorDescripcion.apodo,
+    });
+
+    escaladorCambioApodo = await db.Escalador.create({
+      correo: 'cambio-apodo@test.com',
+      contrasena: 'hashedPassword123',
+      apodo: 'ApodoOriginal',
+    });
+
+    tokenCambioApodo = tokenService.crear({
+      correo: escaladorCambioApodo.correo,
+      apodo: escaladorCambioApodo.apodo,
+    });
   });
 
   afterAll(async () => {
@@ -51,6 +85,11 @@ describe('E2E: Escalador', () => {
       }
     }
     if (escaladorSuscripcion) await escaladorSuscripcion.destroy();
+    if (escaladorValidacion) await escaladorValidacion.destroy();
+    if (escaladorDescripcion) await escaladorDescripcion.destroy();
+    if (escaladorCambioApodo) {
+      await db.Escalador.destroy({ where: { correo: escaladorCambioApodo.correo } });
+    }
     if (rocodromoTest) await rocodromoTest.destroy();
     
     await db.sequelize.close();
@@ -302,6 +341,149 @@ describe('E2E: Escalador', () => {
       expect(response.body).toHaveProperty('error');
       expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
       expect(response.body.error).toContain('Acceso denegado');
+    });
+  });
+
+  describe('Validar apodo', () => {
+    it('deberia devolver disponible false si el apodo ya existe (case-insensitive)', async () => {
+      const response = await request(app)
+        .get('/escaladores/validarApodo/validarapodo')
+        .expect(200);
+
+      expect(response.body).toEqual({ disponible: false });
+    });
+
+    it('deberia devolver disponible true si el apodo no existe', async () => {
+      const response = await request(app)
+        .get('/escaladores/validarApodo/ApodoNuevo123')
+        .expect(200);
+
+      expect(response.body).toEqual({ disponible: true });
+    });
+
+    it('deberia retornar 422 con apodo invalido', async () => {
+      const response = await request(app)
+        .get('/escaladores/validarApodo/!!!invalid!!!')
+        .expect(422);
+
+      expect(response.body).toHaveProperty('status', 'invalid_request');
+      const fields = response.body.errors.map((e) => e.field);
+      expect(fields).toContain('apodo');
+    });
+  });
+
+  describe('Validar correo', () => {
+    it('deberia devolver disponible false si el correo ya existe', async () => {
+      const correo = encodeURIComponent('validacion@test.com');
+      const response = await request(app)
+        .get(`/escaladores/validarCorreo/${correo}`)
+        .expect(200);
+
+      expect(response.body).toEqual({ disponible: false });
+    });
+
+    it('deberia devolver disponible true si el correo no existe', async () => {
+      const correo = encodeURIComponent('nuevo_correo@test.com');
+      const response = await request(app)
+        .get(`/escaladores/validarCorreo/${correo}`)
+        .expect(200);
+
+      expect(response.body).toEqual({ disponible: true });
+    });
+
+    it('deberia retornar 422 con correo invalido', async () => {
+      const response = await request(app)
+        .get('/escaladores/validarCorreo/no-es-email')
+        .expect(422);
+
+      expect(response.body).toHaveProperty('status', 'invalid_request');
+      const fields = response.body.errors.map((e) => e.field);
+      expect(fields).toContain('correo');
+    });
+  });
+
+  describe('Actualizar descripcion', () => {
+    it('deberia actualizar la descripcion del escalador autenticado', async () => {
+      const response = await request(app)
+        .put('/escaladores/actualizarDescripcion')
+        .set('Authorization', `Bearer ${tokenDescripcion}`)
+        .send({ descripcion: 'Nueva descripcion de perfil' })
+        .expect(200);
+
+      expect(response.body).toHaveProperty('id');
+      expect(response.body).toHaveProperty('correo', escaladorDescripcion.correo);
+      expect(response.body).toHaveProperty('apodo', escaladorDescripcion.apodo);
+      expect(response.body).toHaveProperty('descripcion', 'Nueva descripcion de perfil');
+
+      const escaladorActualizado = await db.Escalador.findByPk(escaladorDescripcion.id);
+      expect(escaladorActualizado.descripcion).toBe('Nueva descripcion de perfil');
+    });
+
+    it('deberia retornar 401 si no se proporciona token', async () => {
+      const response = await request(app)
+        .put('/escaladores/actualizarDescripcion')
+        .send({ descripcion: 'Texto' })
+        .expect(401);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
+    });
+
+    it('deberia retornar 422 si la descripcion es muy larga', async () => {
+      const response = await request(app)
+        .put('/escaladores/actualizarDescripcion')
+        .set('Authorization', `Bearer ${tokenDescripcion}`)
+        .send({ descripcion: 'a'.repeat(256) })
+        .expect(422);
+
+      expect(response.body).toHaveProperty('status', 'invalid_request');
+      const fields = response.body.errors.map((e) => e.field);
+      expect(fields).toContain('descripcion');
+    });
+  });
+
+  describe('Cambiar apodo', () => {
+    it('deberia actualizar el apodo y devolver un nuevo token', async () => {
+      const response = await request(app)
+        .put('/escaladores/cambiarApodo')
+        .set('Authorization', `Bearer ${tokenCambioApodo}`)
+        .send({ apodo: 'ApodoActualizado' })
+        .expect(200);
+
+      expect(response.body).toHaveProperty('apodo', 'ApodoActualizado');
+      expect(response.body).toHaveProperty('correo', escaladorCambioApodo.correo);
+      expect(response.body).toHaveProperty('token');
+      expect(typeof response.body.token).toBe('string');
+
+      const decoded = tokenService.verificar(response.body.token);
+      expect(decoded.apodo).toBe('ApodoActualizado');
+
+      const escaladorActualizado = await db.Escalador.findOne({
+        where: { correo: escaladorCambioApodo.correo },
+      });
+      expect(escaladorActualizado.apodo).toBe('ApodoActualizado');
+    });
+
+    it('deberia retornar 422 con apodo invalido', async () => {
+      const response = await request(app)
+        .put('/escaladores/cambiarApodo')
+        .set('Authorization', `Bearer ${tokenCambioApodo}`)
+        .send({ apodo: '!!!invalid!!!' })
+        .expect(422);
+
+      expect(response.body).toHaveProperty('status', 'invalid_request');
+      const fields = response.body.errors.map((e) => e.field);
+      expect(fields).toContain('apodo');
+    });
+
+    it('deberia retornar 401 si no se proporciona token', async () => {
+      const response = await request(app)
+        .put('/escaladores/cambiarApodo')
+        .send({ apodo: 'OtroApodo' })
+        .expect(401);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
     });
   });
 });

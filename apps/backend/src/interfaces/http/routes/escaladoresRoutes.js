@@ -94,6 +94,60 @@ router.post(
 );
 
 /**
+ * GET /escaladores/validarApodo/:apodo
+ * Verifica si el apodo ya esta registrado en el sistema
+ *
+ * Respuesta esperada: @return {Object} { disponible: boolean }
+ */
+const validarApodoValidators = [
+  param('apodo')
+    .trim()
+    .notEmpty()
+    .withMessage('apodo es requerido')
+    .isLength({ min: 1, max: 20 })
+    .withMessage('apodo debe tener entre 1 y 20 caracteres')
+    .matches(/^[a-zA-Z0-9_-]+$/)
+    .withMessage(
+      'apodo solo puede contener letras, numeros, guiones y guiones bajos'
+    )
+    .toLowerCase(),
+];
+
+router.get(
+  '/validarApodo/:apodo',
+  validarApodoValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.validarApodo(req, res, next);
+  }
+);
+
+/**
+ * GET /escaladores/validarCorreo/:correo
+ * Verifica si el correo ya esta registrado en el sistema
+ *
+ * Respuesta esperada: @return {Object} { disponible: boolean }
+ */
+const validarCorreoValidators = [
+  param('correo')
+    .trim()
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('correo debe ser un email valido')
+    .notEmpty()
+    .withMessage('correo es requerido'),
+];
+
+router.get(
+  '/validarCorreo/:correo',
+  validarCorreoValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.validarCorreo(req, res, next);
+  }
+);
+
+/**
  * POST /escaladores/suscribirse
  * Suscribe el escalador autenticado a un rocodromo
  *
@@ -178,6 +232,70 @@ router.get('/mis-rocodromos', verifyToken, (req, res, next) => {
 router.get('/perfil', verifyToken, (req, res, next) => {
   escaladorController.obtenerPerfil(req, res, next);
 });
+
+/**
+ * PUT /escaladores/actualizarDescripcion
+ * Actualiza la descripcion del escalador autenticado
+ *
+ * Parámetros esperados (body):
+ * - descripcion (@param {String} , opcional): Nueva descripcion (max 255 caracteres)
+ *
+ * Requiere: Token JWT válido en header Authorization
+ *
+ * Respuesta esperada: @return {Object} Perfil del escalador actualizado
+ */
+const actualizarDescripcionValidators = [
+  body('descripcion')
+    .optional({ values: 'falsy' })
+    .isString()
+    .trim()
+    .isLength({ max: 255 })
+    .withMessage('descripcion debe tener maximo 255 caracteres'),
+];
+
+router.put(
+  '/actualizarDescripcion',
+  verifyToken,
+  actualizarDescripcionValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.actualizarDescripcion(req, res, next);
+  }
+);
+
+/**
+ * PUT /escaladores/cambiarApodo
+ * Actualiza el apodo del escalador autenticado
+ *
+ * Parámetros esperados (body):
+ * - apodo (@param {String} , requerido): Nuevo apodo
+ *
+ * Requiere: Token JWT válido en header Authorization
+ *
+ * Respuesta esperada: @return {Object} Perfil del escalador actualizado y token
+ */
+const cambiarApodoValidators = [
+  body('apodo')
+    .trim()
+    .notEmpty()
+    .withMessage('apodo es requerido')
+    .isLength({ min: 1, max: 20 })
+    .withMessage('apodo debe tener entre 1 y 20 caracteres')
+    .matches(/^[a-zA-Z0-9_-]+$/)
+    .withMessage(
+      'apodo solo puede contener letras, numeros, guiones y guiones bajos'
+    ),
+];
+
+router.put(
+  '/cambiarApodo',
+  verifyToken,
+  cambiarApodoValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.cambiarApodo(req, res, next);
+  }
+);
 
 /**
  * POST /escaladores/fotos-perfil

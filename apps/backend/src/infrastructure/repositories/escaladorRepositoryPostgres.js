@@ -1,3 +1,4 @@
+import { col, fn, where } from 'sequelize';
 import escaladorRepository from '../../domain/escaladores/escaladorRepository.js';
 import Escalador from '../../domain/escaladores/Escalador.js';
 import Rocodromo from '../../domain/rocodromos/Rocodromo.js';
@@ -74,6 +75,20 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
       throw mapRepositoryError(error, {
         fallbackMessage: 'Error al buscar escalador por apodo',
         internalCode: 'ESCALADOR_FIND_BY_NICKNAME_FAILED',
+      });
+    }
+  }
+
+  async encontrarPorApodoInsensitive(apodo) {
+    try {
+      const escaladorModel = await this.EscaladorModel.findOne({
+        where: where(fn('lower', col('Apodo')), apodo.toLowerCase()),
+      });
+      return this._toDomain(escaladorModel);
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al buscar escalador por apodo (insensible)',
+        internalCode: 'ESCALADOR_FIND_BY_NICKNAME_INSENSITIVE_FAILED',
       });
     }
   }
@@ -225,6 +240,52 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
       throw mapRepositoryError(error, {
         fallbackMessage: 'Error al actualizar la foto del escalador',
         internalCode: 'ESCALADOR_PROFILE_PHOTO_UPDATE_DB_FAILED',
+      });
+    }
+  }
+
+  async actualizarDescripcion(apodo, descripcion) {
+    try {
+      const escaladorModel = await this.EscaladorModel.findOne({
+        where: { apodo },
+      });
+
+      if (!escaladorModel) {
+        return null;
+      }
+
+      escaladorModel.descripcion = descripcion;
+      await escaladorModel.save();
+
+      return this._toDomain(escaladorModel);
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al actualizar la descripcion del escalador',
+        internalCode: 'ESCALADOR_DESCRIPTION_UPDATE_DB_FAILED',
+      });
+    }
+  }
+
+  async actualizarApodo(apodoActual, nuevoApodo) {
+    try {
+      const escaladorModel = await this.EscaladorModel.findOne({
+        where: { apodo: apodoActual },
+      });
+
+      if (!escaladorModel) {
+        return null;
+      }
+
+      escaladorModel.apodo = nuevoApodo;
+      await escaladorModel.save();
+
+      return this._toDomain(escaladorModel);
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al actualizar el apodo del escalador',
+        conflictMessage: 'El apodo ya está registrado',
+        conflictCode: 'ESCALADOR_APODO_DUPLICADO_DB',
+        internalCode: 'ESCALADOR_NICKNAME_UPDATE_DB_FAILED',
       });
     }
   }

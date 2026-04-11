@@ -187,6 +187,61 @@ class EscaladorController {
       return next(error);
     }
   }
+
+  async validarApodo(req, res, next) {
+    try {
+      const { apodo } = req.params;
+      const resultado = await this.useCases.validarApodo.execute(apodo);
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async validarCorreo(req, res, next) {
+    try {
+      const { correo } = req.params;
+      const resultado = await this.useCases.validarCorreo.execute(correo);
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async actualizarDescripcion(req, res, next) {
+    try {
+      const { descripcion } = req.body;
+      const apodo = req.user.apodo;
+
+      const resultado = await this.useCases.actualizarDescripcion.execute({
+        apodo,
+        descripcion,
+      });
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async cambiarApodo(req, res, next) {
+    try {
+      const { apodo } = req.body;
+      const apodoActual = req.user.apodo;
+
+      const resultado = await this.useCases.cambiarApodo.execute({
+        apodoActual,
+        nuevoApodo: apodo,
+        usuario: req.user,
+      });
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      return next(error);
+    }
+  }
 }
 
 export default EscaladorController;

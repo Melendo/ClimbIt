@@ -1,6 +1,7 @@
 import { renderPerfil } from './escaladorView.js';
-import { fetchClient, fetchImageObjectUrl, removeToken } from '../../core/client.js';
+import { fetchClient, fetchImageObjectUrl, removeToken, saveToken } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
+import { showToast } from '../../components/toast.js';
 import { showProfilePhotoModal } from '../../components/profilePhotoModal.js';
 
 const PERFIL_PLACEHOLDER = '/assets/johnDoe.png';
@@ -77,6 +78,37 @@ async function abrirCambioFotoPerfil(container, escalador) {
     }
 }
 
+async function validarApodo(apodo) {
+    try {
+        const response = await fetchClient(`/escaladores/validarApodo/${encodeURIComponent(apodo)}`);
+        const data = await response.json();
+        if (data?.disponible === false) {
+            return { ok: false, message: 'El apodo no esta disponible.' };
+        }
+        return { ok: true };
+    } catch (err) {
+        const errorMsg = await extractValidatorMessage(err);
+        return { ok: false, message: errorMsg || err.message || 'No se pudo validar el apodo.' };
+    }
+}
+
+async function extractValidatorMessage(err) {
+    if (!err?.response) {
+        return null;
+    }
+
+    try {
+        const payload = await err.response.json();
+        const errorMsg = payload?.errors?.[0]?.msg;
+        if (errorMsg) {
+            return errorMsg;
+        }
+        return payload?.message || payload?.error || null;
+    } catch {
+        return null;
+    }
+}
+
 // Controlador para la vista de perfil del usuario
 export async function perfilCmd(container) {
     showLoading();
@@ -110,6 +142,53 @@ export async function perfilCmd(container) {
             },
             onOpenChangePhoto: async () => {
                 await abrirCambioFotoPerfil(container, escalador);
+            },
+            onUpdateDescripcion: async (descripcion) => {
+                try {
+                    const response = await fetchClient('/escaladores/actualizarDescripcion', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ descripcion })
+                    });
+
+                    const updated = await response.json();
+                    escalador.descripcion = updated?.descripcion ?? descripcion;
+                    renderPerfil(container, escalador, callbacks);
+                    showToast('Descripcion actualizada correctamente.', { variant: 'success' });
+                } catch (err) {
+                    const errorMsg = await extractValidatorMessage(err);
+                    showToast(`No se ha podido completar el cambio: ${errorMsg || err.message}`);
+                }
+            },
+            onUpdateApodo: async (apodo) => {
+                try {
+                    const validation = await validarApodo(apodo);
+                    if (!validation.ok) {
+                        showToast(`No se ha podido completar el cambio: ${validation.message}`);
+                        return;
+                    }
+
+                    const response = await fetchClient('/escaladores/cambiarApodo', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ apodo })
+                    });
+
+                    const updated = await response.json();
+                    if (updated?.token) {
+                        saveToken(updated.token);
+                    }
+                    escalador.apodo = updated?.apodo ?? apodo;
+                    renderPerfil(container, escalador, callbacks);
+                    showToast('Apodo actualizado correctamente.', { variant: 'success' });
+                } catch (err) {
+                    const errorMsg = await extractValidatorMessage(err);
+                    showToast(`No se ha podido completar el cambio: ${errorMsg || err.message}`);
+                }
             }
         };
 

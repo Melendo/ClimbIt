@@ -28,6 +28,10 @@ import CrearFotoPerfil from '../application/escaladores/crearFotoPerfil.js';
 import ObtenerFotosPerfil from '../application/escaladores/obtenerFotosPerfil.js';
 import ObtenerFotoPerfil from '../application/escaladores/obtenerFotoPerfil.js';
 import ActualizarFotoPerfilEscalador from '../application/escaladores/actualizarFotoPerfilEscalador.js';
+import ValidarApodoEscalador from '../application/escaladores/validarApodoEscalador.js';
+import ValidarCorreoEscalador from '../application/escaladores/validarCorreoEscalador.js';
+import ActualizarDescripcionEscalador from '../application/escaladores/actualizarDescripcionEscalador.js';
+import CambiarApodoEscalador from '../application/escaladores/cambiarApodoEscalador.js';
 
 import CrearPista from '../application/pistas/crearPista.js';
 import ActualizarPista from '../application/pistas/actualizarPista.js';
@@ -99,6 +103,15 @@ async function inicializarContainer() {
     escaladorRepository,
     fotosPerfilRepository
   );
+  const validarApodoUseCase = new ValidarApodoEscalador(escaladorRepository);
+  const validarCorreoUseCase = new ValidarCorreoEscalador(escaladorRepository);
+  const actualizarDescripcionUseCase = new ActualizarDescripcionEscalador(
+    escaladorRepository
+  );
+  const cambiarApodoUseCase = new CambiarApodoEscalador(
+    escaladorRepository,
+    tokenService
+  );
 
   const crearPistaUseCase = new CrearPista(
     pistaRepository,
@@ -154,6 +167,10 @@ async function inicializarContainer() {
     obtenerFotosPerfil: obtenerFotosPerfilUseCase,
     obtenerFotoPerfil: obtenerFotoPerfilUseCase,
     actualizarFotoPerfil: actualizarFotoPerfilUseCase,
+    validarApodo: validarApodoUseCase,
+    validarCorreo: validarCorreoUseCase,
+    actualizarDescripcion: actualizarDescripcionUseCase,
+    cambiarApodo: cambiarApodoUseCase,
   };
   const pistaUseCases = {
     crear: crearPistaUseCase,

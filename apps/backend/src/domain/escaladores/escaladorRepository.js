@@ -12,6 +12,10 @@ class EscaladorRepository {
     throw new Error('Método "encontrarPorApodo" no implementado');
   }
 
+  async encontrarPorApodoInsensitive(apodo) {
+    throw new Error('Método "encontrarPorApodoInsensitive" no implementado');
+  }
+
   async suscribirse(escaladorApodo, rocodromo) {
     throw new Error('Método "suscribirse" no implementado');
   }
@@ -34,6 +38,14 @@ class EscaladorRepository {
 
   async actualizarFotoPerfilId(escaladorApodo, idFotoPerfil) {
     throw new Error('Método "actualizarFotoPerfilId" no implementado');
+  }
+
+  async actualizarDescripcion(apodo, descripcion) {
+    throw new Error('Método "actualizarDescripcion" no implementado');
+  }
+
+  async actualizarApodo(apodoActual, nuevoApodo) {
+    throw new Error('Método "actualizarApodo" no implementado');
   }
 }
 export default EscaladorRepository;
