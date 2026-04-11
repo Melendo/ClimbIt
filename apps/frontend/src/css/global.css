@@ -545,7 +545,7 @@ body {
 .perfil-stats-section {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 1.15rem;
 }
 
 .perfil-stats-title {
@@ -702,6 +702,27 @@ body {
   position: relative;
 }
 
+.perfil-heatmap-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.perfil-heatmap-month {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1f1f1f;
+  text-transform: capitalize;
+}
+
+.perfil-heatmap-subtitle {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6c757d;
+}
+
 .perfil-heatmap-weekdays {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -771,6 +792,74 @@ body {
   border-radius: 3px;
 }
 
+.perfil-monthly-summary {
+  gap: 0.9rem;
+}
+
+.perfil-monthly-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.perfil-monthly-metric {
+  background: #ffffff;
+  border: 1px solid #e1e1e1;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}
+
+.perfil-monthly-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6c757d;
+}
+
+.perfil-monthly-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f1f1f;
+}
+
+.perfil-monthly-chart {
+  display: grid;
+  min-height: 90px;
+  padding: 8px 6px 2px;
+  background: #ffffff;
+  border: 1px solid #e1e1e1;
+  border-radius: 12px;
+  width: 100%;
+  margin: 0;
+}
+
+.perfil-monthly-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  height: 100%;
+  width: 100%;
+}
+
+.perfil-monthly-bar-fill {
+  width: 100%;
+  max-width: 24px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #f6a44a 0%, #d97924 100%);
+  min-height: 8px;
+}
+
+.perfil-monthly-bar-label {
+  font-size: 0.65rem;
+  color: #6c757d;
+}
+
 .perfil-heatmap-tooltip {
   position: absolute;
   left: 0;
@@ -820,6 +909,10 @@ body {
   .perfil-heatmap-weekdays,
   .perfil-heatmap-grid {
     gap: 4px;
+  }
+
+  .perfil-monthly-metrics {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

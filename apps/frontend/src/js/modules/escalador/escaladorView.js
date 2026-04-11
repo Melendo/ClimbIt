@@ -60,6 +60,35 @@ export function renderPerfil(container, escalador, callbacks) {
       count: getHeatmapCount(dayNumber),
     };
   });
+  const heatmapCounts = heatmapCells.map((cell) => (cell ? cell.count : 0));
+  const totalMonthlyRoutes = heatmapCounts.reduce(
+    (acc, count) => acc + count,
+    0
+  );
+  const activeDays = heatmapCells.filter(
+    (cell) => cell && cell.count > 0
+  ).length;
+  const avgRoutesPerActiveDay = activeDays
+    ? totalMonthlyRoutes / activeDays
+    : 0;
+  const weeklyTotals = [];
+  for (let i = 0; i < heatmapCounts.length; i += 7) {
+    weeklyTotals.push(
+      heatmapCounts.slice(i, i + 7).reduce((acc, count) => acc + count, 0)
+    );
+  }
+  const maxWeeklyTotal = Math.max(1, ...weeklyTotals);
+  const weeklyBarsHtml = weeklyTotals
+    .map((total, index) => {
+      const heightPct = (total / maxWeeklyTotal) * 100;
+      return `
+        <div class="perfil-monthly-bar">
+          <span class="perfil-monthly-bar-fill" style="height: ${heightPct}%;"></span>
+          <span class="perfil-monthly-bar-label">S${index + 1}</span>
+        </div>
+      `;
+    })
+    .join('');
   const heatmapWeekdaysHtml = weekdayLabels
     .map((label) => `<span>${label}</span>`)
     .join('');
@@ -220,8 +249,12 @@ export function renderPerfil(container, escalador, callbacks) {
               </div>
 
               <div class="perfil-stats-section">
-                <p class="perfil-stats-title">${monthTitle}</p>
+                <p class="perfil-stats-title">Actividad mensual</p>
                 <div class="perfil-stats-card perfil-heatmap-card">
+                  <div class="perfil-heatmap-header">
+                    <span class="perfil-heatmap-month">${monthTitle}</span>
+                    <span class="perfil-heatmap-subtitle">Mapa de calor</span>
+                  </div>
                   <div class="perfil-heatmap-weekdays">
                     ${heatmapWeekdaysHtml}
                   </div>
@@ -242,6 +275,25 @@ export function renderPerfil(container, escalador, callbacks) {
                       <span class="perfil-heatmap-day is-high perfil-heatmap-legend-swatch"></span>
                       <span>5+ rutas</span>
                     </span>
+                  </div>
+                </div>
+                <div class="perfil-stats-card perfil-monthly-summary">
+                  <div class="perfil-monthly-metrics">
+                    <div class="perfil-monthly-metric">
+                      <span class="perfil-monthly-label">Rutas del mes</span>
+                      <span class="perfil-monthly-value">${totalMonthlyRoutes}</span>
+                    </div>
+                    <div class="perfil-monthly-metric">
+                      <span class="perfil-monthly-label">Dias activos</span>
+                      <span class="perfil-monthly-value">${activeDays}</span>
+                    </div>
+                    <div class="perfil-monthly-metric">
+                      <span class="perfil-monthly-label">Media por dia</span>
+                      <span class="perfil-monthly-value">${avgRoutesPerActiveDay.toFixed(1)}</span>
+                    </div>
+                  </div>
+                  <div class="perfil-monthly-chart" style="grid-template-columns: repeat(${weeklyTotals.length}, minmax(0, 1fr));">
+                    ${weeklyBarsHtml}
                   </div>
                 </div>
               </div>
