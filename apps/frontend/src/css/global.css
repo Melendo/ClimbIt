@@ -697,6 +697,101 @@ body {
   color: #6c757d;
 }
 
+.perfil-heatmap-card {
+  gap: 0.9rem;
+  position: relative;
+}
+
+.perfil-heatmap-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  font-size: 0.7rem;
+  color: #6c757d;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.perfil-heatmap-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.perfil-heatmap-day {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 4px;
+  background: #e9ecef;
+  border: 1px solid #d5d5d5;
+}
+
+.perfil-heatmap-day:not(.is-empty) {
+  cursor: pointer;
+}
+
+.perfil-heatmap-day.is-empty {
+  background: transparent;
+  border-color: transparent;
+}
+
+.perfil-heatmap-day.is-low {
+  background: #ffd8b0;
+  border-color: #f4c08a;
+}
+
+.perfil-heatmap-day.is-mid {
+  background: #f4a261;
+  border-color: #e88b3d;
+}
+
+.perfil-heatmap-day.is-high {
+  background: #d97924;
+  border-color: #c86b17;
+}
+
+.perfil-heatmap-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+.perfil-heatmap-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.perfil-heatmap-legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+.perfil-heatmap-tooltip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -100%);
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #1f1f1f;
+  color: #ffffff;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.perfil-heatmap-tooltip.is-visible {
+  opacity: 1;
+}
+
 @media (max-width: 480px) {
   .perfil-stats-badges,
   .perfil-stats-choices {
@@ -720,6 +815,11 @@ body {
 
   .perfil-stats-title {
     text-align: center;
+  }
+
+  .perfil-heatmap-weekdays,
+  .perfil-heatmap-grid {
+    gap: 4px;
   }
 }
 
