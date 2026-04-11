@@ -1,7 +1,7 @@
 // Importamos los controladores de los diferentes modulos y las funciones de UI
 import { mainContainer, showLoading, showError } from './ui.js';
 import { isAuthenticated, canManageRocodromo } from './client.js';
-import { perfilCmd } from '../modules/escalador/escaladorController.js';
+import { perfilCmd, editarPerfilCmd } from '../modules/escalador/escaladorController.js';
 import { crearRutaCmd, infoRutaCmd, modificarRutaCmd } from '../modules/ruta/rutaController.js';
 import {
     misRocodromosCmd,
@@ -108,6 +108,9 @@ export async function handleNavigation() {
         }
         else if (hash === '#perfil') {
             await perfilCmd(mainContainer);
+        }
+        else if (hash === '#editarPerfil') {
+            await editarPerfilCmd(mainContainer);
         }
         else {
             error404Cmd(mainContainer);

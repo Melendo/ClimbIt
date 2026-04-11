@@ -16,6 +16,7 @@ export function renderEditableField({
   prefix,
   wrapperClass,
   viewContent,
+  titleHtml = '',
   inputValue,
   inputTag = 'input',
   inputClasses = 'form-control form-control-sm',
@@ -49,9 +50,12 @@ export function renderEditableField({
 
   return `
     <div class="${wrapperClass}" ${dataPrefix}-wrap>
-      <div class="perfil-${prefix}-view" ${dataPrefix}-view>
-        ${viewContent}
-        ${dividerMarkup}
+      ${titleHtml}
+      <div class="perfil-${prefix}-view w-100" ${dataPrefix}-view>
+        <div class="perfil-${prefix}-view-content">
+          ${viewContent}
+          ${dividerMarkup}
+        </div>
       </div>
       <div class="perfil-${prefix}-edit d-none" ${dataPrefix}-edit>
         <div class="perfil-input-wrap${isTextarea ? ' is-textarea' : ''}">
