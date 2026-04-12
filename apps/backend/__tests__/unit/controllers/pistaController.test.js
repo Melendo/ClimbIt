@@ -456,4 +456,134 @@ describe('Unit: PistaController', () => {
       expect(next.mock.calls[0][0].message).toBe('Error al actualizar la pista');
     });
   });
+
+  describe('actualizarValoracion', () => {
+    it('responde 200 con éxito cuando se actualiza la valoración', async () => {
+      const useCases = {
+        actualizarValoracion: {
+          execute: jest.fn().mockResolvedValue({
+            mensaje: 'Valoración actualizada exitosamente',
+          }),
+        },
+      };
+      const controller = new PistaController(useCases);
+      const req = {
+        params: { id: '1' },
+        body: { valoracion: 8 },
+        user: { id: 5 },
+      };
+      const res = createResMock();
+
+      await controller.actualizarValoracion(req, res, () => {});
+
+      expect(useCases.actualizarValoracion.execute).toHaveBeenCalledWith({
+        idPista: '1',
+        idEscalador: 5,
+        nuevaValoracion: 8,
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.body).toEqual({
+        mensaje: 'Valoración actualizada exitosamente',
+      });
+    });
+
+    it('responde 200 con valoración mínima (1)', async () => {
+      const useCases = {
+        actualizarValoracion: {
+          execute: jest.fn().mockResolvedValue({
+            mensaje: 'Valoración actualizada exitosamente',
+          }),
+        },
+      };
+      const controller = new PistaController(useCases);
+      const req = {
+        params: { id: '1' },
+        body: { valoracion: 1 },
+        user: { id: 5 },
+      };
+      const res = createResMock();
+
+      await controller.actualizarValoracion(req, res, () => {});
+
+      expect(useCases.actualizarValoracion.execute).toHaveBeenCalledWith({
+        idPista: '1',
+        idEscalador: 5,
+        nuevaValoracion: 1,
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+    });
+
+    it('responde 200 con valoración máxima (10)', async () => {
+      const useCases = {
+        actualizarValoracion: {
+          execute: jest.fn().mockResolvedValue({
+            mensaje: 'Valoración actualizada exitosamente',
+          }),
+        },
+      };
+      const controller = new PistaController(useCases);
+      const req = {
+        params: { id: '1' },
+        body: { valoracion: 10 },
+        user: { id: 5 },
+      };
+      const res = createResMock();
+
+      await controller.actualizarValoracion(req, res, () => {});
+
+      expect(useCases.actualizarValoracion.execute).toHaveBeenCalledWith({
+        idPista: '1',
+        idEscalador: 5,
+        nuevaValoracion: 10,
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+    });
+
+    it('responde 500 si el caso de uso lanza un error', async () => {
+      const useCases = {
+        actualizarValoracion: {
+          execute: jest.fn().mockRejectedValue(
+            new Error('Error al actualizar la valoración')
+          ),
+        },
+      };
+      const controller = new PistaController(useCases);
+      const req = {
+        params: { id: '999' },
+        body: { valoracion: 8 },
+        user: { id: 5 },
+      };
+      const res = createResMock();
+
+      const next = jest.fn();
+
+      await controller.actualizarValoracion(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(expect.any(Error));
+      expect(next.mock.calls[0][0].message).toBe(
+        'Error al actualizar la valoración'
+      );
+    });
+
+    it('responde 500 si falta el idEscalador en req.user', async () => {
+      const useCases = {
+        actualizarValoracion: {
+          execute: jest.fn(),
+        },
+      };
+      const controller = new PistaController(useCases);
+      const req = {
+        params: { id: '1' },
+        body: { valoracion: 8 },
+        user: undefined,
+      };
+      const res = createResMock();
+
+      const next = jest.fn();
+
+      await controller.actualizarValoracion(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(expect.any(Error));
+    });
+  });
 });

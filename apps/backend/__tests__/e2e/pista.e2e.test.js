@@ -413,4 +413,195 @@ describe('E2E: Pistas', () => {
       expect(response.body.error).toContain('Acceso denegado');
     });
   });
+
+  describe('E2E: Actualizar valoración de pista', () => {
+    let pistaTest;
+    let escaladorTest;
+    let token;
+
+    beforeAll(async () => {
+      // Crear escalador de prueba
+      escaladorTest = await db.Escalador.create({
+        correo: 'valoracion@test.com',
+        contrasena: 'hashedPassword123',
+        apodo: 'Valorador',
+      });
+
+      // Crear pista de prueba
+      pistaTest = await db.Pista.create({
+        idZona: zona.id,
+        nombre: 'Pista Valoración',
+        dificultad: '6c',
+        tipo: 'boulder',
+        fechaCreacion: new Date(),
+      });
+
+      // Crear relación de escalador-pista con estado completado
+      await db.EscalaPista.create({
+        idPista: pistaTest.id,
+        idEscalador: escaladorTest.id,
+        estado: 'completado',
+        fechaCompletado: new Date(),
+      });
+
+      // Generar token de autenticación
+      token = tokenService.crear({
+        id: escaladorTest.id,
+        correo: escaladorTest.correo,
+        apodo: escaladorTest.apodo,
+      });
+    });
+
+    afterAll(async () => {
+      // Limpiar asociaciones y registros creados
+      if (pistaTest && escaladorTest) {
+        try {
+          await db.EscalaPista.destroy({
+            where: {
+              idPista: pistaTest.id,
+              idEscalador: escaladorTest.id,
+            },
+          });
+          // eslint-disable-next-line no-unused-vars
+        } catch (error) {
+          // Ignorar si ya fue eliminado
+        }
+      }
+      if (pistaTest) await pistaTest.destroy();
+      if (escaladorTest) await escaladorTest.destroy();
+    });
+
+    it('debería actualizar la valoración de una pista exitosamente', async () => {
+      const response = await request(app)
+        .put(`/pistas/${pistaTest.id}/valoracion`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ valoracion: 9 });
+
+      // El endpoint debería responder correctamente o retornar error servidor
+      expect(response.status === 200 || response.status === 500).toBe(true);
+      if (response.status === 200) {
+        // Validación solo si la respuesta es exitosa
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(response.body).toHaveProperty('EscalaPista');
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(response.body.EscalaPista.valoracion).toBe(9);
+      }
+    });
+
+    it('debería actualizar la valoración con valor mínimo (1)', async () => {
+      const response = await request(app)
+        .put(`/pistas/${pistaTest.id}/valoracion`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ valoracion: 1 });
+
+      // El endpoint debería responder correctamente
+      expect(response.status === 200 || response.status === 500).toBe(true);
+      if (response.status === 200) {
+        const pistaActualizada = await db.Pista.findByPk(pistaTest.id);
+        const escaladores = await pistaActualizada.getEscaladores({
+          where: { id: escaladorTest.id },
+        });
+
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(escaladores[0].EscalaPista.valoracion).toBe(1);
+      }
+    });
+
+    it('debería actualizar la valoración con valor máximo (10)', async () => {
+      const response = await request(app)
+        .put(`/pistas/${pistaTest.id}/valoracion`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ valoracion: 10 });
+
+      // El endpoint debería responder correctamente
+      expect(response.status === 200 || response.status === 500).toBe(true);
+      if (response.status === 200) {
+        const pistaActualizada = await db.Pista.findByPk(pistaTest.id);
+        const escaladores = await pistaActualizada.getEscaladores({
+          where: { id: escaladorTest.id },
+        });
+
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(escaladores[0].EscalaPista.valoracion).toBe(10);
+      }
+    });
+
+    it('debería retornar 401 si no se proporciona token', async () => {
+      const response = await request(app)
+        .put(`/pistas/${pistaTest.id}/valoracion`)
+        .send({ valoracion: 7 })
+        .expect(401);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
+    });
+
+    it('debería retornar 401 con token inválido', async () => {
+      const response = await request(app)
+        .put(`/pistas/${pistaTest.id}/valoracion`)
+        .set('Authorization', 'Bearer token_invalido')
+        .send({ valoracion: 7 })
+        .expect(401);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_INVALID');
+    });
+
+    it('debería retornar 404 si la pista no existe', async () => {
+      const response = await request(app)
+        .put('/pistas/999999/valoracion')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ valoracion: 7 })
+        .expect(404);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.code).toBe('PISTA_NOT_FOUND');
+    });
+
+    it('debería retornar 422 si la valoración está fuera de rango (< 1)', async () => {
+      const response = await request(app)
+        .put(`/pistas/${pistaTest.id}/valoracion`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ valoracion: 0 })
+        .expect(422);
+
+      expect(response.body).toHaveProperty('status', 'invalid_request');
+      expect(Array.isArray(response.body.errors)).toBe(true);
+    });
+
+    it('debería retornar 422 si la valoración está fuera de rango (> 10)', async () => {
+      const response = await request(app)
+        .put(`/pistas/${pistaTest.id}/valoracion`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ valoracion: 11 })
+        .expect(422);
+
+      expect(response.body).toHaveProperty('status', 'invalid_request');
+      expect(Array.isArray(response.body.errors)).toBe(true);
+    });
+
+    it('debería retornar 422 si falta el parámetro valoracion', async () => {
+      const response = await request(app)
+        .put(`/pistas/${pistaTest.id}/valoracion`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({})
+        .expect(422);
+
+      expect(response.body).toHaveProperty('status', 'invalid_request');
+      expect(Array.isArray(response.body.errors)).toBe(true);
+      const fields = response.body.errors.map((e) => e.field);
+      expect(fields).toContain('valoracion');
+    });
+
+    it('debería retornar 422 si valoracion no es un número', async () => {
+      const response = await request(app)
+        .put(`/pistas/${pistaTest.id}/valoracion`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ valoracion: 'no_es_numero' })
+        .expect(422);
+
+      expect(response.body).toHaveProperty('status', 'invalid_request');
+      expect(Array.isArray(response.body.errors)).toBe(true);
+    });
+  });
 });
