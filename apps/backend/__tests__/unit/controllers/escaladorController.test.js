@@ -382,4 +382,44 @@ describe('Unit: EscaladorController', () => {
       expect(res.body).toEqual({ fotoUrl: '/uploads/fotos_perfil/foto.png' });
     });
   });
+
+  describe('estadisticas', () => {
+    it('obtenerResumenEstadisticas responde 200 con datos del escalador autenticado', async () => {
+      const useCases = {
+        obtenerResumenEstadisticas: {
+          execute: jest.fn().mockResolvedValue({ totalRutas: 9, totalFlash: 3 }),
+        },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = { user: { apodo: 'Tester' } };
+      const res = createResMock();
+
+      await controller.obtenerResumenEstadisticas(req, res, () => {});
+
+      expect(useCases.obtenerResumenEstadisticas.execute).toHaveBeenCalledWith({
+        apodo: 'Tester',
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.body).toEqual({ totalRutas: 9, totalFlash: 3 });
+    });
+
+    it('obtenerTiposEstadisticasPublico responde 200 con datos del apodo en params', async () => {
+      const useCases = {
+        obtenerTiposEstadisticas: {
+          execute: jest.fn().mockResolvedValue({ totalBloques: 4, totalVias: 2 }),
+        },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = { params: { apodo: 'PerfilPublico' } };
+      const res = createResMock();
+
+      await controller.obtenerTiposEstadisticasPublico(req, res, () => {});
+
+      expect(useCases.obtenerTiposEstadisticas.execute).toHaveBeenCalledWith({
+        apodo: 'PerfilPublico',
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.body).toEqual({ totalBloques: 4, totalVias: 2 });
+    });
+  });
 });

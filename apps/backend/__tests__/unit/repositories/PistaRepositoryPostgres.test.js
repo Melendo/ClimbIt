@@ -11,6 +11,14 @@ describe('PistaRepositoryPostgres', () => {
     mockPistaModel = {
       create: jest.fn(),
       findByPk: jest.fn(),
+      findAll: jest.fn(),
+      sequelize: {
+        models: {
+          EscalaPista: {
+            findAll: jest.fn(),
+          },
+        },
+      },
     };
 
     // Instanciamos el repositorio con el modelo mockeado
@@ -249,6 +257,84 @@ describe('PistaRepositoryPostgres', () => {
 
       const resultado = await repository.obtenerEstado(1, 5);
       expect(resultado).toBeNull();
+    });
+  });
+
+  describe('obtenerResumenEstadisticasEscalador', () => {
+    it('deberia retornar resumen agregado por estado', async () => {
+      mockPistaModel.sequelize.models.EscalaPista.findAll.mockResolvedValue([
+        { estado: 'flash', total: '2' },
+        { estado: 'completado', total: '5' },
+        { estado: 'proyecto', total: '3' },
+      ]);
+
+      const resultado = await repository.obtenerResumenEstadisticasEscalador(9);
+
+      expect(
+        mockPistaModel.sequelize.models.EscalaPista.findAll
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { idEscalador: 9 },
+          raw: true,
+        })
+      );
+      expect(resultado.totalRutas).toBe(7);
+      expect(resultado.totalFlash).toBe(2);
+      expect(resultado.totalCompletado).toBe(5);
+      expect(resultado.totalProyecto).toBe(3);
+      expect(resultado.porcentajeFlash).toBeCloseTo(28.57142857, 8);
+    });
+
+    it('deberia retornar valores en cero cuando no hay datos', async () => {
+      mockPistaModel.sequelize.models.EscalaPista.findAll.mockResolvedValue([]);
+
+      const resultado = await repository.obtenerResumenEstadisticasEscalador(3);
+
+      expect(resultado).toEqual({
+        totalRutas: 0,
+        totalFlash: 0,
+        totalCompletado: 0,
+        totalProyecto: 0,
+        porcentajeFlash: 0,
+      });
+    });
+  });
+
+  describe('obtenerTiposEstadisticasEscalador', () => {
+    it('deberia retornar distribucion agregada por tipo', async () => {
+      mockPistaModel.findAll.mockResolvedValue([
+        { tipo: 'boulder', total: '8' },
+        { tipo: 'via', total: '2' },
+      ]);
+
+      const resultado = await repository.obtenerTiposEstadisticasEscalador(5);
+
+      expect(mockPistaModel.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          raw: true,
+        })
+      );
+      expect(resultado).toEqual({
+        totalBloques: 8,
+        totalVias: 2,
+        porcentajeBloques: 80,
+        porcentajeVias: 20,
+        favoritaTexto: 'Bloque',
+      });
+    });
+
+    it('deberia retornar valores en cero cuando no hay rutas escaladas', async () => {
+      mockPistaModel.findAll.mockResolvedValue([]);
+
+      const resultado = await repository.obtenerTiposEstadisticasEscalador(5);
+
+      expect(resultado).toEqual({
+        totalBloques: 0,
+        totalVias: 0,
+        porcentajeBloques: 0,
+        porcentajeVias: 0,
+        favoritaTexto: 'Bloque',
+      });
     });
   });
 });
