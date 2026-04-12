@@ -507,6 +507,183 @@ class PistaRepositoryPostgres extends pistaRepository {
       });
     }
   }
+
+  async obtenerResumenEstadisticasEscaladorPorRocodromo(idEscalador, idRocodromo) {
+    try {
+      const filas = await this.PistaModel.sequelize.query(
+        `
+          SELECT
+            ep."Estado" AS estado,
+            COUNT(*)::int AS total
+          FROM "EscalaPista" ep
+          INNER JOIN "Pistas" p ON p."IDPista" = ep."IDPista"
+          INNER JOIN "Zonas" z ON z."IDZona" = p."IDZona"
+          WHERE ep."IDEscalador" = :idEscalador
+            AND z."IDRoco" = :idRocodromo
+          GROUP BY ep."Estado"
+        `,
+        {
+          replacements: { idEscalador, idRocodromo },
+          type: QueryTypes.SELECT,
+        }
+      );
+
+      const totales = filas.reduce(
+        (acc, fila) => {
+          const estado = fila.estado;
+          const total = Number(fila.total) || 0;
+          if (estado === 'flash') {
+            acc.totalFlash = total;
+          } else if (estado === 'completado') {
+            acc.totalCompletado = total;
+          } else if (estado === 'proyecto') {
+            acc.totalProyecto = total;
+          }
+          return acc;
+        },
+        {
+          totalFlash: 0,
+          totalCompletado: 0,
+          totalProyecto: 0,
+        }
+      );
+
+      const totalRutas = totales.totalFlash + totales.totalCompletado;
+      const porcentajeFlash =
+        totalRutas > 0 ? (totales.totalFlash / totalRutas) * 100 : 0;
+
+      return {
+        totalRutas,
+        totalFlash: totales.totalFlash,
+        totalCompletado: totales.totalCompletado,
+        totalProyecto: totales.totalProyecto,
+        porcentajeFlash,
+      };
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage:
+          'Error al obtener resumen de estadisticas del escalador por rocodromo',
+        internalCode: 'PISTA_STATS_RESUMEN_ROCODROMO_DB_FAILED',
+      });
+    }
+  }
+
+  async obtenerTiposEstadisticasEscaladorPorRocodromo(idEscalador, idRocodromo) {
+    try {
+      const filas = await this.PistaModel.sequelize.query(
+        `
+          SELECT
+            p."Tipo" AS tipo,
+            COUNT(*)::int AS total
+          FROM "EscalaPista" ep
+          INNER JOIN "Pistas" p ON p."IDPista" = ep."IDPista"
+          INNER JOIN "Zonas" z ON z."IDZona" = p."IDZona"
+          WHERE ep."IDEscalador" = :idEscalador
+            AND z."IDRoco" = :idRocodromo
+            AND ep."Estado" IN ('flash', 'completado')
+          GROUP BY p."Tipo"
+        `,
+        {
+          replacements: { idEscalador, idRocodromo },
+          type: QueryTypes.SELECT,
+        }
+      );
+
+      const totales = filas.reduce(
+        (acc, fila) => {
+          const tipo = fila.tipo;
+          const total = Number(fila.total) || 0;
+
+          if (tipo === 'boulder') {
+            acc.totalBloques = total;
+          } else if (tipo === 'via') {
+            acc.totalVias = total;
+          }
+
+          return acc;
+        },
+        {
+          totalBloques: 0,
+          totalVias: 0,
+        }
+      );
+
+      const totalRutas = totales.totalBloques + totales.totalVias;
+      const porcentajeBloques =
+        totalRutas > 0 ? (totales.totalBloques / totalRutas) * 100 : 0;
+      const porcentajeVias =
+        totalRutas > 0 ? (totales.totalVias / totalRutas) * 100 : 0;
+
+      return {
+        totalBloques: totales.totalBloques,
+        totalVias: totales.totalVias,
+        porcentajeBloques,
+        porcentajeVias,
+        favoritaTexto:
+          totales.totalBloques >= totales.totalVias ? 'Bloque' : 'Via',
+      };
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage:
+          'Error al obtener distribucion por tipo de rutas del escalador por rocodromo',
+        internalCode: 'PISTA_STATS_TIPOS_ROCODROMO_DB_FAILED',
+      });
+    }
+  }
+
+  async obtenerActividadMensualEscaladorPorRocodromo(
+    idEscalador,
+    idRocodromo,
+    year,
+    month
+  ) {
+    try {
+      const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
+      const endDate = new Date(Date.UTC(year, month, 1, 0, 0, 0));
+
+      const rows = await this.PistaModel.sequelize.query(
+        `
+          SELECT
+            DATE(ep."FechaCompletado") AS "fechaCompletado",
+            EXTRACT(DAY FROM ep."FechaCompletado")::int AS dia,
+            COUNT(*)::int AS rutas
+          FROM "EscalaPista" ep
+          INNER JOIN "Pistas" p ON p."IDPista" = ep."IDPista"
+          INNER JOIN "Zonas" z ON z."IDZona" = p."IDZona"
+          WHERE ep."IDEscalador" = :idEscalador
+            AND z."IDRoco" = :idRocodromo
+            AND ep."Estado" IN ('flash', 'completado')
+            AND ep."FechaCompletado" IS NOT NULL
+            AND ep."FechaCompletado" >= :startDate
+            AND ep."FechaCompletado" < :endDate
+          GROUP BY DATE(ep."FechaCompletado"), EXTRACT(DAY FROM ep."FechaCompletado")
+          ORDER BY DATE(ep."FechaCompletado") ASC
+        `,
+        {
+          replacements: { idEscalador, idRocodromo, startDate, endDate },
+          type: QueryTypes.SELECT,
+        }
+      );
+
+      const actividadMensual = rows.map((row) => ({
+        fechaCompletado: row.fechaCompletado,
+        dia: Number(row.dia),
+        rutas: Number(row.rutas) || 0,
+      }));
+
+      return {
+        year,
+        month,
+        actividadMensual,
+      };
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage:
+          'Error al obtener actividad mensual del escalador por rocodromo',
+        internalCode: 'PISTA_STATS_ACTIVIDAD_MENSUAL_ROCODROMO_DB_FAILED',
+      });
+    }
+  }
 }
 
 export default PistaRepositoryPostgres;

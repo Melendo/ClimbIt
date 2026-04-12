@@ -88,6 +88,53 @@ class EscaladorController {
     }
   }
 
+  async obtenerResumenEstadisticasRocodromo(req, res, next) {
+    try {
+      const apodo = req.user.apodo;
+      const idRocodromo = Number(req.params.id);
+      const resumen = await this.useCases.obtenerResumenEstadisticasRocodromo.execute({
+        apodo,
+        idRocodromo,
+      });
+      res.status(200).json(resumen);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async obtenerTiposEstadisticasRocodromo(req, res, next) {
+    try {
+      const apodo = req.user.apodo;
+      const idRocodromo = Number(req.params.id);
+      const tipos = await this.useCases.obtenerTiposEstadisticasRocodromo.execute({
+        apodo,
+        idRocodromo,
+      });
+      res.status(200).json(tipos);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async obtenerActividadMensualRocodromo(req, res, next) {
+    try {
+      const apodo = req.user.apodo;
+      const idRocodromo = Number(req.params.id);
+      const year = req.query.year ? Number(req.query.year) : undefined;
+      const month = req.query.month ? Number(req.query.month) : undefined;
+      const actividad =
+        await this.useCases.obtenerActividadMensualRocodromo.execute({
+          apodo,
+          idRocodromo,
+          year,
+          month,
+        });
+      res.status(200).json(actividad);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
   async obtenerResumenEstadisticasPublico(req, res, next) {
     try {
       const { apodo } = req.params;
