@@ -152,18 +152,30 @@ async function cargarPerfilEscalador() {
 }
 
 async function cargarEstadisticasEscalador() {
-    const [resumenResponse, tiposResponse] = await Promise.all([
+    const now = new Date();
+    const params = new URLSearchParams({
+        year: String(now.getFullYear()),
+        month: String(now.getMonth() + 1)
+    });
+
+    const [resumenResponse, tiposResponse, actividadResponse] = await Promise.all([
         fetchClient('/escaladores/stats/resumen'),
-        fetchClient('/escaladores/stats/tipos')
+        fetchClient('/escaladores/stats/tipos'),
+        fetchClient(`/escaladores/stats/actividad-mensual?${params.toString()}`)
     ]);
 
     const resumen = await resumenResponse.json();
     const tipos = await tiposResponse.json();
+    const actividadPayload = await actividadResponse.json();
+    const actividadMensual = Array.isArray(actividadPayload?.actividadMensual)
+        ? actividadPayload.actividadMensual
+        : [];
 
     return {
         ...DEFAULT_ESCALADOR_STATS,
         ...resumen,
         ...tipos,
+        actividadMensual,
     };
 }
 
