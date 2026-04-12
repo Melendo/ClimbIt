@@ -753,7 +753,7 @@ export async function infoRutaCmd(container, id) {
                     throw new Error('Solo puedes valorar rutas marcadas como completadas o flash.');
                 }
 
-                const valoracion = Number(selectedStars) * 2;
+                const valoracion = Math.round(Number(selectedStars) * 2);
 
                 try {
                     await fetchClient(`/pistas/${ruta.id}/valoracion`, {
