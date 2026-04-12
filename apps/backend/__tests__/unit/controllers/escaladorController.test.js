@@ -421,5 +421,37 @@ describe('Unit: EscaladorController', () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.body).toEqual({ totalBloques: 4, totalVias: 2 });
     });
+
+    it('obtenerActividadMensual usa query params y responde 200', async () => {
+      const useCases = {
+        obtenerActividadMensual: {
+          execute: jest.fn().mockResolvedValue({
+            year: 2026,
+            month: 4,
+            actividadMensual: [{ dia: 1, rutas: 2 }],
+          }),
+        },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = {
+        user: { apodo: 'Tester' },
+        query: { year: '2026', month: '4' },
+      };
+      const res = createResMock();
+
+      await controller.obtenerActividadMensual(req, res, () => {});
+
+      expect(useCases.obtenerActividadMensual.execute).toHaveBeenCalledWith({
+        apodo: 'Tester',
+        year: 2026,
+        month: 4,
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.body).toEqual({
+        year: 2026,
+        month: 4,
+        actividadMensual: [{ dia: 1, rutas: 2 }],
+      });
+    });
   });
 });

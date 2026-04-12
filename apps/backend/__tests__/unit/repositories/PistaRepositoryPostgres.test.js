@@ -13,6 +13,7 @@ describe('PistaRepositoryPostgres', () => {
       findByPk: jest.fn(),
       findAll: jest.fn(),
       sequelize: {
+        query: jest.fn(),
         models: {
           EscalaPista: {
             findAll: jest.fn(),
@@ -334,6 +335,46 @@ describe('PistaRepositoryPostgres', () => {
         porcentajeBloques: 0,
         porcentajeVias: 0,
         favoritaTexto: 'Bloque',
+      });
+    });
+  });
+
+  describe('obtenerActividadMensualEscalador', () => {
+    it('deberia retornar actividad mensual agregada por dia', async () => {
+      mockPistaModel.sequelize.query.mockResolvedValue([
+        { dia: 3, rutas: 2 },
+        { dia: 7, rutas: 1 },
+      ]);
+
+      const resultado = await repository.obtenerActividadMensualEscalador(5, 2026, 4);
+
+      expect(mockPistaModel.sequelize.query).toHaveBeenCalledWith(
+        expect.stringContaining('FROM "Pistas" p'),
+        expect.objectContaining({
+          replacements: expect.objectContaining({
+            idEscalador: 5,
+          }),
+        })
+      );
+      expect(resultado).toEqual({
+        year: 2026,
+        month: 4,
+        actividadMensual: [
+          { dia: 3, rutas: 2 },
+          { dia: 7, rutas: 1 },
+        ],
+      });
+    });
+
+    it('deberia retornar actividad vacia cuando no hay datos', async () => {
+      mockPistaModel.sequelize.query.mockResolvedValue([]);
+
+      const resultado = await repository.obtenerActividadMensualEscalador(5, 2026, 4);
+
+      expect(resultado).toEqual({
+        year: 2026,
+        month: 4,
+        actividadMensual: [],
       });
     });
   });
