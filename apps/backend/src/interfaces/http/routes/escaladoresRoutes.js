@@ -1,5 +1,5 @@
 import express from 'express';
-import { body, param } from 'express-validator';
+import { body, param, query } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyToken from '../middlewares/verifyToken.js';
 import uploadImages, {
@@ -253,6 +253,33 @@ router.get('/stats/tipos', verifyToken, (req, res, next) => {
   escaladorController.obtenerTiposEstadisticas(req, res, next);
 });
 
+const actividadMensualValidators = [
+  query('year')
+    .optional()
+    .toInt()
+    .isInt({ min: 2000, max: 2100 })
+    .withMessage('year debe ser un entero entre 2000 y 2100'),
+  query('month')
+    .optional()
+    .toInt()
+    .isInt({ min: 1, max: 12 })
+    .withMessage('month debe ser un entero entre 1 y 12'),
+];
+
+/**
+ * GET /escaladores/stats/actividad-mensual
+ * Obtiene actividad mensual del escalador autenticado para el mes y anio solicitados.
+ */
+router.get(
+  '/stats/actividad-mensual',
+  verifyToken,
+  actividadMensualValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.obtenerActividadMensual(req, res, next);
+  }
+);
+
 const statsPublicosPorApodoValidators = [
   param('apodo')
     .trim()
@@ -289,6 +316,20 @@ router.get(
   validate,
   (req, res, next) => {
     escaladorController.obtenerTiposEstadisticasPublico(req, res, next);
+  }
+);
+
+/**
+ * GET /escaladores/public/:apodo/stats/actividad-mensual
+ * Obtiene actividad mensual publica de un escalador por apodo.
+ */
+router.get(
+  '/public/:apodo/stats/actividad-mensual',
+  statsPublicosPorApodoValidators,
+  actividadMensualValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.obtenerActividadMensualPublico(req, res, next);
   }
 );
 

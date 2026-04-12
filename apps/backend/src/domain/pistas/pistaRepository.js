@@ -35,6 +35,10 @@ class PistaRepository {
   async obtenerTiposEstadisticasEscalador(idEscalador) {
     throw new Error('Método "obtenerTiposEstadisticasEscalador" no implementado');
   }
+
+  async obtenerActividadMensualEscalador(idEscalador, year, month) {
+    throw new Error('Método "obtenerActividadMensualEscalador" no implementado');
+  }
 }
 
 export default PistaRepository;

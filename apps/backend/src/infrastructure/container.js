@@ -34,6 +34,7 @@ import ActualizarDescripcionEscalador from '../application/escaladores/actualiza
 import CambiarApodoEscalador from '../application/escaladores/cambiarApodoEscalador.js';
 import ObtenerResumenEstadisticasEscalador from '../application/escaladores/obtenerResumenEstadisticasEscalador.js';
 import ObtenerTiposEstadisticasEscalador from '../application/escaladores/obtenerTiposEstadisticasEscalador.js';
+import ObtenerActividadMensualEscalador from '../application/escaladores/obtenerActividadMensualEscalador.js';
 
 import CrearPista from '../application/pistas/crearPista.js';
 import ActualizarPista from '../application/pistas/actualizarPista.js';
@@ -121,6 +122,8 @@ async function inicializarContainer() {
     );
   const obtenerTiposEstadisticasUseCase =
     new ObtenerTiposEstadisticasEscalador(escaladorRepository, pistaRepository);
+  const obtenerActividadMensualUseCase =
+    new ObtenerActividadMensualEscalador(escaladorRepository, pistaRepository);
 
   const crearPistaUseCase = new CrearPista(
     pistaRepository,
@@ -182,6 +185,7 @@ async function inicializarContainer() {
     cambiarApodo: cambiarApodoUseCase,
     obtenerResumenEstadisticas: obtenerResumenEstadisticasUseCase,
     obtenerTiposEstadisticas: obtenerTiposEstadisticasUseCase,
+    obtenerActividadMensual: obtenerActividadMensualUseCase,
   };
   const pistaUseCases = {
     crear: crearPistaUseCase,

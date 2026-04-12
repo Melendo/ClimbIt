@@ -1,4 +1,4 @@
-import { fn, col } from 'sequelize';
+import { fn, col, QueryTypes } from 'sequelize';
 import pistaRepository from '../../domain/pistas/pistaRepository.js';
 import Pista from '../../domain/pistas/Pista.js';
 import { NotFoundError, ValidationError } from '../../domain/sharedObjects/AppError.js';
@@ -343,6 +343,49 @@ class PistaRepositoryPostgres extends pistaRepository {
         fallbackMessage:
           'Error al obtener distribucion por tipo de rutas del escalador',
         internalCode: 'PISTA_STATS_TIPOS_DB_FAILED',
+      });
+    }
+  }
+
+  async obtenerActividadMensualEscalador(idEscalador, year, month) {
+    try {
+      const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
+      const endDate = new Date(Date.UTC(year, month, 1, 0, 0, 0));
+
+      const rows = await this.PistaModel.sequelize.query(
+        `
+          SELECT
+            EXTRACT(DAY FROM p."FechaCreacion")::int AS dia,
+            COUNT(*)::int AS rutas
+          FROM "Pistas" p
+          INNER JOIN "EscalaPista" ep ON ep."IDPista" = p."IDPista"
+          WHERE ep."IDEscalador" = :idEscalador
+            AND ep."Estado" IN ('flash', 'completado')
+            AND p."FechaCreacion" >= :startDate
+            AND p."FechaCreacion" < :endDate
+          GROUP BY dia
+          ORDER BY dia ASC
+        `,
+        {
+          replacements: { idEscalador, startDate, endDate },
+          type: QueryTypes.SELECT,
+        }
+      );
+
+      const actividadMensual = rows.map((row) => ({
+        dia: Number(row.dia),
+        rutas: Number(row.rutas) || 0,
+      }));
+
+      return {
+        year,
+        month,
+        actividadMensual,
+      };
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al obtener actividad mensual del escalador',
+        internalCode: 'PISTA_STATS_ACTIVIDAD_MENSUAL_DB_FAILED',
       });
     }
   }
