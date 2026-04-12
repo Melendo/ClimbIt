@@ -20,6 +20,66 @@ const DEFAULT_ESCALADOR_STATS = {
 };
 let perfilPhotoObjectUrl = null;
 
+function toSafeNumber(value) {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+        return 0;
+    }
+
+    return parsed;
+}
+
+function normalizeActividadMensual(actividadMensual) {
+    if (!Array.isArray(actividadMensual)) {
+        return [];
+    }
+
+    return actividadMensual
+        .map((item) => {
+            const dia = Number(item?.dia);
+            const rutas = toSafeNumber(item?.rutas);
+
+            if (!Number.isInteger(dia) || dia < 1 || dia > 31) {
+                return null;
+            }
+
+            return {
+                dia,
+                rutas,
+            };
+        })
+        .filter(Boolean);
+}
+
+function getDefaultEscaladorStats() {
+    return {
+        ...DEFAULT_ESCALADOR_STATS,
+        actividadMensual: [],
+    };
+}
+
+function normalizeEscaladorStats(rawStats = {}) {
+    const favoritaTexto =
+        typeof rawStats.favoritaTexto === 'string' && rawStats.favoritaTexto.trim()
+            ? rawStats.favoritaTexto.trim()
+            : DEFAULT_ESCALADOR_STATS.favoritaTexto;
+
+    return {
+        ...getDefaultEscaladorStats(),
+        totalRutas: toSafeNumber(rawStats.totalRutas),
+        totalFlash: toSafeNumber(rawStats.totalFlash),
+        totalCompletado: toSafeNumber(rawStats.totalCompletado),
+        totalProyecto: toSafeNumber(rawStats.totalProyecto),
+        porcentajeFlash: toSafeNumber(rawStats.porcentajeFlash),
+        totalBloques: toSafeNumber(rawStats.totalBloques),
+        totalVias: toSafeNumber(rawStats.totalVias),
+        porcentajeBloques: toSafeNumber(rawStats.porcentajeBloques),
+        porcentajeVias: toSafeNumber(rawStats.porcentajeVias),
+        favoritaTexto,
+        actividadMensual: normalizeActividadMensual(rawStats.actividadMensual),
+    };
+}
+
 function revokeObjectUrl(url) {
     if (typeof url === 'string' && url.startsWith('blob:')) {
         URL.revokeObjectURL(url);
@@ -171,12 +231,11 @@ async function cargarEstadisticasEscalador() {
         ? actividadPayload.actividadMensual
         : [];
 
-    return {
-        ...DEFAULT_ESCALADOR_STATS,
+    return normalizeEscaladorStats({
         ...resumen,
         ...tipos,
         actividadMensual,
-    };
+    });
 }
 
 async function renderPerfilConDatos(container, renderFn) {
@@ -185,9 +244,9 @@ async function renderPerfilConDatos(container, renderFn) {
     try {
         const [escalador, estadisticas] = await Promise.all([
             cargarPerfilEscalador(),
-            cargarEstadisticasEscalador().catch(() => DEFAULT_ESCALADOR_STATS)
+            cargarEstadisticasEscalador().catch(() => getDefaultEscaladorStats())
         ]);
-        escalador.estadisticas = estadisticas;
+        escalador.estadisticas = normalizeEscaladorStats(estadisticas);
 
         const callbacks = {
             onLogout: () => {

@@ -3,14 +3,49 @@ import { showConfirmModal } from '../../components/modal.js';
 import { escapeHtml } from '../../components/formHelpers.js';
 import { renderEditableField, initEditableField } from '../../components/editableField.js';
 import { renderSectionDivider } from '../../components/sectionDivider.js';
+import {
+  bindHeatmapInteractions,
+  buildEscaladorStatsViewModel,
+  renderMonthlyActivityCards,
+  renderRouteTypesStatsCard,
+  renderStatsSection,
+  renderTotalRoutesStatsCard,
+} from '../../components/escaladorStats.js';
 
 function renderPerfilFieldTitle(text) {
   return `<p class="text-muted small text-uppercase fw-semibold mb-1 perfil-field-title">${text}</p>`;
 }
 
+function renderPerfilStats(statsViewModel) {
+  return `
+    <div class="perfil-estadisticas-wrap mt-4">
+      ${renderSectionDivider({ label: 'Estadisticas' })}
+      <div class="perfil-estadisticas-view mt-3">
+        ${renderStatsSection({
+          title: 'Total de Rutas Escaladas',
+          content: renderTotalRoutesStatsCard(statsViewModel.totals),
+        })}
+        ${renderStatsSection({
+          title: 'Tipos de Rutas Escaladas',
+          content: renderRouteTypesStatsCard(statsViewModel.totals),
+        })}
+        ${renderStatsSection({
+          title: 'Actividad mensual',
+          content: renderMonthlyActivityCards(statsViewModel.monthly),
+        })}
+      </div>
+    </div>
+  `;
+}
+
 // Vista del perfil del escalador
 export function renderPerfil(container, escalador, callbacks) {
   const { apodo, descripcion, fotoSrc, estadisticas = {} } = escalador;
+  if (typeof container.__perfilStatsCleanup === 'function') {
+    container.__perfilStatsCleanup();
+    container.__perfilStatsCleanup = null;
+  }
+
   const avatar = fotoSrc || '/assets/johnDoe.png';
   const apodoLimpio = typeof apodo === 'string' ? apodo.trim() : '';
   const descripcionLimpia =
@@ -19,115 +54,7 @@ export function renderPerfil(container, escalador, callbacks) {
     descripcionLimpia && descripcionLimpia.toLowerCase() !== 'null'
       ? escapeHtml(descripcionLimpia)
       : '';
-  const totalRutas = Number(estadisticas.totalRutas) || 0;
-  const totalFlash = Number(estadisticas.totalFlash) || 0;
-  const totalBloques = Number(estadisticas.totalBloques) || 0;
-  const totalVias = Number(estadisticas.totalVias) || 0;
-  const rutasFlashPct = totalRutas > 0 ? (totalFlash / totalRutas) * 100 : 0;
-  const bloquesPct = totalRutas > 0 ? (totalBloques / totalRutas) * 100 : 0;
-  const viasPct = totalRutas > 0 ? (totalVias / totalRutas) * 100 : 0;
-  const favoritaTexto =
-    typeof estadisticas.favoritaTexto === 'string' && estadisticas.favoritaTexto.trim()
-      ? estadisticas.favoritaTexto.trim()
-      : totalBloques >= totalVias
-        ? 'Bloque'
-        : 'Via';
-  const formatPct = (value) => `${value.toFixed(2)}%`;
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth();
-  const monthLabel = now.toLocaleString('es-ES', {
-    month: 'long',
-    year: 'numeric',
-  });
-  const monthTitle =
-    monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  const firstDayIndex = (new Date(currentYear, currentMonth, 1).getDay() + 6) % 7;
-  const totalHeatmapCells =
-    Math.ceil((firstDayIndex + daysInMonth) / 7) * 7;
-  const weekdayLabels = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-  const actividadMensual = Array.isArray(estadisticas.actividadMensual)
-    ? estadisticas.actividadMensual
-    : [];
-  const actividadPorDia = actividadMensual.reduce((acc, item) => {
-    const dia = Number(item?.dia);
-    const rutas = Number(item?.rutas);
-    if (Number.isInteger(dia) && dia > 0 && dia <= daysInMonth) {
-      acc[dia] = Number.isFinite(rutas) && rutas > 0 ? rutas : 0;
-    }
-    return acc;
-  }, {});
-  const heatmapCells = Array.from({ length: totalHeatmapCells }, (_, index) => {
-    const dayNumber = index - firstDayIndex + 1;
-
-    if (dayNumber < 1 || dayNumber > daysInMonth) {
-      return null;
-    }
-
-    return {
-      day: dayNumber,
-      count: actividadPorDia[dayNumber] || 0,
-    };
-  });
-  const heatmapCounts = heatmapCells.map((cell) => (cell ? cell.count : 0));
-  const totalMonthlyRoutes = heatmapCounts.reduce(
-    (acc, count) => acc + count,
-    0
-  );
-  const activeDays = heatmapCells.filter(
-    (cell) => cell && cell.count > 0
-  ).length;
-  const avgRoutesPerActiveDay = activeDays
-    ? totalMonthlyRoutes / activeDays
-    : 0;
-  const weeklyTotals = [];
-  for (let i = 0; i < heatmapCounts.length; i += 7) {
-    weeklyTotals.push(
-      heatmapCounts.slice(i, i + 7).reduce((acc, count) => acc + count, 0)
-    );
-  }
-  const maxWeeklyTotal = Math.max(1, ...weeklyTotals);
-  const weeklyBarsHtml = weeklyTotals
-    .map((total, index) => {
-      const heightPct = (total / maxWeeklyTotal) * 100;
-      return `
-        <div class="perfil-monthly-bar">
-          <span class="perfil-monthly-bar-fill" style="height: ${heightPct}%;"></span>
-          <span class="perfil-monthly-bar-label">S${index + 1}</span>
-        </div>
-      `;
-    })
-    .join('');
-  const heatmapWeekdaysHtml = weekdayLabels
-    .map((label) => `<span>${label}</span>`)
-    .join('');
-  const heatmapCellsHtml = heatmapCells
-    .map((cell) => {
-      if (!cell) {
-        return '<div class="perfil-heatmap-day is-empty"></div>';
-      }
-
-      let toneClass = 'is-zero';
-      if (cell.count >= 5) {
-        toneClass = 'is-high';
-      } else if (cell.count >= 3) {
-        toneClass = 'is-mid';
-      } else if (cell.count >= 1) {
-        toneClass = 'is-low';
-      }
-
-      return `
-        <div
-          class="perfil-heatmap-day ${toneClass}"
-          data-day="${cell.day}"
-          data-count="${cell.count}"
-          title="Dia ${cell.day}: ${cell.count} rutas"
-          aria-label="Dia ${cell.day}: ${cell.count} rutas"
-        ></div>
-      `;
-    })
-    .join('');
+  const statsViewModel = buildEscaladorStatsViewModel(estadisticas);
 
   container.innerHTML = `
       <!-- Cabecera -->
@@ -204,111 +131,7 @@ export function renderPerfil(container, escalador, callbacks) {
             </div>
           </div>
 
-          <div class="perfil-estadisticas-wrap mt-4">
-            ${renderSectionDivider({ label: 'Estadisticas' })}
-            <div class="perfil-estadisticas-view mt-3">
-              <div class="perfil-stats-section">
-                <p class="perfil-stats-title">Total de Rutas Escaladas</p>
-                <div class="perfil-stats-card">
-                  <div class="perfil-stats-badges">
-                    <div class="perfil-stats-badge is-completed">
-                      <span class="perfil-stats-badge-value">${totalRutas}</span>
-                      <span class="perfil-stats-badge-label">Completado</span>
-                    </div>
-                    <div class="perfil-stats-badge is-flash">
-                      <span class="perfil-stats-badge-value">${totalFlash}</span>
-                      <span class="perfil-stats-badge-label">Flash</span>
-                    </div>
-                  </div>
-                  <p class="perfil-stats-text">
-                    Has escalado un total de ${totalRutas} rutas, de las cuales ${totalFlash} han sido a la primera.
-                  </p>
-                  <div class="perfil-stats-bar">
-                    <span class="perfil-stats-bar-fill is-completed" style="width: 100%;"></span>
-                    <span class="perfil-stats-bar-fill is-flash" style="width: ${formatPct(rutasFlashPct)};"></span>
-                  </div>
-                  <div class="perfil-stats-bar-labels">
-                    <span>${formatPct(rutasFlashPct)}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="perfil-stats-section">
-                <p class="perfil-stats-title">Tipos de Rutas Escaladas</p>
-                <div class="perfil-stats-card">
-                  <div class="perfil-stats-choices">
-                    <div class="perfil-stats-pill is-bloque">
-                      <span class="perfil-stats-pill-label">Bloques</span>
-                      <span class="perfil-stats-pill-value">${totalBloques}</span>
-                    </div>
-                    <div class="perfil-stats-pill is-via">
-                      <span class="perfil-stats-pill-label">Vias</span>
-                      <span class="perfil-stats-pill-value">${totalVias}</span>
-                    </div>
-                  </div>
-                  <p class="perfil-stats-text">Tu tipo de ruta favorita es el ${favoritaTexto}.</p>
-                  <div class="perfil-stats-bar is-split">
-                    <span class="perfil-stats-bar-fill is-bloque" style="width: ${formatPct(bloquesPct)};"></span>
-                    <span class="perfil-stats-bar-fill is-via" style="width: ${formatPct(viasPct)};"></span>
-                  </div>
-                  <div class="perfil-stats-bar-labels">
-                    <span>${formatPct(bloquesPct)}</span>
-                    <span>${formatPct(viasPct)}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="perfil-stats-section">
-                <p class="perfil-stats-title">Actividad mensual</p>
-                <div class="perfil-stats-card perfil-heatmap-card">
-                  <div class="perfil-heatmap-header">
-                    <span class="perfil-heatmap-month">${monthTitle}</span>
-                    <span class="perfil-heatmap-subtitle">${actividadMensual.length ? 'Mapa de calor' : 'Actividad no disponible en esta version'}</span>
-                  </div>
-                  <div class="perfil-heatmap-weekdays">
-                    ${heatmapWeekdaysHtml}
-                  </div>
-                  <div class="perfil-heatmap-grid">
-                    ${heatmapCellsHtml}
-                  </div>
-                  <div class="perfil-heatmap-tooltip" role="status" aria-live="polite"></div>
-                  <div class="perfil-heatmap-legend">
-                    <span class="perfil-heatmap-legend-item">
-                      <span class="perfil-heatmap-day is-low perfil-heatmap-legend-swatch"></span>
-                      <span>1-3 rutas</span>
-                    </span>
-                    <span class="perfil-heatmap-legend-item">
-                      <span class="perfil-heatmap-day is-mid perfil-heatmap-legend-swatch"></span>
-                      <span>3-5 rutas</span>
-                    </span>
-                    <span class="perfil-heatmap-legend-item">
-                      <span class="perfil-heatmap-day is-high perfil-heatmap-legend-swatch"></span>
-                      <span>5+ rutas</span>
-                    </span>
-                  </div>
-                </div>
-                <div class="perfil-stats-card perfil-monthly-summary">
-                  <div class="perfil-monthly-metrics">
-                    <div class="perfil-monthly-metric">
-                      <span class="perfil-monthly-label">Rutas del mes</span>
-                      <span class="perfil-monthly-value">${totalMonthlyRoutes}</span>
-                    </div>
-                    <div class="perfil-monthly-metric">
-                      <span class="perfil-monthly-label">Dias activos</span>
-                      <span class="perfil-monthly-value">${activeDays}</span>
-                    </div>
-                    <div class="perfil-monthly-metric">
-                      <span class="perfil-monthly-label">Media por dia</span>
-                      <span class="perfil-monthly-value">${avgRoutesPerActiveDay.toFixed(1)}</span>
-                    </div>
-                  </div>
-                  <div class="perfil-monthly-chart" style="grid-template-columns: repeat(${weeklyTotals.length}, minmax(0, 1fr));">
-                    ${weeklyBarsHtml}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          ${renderPerfilStats(statsViewModel)}
         </div>
       </div>
 
@@ -316,31 +139,7 @@ export function renderPerfil(container, escalador, callbacks) {
       ${renderNavbar()}
     `;
 
-  const heatmapCard = container.querySelector('.perfil-heatmap-card');
-  if (heatmapCard) {
-    const tooltip = heatmapCard.querySelector('.perfil-heatmap-tooltip');
-    heatmapCard.addEventListener('click', (event) => {
-      const dayCell = event.target.closest('.perfil-heatmap-day[data-day]');
-
-      if (!dayCell) {
-        tooltip.classList.remove('is-visible');
-        return;
-      }
-
-      const day = dayCell.dataset.day;
-      const count = dayCell.dataset.count;
-      tooltip.textContent = `Dia ${day}: ${count} rutas`;
-
-      const cardRect = heatmapCard.getBoundingClientRect();
-      const cellRect = dayCell.getBoundingClientRect();
-      const left = cellRect.left - cardRect.left + cellRect.width / 2;
-      const top = cellRect.top - cardRect.top - 8;
-
-      tooltip.style.left = `${left}px`;
-      tooltip.style.top = `${top}px`;
-      tooltip.classList.add('is-visible');
-    });
-  }
+  container.__perfilStatsCleanup = bindHeatmapInteractions(container);
 
   const menuPlaceholders = container.querySelectorAll(
     '[data-menu-placeholder]'
@@ -372,6 +171,11 @@ export function renderPerfil(container, escalador, callbacks) {
 
 // Vista de editar perfil
 export function renderEditarPerfil(container, escalador, callbacks) {
+  if (typeof container.__perfilStatsCleanup === 'function') {
+    container.__perfilStatsCleanup();
+    container.__perfilStatsCleanup = null;
+  }
+
   const { apodo, descripcion, fotoSrc, correo } = escalador;
   const avatar = fotoSrc || '/assets/johnDoe.png';
   const apodoLimpio = typeof apodo === 'string' ? apodo.trim() : '';
