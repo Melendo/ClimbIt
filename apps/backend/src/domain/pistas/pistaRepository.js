@@ -27,6 +27,14 @@ class PistaRepository {
   async obtenerEstado(idPista, idEscalador) {
     throw new Error('Método "obtenerEstado" no implementado');
   }
+
+  async obtenerResumenEstadisticasEscalador(idEscalador) {
+    throw new Error('Método "obtenerResumenEstadisticasEscalador" no implementado');
+  }
+
+  async obtenerTiposEstadisticasEscalador(idEscalador) {
+    throw new Error('Método "obtenerTiposEstadisticasEscalador" no implementado');
+  }
 }
 
 export default PistaRepository;

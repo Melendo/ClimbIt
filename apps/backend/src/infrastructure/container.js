@@ -32,6 +32,8 @@ import ValidarApodoEscalador from '../application/escaladores/validarApodoEscala
 import ValidarCorreoEscalador from '../application/escaladores/validarCorreoEscalador.js';
 import ActualizarDescripcionEscalador from '../application/escaladores/actualizarDescripcionEscalador.js';
 import CambiarApodoEscalador from '../application/escaladores/cambiarApodoEscalador.js';
+import ObtenerResumenEstadisticasEscalador from '../application/escaladores/obtenerResumenEstadisticasEscalador.js';
+import ObtenerTiposEstadisticasEscalador from '../application/escaladores/obtenerTiposEstadisticasEscalador.js';
 
 import CrearPista from '../application/pistas/crearPista.js';
 import ActualizarPista from '../application/pistas/actualizarPista.js';
@@ -112,6 +114,13 @@ async function inicializarContainer() {
     escaladorRepository,
     tokenService
   );
+  const obtenerResumenEstadisticasUseCase =
+    new ObtenerResumenEstadisticasEscalador(
+      escaladorRepository,
+      pistaRepository
+    );
+  const obtenerTiposEstadisticasUseCase =
+    new ObtenerTiposEstadisticasEscalador(escaladorRepository, pistaRepository);
 
   const crearPistaUseCase = new CrearPista(
     pistaRepository,
@@ -171,6 +180,8 @@ async function inicializarContainer() {
     validarCorreo: validarCorreoUseCase,
     actualizarDescripcion: actualizarDescripcionUseCase,
     cambiarApodo: cambiarApodoUseCase,
+    obtenerResumenEstadisticas: obtenerResumenEstadisticasUseCase,
+    obtenerTiposEstadisticas: obtenerTiposEstadisticasUseCase,
   };
   const pistaUseCases = {
     crear: crearPistaUseCase,

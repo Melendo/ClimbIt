@@ -234,6 +234,65 @@ router.get('/perfil', verifyToken, (req, res, next) => {
 });
 
 /**
+ * GET /escaladores/stats/resumen
+ * Obtiene estadisticas resumidas del escalador autenticado.
+ *
+ * Requiere: Token JWT valido en header Authorization.
+ */
+router.get('/stats/resumen', verifyToken, (req, res, next) => {
+  escaladorController.obtenerResumenEstadisticas(req, res, next);
+});
+
+/**
+ * GET /escaladores/stats/tipos
+ * Obtiene distribucion por tipo de rutas escaladas del escalador autenticado.
+ *
+ * Requiere: Token JWT valido en header Authorization.
+ */
+router.get('/stats/tipos', verifyToken, (req, res, next) => {
+  escaladorController.obtenerTiposEstadisticas(req, res, next);
+});
+
+const statsPublicosPorApodoValidators = [
+  param('apodo')
+    .trim()
+    .notEmpty()
+    .withMessage('apodo es requerido')
+    .isLength({ min: 1, max: 20 })
+    .withMessage('apodo debe tener entre 1 y 20 caracteres')
+    .matches(/^[a-zA-Z0-9_-]+$/)
+    .withMessage(
+      'apodo solo puede contener letras, numeros, guiones y guiones bajos'
+    ),
+];
+
+/**
+ * GET /escaladores/public/:apodo/stats/resumen
+ * Obtiene estadisticas resumidas publicas de un escalador por apodo.
+ */
+router.get(
+  '/public/:apodo/stats/resumen',
+  statsPublicosPorApodoValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.obtenerResumenEstadisticasPublico(req, res, next);
+  }
+);
+
+/**
+ * GET /escaladores/public/:apodo/stats/tipos
+ * Obtiene distribucion de tipos de rutas publicas de un escalador por apodo.
+ */
+router.get(
+  '/public/:apodo/stats/tipos',
+  statsPublicosPorApodoValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.obtenerTiposEstadisticasPublico(req, res, next);
+  }
+);
+
+/**
  * PUT /escaladores/actualizarDescripcion
  * Actualiza la descripcion del escalador autenticado
  *

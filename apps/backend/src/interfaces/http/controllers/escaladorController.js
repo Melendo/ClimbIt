@@ -48,6 +48,54 @@ class EscaladorController {
     }
   }
 
+  async obtenerResumenEstadisticas(req, res, next) {
+    try {
+      const apodo = req.user.apodo;
+      const resumen = await this.useCases.obtenerResumenEstadisticas.execute({
+        apodo,
+      });
+      res.status(200).json(resumen);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async obtenerTiposEstadisticas(req, res, next) {
+    try {
+      const apodo = req.user.apodo;
+      const tipos = await this.useCases.obtenerTiposEstadisticas.execute({
+        apodo,
+      });
+      res.status(200).json(tipos);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async obtenerResumenEstadisticasPublico(req, res, next) {
+    try {
+      const { apodo } = req.params;
+      const resumen = await this.useCases.obtenerResumenEstadisticas.execute({
+        apodo,
+      });
+      res.status(200).json(resumen);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async obtenerTiposEstadisticasPublico(req, res, next) {
+    try {
+      const { apodo } = req.params;
+      const tipos = await this.useCases.obtenerTiposEstadisticas.execute({
+        apodo,
+      });
+      res.status(200).json(tipos);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
   async suscribirse(req, res, next) {
     try {
       const escaladorApodo = req.user.apodo; // Asumiendo que el middleware verifyToken añade escaladorId al req

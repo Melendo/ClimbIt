@@ -1,3 +1,4 @@
+import { fn, col } from 'sequelize';
 import pistaRepository from '../../domain/pistas/pistaRepository.js';
 import Pista from '../../domain/pistas/Pista.js';
 import { NotFoundError, ValidationError } from '../../domain/sharedObjects/AppError.js';
@@ -223,6 +224,125 @@ class PistaRepositoryPostgres extends pistaRepository {
       throw mapRepositoryError(error, {
         fallbackMessage: 'Error al obtener estado de pista',
         internalCode: 'PISTA_GET_STATE_DB_FAILED',
+      });
+    }
+  }
+
+  async obtenerResumenEstadisticasEscalador(idEscalador) {
+    try {
+      const escalaPistaModel = this.PistaModel.sequelize.models.EscalaPista;
+      const filas = await escalaPistaModel.findAll({
+        where: { idEscalador },
+        attributes: [
+          [col('Estado'), 'estado'],
+          [fn('COUNT', col('Estado')), 'total'],
+        ],
+        group: [col('Estado')],
+        raw: true,
+      });
+
+      const totales = filas.reduce(
+        (acc, fila) => {
+          const estado = fila.estado;
+          const total = Number(fila.total) || 0;
+          if (estado === 'flash') {
+            acc.totalFlash = total;
+          } else if (estado === 'completado') {
+            acc.totalCompletado = total;
+          } else if (estado === 'proyecto') {
+            acc.totalProyecto = total;
+          }
+          return acc;
+        },
+        {
+          totalFlash: 0,
+          totalCompletado: 0,
+          totalProyecto: 0,
+        }
+      );
+
+      const totalRutas = totales.totalFlash + totales.totalCompletado;
+      const porcentajeFlash =
+        totalRutas > 0 ? (totales.totalFlash / totalRutas) * 100 : 0;
+ 
+      return {
+        totalRutas,
+        totalFlash: totales.totalFlash,
+        totalCompletado: totales.totalCompletado,
+        totalProyecto: totales.totalProyecto,
+        porcentajeFlash,
+      };
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al obtener resumen de estadisticas del escalador',
+        internalCode: 'PISTA_STATS_RESUMEN_DB_FAILED',
+      });
+    }
+  }
+
+  async obtenerTiposEstadisticasEscalador(idEscalador) {
+    try {
+      const filas = await this.PistaModel.findAll({
+        attributes: [
+          'tipo',
+          [fn('COUNT', col('Pista.IDPista')), 'total'],
+        ],
+        include: [
+          {
+            association: 'escaladores',
+            attributes: [],
+            through: {
+              attributes: [],
+              where: {
+                idEscalador,
+                estado: ['flash', 'completado'],
+              },
+            },
+            required: true,
+          },
+        ],
+        group: [col('Pista.Tipo')],
+        raw: true,
+      });
+
+      const totales = filas.reduce(
+        (acc, fila) => {
+          const tipo = fila.tipo;
+          const total = Number(fila.total) || 0;
+
+          if (tipo === 'boulder') {
+            acc.totalBloques = total;
+          } else if (tipo === 'via') {
+            acc.totalVias = total;
+          }
+
+          return acc;
+        },
+        {
+          totalBloques: 0,
+          totalVias: 0,
+        }
+      );
+
+      const totalRutas = totales.totalBloques + totales.totalVias;
+      const porcentajeBloques =
+        totalRutas > 0 ? (totales.totalBloques / totalRutas) * 100 : 0;
+      const porcentajeVias =
+        totalRutas > 0 ? (totales.totalVias / totalRutas) * 100 : 0;
+
+      return {
+        totalBloques: totales.totalBloques,
+        totalVias: totales.totalVias,
+        porcentajeBloques,
+        porcentajeVias,
+        favoritaTexto:
+          totales.totalBloques >= totales.totalVias ? 'Bloque' : 'Via',
+      };
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage:
+          'Error al obtener distribucion por tipo de rutas del escalador',
+        internalCode: 'PISTA_STATS_TIPOS_DB_FAILED',
       });
     }
   }
