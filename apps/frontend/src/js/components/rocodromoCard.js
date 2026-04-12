@@ -9,7 +9,7 @@ export function renderRocodromoCard(rocodromo, { estaSuscrito = false } = {}) {
   const logoSrc = rocodromo?.logoSrc || ROCODROMO_LOGO_PLACEHOLDER;
 
   return `
-    <div class="border rounded-3 bg-white p-2 p-md-3 position-relative">
+    <div class="border rounded-3 bg-white p-2 p-md-3 position-relative card-box-shadow">
       ${renderSubscribeButton(id, estaSuscrito, { position: 'absolute' })}
 
       <a
