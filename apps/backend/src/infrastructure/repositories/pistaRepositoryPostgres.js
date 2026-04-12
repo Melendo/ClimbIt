@@ -1,4 +1,4 @@
-import { fn, col, QueryTypes } from 'sequelize';
+import { fn, col, QueryTypes, Op } from 'sequelize';
 import pistaRepository from '../../domain/pistas/pistaRepository.js';
 import Pista from '../../domain/pistas/Pista.js';
 import {
@@ -180,6 +180,47 @@ class PistaRepositoryPostgres extends pistaRepository {
       throw mapRepositoryError(error, {
         fallbackMessage: 'Error al actualizar valoracion de pista',
         internalCode: 'PISTA_UPDATE_RATING_DB_FAILED',
+      });
+    }
+  }
+
+  async obtenerValoracionTotal(idPista) {
+    try {
+      const pistaModel = await this.PistaModel.findByPk(idPista, {
+        include: [
+          {
+            association: 'escaladores',
+            attributes: [],
+            through: {
+              attributes: ['valoracion'],
+              where: {
+                valoracion: { [Op.ne]: null },
+              },
+            },
+            required: false,
+          },
+        ],
+      });
+
+      if (!pistaModel) {
+        throw new NotFoundError(
+          `Obtener valoración total: Pista con ID ${idPista} no encontrada`,
+          'PISTA_NOT_FOUND'
+        );
+      }
+
+      const valoraciones = pistaModel.escaladores.map(
+        (escalador) => escalador.EscalaPista.valoracion
+      );
+
+      const valoracionTotal =
+        valoraciones.reduce((sum, val) => sum + val, 0) / valoraciones.length || 0;
+
+      return valoracionTotal;
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al obtener valoración total de la pista',
+        internalCode: 'PISTA_GET_TOTAL_RATING_DB_FAILED',
       });
     }
   }

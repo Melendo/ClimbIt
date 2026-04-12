@@ -130,6 +130,18 @@ class PistaController {
     }
   }
 
+  async obtenerValoracionTotal(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const resultado = await this.useCases.obtenerValoracionTotal.execute(id);
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      return next(error);
+    }
+  }
+  
   async eliminar(req, res, next) {
     try {
       const { id } = req.params;
