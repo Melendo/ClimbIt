@@ -10,7 +10,7 @@ function renderPerfilFieldTitle(text) {
 
 // Vista del perfil del escalador
 export function renderPerfil(container, escalador, callbacks) {
-  const { apodo, descripcion, fotoSrc } = escalador;
+  const { apodo, descripcion, fotoSrc, estadisticas = {} } = escalador;
   const avatar = fotoSrc || '/assets/johnDoe.png';
   const apodoLimpio = typeof apodo === 'string' ? apodo.trim() : '';
   const descripcionLimpia =
@@ -19,14 +19,19 @@ export function renderPerfil(container, escalador, callbacks) {
     descripcionLimpia && descripcionLimpia.toLowerCase() !== 'null'
       ? escapeHtml(descripcionLimpia)
       : '';
-  const totalRutas = 18;
-  const totalFlash = 5;
-  const totalBloques = 8;
-  const totalVias = 10;
+  const totalRutas = Number(estadisticas.totalRutas) || 0;
+  const totalFlash = Number(estadisticas.totalFlash) || 0;
+  const totalBloques = Number(estadisticas.totalBloques) || 0;
+  const totalVias = Number(estadisticas.totalVias) || 0;
   const rutasFlashPct = totalRutas > 0 ? (totalFlash / totalRutas) * 100 : 0;
   const bloquesPct = totalRutas > 0 ? (totalBloques / totalRutas) * 100 : 0;
   const viasPct = totalRutas > 0 ? (totalVias / totalRutas) * 100 : 0;
-  const favoritaTexto = totalBloques >= totalVias ? 'Bloque' : 'Via';
+  const favoritaTexto =
+    typeof estadisticas.favoritaTexto === 'string' && estadisticas.favoritaTexto.trim()
+      ? estadisticas.favoritaTexto.trim()
+      : totalBloques >= totalVias
+        ? 'Bloque'
+        : 'Via';
   const formatPct = (value) => `${value.toFixed(2)}%`;
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -42,12 +47,17 @@ export function renderPerfil(container, escalador, callbacks) {
   const totalHeatmapCells =
     Math.ceil((firstDayIndex + daysInMonth) / 7) * 7;
   const weekdayLabels = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-  const baseSeed = currentYear * 10000 + (currentMonth + 1) * 100;
-  const getHeatmapCount = (day) => {
-    const seed = baseSeed + day;
-    const raw = (seed * 9301 + 49297) % 233280;
-    return Math.floor((raw / 233280) * 7);
-  };
+  const actividadMensual = Array.isArray(estadisticas.actividadMensual)
+    ? estadisticas.actividadMensual
+    : [];
+  const actividadPorDia = actividadMensual.reduce((acc, item) => {
+    const dia = Number(item?.dia);
+    const rutas = Number(item?.rutas);
+    if (Number.isInteger(dia) && dia > 0 && dia <= daysInMonth) {
+      acc[dia] = Number.isFinite(rutas) && rutas > 0 ? rutas : 0;
+    }
+    return acc;
+  }, {});
   const heatmapCells = Array.from({ length: totalHeatmapCells }, (_, index) => {
     const dayNumber = index - firstDayIndex + 1;
 
@@ -57,7 +67,7 @@ export function renderPerfil(container, escalador, callbacks) {
 
     return {
       day: dayNumber,
-      count: getHeatmapCount(dayNumber),
+      count: actividadPorDia[dayNumber] || 0,
     };
   });
   const heatmapCounts = heatmapCells.map((cell) => (cell ? cell.count : 0));
@@ -253,7 +263,7 @@ export function renderPerfil(container, escalador, callbacks) {
                 <div class="perfil-stats-card perfil-heatmap-card">
                   <div class="perfil-heatmap-header">
                     <span class="perfil-heatmap-month">${monthTitle}</span>
-                    <span class="perfil-heatmap-subtitle">Mapa de calor</span>
+                    <span class="perfil-heatmap-subtitle">${actividadMensual.length ? 'Mapa de calor' : 'Actividad no disponible en esta version'}</span>
                   </div>
                   <div class="perfil-heatmap-weekdays">
                     ${heatmapWeekdaysHtml}

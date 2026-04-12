@@ -5,6 +5,19 @@ import { showToast } from '../../components/toast.js';
 import { showProfilePhotoModal } from '../../components/profilePhotoModal.js';
 
 const PERFIL_PLACEHOLDER = '/assets/johnDoe.png';
+const DEFAULT_ESCALADOR_STATS = {
+    totalRutas: 0,
+    totalFlash: 0,
+    totalCompletado: 0,
+    totalProyecto: 0,
+    porcentajeFlash: 0,
+    totalBloques: 0,
+    totalVias: 0,
+    porcentajeBloques: 0,
+    porcentajeVias: 0,
+    favoritaTexto: 'Bloque',
+    actividadMensual: [],
+};
 let perfilPhotoObjectUrl = null;
 
 function revokeObjectUrl(url) {
@@ -138,11 +151,31 @@ async function cargarPerfilEscalador() {
     return escalador;
 }
 
+async function cargarEstadisticasEscalador() {
+    const [resumenResponse, tiposResponse] = await Promise.all([
+        fetchClient('/escaladores/stats/resumen'),
+        fetchClient('/escaladores/stats/tipos')
+    ]);
+
+    const resumen = await resumenResponse.json();
+    const tipos = await tiposResponse.json();
+
+    return {
+        ...DEFAULT_ESCALADOR_STATS,
+        ...resumen,
+        ...tipos,
+    };
+}
+
 async function renderPerfilConDatos(container, renderFn) {
     showLoading();
 
     try {
-        const escalador = await cargarPerfilEscalador();
+        const [escalador, estadisticas] = await Promise.all([
+            cargarPerfilEscalador(),
+            cargarEstadisticasEscalador().catch(() => DEFAULT_ESCALADOR_STATS)
+        ]);
+        escalador.estadisticas = estadisticas;
 
         const callbacks = {
             onLogout: () => {

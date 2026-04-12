@@ -615,11 +615,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 2px;
   border-radius: 999px;
-  padding: 8px 12px;
+  padding: 8px 6px;
   border: 1px solid transparent;
-  font-weight: 600;
+  font-weight: 450;
   min-width: 0;
 }
 
