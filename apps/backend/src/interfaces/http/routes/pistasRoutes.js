@@ -295,6 +295,21 @@ router.put(
   }
 );
 
+/**
+ * GET /pistas/:id/valoracionTotal
+ * Obtiene la valoración total de una pista
+ *
+ * Parámetros esperados (URL Path):
+ * - id (@param {number} , requerido): ID de la pista (entero positivo)
+ *
+ * Requiere: Token JWT válido en header Authorization
+ *
+ * Respuesta esperada: @return {Object} Valoración total de la pista:
+ * - idPista: ID de la pista
+ * - valoracionTotal: Valoración total promedio de la pista (decimal)
+ * - numValoraciones: Número total de valoraciones recibidas para la pista (entero)
+ */
+
 router.get(
   '/:id/valoracionTotal',
   verifyTokenMiddleware,

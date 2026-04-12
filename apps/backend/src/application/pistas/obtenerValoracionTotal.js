@@ -19,12 +19,7 @@ class ObtenerValoracionTotal {
         );
       }
 
-      const valoracionTotal = await this.pistaRepository.obtenerValoracionTotal(idPista);
-
-      return {
-        idPista,
-        valoracionTotal
-      };
+      return await this.pistaRepository.obtenerValoracionTotal(idPista);
     } catch (error) {
       if (error instanceof AppError) {
         throw error;

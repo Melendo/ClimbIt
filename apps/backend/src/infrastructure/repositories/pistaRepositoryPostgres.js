@@ -212,11 +212,11 @@ class PistaRepositoryPostgres extends pistaRepository {
       const valoraciones = pistaModel.escaladores.map(
         (escalador) => escalador.EscalaPista.valoracion
       );
-
+      const numValoraciones = valoraciones.length;
       const valoracionTotal =
-        valoraciones.reduce((sum, val) => sum + val, 0) / valoraciones.length || 0;
+        valoraciones.reduce((sum, val) => sum + val, 0) / numValoraciones || 0;
 
-      return valoracionTotal;
+      return { idPista, valoracionTotal, numValoraciones };
     } catch (error) {
       throw mapRepositoryError(error, {
         fallbackMessage: 'Error al obtener valoración total de la pista',
