@@ -356,6 +356,12 @@ body {
   stroke-width: 3;
 }
 
+.card-box-shadow{
+  box-shadow:
+    0 8px 12px rgba(0, 0, 0, 0.25),
+    0 4px 6px rgba(0, 0, 0, 0.20);
+}
+
 /* ========================================
    Vista crear ruta
    ======================================== */
