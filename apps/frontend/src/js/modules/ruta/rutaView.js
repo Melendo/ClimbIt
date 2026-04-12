@@ -1,4 +1,8 @@
 import { renderRutaEstadoButtons, setupRutaEstadoButtons } from '../../components/rutaEstadoButtons.js';
+import {
+  renderRutaRatingSection,
+  setupRutaRatingSection,
+} from '../../components/rutaRating.js';
 import { escapeHtml } from '../../components/formHelpers.js';
 import { renderPresaColorIcon } from '../../components/rutaCardIndicators.js';
 
@@ -292,6 +296,11 @@ export function renderInfoRuta(container, ruta, callbacks) {
   const activoBadgeClass = activo ? 'text-bg-success' : 'text-bg-secondary';
   const canManage = Boolean(ruta?.canManage);
   const backHref = ruta?.backHref || '#misRocodromos';
+  const ratingSummary = {
+    averageRating: Number(ruta?.ratingSummary?.averageRating) || 0,
+    numValoraciones: Number(ruta?.ratingSummary?.numValoraciones) || 0,
+    canRate: Boolean(ruta?.canRateRating),
+  };
   
   container.innerHTML = `
 <div class="d-flex flex-column" style="min-height: 100dvh; background: #f8f9fa;">
@@ -348,6 +357,8 @@ export function renderInfoRuta(container, ruta, callbacks) {
         ${renderRutaEstadoButtons()}
       </div>
     </div>
+
+    ${renderRutaRatingSection(ratingSummary)}
   
     <!-- Detalles de la ruta -->
     <div class="bg-white mt-2 px-4 py-4">
@@ -400,6 +411,16 @@ export function renderInfoRuta(container, ruta, callbacks) {
 </div>`;
   
   setupRutaEstadoButtons(container, callbacks.onEstadoChange);
+  const ratingSectionController = setupRutaRatingSection(container, {
+    canRate: ratingSummary.canRate,
+    onSave: callbacks.onRatingSave,
+    onWarn: callbacks.onRatingWarn,
+    onError: callbacks.onRatingError,
+  });
+
+  if (ratingSectionController && typeof callbacks.onRatingReady === 'function') {
+    callbacks.onRatingReady(ratingSectionController);
+  }
   
   const editButton = container.querySelector('#btn-modificar-ruta');
   if (editButton && typeof callbacks.onEdit === 'function') {

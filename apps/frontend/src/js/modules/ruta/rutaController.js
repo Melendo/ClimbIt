@@ -13,11 +13,65 @@ import {
 import { showConfirmModal } from '../../components/modal.js';
 import { fetchClient, canManageRocodromo, fetchImageObjectUrl, fetchSvgText, getTokenPayload } from '../../core/client.js';
 import { showError, showLoading, showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
+import { showToast } from '../../components/toast.js';
 
 const RUTA_IMAGE_PLACEHOLDER = '/assets/placeholder.jpg';
 
 const TIPOS_PISTA = ['boulder', 'via'];
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+
+function canRateRutaByEstado(estado) {
+    const normalizedState = ESTADOS_FRONTEND[estado] || estado;
+    return normalizedState === 'flash' || normalizedState === 'completado';
+}
+
+function mapValoracionTotalToFiveStars(valoracionTotal) {
+    const numericValue = Number(valoracionTotal);
+    if (!Number.isFinite(numericValue) || numericValue <= 0) {
+        return 0;
+    }
+
+    return Math.max(0, Math.min(5, numericValue / 2));
+}
+
+async function obtenerResumenValoracionPista(idPista) {
+    try {
+        const response = await fetchClient(`/pistas/${idPista}/valoracionTotal`);
+        const payload = await response.json();
+
+        return {
+            averageRating: mapValoracionTotalToFiveStars(payload?.valoracionTotal),
+            numValoraciones: Number(payload?.numValoraciones) || 0,
+        };
+    } catch (err) {
+        console.warn(`No se pudo obtener la valoracion total de la pista ${idPista}:`, err.message);
+        return {
+            averageRating: 0,
+            numValoraciones: 0,
+        };
+    }
+}
+
+async function extractBackendErrorMessage(error, fallbackMessage) {
+    if (!error?.response) {
+        return fallbackMessage;
+    }
+
+    try {
+        const body = await error.response.json();
+        if (Array.isArray(body?.errors) && body.errors[0]?.msg) {
+            return body.errors[0].msg;
+        }
+
+        if (typeof body?.error === 'string' && body.error.trim()) {
+            return body.error;
+        }
+    } catch {
+        // No se pudo parsear el cuerpo de error, usar fallback.
+    }
+
+    return fallbackMessage;
+}
 
 function normalizeDificultades(dificultades) {
     if (!Array.isArray(dificultades)) return [];
@@ -633,7 +687,10 @@ export async function infoRutaCmd(container, id) {
         }
 
         const colorScaleMap = await loadColorScaleMap();
+        const ratingSummary = await obtenerResumenValoracionPista(ruta.id);
         ruta.canManage = await canManageRutaByZonaId(ruta.idZona);
+        ruta.canRateRating = canRateRutaByEstado(ruta.estado);
+        ruta.ratingSummary = ratingSummary;
         ruta.colorPresasRgb = resolveColorScaleRgb(ruta?.colorPresas, colorScaleMap);
 
         if (ruta?.imagenUrl) {
@@ -647,6 +704,17 @@ export async function infoRutaCmd(container, id) {
             ruta.imagenSrc = RUTA_IMAGE_PLACEHOLDER;
         }
 
+        let ratingSectionController = null;
+
+        const updateRatingAvailability = (estado) => {
+            const canRate = canRateRutaByEstado(estado);
+            ruta.canRateRating = canRate;
+
+            if (ratingSectionController?.setCanRate) {
+                ratingSectionController.setCanRate(canRate);
+            }
+        };
+
         const callbacks = {
             onEdit: () => {
                 window.location.hash = `#modificarRuta?id=${ruta.id}`;
@@ -654,6 +722,9 @@ export async function infoRutaCmd(container, id) {
             onEstadoChange: async (estado, estadoElement, estadoTextoElement) => {
                 const config = getEstadoConfig(estado);
                 const estadoBackend = ESTADOS_BACKEND[ESTADOS_FRONTEND[estado] || estado] || 'S/N';
+                const prevEstado = ruta.estado;
+
+                updateRatingAvailability(estado);
 
                 // Actualizar UI inmediatamente para mejor UX
                 estadoElement.style.background = config.bg;
@@ -665,14 +736,56 @@ export async function infoRutaCmd(container, id) {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ estado: estadoBackend })
                     });
+
+                    ruta.estado = ESTADOS_FRONTEND[estado] || estado;
                 } catch (err) {
                     // Revertir UI en caso de error
-                    const prevConfig = ESTADOS_CONFIG.nada;
+                    const prevConfig = getEstadoConfig(prevEstado || 'nada');
                     estadoElement.style.background = prevConfig.bg;
                     estadoElement.innerHTML = `<span class="material-icons" style="color: ${prevConfig.color}; font-size: 28px;">${prevConfig.icon}</span>`;
-                    estadoTextoElement.textContent = 'Sin registrar';
+                    estadoTextoElement.textContent = prevConfig.texto;
+                    updateRatingAvailability(prevEstado);
                     showError(`Error al cambiar estado: ${err.message}`);
                 }
+            },
+            onRatingSave: async (selectedStars) => {
+                if (!canRateRutaByEstado(ruta.estado)) {
+                    throw new Error('Solo puedes valorar rutas marcadas como completadas o flash.');
+                }
+
+                const valoracion = Number(selectedStars) * 2;
+
+                try {
+                    await fetchClient(`/pistas/${ruta.id}/valoracion`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ valoracion }),
+                    });
+
+                    const nextSummary = await obtenerResumenValoracionPista(ruta.id);
+                    ruta.ratingSummary = nextSummary;
+                    showToast('Valoracion guardada correctamente.', { variant: 'success' });
+
+                    return {
+                        summary: nextSummary,
+                    };
+                } catch (err) {
+                    const message = await extractBackendErrorMessage(
+                        err,
+                        `Error al guardar valoracion: ${err.message}`
+                    );
+                    showToast(message, { variant: 'danger' });
+                    throw new Error(message);
+                }
+            },
+            onRatingReady: (controller) => {
+                ratingSectionController = controller;
+            },
+            onRatingWarn: (message) => {
+                showToast(message);
+            },
+            onRatingError: (message) => {
+                showToast(message);
             },
             onDeleteRoute: async (rutaData, deleteButton) => {
                 const confirmed = await showConfirmModal({
