@@ -14,7 +14,11 @@ describe('E2E: Escalador', () => {
     'cambio-apodo@test.com',
     'sin-suscripcion@test.com',
   ];
-  const FIXTURE_ROCODROMO_NOMBRE = 'Boulder Test E2E';
+  const FIXTURE_ROCODROMO_NOMBRES = [
+    'Boulder Test E2E',
+    'Stats Roco E2E',
+    'Stats Roco Sin Datos E2E',
+  ];
   const escaladorTest = {
     correo: 'e2e@test.com',
     contrasena: 'Password123',
@@ -23,6 +27,8 @@ describe('E2E: Escalador', () => {
 
   let escaladorSuscripcion;
   let rocodromoTest;
+  let rocodromoStats;
+  let rocodromoStatsSinDatos;
   let tokenSuscripcion;
   // eslint-disable-next-line no-unused-vars
   let escaladorValidacion;
@@ -33,7 +39,7 @@ describe('E2E: Escalador', () => {
 
   async function limpiarFixturesEscaladorE2E() {
     const rocodromos = await db.Rocodromo.findAll({
-      where: { nombre: FIXTURE_ROCODROMO_NOMBRE },
+      where: { nombre: FIXTURE_ROCODROMO_NOMBRES },
       attributes: ['id'],
     });
     const idsRocodromos = rocodromos.map((r) => r.id);
@@ -44,6 +50,29 @@ describe('E2E: Escalador', () => {
     });
     const idsEscaladores = escaladores.map((e) => e.id);
 
+    const zonas = await db.Zona.findAll({
+      where: { idRoco: idsRocodromos },
+      attributes: ['id'],
+    });
+    const idsZonas = zonas.map((z) => z.id);
+
+    const pistas = await db.Pista.findAll({
+      where: { idZona: idsZonas },
+      attributes: ['id'],
+    });
+    const idsPistas = pistas.map((p) => p.id);
+
+    if (idsPistas.length > 0) {
+      await db.EscalaPista.destroy({ where: { idPista: idsPistas } });
+    }
+    if (idsEscaladores.length > 0) {
+      await db.EscalaPista.destroy({ where: { idEscalador: idsEscaladores } });
+    }
+    if (idsZonas.length > 0) {
+      await db.Pista.destroy({ where: { idZona: idsZonas } });
+      await db.Zona.destroy({ where: { id: idsZonas } });
+    }
+
     if (idsEscaladores.length > 0) {
       await db.Suscripcion.destroy({ where: { idEscalador: idsEscaladores } });
     }
@@ -52,7 +81,7 @@ describe('E2E: Escalador', () => {
     }
 
     await db.Escalador.destroy({ where: { correo: FIXTURE_CORREOS } });
-    await db.Rocodromo.destroy({ where: { nombre: FIXTURE_ROCODROMO_NOMBRE } });
+    await db.Rocodromo.destroy({ where: { nombre: FIXTURE_ROCODROMO_NOMBRES } });
   }
 
   beforeAll(async () => {
@@ -69,6 +98,16 @@ describe('E2E: Escalador', () => {
     rocodromoTest = await db.Rocodromo.create({
       nombre: 'Boulder Test E2E',
       ubicacion: 'Test City',
+    });
+
+    rocodromoStats = await db.Rocodromo.create({
+      nombre: 'Stats Roco E2E',
+      ubicacion: 'Stats City 1',
+    });
+
+    rocodromoStatsSinDatos = await db.Rocodromo.create({
+      nombre: 'Stats Roco Sin Datos E2E',
+      ubicacion: 'Stats City 2',
     });
 
     // Generar token de autenticación
@@ -105,6 +144,71 @@ describe('E2E: Escalador', () => {
     tokenCambioApodo = tokenService.crear({
       correo: escaladorCambioApodo.correo,
       apodo: escaladorCambioApodo.apodo,
+    });
+
+    const zonaStats = await db.Zona.create({
+      idRoco: rocodromoStats.id,
+      nombre: 'Zona Stats',
+    });
+
+    const zonaOtra = await db.Zona.create({
+      idRoco: rocodromoTest.id,
+      nombre: 'Zona Otra',
+    });
+
+    await db.Zona.create({
+      idRoco: rocodromoStatsSinDatos.id,
+      nombre: 'Zona Vacia',
+    });
+
+    const pistaFlashStats = await db.Pista.create({
+      idZona: zonaStats.id,
+      nombre: 'Boulder Stats',
+      dificultad: 'V4',
+      tipo: 'boulder',
+    });
+    const pistaCompletadaStats = await db.Pista.create({
+      idZona: zonaStats.id,
+      nombre: 'Via Stats',
+      dificultad: '6b',
+      tipo: 'via',
+    });
+    const pistaProyectoStats = await db.Pista.create({
+      idZona: zonaStats.id,
+      nombre: 'Proyecto Stats',
+      dificultad: '7a',
+      tipo: 'via',
+    });
+    const pistaOtra = await db.Pista.create({
+      idZona: zonaOtra.id,
+      nombre: 'Fuera Roco Stats',
+      dificultad: 'V2',
+      tipo: 'boulder',
+    });
+
+    await db.EscalaPista.create({
+      idPista: pistaFlashStats.id,
+      idEscalador: escaladorSuscripcion.id,
+      estado: 'flash',
+      fechaCompletado: new Date('2026-04-03T10:00:00.000Z'),
+    });
+    await db.EscalaPista.create({
+      idPista: pistaCompletadaStats.id,
+      idEscalador: escaladorSuscripcion.id,
+      estado: 'completado',
+      fechaCompletado: new Date('2026-04-07T10:00:00.000Z'),
+    });
+    await db.EscalaPista.create({
+      idPista: pistaProyectoStats.id,
+      idEscalador: escaladorSuscripcion.id,
+      estado: 'proyecto',
+      fechaCompletado: null,
+    });
+    await db.EscalaPista.create({
+      idPista: pistaOtra.id,
+      idEscalador: escaladorSuscripcion.id,
+      estado: 'flash',
+      fechaCompletado: new Date('2026-04-09T10:00:00.000Z'),
     });
   });
 
@@ -300,6 +404,98 @@ describe('E2E: Escalador', () => {
       expect(response.body).toHaveProperty('error');
       expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
       expect(response.body.error).toContain('Acceso denegado');
+    });
+  });
+
+  describe('Estadisticas por rocodromo del escalador', () => {
+    it('deberia obtener resumen filtrado por rocodromo', async () => {
+      const response = await request(app)
+        .get(`/escaladores/stats/rocodromo/${rocodromoStats.id}/resumen`)
+        .set('Authorization', `Bearer ${tokenSuscripcion}`)
+        .expect(200);
+
+      expect(response.body).toEqual({
+        totalRutas: 2,
+        totalFlash: 1,
+        totalCompletado: 1,
+        totalProyecto: 1,
+        porcentajeFlash: expect.any(Number),
+      });
+    });
+
+    it('deberia obtener tipos filtrados por rocodromo', async () => {
+      const response = await request(app)
+        .get(`/escaladores/stats/rocodromo/${rocodromoStats.id}/tipos`)
+        .set('Authorization', `Bearer ${tokenSuscripcion}`)
+        .expect(200);
+
+      expect(response.body.totalBloques).toBe(1);
+      expect(response.body.totalVias).toBe(1);
+      expect(response.body.porcentajeBloques).toBe(50);
+      expect(response.body.porcentajeVias).toBe(50);
+      expect(response.body.favoritaTexto).toBe('Bloque');
+    });
+
+    it('deberia obtener actividad mensual filtrada por rocodromo', async () => {
+      const response = await request(app)
+        .get(`/escaladores/stats/rocodromo/${rocodromoStats.id}/actividad-mensual?year=2026&month=4`)
+        .set('Authorization', `Bearer ${tokenSuscripcion}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('year', 2026);
+      expect(response.body).toHaveProperty('month', 4);
+      expect(response.body.actividadMensual).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ dia: 3, rutas: 1 }),
+          expect.objectContaining({ dia: 7, rutas: 1 }),
+        ])
+      );
+      expect(
+        response.body.actividadMensual.find((item) => item.dia === 9)
+      ).toBeUndefined();
+    });
+
+    it('deberia retornar ceros si el rocodromo no tiene datos del escalador', async () => {
+      const response = await request(app)
+        .get(`/escaladores/stats/rocodromo/${rocodromoStatsSinDatos.id}/resumen`)
+        .set('Authorization', `Bearer ${tokenSuscripcion}`)
+        .expect(200);
+
+      expect(response.body).toEqual({
+        totalRutas: 0,
+        totalFlash: 0,
+        totalCompletado: 0,
+        totalProyecto: 0,
+        porcentajeFlash: 0,
+      });
+    });
+
+    it('deberia retornar 401 sin token', async () => {
+      const response = await request(app)
+        .get(`/escaladores/stats/rocodromo/${rocodromoStats.id}/resumen`)
+        .expect(401);
+
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
+    });
+
+    it('deberia retornar 404 si el rocodromo no existe', async () => {
+      const response = await request(app)
+        .get('/escaladores/stats/rocodromo/999999/resumen')
+        .set('Authorization', `Bearer ${tokenSuscripcion}`)
+        .expect(404);
+
+      expect(response.body).toHaveProperty('code', 'ROCODROMO_NOT_FOUND');
+    });
+
+    it('deberia retornar 422 con id invalido', async () => {
+      const response = await request(app)
+        .get('/escaladores/stats/rocodromo/no-valido/resumen')
+        .set('Authorization', `Bearer ${tokenSuscripcion}`)
+        .expect(422);
+
+      expect(response.body).toHaveProperty('status', 'invalid_request');
+      const fields = response.body.errors.map((e) => e.field);
+      expect(fields).toContain('id');
     });
   });
 

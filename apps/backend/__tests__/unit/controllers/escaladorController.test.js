@@ -453,5 +453,85 @@ describe('Unit: EscaladorController', () => {
         actividadMensual: [{ dia: 1, rutas: 2 }],
       });
     });
+
+    it('obtenerResumenEstadisticasRocodromo responde 200 con datos filtrados', async () => {
+      const useCases = {
+        obtenerResumenEstadisticasRocodromo: {
+          execute: jest.fn().mockResolvedValue({ totalRutas: 4, totalFlash: 1 }),
+        },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = {
+        user: { apodo: 'Tester' },
+        params: { id: '7' },
+      };
+      const res = createResMock();
+
+      await controller.obtenerResumenEstadisticasRocodromo(req, res, () => {});
+
+      expect(useCases.obtenerResumenEstadisticasRocodromo.execute).toHaveBeenCalledWith({
+        apodo: 'Tester',
+        idRocodromo: 7,
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.body).toEqual({ totalRutas: 4, totalFlash: 1 });
+    });
+
+    it('obtenerTiposEstadisticasRocodromo responde 200 con datos filtrados', async () => {
+      const useCases = {
+        obtenerTiposEstadisticasRocodromo: {
+          execute: jest.fn().mockResolvedValue({ totalBloques: 3, totalVias: 1 }),
+        },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = {
+        user: { apodo: 'Tester' },
+        params: { id: '7' },
+      };
+      const res = createResMock();
+
+      await controller.obtenerTiposEstadisticasRocodromo(req, res, () => {});
+
+      expect(useCases.obtenerTiposEstadisticasRocodromo.execute).toHaveBeenCalledWith({
+        apodo: 'Tester',
+        idRocodromo: 7,
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.body).toEqual({ totalBloques: 3, totalVias: 1 });
+    });
+
+    it('obtenerActividadMensualRocodromo usa params y query, responde 200', async () => {
+      const useCases = {
+        obtenerActividadMensualRocodromo: {
+          execute: jest.fn().mockResolvedValue({
+            year: 2026,
+            month: 4,
+            actividadMensual: [{ dia: 6, rutas: 2 }],
+          }),
+        },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = {
+        user: { apodo: 'Tester' },
+        params: { id: '7' },
+        query: { year: '2026', month: '4' },
+      };
+      const res = createResMock();
+
+      await controller.obtenerActividadMensualRocodromo(req, res, () => {});
+
+      expect(useCases.obtenerActividadMensualRocodromo.execute).toHaveBeenCalledWith({
+        apodo: 'Tester',
+        idRocodromo: 7,
+        year: 2026,
+        month: 4,
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.body).toEqual({
+        year: 2026,
+        month: 4,
+        actividadMensual: [{ dia: 6, rutas: 2 }],
+      });
+    });
   });
 });
