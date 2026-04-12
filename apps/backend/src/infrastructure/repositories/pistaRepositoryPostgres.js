@@ -1,7 +1,10 @@
 import { fn, col, QueryTypes } from 'sequelize';
 import pistaRepository from '../../domain/pistas/pistaRepository.js';
 import Pista from '../../domain/pistas/Pista.js';
-import { NotFoundError, ValidationError } from '../../domain/sharedObjects/AppError.js';
+import {
+  NotFoundError,
+  ValidationError,
+} from '../../domain/sharedObjects/AppError.js';
 import mapRepositoryError from './dbErrorHandler.js';
 
 class PistaRepositoryPostgres extends pistaRepository {
@@ -29,7 +32,11 @@ class PistaRepositoryPostgres extends pistaRepository {
         pistaModel.activo
       );
     } catch (error) {
-      throw new ValidationError(error.message, 'PISTA_MODEL_MAPPING_FAILED', error);
+      throw new ValidationError(
+        error.message,
+        'PISTA_MODEL_MAPPING_FAILED',
+        error
+      );
     }
   }
 
@@ -114,6 +121,65 @@ class PistaRepositoryPostgres extends pistaRepository {
       throw mapRepositoryError(error, {
         fallbackMessage: 'Error al cambiar estado de pista',
         internalCode: 'PISTA_CHANGE_STATE_DB_FAILED',
+      });
+    }
+  }
+
+  async actualizarValoracion(id, idEscalador, nuevaValoracion) {
+    try {
+      const pistaModel = await this.PistaModel.findByPk(id, {
+        include: [
+          {
+            association: 'escaladores',
+            where: { id: idEscalador },
+            required: false,
+          },
+        ],
+      });
+
+      if (!pistaModel) {
+        throw new NotFoundError(
+          `Actualizar valoracion: Pista con ID ${id} no encontrada`,
+          'PISTA_NOT_FOUND'
+        );
+      }
+
+      if (pistaModel.escaladores && pistaModel.escaladores.length > 0) {
+        // Si existe la relación, verificar si el estado permite valorar
+        const escaladorData = pistaModel.escaladores[0];
+        const estado = escaladorData.EscalaPista.estado;
+
+        if (estado === 'completado' || estado === 'flash') {
+          // Actualizar la valoración en la tabla intermedia
+          await this.PistaModel.sequelize.models.EscalaPista.update(
+            { valoracion: nuevaValoracion },
+            { where: { idPista: id, idEscalador: idEscalador } }
+          );
+
+          return {
+            EscalaPista: {
+              idPista: id,
+              idEscalador: idEscalador,
+              estado: estado,
+              valoracion: nuevaValoracion,
+            },
+          };
+        } else {
+          throw new ValidationError(
+            `No se puede valorar una pista que no ha sido completada o flashada por el escalador`,
+            'PISTA_VALORACION_INVALIDA'
+          );
+        }
+      } else {
+        throw new NotFoundError(
+          `Actualizar valoracion: No se encontró relación entre pista ID ${id} y escalador ID ${idEscalador}`,
+          'PISTA_ESCALADOR_RELATION_NOT_FOUND'
+        );
+      }
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al actualizar valoracion de pista',
+        internalCode: 'PISTA_UPDATE_RATING_DB_FAILED',
       });
     }
   }
@@ -274,7 +340,7 @@ class PistaRepositoryPostgres extends pistaRepository {
       const totalRutas = totales.totalFlash + totales.totalCompletado;
       const porcentajeFlash =
         totalRutas > 0 ? (totales.totalFlash / totalRutas) * 100 : 0;
- 
+
       return {
         totalRutas,
         totalFlash: totales.totalFlash,
@@ -284,7 +350,8 @@ class PistaRepositoryPostgres extends pistaRepository {
       };
     } catch (error) {
       throw mapRepositoryError(error, {
-        fallbackMessage: 'Error al obtener resumen de estadisticas del escalador',
+        fallbackMessage:
+          'Error al obtener resumen de estadisticas del escalador',
         internalCode: 'PISTA_STATS_RESUMEN_DB_FAILED',
       });
     }
@@ -293,10 +360,7 @@ class PistaRepositoryPostgres extends pistaRepository {
   async obtenerTiposEstadisticasEscalador(idEscalador) {
     try {
       const filas = await this.PistaModel.findAll({
-        attributes: [
-          'tipo',
-          [fn('COUNT', col('Pista.IDPista')), 'total'],
-        ],
+        attributes: ['tipo', [fn('COUNT', col('Pista.IDPista')), 'total']],
         include: [
           {
             association: 'escaladores',

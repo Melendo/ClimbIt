@@ -111,6 +111,25 @@ class PistaController {
     }
   }
 
+  async actualizarValoracion(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { valoracion } = req.body;
+      const escaladorID = req.user.id;
+
+      const resultado = await this.useCases.actualizarValoracion.execute({
+        idPista: id,
+        idEscalador: escaladorID,
+        nuevaValoracion: valoracion,
+
+      });
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
   async eliminar(req, res, next) {
     try {
       const { id } = req.params;

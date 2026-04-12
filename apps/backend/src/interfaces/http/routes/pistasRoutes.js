@@ -257,6 +257,41 @@ router.post(
   }
 );
 
+
+/**
+ * PUT /pistas/:id/valoracion
+ * Actualiza la valoración de una pista
+ *
+ * Parámetros esperados (URL Path):
+ * - id (@param {number} , requerido): ID de la pista (entero positivo)
+ *
+ * Parámetros esperados (body):
+ * - valoracion (@param {number} , requerido): Nueva valoración de la pista (entero entre 1 y 10)
+ *
+ * Requiere: Token JWT válido en header Authorization
+ */
+
+const actualizarValoracionPistaValidators = [
+  param('id')
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('El id de la pista debe ser un entero positivo'),
+  body('valoracion')
+    .toInt()
+    .isInt({ min: 1, max: 10 })
+    .withMessage('La valoración debe ser un entero entre 1 y 10'),
+];
+
+router.put(
+  '/:id/valoracion',
+  verifyTokenMiddleware,
+  actualizarValoracionPistaValidators,
+  validate,
+  (req, res, next) => {
+    pistaController.actualizarValoracion(req, res, next);
+  }
+);
+
 /**
  * DELETE /pistas/:id
  * Inactiva una pista (borrado logico)

@@ -41,6 +41,7 @@ import ActualizarPista from '../application/pistas/actualizarPista.js';
 import ActualizarImagenPista from '../application/pistas/actualizarImagenPista.js';
 import ObtenerPistaPorId from '../application/pistas/obtenerPistaPorId.js';
 import CambiarEstadoPista from '../application/pistas/cambiarEstadoPista.js';
+import ActualizarValoracion from '../application/pistas/actualizarValoracion.js';
 import EliminarPista from '../application/pistas/eliminarPista.js';
 
 import CrearZona from '../application/zonas/crearZona.js';
@@ -141,6 +142,11 @@ async function inicializarContainer() {
     pistaRepository,
     escaladorRepository
   );
+  const actualizarValoracionUseCase = new ActualizarValoracion(
+    pistaRepository,
+    escaladorRepository
+  );
+
   const eliminarPistaUseCase = new EliminarPista(pistaRepository);
 
   const crearZonaUseCase = new CrearZona(zonaRepository, db.Rocodromo);
@@ -193,6 +199,7 @@ async function inicializarContainer() {
     actualizarImagen: actualizarImagenPistaUseCase,
     obtenerPistaPorId: obtenerPistaPorIdUseCase,
     cambiarEstado: cambiarEstadoPistaUseCase,
+    actualizarValoracion: actualizarValoracionUseCase,
     eliminar: eliminarPistaUseCase,
   };
   const zonaUseCases = {
