@@ -72,6 +72,10 @@ class PistaRepositoryPostgres extends pistaRepository {
 
   async cambiarEstado(idPista, idEscalador, nuevoEstado) {
     try {
+      const fechaCompletado = ['flash', 'completado'].includes(nuevoEstado)
+        ? new Date()
+        : null;
+
       const pistaModel = await this.PistaModel.findByPk(idPista, {
         include: [
           {
@@ -93,11 +97,17 @@ class PistaRepositoryPostgres extends pistaRepository {
       if (pistaModel.escaladores && pistaModel.escaladores.length > 0) {
         // Si existe, actualizar el estado
         const escaladorData = pistaModel.escaladores[0];
-        await escaladorData.EscalaPista.update({ estado: nuevoEstado });
+        await escaladorData.EscalaPista.update({
+          estado: nuevoEstado,
+          fechaCompletado,
+        });
       } else {
         // Si no existe, crear la relación
         await pistaModel.addEscaladores(idEscalador, {
-          through: { estado: nuevoEstado },
+          through: {
+            estado: nuevoEstado,
+            fechaCompletado,
+          },
         });
       }
     } catch (error) {
@@ -355,16 +365,17 @@ class PistaRepositoryPostgres extends pistaRepository {
       const rows = await this.PistaModel.sequelize.query(
         `
           SELECT
-            EXTRACT(DAY FROM p."FechaCreacion")::int AS dia,
+            DATE(ep."FechaCompletado") AS "fechaCompletado",
+            EXTRACT(DAY FROM ep."FechaCompletado")::int AS dia,
             COUNT(*)::int AS rutas
-          FROM "Pistas" p
-          INNER JOIN "EscalaPista" ep ON ep."IDPista" = p."IDPista"
+          FROM "EscalaPista" ep
           WHERE ep."IDEscalador" = :idEscalador
             AND ep."Estado" IN ('flash', 'completado')
-            AND p."FechaCreacion" >= :startDate
-            AND p."FechaCreacion" < :endDate
-          GROUP BY dia
-          ORDER BY dia ASC
+            AND ep."FechaCompletado" IS NOT NULL
+            AND ep."FechaCompletado" >= :startDate
+            AND ep."FechaCompletado" < :endDate
+          GROUP BY DATE(ep."FechaCompletado"), EXTRACT(DAY FROM ep."FechaCompletado")
+          ORDER BY DATE(ep."FechaCompletado") ASC
         `,
         {
           replacements: { idEscalador, startDate, endDate },
@@ -373,6 +384,7 @@ class PistaRepositoryPostgres extends pistaRepository {
       );
 
       const actividadMensual = rows.map((row) => ({
+        fechaCompletado: row.fechaCompletado,
         dia: Number(row.dia),
         rutas: Number(row.rutas) || 0,
       }));

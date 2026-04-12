@@ -129,7 +129,10 @@ describe('PistaRepositoryPostgres', () => {
         }],
       });
       expect(mockPistaInstance.addEscaladores).toHaveBeenCalledWith(idEscalador, { 
-        through: { estado: nuevoEstado } 
+        through: {
+          estado: nuevoEstado,
+          fechaCompletado: expect.any(Date),
+        }
       });
     });
 
@@ -168,7 +171,37 @@ describe('PistaRepositoryPostgres', () => {
           required: false,
         }],
       });
-      expect(mockEscalaPistaData.update).toHaveBeenCalledWith({ estado: nuevoEstado });
+      expect(mockEscalaPistaData.update).toHaveBeenCalledWith({
+        estado: nuevoEstado,
+        fechaCompletado: expect.any(Date),
+      });
+    });
+
+    it('debería limpiar fechaCompletado al cambiar a proyecto', async () => {
+      const idPista = 2;
+      const idEscalador = 3;
+      const nuevoEstado = 'proyecto';
+
+      const mockEscalaPistaData = {
+        update: jest.fn().mockResolvedValue(true),
+      };
+
+      const mockPistaInstance = {
+        id: idPista,
+        escaladores: [{
+          id: idEscalador,
+          EscalaPista: mockEscalaPistaData,
+        }],
+      };
+
+      mockPistaModel.findByPk.mockResolvedValue(mockPistaInstance);
+
+      await repository.cambiarEstado(idPista, idEscalador, nuevoEstado);
+
+      expect(mockEscalaPistaData.update).toHaveBeenCalledWith({
+        estado: 'proyecto',
+        fechaCompletado: null,
+      });
     });
 
     it('debería lanzar un error si la pista no existe', async () => {
@@ -342,14 +375,14 @@ describe('PistaRepositoryPostgres', () => {
   describe('obtenerActividadMensualEscalador', () => {
     it('deberia retornar actividad mensual agregada por dia', async () => {
       mockPistaModel.sequelize.query.mockResolvedValue([
-        { dia: 3, rutas: 2 },
-        { dia: 7, rutas: 1 },
+        { fechaCompletado: '2026-04-03', dia: 3, rutas: 2 },
+        { fechaCompletado: '2026-04-07', dia: 7, rutas: 1 },
       ]);
 
       const resultado = await repository.obtenerActividadMensualEscalador(5, 2026, 4);
 
       expect(mockPistaModel.sequelize.query).toHaveBeenCalledWith(
-        expect.stringContaining('FROM "Pistas" p'),
+        expect.stringContaining('FROM "EscalaPista" ep'),
         expect.objectContaining({
           replacements: expect.objectContaining({
             idEscalador: 5,
@@ -360,8 +393,8 @@ describe('PistaRepositoryPostgres', () => {
         year: 2026,
         month: 4,
         actividadMensual: [
-          { dia: 3, rutas: 2 },
-          { dia: 7, rutas: 1 },
+          { fechaCompletado: '2026-04-03', dia: 3, rutas: 2 },
+          { fechaCompletado: '2026-04-07', dia: 7, rutas: 1 },
         ],
       });
     });
