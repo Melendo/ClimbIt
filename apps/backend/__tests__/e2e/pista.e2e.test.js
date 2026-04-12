@@ -604,4 +604,281 @@ describe('E2E: Pistas', () => {
       expect(Array.isArray(response.body.errors)).toBe(true);
     });
   });
+
+  describe('E2E: Obtener valoración total de pista', () => {
+    let pistaTest;
+    let escalador1;
+    let escalador2;
+    let token;
+
+    beforeAll(async () => {
+      // Crear escaladores de prueba
+      escalador1 = await db.Escalador.create({
+        correo: 'escalador1@test.com',
+        contrasena: 'hashedPassword123',
+        apodo: 'Escalador1',
+      });
+
+      escalador2 = await db.Escalador.create({
+        correo: 'escalador2@test.com',
+        contrasena: 'hashedPassword123',
+        apodo: 'Escalador2',
+      });
+
+      // Crear pista de prueba
+      pistaTest = await db.Pista.create({
+        idZona: zona.id,
+        nombre: 'Pista Valoración Total',
+        dificultad: '6b+',
+        tipo: 'via',
+        fechaCreacion: new Date(),
+      });
+
+      // Crear relaciones con valoraciones
+      await db.EscalaPista.create({
+        idPista: pistaTest.id,
+        idEscalador: escalador1.id,
+        estado: 'completado',
+        fechaCompletado: new Date(),
+        valoracion: 8,
+      });
+
+      await db.EscalaPista.create({
+        idPista: pistaTest.id,
+        idEscalador: escalador2.id,
+        estado: 'completado',
+        fechaCompletado: new Date(),
+        valoracion: 9,
+      });
+
+      // Generar token de autenticación
+      token = tokenService.crear({
+        id: escalador1.id,
+        correo: escalador1.correo,
+        apodo: escalador1.apodo,
+      });
+    });
+
+    afterAll(async () => {
+      // Limpiar datos creados
+      if (pistaTest && escalador1 && escalador2) {
+        try {
+          await db.EscalaPista.destroy({
+            where: {
+              idPista: pistaTest.id,
+            },
+          });
+          // eslint-disable-next-line no-unused-vars
+        } catch (error) {
+          // Ignorar si ya fue eliminado
+        }
+      }
+      if (pistaTest) await pistaTest.destroy();
+      if (escalador1) await escalador1.destroy();
+      if (escalador2) await escalador2.destroy();
+    });
+
+    it('debería obtener la valoración total correctamente', async () => {
+      const response = await request(app)
+        .get(`/pistas/${pistaTest.id}/valoracionTotal`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('idPista', pistaTest.id);
+      expect(response.body).toHaveProperty('valoracionTotal');
+      expect(response.body).toHaveProperty('numValoraciones');
+      expect(response.body.numValoraciones).toBe(2);
+      expect(response.body.valoracionTotal).toBe(8.5); // (8+9)/2
+    });
+
+    it('debería retornar 0 cuando una pista no tiene valoraciones', async () => {
+      // Crear pista sin valoraciones
+      const pistaSinValoraciones = await db.Pista.create({
+        idZona: zona.id,
+        nombre: 'Pista Sin Valoraciones',
+        dificultad: '5c',
+        tipo: 'boulder',
+        fechaCreacion: new Date(),
+      });
+
+      const response = await request(app)
+        .get(`/pistas/${pistaSinValoraciones.id}/valoracionTotal`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(response.body.idPista).toBe(pistaSinValoraciones.id);
+      expect(response.body.valoracionTotal).toBe(0);
+      expect(response.body.numValoraciones).toBe(0);
+
+      // Limpiar
+      await pistaSinValoraciones.destroy();
+    });
+
+    it('debería devolver valoración única correctamente', async () => {
+      // Crear pista con una sola valoración
+      const pistaUnica = await db.Pista.create({
+        idZona: zona.id,
+        nombre: 'Pista Una Valoración',
+        dificultad: '6a',
+        tipo: 'via',
+        fechaCreacion: new Date(),
+      });
+
+      // Crear relación con una valoración
+      await db.EscalaPista.create({
+        idPista: pistaUnica.id,
+        idEscalador: escalador1.id,
+        estado: 'completado',
+        fechaCompletado: new Date(),
+        valoracion: 7,
+      });
+
+      const response = await request(app)
+        .get(`/pistas/${pistaUnica.id}/valoracionTotal`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(response.body.valoracionTotal).toBe(7);
+      expect(response.body.numValoraciones).toBe(1);
+
+      // Limpiar
+      await db.EscalaPista.destroy({
+        where: { idPista: pistaUnica.id },
+      });
+      await pistaUnica.destroy();
+    });
+
+    it('debería retornar 404 si la pista no existe', async () => {
+      const response = await request(app)
+        .get('/pistas/999999/valoracionTotal')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(404);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.code).toBe('PISTA_NOT_FOUND');
+    });
+
+    it('debería retornar 401 si no se proporciona token', async () => {
+      const response = await request(app)
+        .get(`/pistas/${pistaTest.id}/valoracionTotal`)
+        .expect(401);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
+    });
+
+    it('debería retornar 401 con token inválido', async () => {
+      const response = await request(app)
+        .get(`/pistas/${pistaTest.id}/valoracionTotal`)
+        .set('Authorization', 'Bearer token_invalido')
+        .expect(401);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_INVALID');
+    });
+
+    it('debería calcular correctamente el promedio con múltiples valoraciones', async () => {
+      // Crear pista con varias valoraciones: 6, 8, 9, 10, 7 => promedio 8
+      const pistaMultiple = await db.Pista.create({
+        idZona: zona.id,
+        nombre: 'Pista Múltiples Valoraciones',
+        dificultad: '6c',
+        tipo: 'boulder',
+        fechaCreacion: new Date(),
+      });
+
+      const escaladores = [
+        { valoracion: 6 },
+        { valoracion: 8 },
+        { valoracion: 9 },
+        { valoracion: 10 },
+        { valoracion: 7 },
+      ];
+
+      for (let i = 0; i < escaladores.length; i++) {
+        const uniqueId = `${Date.now()}_${i}_${Math.random().toString(36).substr(2, 9)}`;
+        const newEscalador = await db.Escalador.create({
+          correo: `test${uniqueId}@valoraciones.com`,
+          contrasena: 'hashedPassword123',
+          apodo: `EscaladorValor${uniqueId}`,
+        });
+
+        await db.EscalaPista.create({
+          idPista: pistaMultiple.id,
+          idEscalador: newEscalador.id,
+          estado: 'completado',
+          fechaCompletado: new Date(),
+          valoracion: escaladores[i].valoracion,
+        });
+      }
+
+      const response = await request(app)
+        .get(`/pistas/${pistaMultiple.id}/valoracionTotal`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(response.body.numValoraciones).toBe(5);
+      expect(response.body.valoracionTotal).toBe(8); // (6+8+9+10+7)/5 = 8
+
+      // Limpiar
+      await db.EscalaPista.destroy({
+        where: { idPista: pistaMultiple.id },
+      });
+      await pistaMultiple.destroy();
+    });
+
+    it('ignora valoraciones nulas en el cálculo', async () => {
+      // Crear pista con una relación sin valoración
+      const pistaConNull = await db.Pista.create({
+        idZona: zona.id,
+        nombre: 'Pista Con Null',
+        dificultad: '5a',
+        tipo: 'via',
+        fechaCreacion: new Date(),
+      });
+
+      const escaladorTemporal = await db.Escalador.create({
+        correo: `temporal${Date.now()}_${Math.random().toString(36).substr(2, 9)}@test.com`,
+        contrasena: 'hashedPassword123',
+        apodo: `EscaladorTemporal${Date.now()}`,
+      });
+
+      // Crear relación con valoración
+      await db.EscalaPista.create({
+        idPista: pistaConNull.id,
+        idEscalador: escaladorTemporal.id,
+        estado: 'completado',
+        fechaCompletado: new Date(),
+        valoracion: 9,
+      });
+
+      // Crear relación sin valoración (proyecto)
+      const escaladorSinValor = await db.Escalador.create({
+        correo: `sinvalor${Date.now()}_${Math.random().toString(36).substr(2, 9)}@test.com`,
+        contrasena: 'hashedPassword123',
+        apodo: `SinValoración${Date.now()}`,
+      });
+
+      await db.EscalaPista.create({
+        idPista: pistaConNull.id,
+        idEscalador: escaladorSinValor.id,
+        estado: 'proyecto',
+        valoracion: null,
+      });
+
+      const response = await request(app)
+        .get(`/pistas/${pistaConNull.id}/valoracionTotal`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(response.body.numValoraciones).toBe(1);
+      expect(response.body.valoracionTotal).toBe(9);
+
+      // Limpiar
+      await db.EscalaPista.destroy({
+        where: { idPista: pistaConNull.id },
+      });
+      await pistaConNull.destroy();
+    });
+  });
 });

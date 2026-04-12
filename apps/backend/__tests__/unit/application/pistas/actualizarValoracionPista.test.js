@@ -16,7 +16,7 @@ describe('ActualizarValoracionPistaUseCase', () => {
       actualizarValoracion: jest.fn(),
     };
     mockEscaladorRepository = {
-      obtenerPorId: jest.fn(),
+      encontrarPorApodo: jest.fn(),
     };
     actualizarValoracionUseCase = new ActualizarValoracionUseCase(
       mockPistaRepository,
@@ -27,7 +27,7 @@ describe('ActualizarValoracionPistaUseCase', () => {
   it('debería actualizar la valoración de una pista correctamente', async () => {
     const datosEntrada = {
       idPista: 1,
-      idEscalador: 1,
+      escaladorApodo: 'TestClimber',
       nuevaValoracion: 8,
     };
 
@@ -44,25 +44,35 @@ describe('ActualizarValoracionPistaUseCase', () => {
       apodo: 'TestClimber',
     };
 
-    mockPistaRepository.obtenerPorId.mockResolvedValue(pistaEncontrada);
-    mockEscaladorRepository.obtenerPorId.mockResolvedValue(escaladorEncontrado);
-    mockPistaRepository.actualizarValoracion.mockResolvedValue();
+    const resultadoActualizacion = {
+      EscalaPista: {
+        idPista: 1,
+        idEscalador: 1,
+        estado: 'completado',
+        valoracion: 8,
+      },
+    };
 
-    await actualizarValoracionUseCase.execute(datosEntrada);
+    mockPistaRepository.obtenerPorId.mockResolvedValue(pistaEncontrada);
+    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue(escaladorEncontrado);
+    mockPistaRepository.actualizarValoracion.mockResolvedValue(resultadoActualizacion);
+
+    const resultado = await actualizarValoracionUseCase.execute(datosEntrada);
 
     expect(mockPistaRepository.obtenerPorId).toHaveBeenCalledWith(datosEntrada.idPista);
-    expect(mockEscaladorRepository.obtenerPorId).toHaveBeenCalledWith(datosEntrada.idEscalador);
+    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(datosEntrada.escaladorApodo);
     expect(mockPistaRepository.actualizarValoracion).toHaveBeenCalledWith(
       pistaEncontrada.id,
       escaladorEncontrado.id,
       datosEntrada.nuevaValoracion
     );
+    expect(resultado).toEqual(resultadoActualizacion);
   });
 
   it('debería lanzar error si la pista no existe', async () => {
     const datosEntrada = {
       idPista: 999,
-      idEscalador: 1,
+      escaladorApodo: 'TestClimber',
       nuevaValoracion: 8,
     };
 
@@ -73,14 +83,14 @@ describe('ActualizarValoracionPistaUseCase', () => {
     ).rejects.toThrow(NotFoundError);
 
     expect(mockPistaRepository.obtenerPorId).toHaveBeenCalledWith(999);
-    expect(mockEscaladorRepository.obtenerPorId).not.toHaveBeenCalled();
+    expect(mockEscaladorRepository.encontrarPorApodo).not.toHaveBeenCalled();
     expect(mockPistaRepository.actualizarValoracion).not.toHaveBeenCalled();
   });
 
   it('debería lanzar error si el escalador no existe', async () => {
     const datosEntrada = {
       idPista: 1,
-      idEscalador: 999,
+      escaladorApodo: 'UltimoApodo',
       nuevaValoracion: 8,
     };
 
@@ -92,21 +102,21 @@ describe('ActualizarValoracionPistaUseCase', () => {
     };
 
     mockPistaRepository.obtenerPorId.mockResolvedValue(pistaEncontrada);
-    mockEscaladorRepository.obtenerPorId.mockResolvedValue(null);
+    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue(null);
 
     await expect(
       actualizarValoracionUseCase.execute(datosEntrada)
     ).rejects.toThrow(NotFoundError);
 
     expect(mockPistaRepository.obtenerPorId).toHaveBeenCalledWith(1);
-    expect(mockEscaladorRepository.obtenerPorId).toHaveBeenCalledWith(999);
+    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith('UltimoApodo');
     expect(mockPistaRepository.actualizarValoracion).not.toHaveBeenCalled();
   });
 
   it('debería lanzar error si falla al actualizar la valoración en el repositorio', async () => {
     const datosEntrada = {
       idPista: 1,
-      idEscalador: 1,
+      escaladorApodo: 'TestClimber',
       nuevaValoracion: 8,
     };
 
@@ -124,7 +134,7 @@ describe('ActualizarValoracionPistaUseCase', () => {
     };
 
     mockPistaRepository.obtenerPorId.mockResolvedValue(pistaEncontrada);
-    mockEscaladorRepository.obtenerPorId.mockResolvedValue(escaladorEncontrado);
+    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue(escaladorEncontrado);
     mockPistaRepository.actualizarValoracion.mockRejectedValue(
       new Error('Error al actualizar en BD')
     );
@@ -134,7 +144,7 @@ describe('ActualizarValoracionPistaUseCase', () => {
     ).rejects.toThrow(InternalServerError);
 
     expect(mockPistaRepository.obtenerPorId).toHaveBeenCalledWith(1);
-    expect(mockEscaladorRepository.obtenerPorId).toHaveBeenCalledWith(1);
+    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith('TestClimber');
     expect(mockPistaRepository.actualizarValoracion).toHaveBeenCalledWith(
       1,
       1,
@@ -157,15 +167,22 @@ describe('ActualizarValoracionPistaUseCase', () => {
     };
 
     mockPistaRepository.obtenerPorId.mockResolvedValue(pistaEncontrada);
-    mockEscaladorRepository.obtenerPorId.mockResolvedValue(escaladorEncontrado);
-    mockPistaRepository.actualizarValoracion.mockResolvedValue();
+    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue(escaladorEncontrado);
+    mockPistaRepository.actualizarValoracion.mockResolvedValue({
+      EscalaPista: {
+        idPista: 1,
+        idEscalador: 1,
+        estado: 'completado',
+        valoracion: 5,
+      },
+    });
 
     const valoraciones = [1, 5, 10];
 
     for (const valoracion of valoraciones) {
       await actualizarValoracionUseCase.execute({
         idPista: 1,
-        idEscalador: 1,
+        escaladorApodo: 'TestClimber',
         nuevaValoracion: valoracion,
       });
 
@@ -182,7 +199,7 @@ describe('ActualizarValoracionPistaUseCase', () => {
   it('debería propagar AppError cuando el repositorio lo lanza', async () => {
     const datosEntrada = {
       idPista: 1,
-      idEscalador: 1,
+      escaladorApodo: 'TestClimber',
       nuevaValoracion: 8,
     };
 
@@ -205,7 +222,7 @@ describe('ActualizarValoracionPistaUseCase', () => {
     );
 
     mockPistaRepository.obtenerPorId.mockResolvedValue(pistaEncontrada);
-    mockEscaladorRepository.obtenerPorId.mockResolvedValue(escaladorEncontrado);
+    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue(escaladorEncontrado);
     mockPistaRepository.actualizarValoracion.mockRejectedValue(appError);
 
     await expect(
