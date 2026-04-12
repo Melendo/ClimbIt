@@ -6,6 +6,15 @@ import tokenService from '../../src/infrastructure/security/tokenService.js';
 const db = await dbPromise;
 
 describe('E2E: Escalador', () => {
+  const FIXTURE_CORREOS = [
+    'e2e@test.com',
+    'suscripcion@test.com',
+    'validacion@test.com',
+    'descripcion@test.com',
+    'cambio-apodo@test.com',
+    'sin-suscripcion@test.com',
+  ];
+  const FIXTURE_ROCODROMO_NOMBRE = 'Boulder Test E2E';
   const escaladorTest = {
     correo: 'e2e@test.com',
     contrasena: 'Password123',
@@ -15,13 +24,40 @@ describe('E2E: Escalador', () => {
   let escaladorSuscripcion;
   let rocodromoTest;
   let tokenSuscripcion;
+  // eslint-disable-next-line no-unused-vars
   let escaladorValidacion;
   let escaladorDescripcion;
   let escaladorCambioApodo;
   let tokenDescripcion;
   let tokenCambioApodo;
 
+  async function limpiarFixturesEscaladorE2E() {
+    const rocodromos = await db.Rocodromo.findAll({
+      where: { nombre: FIXTURE_ROCODROMO_NOMBRE },
+      attributes: ['id'],
+    });
+    const idsRocodromos = rocodromos.map((r) => r.id);
+
+    const escaladores = await db.Escalador.findAll({
+      where: { correo: FIXTURE_CORREOS },
+      attributes: ['id'],
+    });
+    const idsEscaladores = escaladores.map((e) => e.id);
+
+    if (idsEscaladores.length > 0) {
+      await db.Suscripcion.destroy({ where: { idEscalador: idsEscaladores } });
+    }
+    if (idsRocodromos.length > 0) {
+      await db.Suscripcion.destroy({ where: { idRocodromo: idsRocodromos } });
+    }
+
+    await db.Escalador.destroy({ where: { correo: FIXTURE_CORREOS } });
+    await db.Rocodromo.destroy({ where: { nombre: FIXTURE_ROCODROMO_NOMBRE } });
+  }
+
   beforeAll(async () => {
+    await limpiarFixturesEscaladorE2E();
+
     // Crear escalador de prueba para suscripción
     escaladorSuscripcion = await db.Escalador.create({
       correo: 'suscripcion@test.com',
@@ -41,6 +77,7 @@ describe('E2E: Escalador', () => {
       apodo: escaladorSuscripcion.apodo 
     });
 
+     
     escaladorValidacion = await db.Escalador.create({
       correo: 'validacion@test.com',
       contrasena: 'hashedPassword123',
@@ -72,26 +109,7 @@ describe('E2E: Escalador', () => {
   });
 
   afterAll(async () => {
-    // Limpiar registros
-    await db.Escalador.destroy({ where: { correo: escaladorTest.correo } });
-    
-    // Limpiar asociaciones y registros de suscripción
-    if (escaladorSuscripcion && rocodromoTest) {
-      try {
-        await escaladorSuscripcion.removeRocodromo(rocodromoTest.id);
-      } catch (error) {
-        // Ignorar si ya fue eliminado
-        error;
-      }
-    }
-    if (escaladorSuscripcion) await escaladorSuscripcion.destroy();
-    if (escaladorValidacion) await escaladorValidacion.destroy();
-    if (escaladorDescripcion) await escaladorDescripcion.destroy();
-    if (escaladorCambioApodo) {
-      await db.Escalador.destroy({ where: { correo: escaladorCambioApodo.correo } });
-    }
-    if (rocodromoTest) await rocodromoTest.destroy();
-    
+    await limpiarFixturesEscaladorE2E();
     await db.sequelize.close();
   });
 

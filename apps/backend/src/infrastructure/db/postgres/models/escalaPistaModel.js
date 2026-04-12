@@ -35,6 +35,11 @@ export default (sequelize, DataTypes) => {
         allowNull: false,
         field: 'Estado',
       },
+      fechaCompletado: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        field: 'FechaCompletado',
+      },
     },
     {
       sequelize,

@@ -3,14 +3,49 @@ import { showConfirmModal } from '../../components/modal.js';
 import { escapeHtml } from '../../components/formHelpers.js';
 import { renderEditableField, initEditableField } from '../../components/editableField.js';
 import { renderSectionDivider } from '../../components/sectionDivider.js';
+import {
+  bindHeatmapInteractions,
+  buildEscaladorStatsViewModel,
+  renderMonthlyActivityCards,
+  renderRouteTypesStatsCard,
+  renderStatsSection,
+  renderTotalRoutesStatsCard,
+} from '../../components/escaladorStats.js';
 
 function renderPerfilFieldTitle(text) {
   return `<p class="text-muted small text-uppercase fw-semibold mb-1 perfil-field-title">${text}</p>`;
 }
 
+function renderPerfilStats(statsViewModel) {
+  return `
+    <div class="perfil-estadisticas-wrap mt-4">
+      ${renderSectionDivider({ label: 'Estadisticas' })}
+      <div class="perfil-estadisticas-view mt-3">
+        ${renderStatsSection({
+          title: 'Total de Rutas Escaladas',
+          content: renderTotalRoutesStatsCard(statsViewModel.totals),
+        })}
+        ${renderStatsSection({
+          title: 'Tipos de Rutas Escaladas',
+          content: renderRouteTypesStatsCard(statsViewModel.totals),
+        })}
+        ${renderStatsSection({
+          title: 'Actividad mensual',
+          content: renderMonthlyActivityCards(statsViewModel.monthly),
+        })}
+      </div>
+    </div>
+  `;
+}
+
 // Vista del perfil del escalador
 export function renderPerfil(container, escalador, callbacks) {
-  const { apodo, descripcion, fotoSrc } = escalador;
+  const { apodo, descripcion, fotoSrc, estadisticas = {} } = escalador;
+  if (typeof container.__perfilStatsCleanup === 'function') {
+    container.__perfilStatsCleanup();
+    container.__perfilStatsCleanup = null;
+  }
+
   const avatar = fotoSrc || '/assets/johnDoe.png';
   const apodoLimpio = typeof apodo === 'string' ? apodo.trim() : '';
   const descripcionLimpia =
@@ -19,6 +54,7 @@ export function renderPerfil(container, escalador, callbacks) {
     descripcionLimpia && descripcionLimpia.toLowerCase() !== 'null'
       ? escapeHtml(descripcionLimpia)
       : '';
+  const statsViewModel = buildEscaladorStatsViewModel(estadisticas);
 
   container.innerHTML = `
       <!-- Cabecera -->
@@ -95,18 +131,15 @@ export function renderPerfil(container, escalador, callbacks) {
             </div>
           </div>
 
-          <div class="perfil-estadisticas-wrap mt-4">
-            ${renderSectionDivider({ label: 'Estadisticas' })}
-            <div class="perfil-estadisticas-view text-center text-muted small mt-3">
-              Sin estadisticas por ahora.
-            </div>
-          </div>
+          ${renderPerfilStats(statsViewModel)}
         </div>
       </div>
 
       <!-- Menú de navegación inferior -->
       ${renderNavbar()}
     `;
+
+  container.__perfilStatsCleanup = bindHeatmapInteractions(container);
 
   const menuPlaceholders = container.querySelectorAll(
     '[data-menu-placeholder]'
@@ -138,6 +171,11 @@ export function renderPerfil(container, escalador, callbacks) {
 
 // Vista de editar perfil
 export function renderEditarPerfil(container, escalador, callbacks) {
+  if (typeof container.__perfilStatsCleanup === 'function') {
+    container.__perfilStatsCleanup();
+    container.__perfilStatsCleanup = null;
+  }
+
   const { apodo, descripcion, fotoSrc, correo } = escalador;
   const avatar = fotoSrc || '/assets/johnDoe.png';
   const apodoLimpio = typeof apodo === 'string' ? apodo.trim() : '';

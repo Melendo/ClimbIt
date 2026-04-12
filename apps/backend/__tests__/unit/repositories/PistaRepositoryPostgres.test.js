@@ -11,6 +11,15 @@ describe('PistaRepositoryPostgres', () => {
     mockPistaModel = {
       create: jest.fn(),
       findByPk: jest.fn(),
+      findAll: jest.fn(),
+      sequelize: {
+        query: jest.fn(),
+        models: {
+          EscalaPista: {
+            findAll: jest.fn(),
+          },
+        },
+      },
     };
 
     // Instanciamos el repositorio con el modelo mockeado
@@ -120,7 +129,10 @@ describe('PistaRepositoryPostgres', () => {
         }],
       });
       expect(mockPistaInstance.addEscaladores).toHaveBeenCalledWith(idEscalador, { 
-        through: { estado: nuevoEstado } 
+        through: {
+          estado: nuevoEstado,
+          fechaCompletado: expect.any(Date),
+        }
       });
     });
 
@@ -159,7 +171,37 @@ describe('PistaRepositoryPostgres', () => {
           required: false,
         }],
       });
-      expect(mockEscalaPistaData.update).toHaveBeenCalledWith({ estado: nuevoEstado });
+      expect(mockEscalaPistaData.update).toHaveBeenCalledWith({
+        estado: nuevoEstado,
+        fechaCompletado: expect.any(Date),
+      });
+    });
+
+    it('debería limpiar fechaCompletado al cambiar a proyecto', async () => {
+      const idPista = 2;
+      const idEscalador = 3;
+      const nuevoEstado = 'proyecto';
+
+      const mockEscalaPistaData = {
+        update: jest.fn().mockResolvedValue(true),
+      };
+
+      const mockPistaInstance = {
+        id: idPista,
+        escaladores: [{
+          id: idEscalador,
+          EscalaPista: mockEscalaPistaData,
+        }],
+      };
+
+      mockPistaModel.findByPk.mockResolvedValue(mockPistaInstance);
+
+      await repository.cambiarEstado(idPista, idEscalador, nuevoEstado);
+
+      expect(mockEscalaPistaData.update).toHaveBeenCalledWith({
+        estado: 'proyecto',
+        fechaCompletado: null,
+      });
     });
 
     it('debería lanzar un error si la pista no existe', async () => {
@@ -249,6 +291,124 @@ describe('PistaRepositoryPostgres', () => {
 
       const resultado = await repository.obtenerEstado(1, 5);
       expect(resultado).toBeNull();
+    });
+  });
+
+  describe('obtenerResumenEstadisticasEscalador', () => {
+    it('deberia retornar resumen agregado por estado', async () => {
+      mockPistaModel.sequelize.models.EscalaPista.findAll.mockResolvedValue([
+        { estado: 'flash', total: '2' },
+        { estado: 'completado', total: '5' },
+        { estado: 'proyecto', total: '3' },
+      ]);
+
+      const resultado = await repository.obtenerResumenEstadisticasEscalador(9);
+
+      expect(
+        mockPistaModel.sequelize.models.EscalaPista.findAll
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { idEscalador: 9 },
+          raw: true,
+        })
+      );
+      expect(resultado.totalRutas).toBe(7);
+      expect(resultado.totalFlash).toBe(2);
+      expect(resultado.totalCompletado).toBe(5);
+      expect(resultado.totalProyecto).toBe(3);
+      expect(resultado.porcentajeFlash).toBeCloseTo(28.57142857, 8);
+    });
+
+    it('deberia retornar valores en cero cuando no hay datos', async () => {
+      mockPistaModel.sequelize.models.EscalaPista.findAll.mockResolvedValue([]);
+
+      const resultado = await repository.obtenerResumenEstadisticasEscalador(3);
+
+      expect(resultado).toEqual({
+        totalRutas: 0,
+        totalFlash: 0,
+        totalCompletado: 0,
+        totalProyecto: 0,
+        porcentajeFlash: 0,
+      });
+    });
+  });
+
+  describe('obtenerTiposEstadisticasEscalador', () => {
+    it('deberia retornar distribucion agregada por tipo', async () => {
+      mockPistaModel.findAll.mockResolvedValue([
+        { tipo: 'boulder', total: '8' },
+        { tipo: 'via', total: '2' },
+      ]);
+
+      const resultado = await repository.obtenerTiposEstadisticasEscalador(5);
+
+      expect(mockPistaModel.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          raw: true,
+        })
+      );
+      expect(resultado).toEqual({
+        totalBloques: 8,
+        totalVias: 2,
+        porcentajeBloques: 80,
+        porcentajeVias: 20,
+        favoritaTexto: 'Bloque',
+      });
+    });
+
+    it('deberia retornar valores en cero cuando no hay rutas escaladas', async () => {
+      mockPistaModel.findAll.mockResolvedValue([]);
+
+      const resultado = await repository.obtenerTiposEstadisticasEscalador(5);
+
+      expect(resultado).toEqual({
+        totalBloques: 0,
+        totalVias: 0,
+        porcentajeBloques: 0,
+        porcentajeVias: 0,
+        favoritaTexto: 'Bloque',
+      });
+    });
+  });
+
+  describe('obtenerActividadMensualEscalador', () => {
+    it('deberia retornar actividad mensual agregada por dia', async () => {
+      mockPistaModel.sequelize.query.mockResolvedValue([
+        { fechaCompletado: '2026-04-03', dia: 3, rutas: 2 },
+        { fechaCompletado: '2026-04-07', dia: 7, rutas: 1 },
+      ]);
+
+      const resultado = await repository.obtenerActividadMensualEscalador(5, 2026, 4);
+
+      expect(mockPistaModel.sequelize.query).toHaveBeenCalledWith(
+        expect.stringContaining('FROM "EscalaPista" ep'),
+        expect.objectContaining({
+          replacements: expect.objectContaining({
+            idEscalador: 5,
+          }),
+        })
+      );
+      expect(resultado).toEqual({
+        year: 2026,
+        month: 4,
+        actividadMensual: [
+          { fechaCompletado: '2026-04-03', dia: 3, rutas: 2 },
+          { fechaCompletado: '2026-04-07', dia: 7, rutas: 1 },
+        ],
+      });
+    });
+
+    it('deberia retornar actividad vacia cuando no hay datos', async () => {
+      mockPistaModel.sequelize.query.mockResolvedValue([]);
+
+      const resultado = await repository.obtenerActividadMensualEscalador(5, 2026, 4);
+
+      expect(resultado).toEqual({
+        year: 2026,
+        month: 4,
+        actividadMensual: [],
+      });
     });
   });
 });

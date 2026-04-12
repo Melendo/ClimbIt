@@ -5,7 +5,80 @@ import { showToast } from '../../components/toast.js';
 import { showProfilePhotoModal } from '../../components/profilePhotoModal.js';
 
 const PERFIL_PLACEHOLDER = '/assets/johnDoe.png';
+const DEFAULT_ESCALADOR_STATS = {
+    totalRutas: 0,
+    totalFlash: 0,
+    totalCompletado: 0,
+    totalProyecto: 0,
+    porcentajeFlash: 0,
+    totalBloques: 0,
+    totalVias: 0,
+    porcentajeBloques: 0,
+    porcentajeVias: 0,
+    favoritaTexto: 'Bloque',
+    actividadMensual: [],
+};
 let perfilPhotoObjectUrl = null;
+
+function toSafeNumber(value) {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+        return 0;
+    }
+
+    return parsed;
+}
+
+function normalizeActividadMensual(actividadMensual) {
+    if (!Array.isArray(actividadMensual)) {
+        return [];
+    }
+
+    return actividadMensual
+        .map((item) => {
+            const dia = Number(item?.dia);
+            const rutas = toSafeNumber(item?.rutas);
+
+            if (!Number.isInteger(dia) || dia < 1 || dia > 31) {
+                return null;
+            }
+
+            return {
+                dia,
+                rutas,
+            };
+        })
+        .filter(Boolean);
+}
+
+function getDefaultEscaladorStats() {
+    return {
+        ...DEFAULT_ESCALADOR_STATS,
+        actividadMensual: [],
+    };
+}
+
+function normalizeEscaladorStats(rawStats = {}) {
+    const favoritaTexto =
+        typeof rawStats.favoritaTexto === 'string' && rawStats.favoritaTexto.trim()
+            ? rawStats.favoritaTexto.trim()
+            : DEFAULT_ESCALADOR_STATS.favoritaTexto;
+
+    return {
+        ...getDefaultEscaladorStats(),
+        totalRutas: toSafeNumber(rawStats.totalRutas),
+        totalFlash: toSafeNumber(rawStats.totalFlash),
+        totalCompletado: toSafeNumber(rawStats.totalCompletado),
+        totalProyecto: toSafeNumber(rawStats.totalProyecto),
+        porcentajeFlash: toSafeNumber(rawStats.porcentajeFlash),
+        totalBloques: toSafeNumber(rawStats.totalBloques),
+        totalVias: toSafeNumber(rawStats.totalVias),
+        porcentajeBloques: toSafeNumber(rawStats.porcentajeBloques),
+        porcentajeVias: toSafeNumber(rawStats.porcentajeVias),
+        favoritaTexto,
+        actividadMensual: normalizeActividadMensual(rawStats.actividadMensual),
+    };
+}
 
 function revokeObjectUrl(url) {
     if (typeof url === 'string' && url.startsWith('blob:')) {
@@ -138,11 +211,42 @@ async function cargarPerfilEscalador() {
     return escalador;
 }
 
+async function cargarEstadisticasEscalador() {
+    const now = new Date();
+    const params = new URLSearchParams({
+        year: String(now.getFullYear()),
+        month: String(now.getMonth() + 1)
+    });
+
+    const [resumenResponse, tiposResponse, actividadResponse] = await Promise.all([
+        fetchClient('/escaladores/stats/resumen'),
+        fetchClient('/escaladores/stats/tipos'),
+        fetchClient(`/escaladores/stats/actividad-mensual?${params.toString()}`)
+    ]);
+
+    const resumen = await resumenResponse.json();
+    const tipos = await tiposResponse.json();
+    const actividadPayload = await actividadResponse.json();
+    const actividadMensual = Array.isArray(actividadPayload?.actividadMensual)
+        ? actividadPayload.actividadMensual
+        : [];
+
+    return normalizeEscaladorStats({
+        ...resumen,
+        ...tipos,
+        actividadMensual,
+    });
+}
+
 async function renderPerfilConDatos(container, renderFn) {
     showLoading();
 
     try {
-        const escalador = await cargarPerfilEscalador();
+        const [escalador, estadisticas] = await Promise.all([
+            cargarPerfilEscalador(),
+            cargarEstadisticasEscalador().catch(() => getDefaultEscaladorStats())
+        ]);
+        escalador.estadisticas = normalizeEscaladorStats(estadisticas);
 
         const callbacks = {
             onLogout: () => {

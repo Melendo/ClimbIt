@@ -1,3 +1,4 @@
+import { fn, col, QueryTypes } from 'sequelize';
 import pistaRepository from '../../domain/pistas/pistaRepository.js';
 import Pista from '../../domain/pistas/Pista.js';
 import { NotFoundError, ValidationError } from '../../domain/sharedObjects/AppError.js';
@@ -71,6 +72,10 @@ class PistaRepositoryPostgres extends pistaRepository {
 
   async cambiarEstado(idPista, idEscalador, nuevoEstado) {
     try {
+      const fechaCompletado = ['flash', 'completado'].includes(nuevoEstado)
+        ? new Date()
+        : null;
+
       const pistaModel = await this.PistaModel.findByPk(idPista, {
         include: [
           {
@@ -92,11 +97,17 @@ class PistaRepositoryPostgres extends pistaRepository {
       if (pistaModel.escaladores && pistaModel.escaladores.length > 0) {
         // Si existe, actualizar el estado
         const escaladorData = pistaModel.escaladores[0];
-        await escaladorData.EscalaPista.update({ estado: nuevoEstado });
+        await escaladorData.EscalaPista.update({
+          estado: nuevoEstado,
+          fechaCompletado,
+        });
       } else {
         // Si no existe, crear la relación
         await pistaModel.addEscaladores(idEscalador, {
-          through: { estado: nuevoEstado },
+          through: {
+            estado: nuevoEstado,
+            fechaCompletado,
+          },
         });
       }
     } catch (error) {
@@ -223,6 +234,170 @@ class PistaRepositoryPostgres extends pistaRepository {
       throw mapRepositoryError(error, {
         fallbackMessage: 'Error al obtener estado de pista',
         internalCode: 'PISTA_GET_STATE_DB_FAILED',
+      });
+    }
+  }
+
+  async obtenerResumenEstadisticasEscalador(idEscalador) {
+    try {
+      const escalaPistaModel = this.PistaModel.sequelize.models.EscalaPista;
+      const filas = await escalaPistaModel.findAll({
+        where: { idEscalador },
+        attributes: [
+          [col('Estado'), 'estado'],
+          [fn('COUNT', col('Estado')), 'total'],
+        ],
+        group: [col('Estado')],
+        raw: true,
+      });
+
+      const totales = filas.reduce(
+        (acc, fila) => {
+          const estado = fila.estado;
+          const total = Number(fila.total) || 0;
+          if (estado === 'flash') {
+            acc.totalFlash = total;
+          } else if (estado === 'completado') {
+            acc.totalCompletado = total;
+          } else if (estado === 'proyecto') {
+            acc.totalProyecto = total;
+          }
+          return acc;
+        },
+        {
+          totalFlash: 0,
+          totalCompletado: 0,
+          totalProyecto: 0,
+        }
+      );
+
+      const totalRutas = totales.totalFlash + totales.totalCompletado;
+      const porcentajeFlash =
+        totalRutas > 0 ? (totales.totalFlash / totalRutas) * 100 : 0;
+ 
+      return {
+        totalRutas,
+        totalFlash: totales.totalFlash,
+        totalCompletado: totales.totalCompletado,
+        totalProyecto: totales.totalProyecto,
+        porcentajeFlash,
+      };
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al obtener resumen de estadisticas del escalador',
+        internalCode: 'PISTA_STATS_RESUMEN_DB_FAILED',
+      });
+    }
+  }
+
+  async obtenerTiposEstadisticasEscalador(idEscalador) {
+    try {
+      const filas = await this.PistaModel.findAll({
+        attributes: [
+          'tipo',
+          [fn('COUNT', col('Pista.IDPista')), 'total'],
+        ],
+        include: [
+          {
+            association: 'escaladores',
+            attributes: [],
+            through: {
+              attributes: [],
+              where: {
+                idEscalador,
+                estado: ['flash', 'completado'],
+              },
+            },
+            required: true,
+          },
+        ],
+        group: [col('Pista.Tipo')],
+        raw: true,
+      });
+
+      const totales = filas.reduce(
+        (acc, fila) => {
+          const tipo = fila.tipo;
+          const total = Number(fila.total) || 0;
+
+          if (tipo === 'boulder') {
+            acc.totalBloques = total;
+          } else if (tipo === 'via') {
+            acc.totalVias = total;
+          }
+
+          return acc;
+        },
+        {
+          totalBloques: 0,
+          totalVias: 0,
+        }
+      );
+
+      const totalRutas = totales.totalBloques + totales.totalVias;
+      const porcentajeBloques =
+        totalRutas > 0 ? (totales.totalBloques / totalRutas) * 100 : 0;
+      const porcentajeVias =
+        totalRutas > 0 ? (totales.totalVias / totalRutas) * 100 : 0;
+
+      return {
+        totalBloques: totales.totalBloques,
+        totalVias: totales.totalVias,
+        porcentajeBloques,
+        porcentajeVias,
+        favoritaTexto:
+          totales.totalBloques >= totales.totalVias ? 'Bloque' : 'Via',
+      };
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage:
+          'Error al obtener distribucion por tipo de rutas del escalador',
+        internalCode: 'PISTA_STATS_TIPOS_DB_FAILED',
+      });
+    }
+  }
+
+  async obtenerActividadMensualEscalador(idEscalador, year, month) {
+    try {
+      const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
+      const endDate = new Date(Date.UTC(year, month, 1, 0, 0, 0));
+
+      const rows = await this.PistaModel.sequelize.query(
+        `
+          SELECT
+            DATE(ep."FechaCompletado") AS "fechaCompletado",
+            EXTRACT(DAY FROM ep."FechaCompletado")::int AS dia,
+            COUNT(*)::int AS rutas
+          FROM "EscalaPista" ep
+          WHERE ep."IDEscalador" = :idEscalador
+            AND ep."Estado" IN ('flash', 'completado')
+            AND ep."FechaCompletado" IS NOT NULL
+            AND ep."FechaCompletado" >= :startDate
+            AND ep."FechaCompletado" < :endDate
+          GROUP BY DATE(ep."FechaCompletado"), EXTRACT(DAY FROM ep."FechaCompletado")
+          ORDER BY DATE(ep."FechaCompletado") ASC
+        `,
+        {
+          replacements: { idEscalador, startDate, endDate },
+          type: QueryTypes.SELECT,
+        }
+      );
+
+      const actividadMensual = rows.map((row) => ({
+        fechaCompletado: row.fechaCompletado,
+        dia: Number(row.dia),
+        rutas: Number(row.rutas) || 0,
+      }));
+
+      return {
+        year,
+        month,
+        actividadMensual,
+      };
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al obtener actividad mensual del escalador',
+        internalCode: 'PISTA_STATS_ACTIVIDAD_MENSUAL_DB_FAILED',
       });
     }
   }
