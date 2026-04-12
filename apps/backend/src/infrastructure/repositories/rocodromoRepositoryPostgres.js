@@ -55,6 +55,9 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
     try {
       const rocodromoData = await this.RocodromoModel.findByPk(idRocodromo, {
         include: 'zonas',
+        order: [
+          ['id', 'ASC']
+        ]
       });
 
       if (!rocodromoData) {
