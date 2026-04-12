@@ -9,7 +9,7 @@ class ActualizarValoracion {
     this.pistaRepository = pistaRepository;
     this.escaladorRepository = escaladorRepository;
   }
-  async execute({ idPista, idEscalador, nuevaValoracion }) {
+  async execute({ idPista, escaladorApodo, nuevaValoracion }) {
     try {
       const pista = await this.pistaRepository.obtenerPorId(idPista);
       if (!pista) {
@@ -18,16 +18,14 @@ class ActualizarValoracion {
           'PISTA_NOT_FOUND'
         );
       }
-
       const escalador =
-        await this.escaladorRepository.obtenerPorId(idEscalador);
+        await this.escaladorRepository.encontrarPorApodo(escaladorApodo);
       if (!escalador) {
         throw new NotFoundError(
-          `Escalador con ID ${idEscalador} no encontrado`,
+          `Escalador con apodo ${escaladorApodo} no encontrado`,
           'ESCALADOR_NOT_FOUND'
         );
       }
-
       const resultado = await this.pistaRepository.actualizarValoracion(
         pista.id,
         escalador.id,

@@ -189,42 +189,6 @@ router.post(
  * - nombre: nombre de la pista
  * - dificultad: grado de dificultad en escala francesa
  */
-const obtenerPistaPorIdValidators = [
-  param('id')
-    .toInt()
-    .isInt({ min: 1 })
-    .withMessage('El id de la pista debe ser un entero positivo'),
-];
-
-router.get(
-  '/:id',
-  verifyTokenMiddleware,
-  obtenerPistaPorIdValidators,
-  validate,
-  (req, res, next) => {
-    pistaController.obtenerPistaPorId(req, res, next);
-  }
-);
-
-/**
- * GET /pistas/:id/imagen
- * Obtiene la imagen de una pista
- *
- * Parámetros esperados (URL Path):
- * - id (@param {number} , requerido): ID de la pista (entero positivo)
- *
- * Requiere: Token JWT válido en header Authorization
- */
-router.get(
-  '/:id/imagen',
-  verifyTokenMiddleware,
-  obtenerPistaPorIdValidators,
-  validate,
-  (req, res, next) => {
-    pistaController.obtenerImagen(req, res, next);
-  }
-);
-
 /**
  * POST /pistas/cambiar-estado/:id
  * Cambia el estado de una pista (activa/inactiva)
@@ -258,6 +222,56 @@ router.post(
   validate,
   (req, res, next) => {
     pistaController.cambiarEstado(req, res, next);
+  }
+);
+
+const obtenerPistaPorIdValidators = [
+  param('id')
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('El id de la pista debe ser un entero positivo'),
+];
+
+/**
+ * GET /pistas/:id/imagen
+ * Obtiene la imagen de una pista
+ *
+ * Parámetros esperados (URL Path):
+ * - id (@param {number} , requerido): ID de la pista (entero positivo)
+ *
+ * Requiere: Token JWT válido en header Authorization
+ */
+router.get(
+  '/:id/imagen',
+  verifyTokenMiddleware,
+  obtenerPistaPorIdValidators,
+  validate,
+  (req, res, next) => {
+    pistaController.obtenerImagen(req, res, next);
+  }
+);
+
+/**
+ * GET /pistas/:id/valoracionTotal
+ * Obtiene la valoración total de una pista
+ *
+ * Parámetros esperados (URL Path):
+ * - id (@param {number} , requerido): ID de la pista (entero positivo)
+ *
+ * Requiere: Token JWT válido en header Authorization
+ *
+ * Respuesta esperada: @return {Object} Valoración total de la pista:
+ * - idPista: ID de la pista
+ * - valoracionTotal: Valoración total promedio de la pista (decimal)
+ * - numValoraciones: Número total de valoraciones recibidas para la pista (entero)
+ */
+router.get(
+  '/:id/valoracionTotal',
+  verifyTokenMiddleware,
+  obtenerPistaPorIdValidators,
+  validate,
+  async (req, res, next) => {
+    pistaController.obtenerValoracionTotal(req, res, next);
   }
 );
 
@@ -296,30 +310,6 @@ router.put(
 );
 
 /**
- * GET /pistas/:id/valoracionTotal
- * Obtiene la valoración total de una pista
- *
- * Parámetros esperados (URL Path):
- * - id (@param {number} , requerido): ID de la pista (entero positivo)
- *
- * Requiere: Token JWT válido en header Authorization
- *
- * Respuesta esperada: @return {Object} Valoración total de la pista:
- * - idPista: ID de la pista
- * - valoracionTotal: Valoración total promedio de la pista (decimal)
- * - numValoraciones: Número total de valoraciones recibidas para la pista (entero)
- */
-
-router.get(
-  '/:id/valoracionTotal',
-  verifyTokenMiddleware,
-  validate,
-  async (req, res, next) => {
-    pistaController.obtenerValoracionTotal(req, res, next);
-  }
-);
-
-/**
  * DELETE /pistas/:id
  * Inactiva una pista (borrado logico)
  *
@@ -341,6 +331,16 @@ router.delete(
   }),
   (req, res, next) => {
     pistaController.eliminar(req, res, next);
+  }
+);
+
+router.get(
+  '/:id',
+  verifyTokenMiddleware,
+  obtenerPistaPorIdValidators,
+  validate,
+  (req, res, next) => {
+    pistaController.obtenerPistaPorId(req, res, next);
   }
 );
 
