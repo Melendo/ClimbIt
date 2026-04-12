@@ -3,6 +3,9 @@
 :root {
   --bs-font-sans-serif: 'Montserrat', sans-serif;
   --app-max-width: 400px;
+  --vh: 1vh;
+  --app-height: calc(var(--vh) * 100);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 body {
@@ -78,9 +81,11 @@ body {
 /* Contenedor principal de la app (vertical) */
 #app-container.app-vertical-layout {
   min-height: 100dvh;
+  min-height: var(--app-height);
   display: flex;
   justify-content: center;
   padding: 1rem;
+  padding-bottom: max(1rem, var(--safe-area-inset-bottom));
 }
 
 /* Contenido centrado con ancho máximo */
@@ -91,12 +96,14 @@ body {
 
 #app-container.app-vertical-layout > .app-content.app-shell {
   height: 100dvh;
+  height: var(--app-height);
 }
 
 /* En móvil: contenido a pantalla completa */
 @media (max-width: 576px) {
   #app-container.app-vertical-layout {
     padding: 0;
+    padding-bottom: var(--safe-area-inset-bottom);
   }
 
   #app-container.app-vertical-layout > .app-content {
@@ -109,6 +116,7 @@ body {
     border-left: none !important;
     border-right: none !important;
     min-height: 100dvh;
+    min-height: var(--app-height);
   }
 
   #app-container.app-vertical-layout > .app-content.app-shell > .card-header,
@@ -166,6 +174,10 @@ body {
   color: var(--bs-primary) !important;
 }
 
+.app-shell > .card-footer {
+  padding-bottom: calc(0.5rem + var(--safe-area-inset-bottom)) !important;
+}
+
 /* ========================================
    Barra de progreso de registro
    ======================================== */
@@ -175,6 +187,7 @@ body {
   left: 0;
   right: 0;
   padding: 1rem;
+  padding-bottom: calc(1rem + var(--safe-area-inset-bottom));
   background: linear-gradient(transparent, rgba(255, 255, 255, 0.95));
   z-index: 100;
 }
@@ -348,6 +361,7 @@ body {
    ======================================== */
 .crear-ruta-card {
   min-height: 100dvh;
+  min-height: var(--app-height);
 }
 
 .crear-ruta-mapa-wrap {
@@ -1057,6 +1071,7 @@ body {
 @media (max-width: 576px) {
   .perfil-photo-modal-content {
     min-height: 100dvh;
+    min-height: var(--app-height);
     border-radius: 0;
   }
 
