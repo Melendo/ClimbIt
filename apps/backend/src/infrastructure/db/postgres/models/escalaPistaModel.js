@@ -40,6 +40,11 @@ export default (sequelize, DataTypes) => {
         allowNull: true,
         field: 'FechaCompletado',
       },
+      valoracion: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        field: 'Valoracion',
+      },
     },
     {
       sequelize,

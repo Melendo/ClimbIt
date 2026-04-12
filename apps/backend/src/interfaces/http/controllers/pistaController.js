@@ -111,6 +111,35 @@ class PistaController {
     }
   }
 
+  async actualizarValoracion(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { valoracion } = req.body;
+      const escaladorApodo = req.user.apodo;
+      const resultado = await this.useCases.actualizarValoracion.execute({
+        idPista: id,
+        escaladorApodo: escaladorApodo,
+        nuevaValoracion: valoracion,
+      });
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async obtenerValoracionTotal(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const resultado = await this.useCases.obtenerValoracionTotal.execute({ idPista: id });
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
   async eliminar(req, res, next) {
     try {
       const { id } = req.params;

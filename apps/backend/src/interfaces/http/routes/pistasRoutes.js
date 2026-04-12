@@ -17,7 +17,12 @@ const router = express.Router();
 const container = await containerPromise;
 const { pistaController } = container;
 
-const RASTER_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const RASTER_IMAGE_MIME_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+];
 const PISTA_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
 const getPistaImageBaseName = (req) => {
@@ -37,7 +42,7 @@ const getPistaImageBaseName = (req) => {
  * Parámetros esperados (body) obligatorios:
  * - idZona (@param {int} , requerido): ID de la zona a la que pertenece la pista (entero positivo)
  * - tipo (@param {string}): Tipo de la pista (ej: "Boulder", "Via", etc.)
- * 
+ *
  * Parámetros esperados (body) opcionales:
  * - nombre (@param {string}): Nombre descriptivo de la pista (1-100 caracteres)
  * - dificultad (@param {string}): Grado de dificultad en escala francesa (ej: "6a", "7b+", etc.)
@@ -46,12 +51,12 @@ const getPistaImageBaseName = (req) => {
  * - posY (@param {int}): Coordenada Y en el mapa de la pista
  * - fechaCreacion (@param {Date}): Fecha de creación de la pista en Date (ej: "2024-06-01T12:00:00Z")
  * - fechaRetirada (@param {Date}): Fecha de retirada de la pista en Date (ej: "2024-06-01T12:00:00Z")
- * 
+ *
  * Parámetros esperados (multipart/form-data):
  * - imagen (@param {file} , opcional): Archivo de imagen de la pista
  *
- * Requiere: 
- * - Token JWT válido en header Authorization 
+ * Requiere:
+ * - Token JWT válido en header Authorization
  * - Rol de Administrador o Gestor del Rocódromo al que pertenece la zona
  *
  * Respuesta esperada: @return {Object} Detalles de la pista creada:
@@ -78,9 +83,7 @@ const crearPistaValidators = [
     .trim()
     .isLength({ min: 0, max: 100 })
     .withMessage('El nombre de la pista debe tener entre 1 y 100 caracteres'),
-  body('dificultad')
-    .optional({ nullable: true, checkFalsy: true })
-    .trim(),
+  body('dificultad').optional({ nullable: true, checkFalsy: true }).trim(),
   body('posX')
     .optional({ nullable: true })
     .toInt()
@@ -113,7 +116,7 @@ const crearPistaValidators = [
         throw new Error('La fecha de creación no puede ser futura');
       }
       return true;
-    })  ,
+    }),
 
   body('fechaRetirada')
     .optional({ nullable: true, checkFalsy: true })
@@ -123,11 +126,12 @@ const crearPistaValidators = [
         return true;
       }
       if (value <= new Date()) {
-        throw new Error('La fecha de retirada no puede ser anterior a la fecha actual');
+        throw new Error(
+          'La fecha de retirada no puede ser anterior a la fecha actual'
+        );
       }
       return true;
     }),
-
 ];
 
 const uploadImagenPista = uploadImages({
@@ -185,42 +189,6 @@ router.post(
  * - nombre: nombre de la pista
  * - dificultad: grado de dificultad en escala francesa
  */
-const obtenerPistaPorIdValidators = [
-  param('id')
-    .toInt()
-    .isInt({ min: 1 })
-    .withMessage('El id de la pista debe ser un entero positivo'),
-];
-
-router.get(
-  '/:id',
-  verifyTokenMiddleware,
-  obtenerPistaPorIdValidators,
-  validate,
-  (req, res, next) => {
-    pistaController.obtenerPistaPorId(req, res, next);
-  }
-);
-
-/**
- * GET /pistas/:id/imagen
- * Obtiene la imagen de una pista
- *
- * Parámetros esperados (URL Path):
- * - id (@param {number} , requerido): ID de la pista (entero positivo)
- *
- * Requiere: Token JWT válido en header Authorization
- */
-router.get(
-  '/:id/imagen',
-  verifyTokenMiddleware,
-  obtenerPistaPorIdValidators,
-  validate,
-  (req, res, next) => {
-    pistaController.obtenerImagen(req, res, next);
-  }
-);
-
 /**
  * POST /pistas/cambiar-estado/:id
  * Cambia el estado de una pista (activa/inactiva)
@@ -257,6 +225,90 @@ router.post(
   }
 );
 
+const obtenerPistaPorIdValidators = [
+  param('id')
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('El id de la pista debe ser un entero positivo'),
+];
+
+/**
+ * GET /pistas/:id/imagen
+ * Obtiene la imagen de una pista
+ *
+ * Parámetros esperados (URL Path):
+ * - id (@param {number} , requerido): ID de la pista (entero positivo)
+ *
+ * Requiere: Token JWT válido en header Authorization
+ */
+router.get(
+  '/:id/imagen',
+  verifyTokenMiddleware,
+  obtenerPistaPorIdValidators,
+  validate,
+  (req, res, next) => {
+    pistaController.obtenerImagen(req, res, next);
+  }
+);
+
+/**
+ * GET /pistas/:id/valoracionTotal
+ * Obtiene la valoración total de una pista
+ *
+ * Parámetros esperados (URL Path):
+ * - id (@param {number} , requerido): ID de la pista (entero positivo)
+ *
+ * Requiere: Token JWT válido en header Authorization
+ *
+ * Respuesta esperada: @return {Object} Valoración total de la pista:
+ * - idPista: ID de la pista
+ * - valoracionTotal: Valoración total promedio de la pista (decimal)
+ * - numValoraciones: Número total de valoraciones recibidas para la pista (entero)
+ */
+router.get(
+  '/:id/valoracionTotal',
+  verifyTokenMiddleware,
+  obtenerPistaPorIdValidators,
+  validate,
+  async (req, res, next) => {
+    pistaController.obtenerValoracionTotal(req, res, next);
+  }
+);
+
+/**
+ * PUT /pistas/:id/valoracion
+ * Actualiza la valoración de una pista
+ *
+ * Parámetros esperados (URL Path):
+ * - id (@param {number} , requerido): ID de la pista (entero positivo)
+ *
+ * Parámetros esperados (body):
+ * - valoracion (@param {number} , requerido): Nueva valoración de la pista (entero entre 1 y 10)
+ *
+ * Requiere: Token JWT válido en header Authorization
+ */
+
+const actualizarValoracionPistaValidators = [
+  param('id')
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('El id de la pista debe ser un entero positivo'),
+  body('valoracion')
+    .toInt()
+    .isInt({ min: 1, max: 10 })
+    .withMessage('La valoración debe ser un entero entre 1 y 10'),
+];
+
+router.put(
+  '/:id/valoracion',
+  verifyTokenMiddleware,
+  actualizarValoracionPistaValidators,
+  validate,
+  (req, res, next) => {
+    pistaController.actualizarValoracion(req, res, next);
+  }
+);
+
 /**
  * DELETE /pistas/:id
  * Inactiva una pista (borrado logico)
@@ -279,6 +331,16 @@ router.delete(
   }),
   (req, res, next) => {
     pistaController.eliminar(req, res, next);
+  }
+);
+
+router.get(
+  '/:id',
+  verifyTokenMiddleware,
+  obtenerPistaPorIdValidators,
+  validate,
+  (req, res, next) => {
+    pistaController.obtenerPistaPorId(req, res, next);
   }
 );
 
@@ -318,9 +380,7 @@ const actualizarPistaValidators = [
     .trim()
     .isLength({ min: 0, max: 100 })
     .withMessage('El nombre de la pista debe tener entre 0 y 100 caracteres'),
-  body('dificultad')
-    .optional({ nullable: true, checkFalsy: true })
-    .trim(),
+  body('dificultad').optional({ nullable: true, checkFalsy: true }).trim(),
   body('tipo')
     .optional({ nullable: true })
     .isIn(['boulder', 'via'])
@@ -363,7 +423,9 @@ const actualizarPistaValidators = [
         return true;
       }
       if (value <= new Date()) {
-        throw new Error('La fecha de retirada no puede ser anterior a la fecha actual');
+        throw new Error(
+          'La fecha de retirada no puede ser anterior a la fecha actual'
+        );
       }
       return true;
     }),
