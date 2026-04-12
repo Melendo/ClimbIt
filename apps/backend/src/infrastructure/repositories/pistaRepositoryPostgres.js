@@ -187,21 +187,22 @@ class PistaRepositoryPostgres extends pistaRepository {
   async obtenerValoracionTotal(idPista) {
     try {
       const pistaModel = await this.PistaModel.findByPk(idPista, {
+        attributes: ['id'],
         include: [
           {
             association: 'escaladores',
-            attributes: [],
+            attributes: ['id'],
             through: {
               attributes: ['valoracion'],
               where: {
-                valoracion: { [Op.ne]: null },
+                valoracion: { [Op.not]: null },
               },
             },
             required: false,
           },
         ],
       });
-
+      console.log('PistaModel con valoraciones:', JSON.stringify(pistaModel));
       if (!pistaModel) {
         throw new NotFoundError(
           `Obtener valoración total: Pista con ID ${idPista} no encontrada`,
