@@ -1,5 +1,9 @@
 const MAX_RATING_STARS = 5;
 
+function clampHalfStars(value) {
+  return Math.round(clampStars(value) * 2) / 2;
+}
+
 function clampStars(value) {
   const numericValue = Number(value);
   if (!Number.isFinite(numericValue)) return 0;
@@ -7,7 +11,7 @@ function clampStars(value) {
 }
 
 function formatAverageRating(value) {
-  return clampStars(value).toFixed(1);
+  return clampHalfStars(value).toFixed(1);
 }
 
 function formatNumValoraciones(value) {
@@ -16,11 +20,15 @@ function formatNumValoraciones(value) {
 }
 
 function renderReadonlyStars(value) {
-  const rounded = Math.round(clampStars(value));
+  const rating = clampHalfStars(value);
 
   return Array.from({ length: MAX_RATING_STARS }, (_, index) => {
-    const filled = index < rounded;
-    return `<span class="material-icons" style="font-size: 28px; line-height: 1; color: ${filled ? '#f59e0b' : '#cbd5e1'};">${filled ? 'star' : 'star_border'}</span>`;
+    const starValue = index + 1;
+    const isFull = rating >= starValue;
+    const isHalf = !isFull && rating >= starValue - 0.5;
+    const icon = isFull ? 'star' : isHalf ? 'star_half' : 'star_border';
+
+    return `<span class="material-icons" style="font-size: 28px; line-height: 1; color: ${isFull || isHalf ? '#f59e0b' : '#cbd5e1'};">${icon}</span>`;
   }).join('');
 }
 
@@ -98,6 +106,22 @@ export function setupRutaRatingSection(container, options = {}) {
   let selectedStars = 0;
   let isSubmitting = false;
 
+  const normalizeSelection = (value) => clampHalfStars(value);
+
+  const getStarFillState = (starIndex, rating) => {
+    const starValue = starIndex + 1;
+
+    if (rating >= starValue) {
+      return 'full';
+    }
+
+    if (rating >= starValue - 0.5) {
+      return 'half';
+    }
+
+    return 'empty';
+  };
+
   const setSelectionText = () => {
     if (!selectionLabel) return;
 
@@ -106,19 +130,23 @@ export function setupRutaRatingSection(container, options = {}) {
       return;
     }
 
-    selectionLabel.textContent = `${selectedStars} estrella${selectedStars === 1 ? '' : 's'} seleccionada${selectedStars === 1 ? '' : 's'}`;
+    const formattedValue = Number.isInteger(selectedStars)
+      ? String(selectedStars)
+      : selectedStars.toFixed(1).replace('.', ',');
+
+    selectionLabel.textContent = `${formattedValue} estrella${selectedStars === 1 ? '' : 's'} seleccionada${selectedStars === 1 ? '' : 's'}`;
   };
 
   const paintSelectedStars = () => {
     starButtons.forEach((button, index) => {
-      const isFilled = index < selectedStars;
+      const fillState = getStarFillState(index, selectedStars);
       const icon = button.querySelector('.material-icons');
 
-      button.setAttribute('aria-pressed', String(isFilled));
+      button.setAttribute('aria-pressed', String(fillState !== 'empty'));
       if (!icon) return;
 
-      icon.textContent = isFilled ? 'star' : 'star_border';
-      icon.style.color = isFilled ? '#f59e0b' : '#cbd5e1';
+      icon.textContent = fillState === 'full' ? 'star' : fillState === 'half' ? 'star_half' : 'star_border';
+      icon.style.color = fillState === 'empty' ? '#cbd5e1' : '#f59e0b';
     });
   };
 
@@ -162,10 +190,20 @@ export function setupRutaRatingSection(container, options = {}) {
   };
 
   starButtons.forEach((button) => {
-    button.addEventListener('click', () => {
+    button.addEventListener('click', (event) => {
       if (!canRate || isSubmitting) return;
 
-      selectedStars = Number(button.dataset.ratingStars) || 0;
+      const rating = Number(button.dataset.ratingStars) || 0;
+      const isPointerClick = Number(event.clientX) > 0 || Number(event.clientY) > 0;
+      let isHalfSelection = false;
+
+      if (isPointerClick) {
+        const buttonRect = button.getBoundingClientRect();
+        const clickX = event.clientX - buttonRect.left;
+        isHalfSelection = clickX < buttonRect.width / 2;
+      }
+
+      selectedStars = normalizeSelection(isHalfSelection ? rating - 0.5 : rating);
       paintSelectedStars();
       setSelectionText();
       updateControlState();

@@ -10,7 +10,7 @@ function toDateInputValue(value) {
   if (!value) return '';
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return '';
-  
+
   const year = parsed.getFullYear();
   const month = String(parsed.getMonth() + 1).padStart(2, '0');
   const day = String(parsed.getDate()).padStart(2, '0');
@@ -290,8 +290,8 @@ export function renderInfoRuta(container, ruta, callbacks) {
   const dificultadLabel = dificultad || 'Sin dificultad';
   const colorPresasLabel = colorPresas || 'No definido';
   const colorPresasRgb = ruta?.colorPresasRgb || 'rgb(158, 158, 158)';
-  const fechaCreacionLabel = formatDateTime(fechaCreacion);
-  const fechaRetiradaLabel = formatDateTime(fechaRetirada);
+  const fechaCreacionLabel = formatDateOnly(fechaCreacion);
+  const fechaRetiradaLabel = formatDateOnly(fechaRetirada);
   const activoLabel = activo ? 'Activa' : 'Inactiva';
   const activoBadgeClass = activo ? 'text-bg-success' : 'text-bg-secondary';
   const canManage = Boolean(ruta?.canManage);
@@ -435,19 +435,17 @@ export function renderInfoRuta(container, ruta, callbacks) {
   }
 
   
-  // Función auxiliar para formatear una fecha/hora a un formato legible o mostrar un texto de fallback si no es válida
-  function formatDateTime(value) {
+  // Función auxiliar para formatear una fecha a día, mes y año o mostrar un texto de fallback si no es válida
+  function formatDateOnly(value) {
     if (!value) return 'No definida';
-    
+
     const parsed = new Date(value);
     if (Number.isNaN(parsed.getTime())) return 'No definida';
-    
-    return parsed.toLocaleString('es-ES', {
+
+    return parsed.toLocaleDateString('es-ES', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
     });
   }
   

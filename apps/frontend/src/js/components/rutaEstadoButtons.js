@@ -99,7 +99,7 @@ export function setupRutaEstadoButtons(container, onEstadoChange) {
 
       const tooltip = document.createElement('div');
       tooltip.className = 'position-absolute px-3 py-2 rounded-3 shadow-sm';
-      tooltip.style.cssText = 'background: #1f2937; color: white; font-size: 0.8rem; z-index: 1000; top: 30px; right: 0; white-space: nowrap; animation: fadeIn 0.15s ease;';
+      tooltip.style.cssText = 'background: #1f2937; color: white; font-size: 0.8rem; z-index: 1000; top: 30px; right: 0; max-width: min(80vw, 220px); white-space: normal; word-break: break-word; text-align: left; animation: fadeIn 0.15s ease;';
       tooltip.textContent = infoBtn.dataset.tooltip;
 
       infoBtn.parentElement.appendChild(tooltip);
