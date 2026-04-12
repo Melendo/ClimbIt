@@ -142,7 +142,6 @@ export function createSvgPanzoomMap(options) {
             selectionLayer = document.createElementNS(SVG_NS, 'g');
             selectionLayer.setAttribute('id', 'point-selection-layer');
 
-            let movedByPan = false;
             let mapStartX = 0;
             let mapStartY = 0;
 
@@ -227,11 +226,33 @@ export function createSvgPanzoomMap(options) {
 
                 let startX = 0;
                 let startY = 0;
+                let lastMarkerActivationAt = 0;
+
+                const triggerMarkerClick = () => {
+                    if (typeof onMarkerClick !== 'function') {
+                        return;
+                    }
+
+                    const now = Date.now();
+                    if (now - lastMarkerActivationAt < 320) {
+                        return;
+                    }
+
+                    lastMarkerActivationAt = now;
+                    onMarkerClick(marker.payload, marker);
+                };
 
                 markerGroup.addEventListener('pointerdown', (event) => {
                     startX = event.clientX;
                     startY = event.clientY;
-                    movedByPan = false;
+
+                    if (typeof markerGroup.setPointerCapture === 'function') {
+                        try {
+                            markerGroup.setPointerCapture(event.pointerId);
+                        } catch {
+                            // Algunos navegadores pueden no permitir captura en SVG.
+                        }
+                    }
                 });
 
                 markerGroup.addEventListener('pointerup', (event) => {
@@ -239,9 +260,17 @@ export function createSvgPanzoomMap(options) {
                     const deltaY = Math.abs(event.clientY - startY);
                     const isClick = deltaX <= clickThreshold && deltaY <= clickThreshold;
 
-                    if (isClick && !movedByPan && typeof onMarkerClick === 'function') {
-                        onMarkerClick(marker.payload, marker);
+                    if (isClick) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        triggerMarkerClick();
                     }
+                });
+
+                markerGroup.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    triggerMarkerClick();
                 });
 
                 markerVisual.appendChild(touchHitbox);
@@ -261,7 +290,6 @@ export function createSvgPanzoomMap(options) {
 
                     mapStartX = event.clientX;
                     mapStartY = event.clientY;
-                    movedByPan = false;
                 });
 
                 svgElement.addEventListener('pointerup', (event) => {
@@ -272,7 +300,7 @@ export function createSvgPanzoomMap(options) {
                     const deltaY = Math.abs(event.clientY - mapStartY);
                     const isClick = deltaX <= clickThreshold && deltaY <= clickThreshold;
 
-                    if (!isClick || movedByPan) {
+                    if (!isClick) {
                         return;
                     }
 
@@ -335,12 +363,10 @@ export function createSvgPanzoomMap(options) {
             clampPanToViewport();
 
             panzoomInstance.on('pan', () => {
-                movedByPan = true;
                 clampPanToViewport();
             });
 
             panzoomInstance.on('zoom', () => {
-                movedByPan = true;
                 const { scale } = panzoomInstance.getTransform();
                 updateMarkerScale(scale);
                 clampPanToViewport();
