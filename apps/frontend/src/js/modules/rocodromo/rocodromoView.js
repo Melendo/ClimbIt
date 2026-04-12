@@ -1,6 +1,15 @@
 import { renderNavbar } from '../../components/navbar.js';
 import { renderSubscribeButton, initSubscribeButtons } from '../../components/subscribeButton.js';
 import { renderRocodromoCard } from '../../components/rocodromoCard.js';
+import { renderSectionDivider } from '../../components/sectionDivider.js';
+import {
+  bindHeatmapInteractions,
+  buildEscaladorStatsViewModel,
+  renderMonthlyActivityCards,
+  renderRouteTypesStatsCard,
+  renderStatsSection,
+  renderTotalRoutesStatsCard,
+} from '../../components/escaladorStats.js';
 // Función auxiliar para mostrar un valor o un texto de fallback si el valor es nulo
 function renderValueOrFallback(value, fallback = 'No disponible') {
   if (value === null || value === undefined) return fallback;
@@ -333,4 +342,61 @@ export function renderCrearRocodromo(container, callbacks) {
       alertBox
     });
   });
+}
+
+export function renderRocodromoEstadisticas(container, data) {
+  const { rocodromo = {}, escalador = {}, estadisticas = {} } = data;
+  if (typeof container.__rocodromoStatsCleanup === 'function') {
+    container.__rocodromoStatsCleanup();
+    container.__rocodromoStatsCleanup = null;
+  }
+
+  const statsViewModel = buildEscaladorStatsViewModel(estadisticas);
+  const rocodromoNombre = renderValueOrFallback(rocodromo?.nombre, 'Rocodromo');
+  const escaladorApodo = renderValueOrFallback(escalador?.apodo, 'Escalador');
+  const logoSrc = rocodromo?.logoSrc || '/assets/rocodromoDefecto.jpg';
+  const avatarSrc = escalador?.fotoSrc || '/assets/johnDoe.png';
+
+  container.innerHTML = `
+    <div class="d-flex flex-column" style="height: 100dvh; overflow: hidden;">
+      <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
+        <a href="#mapaZona?id=${rocodromo.id}" class="text-dark text-decoration-none" aria-label="Volver al mapa">
+          <span class="material-icons align-middle">arrow_back</span>
+        </a>
+        <span class="fw-medium">Estadisticas de Rocodromo</span>
+      </div>
+
+      <div class="card-body flex-grow-1 overflow-auto bg-light rocodromo-stats-page">
+        <div class="rocodromo-stats-hero">
+          <div class="rocodromo-stats-avatars" aria-hidden="true">
+            <img src="${logoSrc}" alt="Logo de ${rocodromoNombre}" class="rocodromo-stats-avatar is-roco" />
+            <img src="${avatarSrc}" alt="Foto de perfil de ${escaladorApodo}" class="rocodromo-stats-avatar is-escalador" />
+          </div>
+          <p class="rocodromo-stats-hero-text text-center mb-0">
+            <strong>${rocodromoNombre}<br />X<br />${escaladorApodo}</strong>
+          </p>
+        </div>
+
+        <div class="mt-4">
+          ${renderSectionDivider({ label: 'Estadisticas' })}
+          <div class="perfil-estadisticas-view mt-3 px-0">
+            ${renderStatsSection({
+              title: 'Total de Rutas Escaladas',
+              content: renderTotalRoutesStatsCard(statsViewModel.totals),
+            })}
+            ${renderStatsSection({
+              title: 'Tipos de Rutas Escaladas',
+              content: renderRouteTypesStatsCard(statsViewModel.totals),
+            })}
+            ${renderStatsSection({
+              title: 'Actividad mensual',
+              content: renderMonthlyActivityCards(statsViewModel.monthly),
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  container.__rocodromoStatsCleanup = bindHeatmapInteractions(container);
 }

@@ -182,7 +182,7 @@ export function renderRouteTypesStatsCard(totals = {}) {
           <span class="perfil-stats-pill-value">${totals.totalVias || 0}</span>
         </div>
       </div>
-      <p class="perfil-stats-text">Tu tipo de ruta favorita es el ${totals.favoritaTexto || 'Bloque'}.</p>
+      <p class="perfil-stats-text">${totals.favoritaTexto || 'Bloque'} es tu tipo de ruta más escalado.</p>
       <div class="perfil-stats-bar is-split">
         <span class="perfil-stats-bar-fill is-bloque" style="width: ${formatPct(totals.bloquesPct)};"></span>
         <span class="perfil-stats-bar-fill is-via" style="width: ${formatPct(totals.viasPct)};"></span>
@@ -263,11 +263,11 @@ export function renderMonthlyActivityCards(monthly = {}) {
     <div class="perfil-stats-card perfil-monthly-summary">
       <div class="perfil-monthly-metrics">
         <div class="perfil-monthly-metric">
-          <span class="perfil-monthly-label">Rutas del mes</span>
+          <span class="perfil-monthly-label">Rutas este mes</span>
           <span class="perfil-monthly-value">${monthly.totalMonthlyRoutes || 0}</span>
         </div>
         <div class="perfil-monthly-metric">
-          <span class="perfil-monthly-label">Dias activos</span>
+          <span class="perfil-monthly-label">Dias activo</span>
           <span class="perfil-monthly-value">${monthly.activeDays || 0}</span>
         </div>
         <div class="perfil-monthly-metric">

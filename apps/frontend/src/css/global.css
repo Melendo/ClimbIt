@@ -562,6 +562,46 @@ body {
   color: #212529;
 }
 
+.rocodromo-stats-page {
+  padding: 20px 16px 24px;
+}
+
+.rocodromo-stats-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.rocodromo-stats-avatars {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.rocodromo-stats-avatar {
+  width: 108px;
+  height: 108px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 3px solid #ffffff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  background: #ffffff;
+}
+
+.rocodromo-stats-avatar.is-escalador {
+  margin-left: -14px;
+}
+
+.rocodromo-stats-hero-text {
+  max-width: 100%;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #1f1f1f;
+  white-space: normal;
+  line-height: 1.35;
+}
+
 .perfil-stats-section {
   display: flex;
   flex-direction: column;
