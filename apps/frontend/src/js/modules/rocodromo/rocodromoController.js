@@ -4,12 +4,149 @@ import {
     renderCrearRocodromo,
     renderInfoRocodromo,
     renderModificarRocodromo,
+    renderRocodromoEstadisticas,
 } from './rocodromoView.js';
 import { fetchClient, fetchImageObjectUrl, canManageRocodromo } from '../../core/client.js';
 import { showLoading, showError, showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
 
 const ROCODROMO_LOGO_PLACEHOLDER = '/assets/rocodromoDefecto.jpg';
+const PERFIL_PLACEHOLDER = '/assets/johnDoe.png';
 const MAX_LOGO_SIZE_BYTES = 3 * 1024 * 1024;
+const DEFAULT_ESCALADOR_STATS = {
+    totalRutas: 0,
+    totalFlash: 0,
+    totalCompletado: 0,
+    totalProyecto: 0,
+    totalRutasActivasRocodromo: 0,
+    porcentajeFlash: 0,
+    totalBloques: 0,
+    totalVias: 0,
+    porcentajeBloques: 0,
+    porcentajeVias: 0,
+    favoritaTexto: 'Bloque',
+    maxDificultadBloque: '',
+    maxDificultadVia: '',
+    actividadMensual: [],
+};
+let rocodromoStatsAvatarObjectUrl = null;
+
+function toSafeNumber(value) {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+        return 0;
+    }
+
+    return parsed;
+}
+
+function normalizeActividadMensual(actividadMensual) {
+    if (!Array.isArray(actividadMensual)) {
+        return [];
+    }
+
+    return actividadMensual
+        .map((item) => {
+            const dia = Number(item?.dia);
+            const rutas = toSafeNumber(item?.rutas);
+
+            if (!Number.isInteger(dia) || dia < 1 || dia > 31) {
+                return null;
+            }
+
+            return {
+                dia,
+                rutas,
+            };
+        })
+        .filter(Boolean);
+}
+
+function getDefaultEscaladorStats() {
+    return {
+        ...DEFAULT_ESCALADOR_STATS,
+        actividadMensual: [],
+    };
+}
+
+function normalizeEscaladorStats(rawStats = {}) {
+    const favoritaTexto =
+        typeof rawStats.favoritaTexto === 'string' && rawStats.favoritaTexto.trim()
+            ? rawStats.favoritaTexto.trim()
+            : DEFAULT_ESCALADOR_STATS.favoritaTexto;
+
+    return {
+        ...getDefaultEscaladorStats(),
+        totalRutas: toSafeNumber(rawStats.totalRutas),
+        totalFlash: toSafeNumber(rawStats.totalFlash),
+        totalCompletado: toSafeNumber(rawStats.totalCompletado),
+        totalProyecto: toSafeNumber(rawStats.totalProyecto),
+        totalRutasActivasRocodromo: toSafeNumber(rawStats.totalRutasActivasRocodromo),
+        porcentajeFlash: toSafeNumber(rawStats.porcentajeFlash),
+        totalBloques: toSafeNumber(rawStats.totalBloques),
+        totalVias: toSafeNumber(rawStats.totalVias),
+        porcentajeBloques: toSafeNumber(rawStats.porcentajeBloques),
+        porcentajeVias: toSafeNumber(rawStats.porcentajeVias),
+        favoritaTexto,
+        maxDificultadBloque:
+            typeof rawStats.maxDificultadBloque === 'string'
+                ? rawStats.maxDificultadBloque.trim()
+                : '',
+        maxDificultadVia:
+            typeof rawStats.maxDificultadVia === 'string'
+                ? rawStats.maxDificultadVia.trim()
+                : '',
+        actividadMensual: normalizeActividadMensual(rawStats.actividadMensual),
+    };
+}
+
+function revokeObjectUrl(url) {
+    if (typeof url === 'string' && url.startsWith('blob:')) {
+        URL.revokeObjectURL(url);
+    }
+}
+
+async function cargarEscaladorBasico() {
+    const response = await fetchClient('/escaladores/perfil');
+    const escalador = await response.json();
+
+    if (rocodromoStatsAvatarObjectUrl) {
+        revokeObjectUrl(rocodromoStatsAvatarObjectUrl);
+        rocodromoStatsAvatarObjectUrl = null;
+    }
+
+    const idFotoPerfil = Number(escalador?.idFotoPerfil);
+    if (Number.isInteger(idFotoPerfil) && idFotoPerfil > 0) {
+        try {
+            escalador.fotoSrc = await fetchImageObjectUrl(`/escaladores/fotos-perfil/${idFotoPerfil}`);
+            rocodromoStatsAvatarObjectUrl = escalador.fotoSrc;
+        } catch (err) {
+            console.warn('No se pudo cargar la foto de perfil:', err.message);
+            escalador.fotoSrc = PERFIL_PLACEHOLDER;
+        }
+    } else {
+        escalador.fotoSrc = PERFIL_PLACEHOLDER;
+    }
+
+    return escalador;
+}
+
+async function cargarEstadisticasEscaladorPorRocodromo(idRocodromo) {
+    const [resumenResponse, tiposResponse, dificultadMaximaResponse] = await Promise.all([
+        fetchClient(`/escaladores/stats/rocodromo/${idRocodromo}/resumen`),
+        fetchClient(`/escaladores/stats/rocodromo/${idRocodromo}/tipos`),
+        fetchClient(`/escaladores/stats/rocodromo/${idRocodromo}/dificultad-maxima`),
+    ]);
+
+    const resumen = await resumenResponse.json();
+    const tipos = await tiposResponse.json();
+    const dificultadMaxima = await dificultadMaximaResponse.json();
+
+    return normalizeEscaladorStats({
+        ...resumen,
+        ...tipos,
+        ...dificultadMaxima,
+    });
+}
 
 function applyRocodromoServerValidationErrors(validationErrors, fields) {
     if (!Array.isArray(validationErrors)) return;
@@ -163,6 +300,35 @@ export async function infoRocoCmd(container, id) {
         }
     } catch (err) {
         showError(`Error al obtener la información del rocódromo: ${err.message}`);
+    }
+}
+
+export async function rocodromoEstadisticasCmd(container, id) {
+    const idRocodromo = Number(id);
+    if (!Number.isInteger(idRocodromo) || idRocodromo < 1) {
+        showError('ID de rocódromo no válido o no proporcionado');
+        return;
+    }
+
+    showLoading();
+
+    try {
+        const rocodromoResponse = await fetchClient(`/rocodromos/${idRocodromo}`);
+        const rocodromo = await rocodromoResponse.json();
+        rocodromo.logoSrc = await resolveRocodromoLogoSrc(rocodromo);
+
+        const [escalador, estadisticas] = await Promise.all([
+            cargarEscaladorBasico().catch(() => ({ apodo: 'Escalador', fotoSrc: PERFIL_PLACEHOLDER })),
+            cargarEstadisticasEscaladorPorRocodromo(idRocodromo).catch(() => getDefaultEscaladorStats()),
+        ]);
+
+        renderRocodromoEstadisticas(container, {
+            rocodromo,
+            escalador,
+            estadisticas: normalizeEscaladorStats(estadisticas),
+        });
+    } catch (err) {
+        showError(`Error al cargar estadísticas del rocódromo: ${err.message}`);
     }
 }
 

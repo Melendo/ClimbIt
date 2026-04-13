@@ -266,6 +266,13 @@ const actividadMensualValidators = [
     .withMessage('month debe ser un entero entre 1 y 12'),
 ];
 
+const statsRocodromoValidators = [
+  param('id')
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('id debe ser un entero positivo'),
+];
+
 /**
  * GET /escaladores/stats/actividad-mensual
  * Obtiene actividad mensual del escalador autenticado para el mes y anio solicitados.
@@ -277,6 +284,63 @@ router.get(
   validate,
   (req, res, next) => {
     escaladorController.obtenerActividadMensual(req, res, next);
+  }
+);
+
+/**
+ * GET /escaladores/stats/rocodromo/:id/resumen
+ * Obtiene estadisticas resumidas del escalador autenticado para un rocodromo.
+ */
+router.get(
+  '/stats/rocodromo/:id/resumen',
+  verifyToken,
+  statsRocodromoValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.obtenerResumenEstadisticasRocodromo(req, res, next);
+  }
+);
+
+/**
+ * GET /escaladores/stats/rocodromo/:id/tipos
+ * Obtiene distribucion por tipo de rutas del escalador autenticado para un rocodromo.
+ */
+router.get(
+  '/stats/rocodromo/:id/tipos',
+  verifyToken,
+  statsRocodromoValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.obtenerTiposEstadisticasRocodromo(req, res, next);
+  }
+);
+
+/**
+ * GET /escaladores/stats/rocodromo/:id/actividad-mensual
+ * Obtiene actividad mensual del escalador autenticado para un rocodromo.
+ */
+router.get(
+  '/stats/rocodromo/:id/actividad-mensual',
+  verifyToken,
+  statsRocodromoValidators,
+  actividadMensualValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.obtenerActividadMensualRocodromo(req, res, next);
+  }
+);
+
+/**
+ * GET /escaladores/stats/rocodromo/:id/dificultad-maxima
+ * Obtiene dificultad maxima escalada por tipo de ruta para el escalador autenticado en un rocodromo.
+ */
+router.get(
+  '/stats/rocodromo/:id/dificultad-maxima',
+  verifyToken,
+  statsRocodromoValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.obtenerDificultadMaximaRocodromo(req, res, next);
   }
 );
 

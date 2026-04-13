@@ -9,6 +9,7 @@ import {
     crearRocodromoCmd,
     infoRocoCmd,
     modificarRocodromoCmd,
+    rocodromoEstadisticasCmd,
 } from '../modules/rocodromo/rocodromoController.js';
 import { mapaZonaCmd, crearZonaCmd } from '../modules/zona/zonaController.js';
 import { homeCmd } from '../modules/home/homeController.js';
@@ -89,6 +90,10 @@ export async function handleNavigation() {
         else if (hash.startsWith('#modificarRocodromo')) {
             const id = obtenerParametroDesdeHash('id');
             await modificarRocodromoCmd(mainContainer, id);
+        }
+        else if (hash.startsWith('#rocodromoEstadisticas')) {
+            const id = obtenerParametroDesdeHash('id');
+            await rocodromoEstadisticasCmd(mainContainer, id);
         }
         else if (hash === '#crearRocodromo') {
             crearRocodromoCmd(mainContainer);

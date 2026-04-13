@@ -343,6 +343,13 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
                 saveZonaFilters(idRocodromo, filtrosActivos);
             }
         );
+
+        const btnEstadisticas = container.querySelector('#btnEstadisticas');
+        if (btnEstadisticas) {
+            btnEstadisticas.addEventListener('click', () => {
+                window.location.hash = `#rocodromoEstadisticas?id=${rocodromo.id}`;
+            });
+        }
         
     } catch (err) {
         showError(`Error al cargar el mapa de zona: ${err.message}`);

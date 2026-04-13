@@ -105,6 +105,9 @@ export function buildEscaladorStatsViewModel(estadisticas = {}, now = new Date()
   const totalFlash = toSafeCount(estadisticas.totalFlash);
   const totalBloques = toSafeCount(estadisticas.totalBloques);
   const totalVias = toSafeCount(estadisticas.totalVias);
+  const totalRutasActivasRocodromo = toSafeCount(
+    estadisticas.totalRutasActivasRocodromo
+  );
   const rutasFlashPct = totalRutas > 0 ? (totalFlash / totalRutas) * 100 : 0;
   const bloquesPct = totalRutas > 0 ? (totalBloques / totalRutas) * 100 : 0;
   const viasPct = totalRutas > 0 ? (totalVias / totalRutas) * 100 : 0;
@@ -117,6 +120,14 @@ export function buildEscaladorStatsViewModel(estadisticas = {}, now = new Date()
   const actividadMensual = Array.isArray(estadisticas.actividadMensual)
     ? estadisticas.actividadMensual
     : [];
+  const maxDificultadBloqueRaw =
+    typeof estadisticas.maxDificultadBloque === 'string'
+      ? estadisticas.maxDificultadBloque.trim()
+      : '';
+  const maxDificultadViaRaw =
+    typeof estadisticas.maxDificultadVia === 'string'
+      ? estadisticas.maxDificultadVia.trim()
+      : '';
 
   return {
     totals: {
@@ -124,13 +135,51 @@ export function buildEscaladorStatsViewModel(estadisticas = {}, now = new Date()
       totalFlash,
       totalBloques,
       totalVias,
+      totalRutasActivasRocodromo,
       rutasFlashPct,
       bloquesPct,
       viasPct,
       favoritaTexto: escapeHtml(favoritaTextoRaw),
+      maxDificultadBloque: escapeHtml(maxDificultadBloqueRaw),
+      maxDificultadVia: escapeHtml(maxDificultadViaRaw),
     },
     monthly: buildMonthlyActivityViewModel(actividadMensual, now),
   };
+}
+
+export function renderRocodromoRoutesOverviewStatsCard(totals = {}) {
+  const totalRutas = toSafeCount(totals.totalRutas);
+  const totalRutasActivasRocodromo = toSafeCount(
+    totals.totalRutasActivasRocodromo
+  );
+  const completadasSobreActivasPct =
+    totalRutasActivasRocodromo > 0
+      ? Math.min(100, (totalRutas / totalRutasActivasRocodromo) * 100)
+      : 0;
+
+  return `
+    <div class="perfil-stats-card">
+      <div class="perfil-stats-badges">
+        <div class="perfil-stats-badge is-completed">
+          <span class="perfil-stats-badge-value">${totalRutas}</span>
+          <span class="perfil-stats-badge-label">Completado</span>
+        </div>
+        <div class="perfil-stats-badge">
+          <span class="perfil-stats-badge-value">${totalRutasActivasRocodromo}</span>
+          <span class="perfil-stats-badge-label">Rutas activas</span>
+        </div>
+      </div>
+      <p class="perfil-stats-text">
+        Has escalado un total de ${totalRutas} rutas de las ${totalRutasActivasRocodromo} que hay activas.
+      </p>
+      <div class="perfil-stats-bar">
+        <span class="perfil-stats-bar-fill is-completed" style="width: ${formatPct(completadasSobreActivasPct)};"></span>
+      </div>
+      <div class="perfil-stats-bar-labels">
+        <span>${formatPct(completadasSobreActivasPct)}</span>
+      </div>
+    </div>
+  `;
 }
 
 export function renderStatsSection({ title, content }) {
@@ -182,7 +231,7 @@ export function renderRouteTypesStatsCard(totals = {}) {
           <span class="perfil-stats-pill-value">${totals.totalVias || 0}</span>
         </div>
       </div>
-      <p class="perfil-stats-text">Tu tipo de ruta favorita es el ${totals.favoritaTexto || 'Bloque'}.</p>
+      <p class="perfil-stats-text">${totals.favoritaTexto || 'Bloque'} es tu tipo de ruta más escalado.</p>
       <div class="perfil-stats-bar is-split">
         <span class="perfil-stats-bar-fill is-bloque" style="width: ${formatPct(totals.bloquesPct)};"></span>
         <span class="perfil-stats-bar-fill is-via" style="width: ${formatPct(totals.viasPct)};"></span>
@@ -190,6 +239,26 @@ export function renderRouteTypesStatsCard(totals = {}) {
       <div class="perfil-stats-bar-labels">
         <span>${formatPct(totals.bloquesPct)}</span>
         <span>${formatPct(totals.viasPct)}</span>
+      </div>
+    </div>
+  `;
+}
+
+export function renderMaxDifficultyStatsCard(totals = {}) {
+  const maxDificultadBloque = totals.maxDificultadBloque || 'Sin datos';
+  const maxDificultadVia = totals.maxDificultadVia || 'Sin datos';
+
+  return `
+    <div class="perfil-stats-card perfil-max-difficulty-card">
+      <div class="perfil-max-difficulty-grid">
+        <div class="perfil-max-difficulty-tile is-bloque">
+          <span class="perfil-max-difficulty-label">Bloques</span>
+          <span class="perfil-max-difficulty-chip">${maxDificultadBloque}</span>
+        </div>
+        <div class="perfil-max-difficulty-tile is-via">
+          <span class="perfil-max-difficulty-label">Vias</span>
+          <span class="perfil-max-difficulty-chip">${maxDificultadVia}</span>
+        </div>
       </div>
     </div>
   `;
@@ -263,11 +332,11 @@ export function renderMonthlyActivityCards(monthly = {}) {
     <div class="perfil-stats-card perfil-monthly-summary">
       <div class="perfil-monthly-metrics">
         <div class="perfil-monthly-metric">
-          <span class="perfil-monthly-label">Rutas del mes</span>
+          <span class="perfil-monthly-label">Rutas este mes</span>
           <span class="perfil-monthly-value">${monthly.totalMonthlyRoutes || 0}</span>
         </div>
         <div class="perfil-monthly-metric">
-          <span class="perfil-monthly-label">Dias activos</span>
+          <span class="perfil-monthly-label">Dias activo</span>
           <span class="perfil-monthly-value">${monthly.activeDays || 0}</span>
         </div>
         <div class="perfil-monthly-metric">

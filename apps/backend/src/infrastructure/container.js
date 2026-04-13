@@ -35,6 +35,10 @@ import CambiarApodoEscalador from '../application/escaladores/cambiarApodoEscala
 import ObtenerResumenEstadisticasEscalador from '../application/escaladores/obtenerResumenEstadisticasEscalador.js';
 import ObtenerTiposEstadisticasEscalador from '../application/escaladores/obtenerTiposEstadisticasEscalador.js';
 import ObtenerActividadMensualEscalador from '../application/escaladores/obtenerActividadMensualEscalador.js';
+import ObtenerResumenEstadisticasRocodromoEscalador from '../application/escaladores/obtenerResumenEstadisticasRocodromoEscalador.js';
+import ObtenerTiposEstadisticasRocodromoEscalador from '../application/escaladores/obtenerTiposEstadisticasRocodromoEscalador.js';
+import ObtenerActividadMensualRocodromoEscalador from '../application/escaladores/obtenerActividadMensualRocodromoEscalador.js';
+import ObtenerDificultadMaximaRocodromoEscalador from '../application/escaladores/obtenerDificultadMaximaRocodromoEscalador.js';
 
 import CrearPista from '../application/pistas/crearPista.js';
 import ActualizarPista from '../application/pistas/actualizarPista.js';
@@ -126,6 +130,30 @@ async function inicializarContainer() {
     new ObtenerTiposEstadisticasEscalador(escaladorRepository, pistaRepository);
   const obtenerActividadMensualUseCase =
     new ObtenerActividadMensualEscalador(escaladorRepository, pistaRepository);
+  const obtenerResumenEstadisticasRocodromoUseCase =
+    new ObtenerResumenEstadisticasRocodromoEscalador(
+      escaladorRepository,
+      rocodromoRepository,
+      pistaRepository
+    );
+  const obtenerTiposEstadisticasRocodromoUseCase =
+    new ObtenerTiposEstadisticasRocodromoEscalador(
+      escaladorRepository,
+      rocodromoRepository,
+      pistaRepository
+    );
+  const obtenerActividadMensualRocodromoUseCase =
+    new ObtenerActividadMensualRocodromoEscalador(
+      escaladorRepository,
+      rocodromoRepository,
+      pistaRepository
+    );
+  const obtenerDificultadMaximaRocodromoUseCase =
+    new ObtenerDificultadMaximaRocodromoEscalador(
+      escaladorRepository,
+      rocodromoRepository,
+      pistaRepository
+    );
 
   const crearPistaUseCase = new CrearPista(
     pistaRepository,
@@ -193,6 +221,13 @@ async function inicializarContainer() {
     obtenerResumenEstadisticas: obtenerResumenEstadisticasUseCase,
     obtenerTiposEstadisticas: obtenerTiposEstadisticasUseCase,
     obtenerActividadMensual: obtenerActividadMensualUseCase,
+    obtenerResumenEstadisticasRocodromo:
+      obtenerResumenEstadisticasRocodromoUseCase,
+    obtenerTiposEstadisticasRocodromo: obtenerTiposEstadisticasRocodromoUseCase,
+    obtenerActividadMensualRocodromo:
+      obtenerActividadMensualRocodromoUseCase,
+    obtenerDificultadMaximaRocodromo:
+      obtenerDificultadMaximaRocodromoUseCase,
   };
   const pistaUseCases = {
     crear: crearPistaUseCase,

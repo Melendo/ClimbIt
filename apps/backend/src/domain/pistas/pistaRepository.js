@@ -47,6 +47,16 @@ class PistaRepository {
   async obtenerActividadMensualEscalador(idEscalador, year, month) {
     throw new Error('Método "obtenerActividadMensualEscalador" no implementado');
   }
+
+  async obtenerTotalPistasActivasPorRocodromo(idRocodromo) {
+    throw new Error('Método "obtenerTotalPistasActivasPorRocodromo" no implementado');
+  }
+
+  async obtenerDificultadesEscaladasPorTipoEnRocodromo(idEscalador, idRocodromo) {
+    throw new Error(
+      'Método "obtenerDificultadesEscaladasPorTipoEnRocodromo" no implementado'
+    );
+  }
 }
 
 export default PistaRepository;
