@@ -1,5 +1,5 @@
 import { renderMapaZona, renderCrearZona } from './zonaView.js';
-import { ESTADOS_CONFIG, loadColorScaleMap, normalizeColorName, resolveColorScaleRgb } from '../../components/climbingConfig.js';
+import { ESTADOS_CONFIG, loadColorScaleMap, resolveColorScaleRgb } from '../../components/climbingConfig.js';
 import { createSvgPanzoomMap } from '../../components/svgPanzoomMap.js';
 import { fetchClient, canManageRocodromo, fetchImageObjectUrl, fetchSvgText } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
@@ -21,18 +21,13 @@ function normalizeDificultades(dificultades) {
         .filter((value) => value.length > 0);
 }
 
-function buildDificultadOptions(escala, colorMap) {
+function buildDificultadOptions(escala) {
     const dificultades = normalizeDificultades(escala?.dificultades);
 
     return dificultades.map((dificultad) => {
-        if (!escala?.isColor) {
-            return { value: dificultad, label: dificultad };
-        }
-
-        const colorHex = colorMap[normalizeColorName(dificultad)] || null;
         return {
             value: dificultad,
-            label: colorHex ? `${dificultad} (${colorHex})` : dificultad,
+            label: dificultad,
         };
     });
 }
@@ -244,8 +239,8 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
             const escalas = await escalasRes.json();
 
             dificultadOptionsByTipo = {
-                boulder: buildDificultadOptions(escalas?.escalaDificultadBloque, colorScaleMap),
-                via: buildDificultadOptions(escalas?.escalaDificultadVia, colorScaleMap),
+                boulder: buildDificultadOptions(escalas?.escalaDificultadBloque),
+                via: buildDificultadOptions(escalas?.escalaDificultadVia),
             };
         } catch (err) {
             console.warn('No se pudieron cargar las escalas de dificultad del rocódromo:', err.message);
