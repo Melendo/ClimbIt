@@ -24,6 +24,8 @@ const DEFAULT_ESCALADOR_STATS = {
     porcentajeBloques: 0,
     porcentajeVias: 0,
     favoritaTexto: 'Bloque',
+    maxDificultadBloque: '',
+    maxDificultadVia: '',
     actividadMensual: [],
 };
 let rocodromoStatsAvatarObjectUrl = null;
@@ -85,6 +87,14 @@ function normalizeEscaladorStats(rawStats = {}) {
         porcentajeBloques: toSafeNumber(rawStats.porcentajeBloques),
         porcentajeVias: toSafeNumber(rawStats.porcentajeVias),
         favoritaTexto,
+        maxDificultadBloque:
+            typeof rawStats.maxDificultadBloque === 'string'
+                ? rawStats.maxDificultadBloque.trim()
+                : '',
+        maxDificultadVia:
+            typeof rawStats.maxDificultadVia === 'string'
+                ? rawStats.maxDificultadVia.trim()
+                : '',
         actividadMensual: normalizeActividadMensual(rawStats.actividadMensual),
     };
 }
@@ -121,17 +131,20 @@ async function cargarEscaladorBasico() {
 }
 
 async function cargarEstadisticasEscaladorPorRocodromo(idRocodromo) {
-    const [resumenResponse, tiposResponse] = await Promise.all([
+    const [resumenResponse, tiposResponse, dificultadMaximaResponse] = await Promise.all([
         fetchClient(`/escaladores/stats/rocodromo/${idRocodromo}/resumen`),
         fetchClient(`/escaladores/stats/rocodromo/${idRocodromo}/tipos`),
+        fetchClient(`/escaladores/stats/rocodromo/${idRocodromo}/dificultad-maxima`),
     ]);
 
     const resumen = await resumenResponse.json();
     const tipos = await tiposResponse.json();
+    const dificultadMaxima = await dificultadMaximaResponse.json();
 
     return normalizeEscaladorStats({
         ...resumen,
         ...tipos,
+        ...dificultadMaxima,
     });
 }
 

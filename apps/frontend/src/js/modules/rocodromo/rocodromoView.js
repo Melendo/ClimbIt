@@ -5,6 +5,7 @@ import { renderSectionDivider } from '../../components/sectionDivider.js';
 import {
   bindHeatmapInteractions,
   buildEscaladorStatsViewModel,
+  renderMaxDifficultyStatsCard,
   renderRocodromoRoutesOverviewStatsCard,
   renderRouteTypesStatsCard,
   renderStatsSection,
@@ -391,6 +392,10 @@ export function renderRocodromoEstadisticas(container, data) {
             ${renderStatsSection({
               title: 'Tipos de Rutas Escaladas',
               content: renderRouteTypesStatsCard(statsViewModel.totals),
+            })}
+            ${renderStatsSection({
+              title: 'DIFICULTAD MÁXIMA ESCALADA',
+              content: renderMaxDifficultyStatsCard(statsViewModel.totals),
             })}
           </div>
         </div>

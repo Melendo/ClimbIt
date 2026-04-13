@@ -120,6 +120,14 @@ export function buildEscaladorStatsViewModel(estadisticas = {}, now = new Date()
   const actividadMensual = Array.isArray(estadisticas.actividadMensual)
     ? estadisticas.actividadMensual
     : [];
+  const maxDificultadBloqueRaw =
+    typeof estadisticas.maxDificultadBloque === 'string'
+      ? estadisticas.maxDificultadBloque.trim()
+      : '';
+  const maxDificultadViaRaw =
+    typeof estadisticas.maxDificultadVia === 'string'
+      ? estadisticas.maxDificultadVia.trim()
+      : '';
 
   return {
     totals: {
@@ -132,6 +140,8 @@ export function buildEscaladorStatsViewModel(estadisticas = {}, now = new Date()
       bloquesPct,
       viasPct,
       favoritaTexto: escapeHtml(favoritaTextoRaw),
+      maxDificultadBloque: escapeHtml(maxDificultadBloqueRaw),
+      maxDificultadVia: escapeHtml(maxDificultadViaRaw),
     },
     monthly: buildMonthlyActivityViewModel(actividadMensual, now),
   };
@@ -229,6 +239,26 @@ export function renderRouteTypesStatsCard(totals = {}) {
       <div class="perfil-stats-bar-labels">
         <span>${formatPct(totals.bloquesPct)}</span>
         <span>${formatPct(totals.viasPct)}</span>
+      </div>
+    </div>
+  `;
+}
+
+export function renderMaxDifficultyStatsCard(totals = {}) {
+  const maxDificultadBloque = totals.maxDificultadBloque || 'Sin datos';
+  const maxDificultadVia = totals.maxDificultadVia || 'Sin datos';
+
+  return `
+    <div class="perfil-stats-card perfil-max-difficulty-card">
+      <div class="perfil-max-difficulty-grid">
+        <div class="perfil-max-difficulty-tile is-bloque">
+          <span class="perfil-max-difficulty-label">Bloques</span>
+          <span class="perfil-max-difficulty-chip">${maxDificultadBloque}</span>
+        </div>
+        <div class="perfil-max-difficulty-tile is-via">
+          <span class="perfil-max-difficulty-label">Vias</span>
+          <span class="perfil-max-difficulty-chip">${maxDificultadVia}</span>
+        </div>
       </div>
     </div>
   `;

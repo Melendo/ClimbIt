@@ -703,6 +703,57 @@ body {
   color: #8c2f54;
 }
 
+.perfil-max-difficulty-card {
+  gap: 0.9rem;
+}
+
+.perfil-max-difficulty-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.perfil-max-difficulty-tile {
+  border-radius: 14px;
+  padding: 14px 10px;
+  border: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.perfil-max-difficulty-tile.is-bloque {
+  background: #e6f4ea;
+  border-color: #c5e6d1;
+  color: #176439;
+}
+
+.perfil-max-difficulty-tile.is-via {
+  background: #f7e5ee;
+  border-color: #ebc3d4;
+  color: #8a3558;
+}
+
+.perfil-max-difficulty-label {
+  font-size: 1.2rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.perfil-max-difficulty-chip {
+  min-width: 78px;
+  text-align: center;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  padding: 4px 14px;
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .perfil-stats-text {
   margin: 0;
   color: #4a4a4a;
