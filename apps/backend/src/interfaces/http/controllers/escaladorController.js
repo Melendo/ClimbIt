@@ -135,6 +135,21 @@ class EscaladorController {
     }
   }
 
+  async obtenerDificultadMaximaRocodromo(req, res, next) {
+    try {
+      const apodo = req.user.apodo;
+      const idRocodromo = Number(req.params.id);
+      const dificultadMaxima =
+        await this.useCases.obtenerDificultadMaximaRocodromo.execute({
+          apodo,
+          idRocodromo,
+        });
+      res.status(200).json(dificultadMaxima);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
   async obtenerResumenEstadisticasPublico(req, res, next) {
     try {
       const { apodo } = req.params;

@@ -330,6 +330,20 @@ router.get(
   }
 );
 
+/**
+ * GET /escaladores/stats/rocodromo/:id/dificultad-maxima
+ * Obtiene dificultad maxima escalada por tipo de ruta para el escalador autenticado en un rocodromo.
+ */
+router.get(
+  '/stats/rocodromo/:id/dificultad-maxima',
+  verifyToken,
+  statsRocodromoValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.obtenerDificultadMaximaRocodromo(req, res, next);
+  }
+);
+
 const statsPublicosPorApodoValidators = [
   param('apodo')
     .trim()

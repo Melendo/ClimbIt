@@ -658,6 +658,58 @@ class PistaRepositoryPostgres extends pistaRepository {
     }
   }
 
+  async obtenerDificultadesEscaladasPorTipoEnRocodromo(idEscalador, idRocodromo) {
+    try {
+      const rows = await this.PistaModel.sequelize.query(
+        `
+          SELECT
+            p."Tipo" AS tipo,
+            p."Dificultad" AS dificultad
+          FROM "EscalaPista" ep
+          INNER JOIN "Pistas" p ON p."IDPista" = ep."IDPista"
+          INNER JOIN "Zonas" z ON z."IDZona" = p."IDZona"
+          WHERE ep."IDEscalador" = :idEscalador
+            AND z."IDRoco" = :idRocodromo
+            AND ep."Estado" IN ('flash', 'completado')
+            AND p."Dificultad" IS NOT NULL
+          GROUP BY p."Tipo", p."Dificultad"
+          ORDER BY p."Tipo", p."Dificultad"
+        `,
+        {
+          replacements: { idEscalador, idRocodromo },
+          type: QueryTypes.SELECT,
+        }
+      );
+
+      return rows.reduce(
+        (acc, row) => {
+          const tipo = row.tipo;
+          const dificultad =
+            typeof row.dificultad === 'string' ? row.dificultad.trim() : '';
+
+          if (!dificultad) {
+            return acc;
+          }
+
+          if (tipo === 'boulder') {
+            acc.boulder.push(dificultad);
+          } else if (tipo === 'via') {
+            acc.via.push(dificultad);
+          }
+
+          return acc;
+        },
+        { boulder: [], via: [] }
+      );
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage:
+          'Error al obtener dificultades escaladas por tipo en rocodromo',
+        internalCode: 'PISTA_STATS_MAX_DIFICULTAD_ROCODROMO_DB_FAILED',
+      });
+    }
+  }
+
   async obtenerActividadMensualEscaladorPorRocodromo(
     idEscalador,
     idRocodromo,

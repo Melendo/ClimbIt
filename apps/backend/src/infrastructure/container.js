@@ -38,6 +38,7 @@ import ObtenerActividadMensualEscalador from '../application/escaladores/obtener
 import ObtenerResumenEstadisticasRocodromoEscalador from '../application/escaladores/obtenerResumenEstadisticasRocodromoEscalador.js';
 import ObtenerTiposEstadisticasRocodromoEscalador from '../application/escaladores/obtenerTiposEstadisticasRocodromoEscalador.js';
 import ObtenerActividadMensualRocodromoEscalador from '../application/escaladores/obtenerActividadMensualRocodromoEscalador.js';
+import ObtenerDificultadMaximaRocodromoEscalador from '../application/escaladores/obtenerDificultadMaximaRocodromoEscalador.js';
 
 import CrearPista from '../application/pistas/crearPista.js';
 import ActualizarPista from '../application/pistas/actualizarPista.js';
@@ -147,6 +148,12 @@ async function inicializarContainer() {
       rocodromoRepository,
       pistaRepository
     );
+  const obtenerDificultadMaximaRocodromoUseCase =
+    new ObtenerDificultadMaximaRocodromoEscalador(
+      escaladorRepository,
+      rocodromoRepository,
+      pistaRepository
+    );
 
   const crearPistaUseCase = new CrearPista(
     pistaRepository,
@@ -219,6 +226,8 @@ async function inicializarContainer() {
     obtenerTiposEstadisticasRocodromo: obtenerTiposEstadisticasRocodromoUseCase,
     obtenerActividadMensualRocodromo:
       obtenerActividadMensualRocodromoUseCase,
+    obtenerDificultadMaximaRocodromo:
+      obtenerDificultadMaximaRocodromoUseCase,
   };
   const pistaUseCases = {
     crear: crearPistaUseCase,
