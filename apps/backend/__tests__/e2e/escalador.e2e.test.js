@@ -179,6 +179,13 @@ describe('E2E: Escalador', () => {
       dificultad: '7a',
       tipo: 'via',
     });
+    const pistaInactivaCompletadaStats = await db.Pista.create({
+      idZona: zonaStats.id,
+      nombre: 'Via Inactiva Stats',
+      dificultad: '7b',
+      tipo: 'via',
+      activo: false,
+    });
     const pistaOtra = await db.Pista.create({
       idZona: zonaOtra.id,
       nombre: 'Fuera Roco Stats',
@@ -203,6 +210,12 @@ describe('E2E: Escalador', () => {
       idEscalador: escaladorSuscripcion.id,
       estado: 'proyecto',
       fechaCompletado: null,
+    });
+    await db.EscalaPista.create({
+      idPista: pistaInactivaCompletadaStats.id,
+      idEscalador: escaladorSuscripcion.id,
+      estado: 'completado',
+      fechaCompletado: new Date('2025-11-14T10:00:00.000Z'),
     });
     await db.EscalaPista.create({
       idPista: pistaOtra.id,
@@ -415,9 +428,9 @@ describe('E2E: Escalador', () => {
         .expect(200);
 
       expect(response.body).toEqual({
-        totalRutas: 2,
+        totalRutas: 3,
         totalFlash: 1,
-        totalCompletado: 1,
+        totalCompletado: 2,
         totalProyecto: 1,
         totalRutasActivasRocodromo: 3,
         porcentajeFlash: expect.any(Number),
@@ -431,10 +444,22 @@ describe('E2E: Escalador', () => {
         .expect(200);
 
       expect(response.body.totalBloques).toBe(1);
-      expect(response.body.totalVias).toBe(1);
-      expect(response.body.porcentajeBloques).toBe(50);
-      expect(response.body.porcentajeVias).toBe(50);
-      expect(response.body.favoritaTexto).toBe('Bloque');
+      expect(response.body.totalVias).toBe(2);
+      expect(response.body.porcentajeBloques).toBeCloseTo(33.33333333, 8);
+      expect(response.body.porcentajeVias).toBeCloseTo(66.66666667, 8);
+      expect(response.body.favoritaTexto).toBe('Via');
+    });
+
+    it('deberia obtener dificultad maxima por tipo incluyendo pistas inactivas', async () => {
+      const response = await request(app)
+        .get(`/escaladores/stats/rocodromo/${rocodromoStats.id}/dificultad-maxima`)
+        .set('Authorization', `Bearer ${tokenSuscripcion}`)
+        .expect(200);
+
+      expect(response.body).toEqual({
+        maxDificultadBloque: 'V4',
+        maxDificultadVia: '7b',
+      });
     });
 
     it('deberia obtener actividad mensual filtrada por rocodromo', async () => {
@@ -492,6 +517,34 @@ describe('E2E: Escalador', () => {
     it('deberia retornar 422 con id invalido', async () => {
       const response = await request(app)
         .get('/escaladores/stats/rocodromo/no-valido/resumen')
+        .set('Authorization', `Bearer ${tokenSuscripcion}`)
+        .expect(422);
+
+      expect(response.body).toHaveProperty('status', 'invalid_request');
+      const fields = response.body.errors.map((e) => e.field);
+      expect(fields).toContain('id');
+    });
+
+    it('deberia retornar 401 sin token en dificultad maxima', async () => {
+      const response = await request(app)
+        .get(`/escaladores/stats/rocodromo/${rocodromoStats.id}/dificultad-maxima`)
+        .expect(401);
+
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
+    });
+
+    it('deberia retornar 404 en dificultad maxima si el rocodromo no existe', async () => {
+      const response = await request(app)
+        .get('/escaladores/stats/rocodromo/999999/dificultad-maxima')
+        .set('Authorization', `Bearer ${tokenSuscripcion}`)
+        .expect(404);
+
+      expect(response.body).toHaveProperty('code', 'ROCODROMO_NOT_FOUND');
+    });
+
+    it('deberia retornar 422 en dificultad maxima con id invalido', async () => {
+      const response = await request(app)
+        .get('/escaladores/stats/rocodromo/no-valido/dificultad-maxima')
         .set('Authorization', `Bearer ${tokenSuscripcion}`)
         .expect(422);
 

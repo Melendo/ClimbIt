@@ -586,4 +586,40 @@ describe('PistaRepositoryPostgres', () => {
       });
     });
   });
+
+  describe('obtenerDificultadesEscaladasPorTipoEnRocodromo', () => {
+    it('deberia retornar dificultades agrupadas por tipo', async () => {
+      mockPistaModel.sequelize.query.mockResolvedValue([
+        { tipo: 'boulder', dificultad: 'V4' },
+        { tipo: 'boulder', dificultad: 'V6' },
+        { tipo: 'via', dificultad: '6c' },
+      ]);
+
+      const resultado =
+        await repository.obtenerDificultadesEscaladasPorTipoEnRocodromo(8, 10);
+
+      expect(mockPistaModel.sequelize.query).toHaveBeenCalledWith(
+        expect.stringContaining("AND ep.\"Estado\" IN ('flash', 'completado')"),
+        expect.objectContaining({
+          replacements: expect.objectContaining({
+            idEscalador: 8,
+            idRocodromo: 10,
+          }),
+        })
+      );
+      expect(resultado).toEqual({
+        boulder: ['V4', 'V6'],
+        via: ['6c'],
+      });
+    });
+
+    it('deberia retornar arrays vacios cuando no hay dificultades', async () => {
+      mockPistaModel.sequelize.query.mockResolvedValue([]);
+
+      const resultado =
+        await repository.obtenerDificultadesEscaladasPorTipoEnRocodromo(8, 10);
+
+      expect(resultado).toEqual({ boulder: [], via: [] });
+    });
+  });
 });

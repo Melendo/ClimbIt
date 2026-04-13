@@ -541,5 +541,34 @@ describe('Unit: EscaladorController', () => {
         actividadMensual: [{ dia: 6, rutas: 2 }],
       });
     });
+
+    it('obtenerDificultadMaximaRocodromo responde 200 con maximas por tipo', async () => {
+      const useCases = {
+        obtenerDificultadMaximaRocodromo: {
+          execute: jest.fn().mockResolvedValue({
+            maxDificultadBloque: 'V6',
+            maxDificultadVia: '7a',
+          }),
+        },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = {
+        user: { apodo: 'Tester' },
+        params: { id: '7' },
+      };
+      const res = createResMock();
+
+      await controller.obtenerDificultadMaximaRocodromo(req, res, () => {});
+
+      expect(useCases.obtenerDificultadMaximaRocodromo.execute).toHaveBeenCalledWith({
+        apodo: 'Tester',
+        idRocodromo: 7,
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.body).toEqual({
+        maxDificultadBloque: 'V6',
+        maxDificultadVia: '7a',
+      });
+    });
   });
 });
