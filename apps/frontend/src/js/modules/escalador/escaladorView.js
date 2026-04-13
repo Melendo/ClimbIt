@@ -210,7 +210,7 @@ export function renderEditarPerfil(container, escalador, callbacks) {
                   <button
                     type="button"
                     id="open-change-photo-btn"
-                    class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center perfil-photo-edit-btn"
+                    class="perfil-photo-edit-btn rounded-circle d-flex align-items-center justify-content-center"
                     aria-label="Cambiar foto de perfil"
                     title="Cambiar foto de perfil"
                   >

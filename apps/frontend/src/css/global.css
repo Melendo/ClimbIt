@@ -2,6 +2,7 @@
 
 :root {
   --bs-font-sans-serif: 'Montserrat', sans-serif;
+  --bs-primary: #c75a14;
   --app-max-width: 400px;
   --vh: 1vh;
   --app-height: calc(var(--vh) * 100);
@@ -10,6 +11,62 @@
 
 body {
   font-family: var(--bs-font-sans-serif);
+}
+
+/* Override Bootstrap primary color */
+.btn-primary {
+  background-color: #c75a14 !important;
+  border-color: #c75a14 !important;
+  color: #fff !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active {
+  background-color: #ab4910 !important;
+  border-color: #ab4910 !important;
+}
+
+.btn-outline-primary {
+  color: #c75a14 !important;
+  border-color: #c75a14 !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active,
+.btn-outline-primary.active {
+  background-color: #c75a14 !important;
+  border-color: #c75a14 !important;
+  color: #fff !important;
+}
+
+.text-primary {
+  color: #c75a14 !important;
+}
+
+.bg-primary {
+  background-color: #c75a14 !important;
+}
+
+.border-primary {
+  border-color: #c75a14 !important;
+}
+
+.btn-link {
+  color: #c75a14 !important;
+}
+
+.btn-link:hover {
+  color: #ab4910 !important;
+}
+
+/* Mantener blanco el icono en botones negros de editar perfil */
+.perfil-photo-edit-btn .material-icons,
+.perfil-descripcion-edit-btn .material-icons,
+.perfil-clear-btn .material-icons {
+  color: #fff !important;
 }
 
 .connectivity-banner {
