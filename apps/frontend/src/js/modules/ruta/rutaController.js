@@ -19,6 +19,7 @@ const RUTA_IMAGE_PLACEHOLDER = '/assets/placeholder.jpg';
 
 const TIPOS_PISTA = ['boulder', 'via'];
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+const MIN_ROUTE_SEPARATION = 18;
 
 function canRateRutaByEstado(estado) {
     const normalizedState = ESTADOS_FRONTEND[estado] || estado;
@@ -291,9 +292,47 @@ function updateCoordinatesBadge(coordsBadge, point) {
     coordsBadge.textContent = `posX: ${point.x} | posY: ${point.y}`;
 }
 
+function toFiniteNumberOrNull(value) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+}
+
+function findConflictingRoute(point, rutas = [], { minDistance = MIN_ROUTE_SEPARATION, excludeRutaId = null } = {}) {
+    if (!point || !Array.isArray(rutas) || rutas.length === 0) {
+        return null;
+    }
+
+    const pointX = toFiniteNumberOrNull(point.x);
+    const pointY = toFiniteNumberOrNull(point.y);
+    if (pointX === null || pointY === null) {
+        return null;
+    }
+
+    for (const ruta of rutas) {
+        const rutaId = Number(ruta?.id);
+        if (Number.isInteger(excludeRutaId) && Number.isInteger(rutaId) && rutaId === excludeRutaId) {
+            continue;
+        }
+
+        const rutaX = toFiniteNumberOrNull(ruta?.posX);
+        const rutaY = toFiniteNumberOrNull(ruta?.posY);
+        if (rutaX === null || rutaY === null) {
+            continue;
+        }
+
+        const distance = Math.hypot(pointX - rutaX, pointY - rutaY);
+        if (distance < minDistance) {
+            return ruta;
+        }
+    }
+
+    return null;
+}
+
 // Validación de campos del formulario
-function validateFields(values, selectedPoint, allowedDificultades = [], allowedColorPresas = []) {
+function validateFields(values, selectedPoint, allowedDificultades = [], allowedColorPresas = [], existingRutas = [], options = {}) {
     const errors = {};
+    const { minRouteSeparation = MIN_ROUTE_SEPARATION, excludeRutaId = null } = options;
     const idZonaNum = Number(values.idZona);
     if (!Number.isInteger(idZonaNum) || idZonaNum < 1) {
         errors.idZona = 'idZona debe ser un entero positivo';
@@ -337,6 +376,15 @@ function validateFields(values, selectedPoint, allowedDificultades = [], allowed
 
     if (!selectedPoint) {
         errors.posicion = 'Selecciona una posicion en el mapa para guardar posX y posY';
+    } else {
+        const conflictingRoute = findConflictingRoute(selectedPoint, existingRutas, {
+            minDistance: minRouteSeparation,
+            excludeRutaId,
+        });
+
+        if (conflictingRoute) {
+            errors.posicion = 'La posicion seleccionada se superpone con otra ruta. Selecciona un punto cercano, pero no encima.';
+        }
     }
 
     if (values.imagen) {
@@ -489,7 +537,17 @@ export async function crearRutaCmd(container, params = {}) {
                 viewport: mapaViewport,
                 svgContent: zonaMapaSvg,
                 enablePointSelection: true,
+                allowMarkerPointSelection: true,
                 onMapPointSelect: (point) => {
+                    const conflictingRoute = findConflictingRoute(point, rutasActivasZona, {
+                        minDistance: MIN_ROUTE_SEPARATION,
+                    });
+
+                    if (conflictingRoute) {
+                        showFormAlert(alertBox, 'warning', 'Ese punto está encima de otra ruta. Puedes colocarla más cerca que antes, pero sin superponerla.');
+                        return;
+                    }
+
                     selectedPoint = point;
                     updateCoordinatesBadge(coordsBadge, point);
                     clearFormAlert(alertBox);
@@ -559,7 +617,14 @@ export async function crearRutaCmd(container, params = {}) {
             // Validar campos
             const allowedDificultades = (dificultadOptionsByTipo[values.tipo] || []).map((option) => option.value);
             const allowedColorPresas = colorPresasOptions.map((option) => option.value);
-            const errors = validateFields(values, selectedPoint, allowedDificultades, allowedColorPresas);
+            const errors = validateFields(
+                values,
+                selectedPoint,
+                allowedDificultades,
+                allowedColorPresas,
+                rutasActivasZona,
+                { minRouteSeparation: MIN_ROUTE_SEPARATION }
+            );
             if (Object.keys(errors).length > 0) {
                 if (errors.nombre) setFieldError(nombreInput, errors.nombre);
                 if (errors.dificultad) setFieldError(dificultadSelect, errors.dificultad);
@@ -969,7 +1034,18 @@ export async function modificarRutaCmd(container, id) {
                     viewport: mapaViewport,
                     svgContent: zonaMapaSvg,
                     enablePointSelection: true,
+                    allowMarkerPointSelection: true,
                     onMapPointSelect: (point) => {
+                        const conflictingRoute = findConflictingRoute(point, rutasActivasZona, {
+                            minDistance: MIN_ROUTE_SEPARATION,
+                            excludeRutaId: idRuta,
+                        });
+
+                        if (conflictingRoute) {
+                            showFormAlert(alertBox, 'warning', 'Ese punto está encima de otra ruta. Puedes colocarla más cerca que antes, pero sin superponerla.');
+                            return;
+                        }
+
                         selectedPoint = point;
                         updateCoordinatesBadge(coordsBadge, point);
                         clearFormAlert(alertBox);
@@ -1037,7 +1113,17 @@ export async function modificarRutaCmd(container, id) {
 
                 const allowedDificultades = (dificultadOptionsByTipo[values.tipo] || []).map((option) => option.value);
                 const allowedColorPresas = colorPresasOptions.map((option) => option.value);
-                const errors = validateFields(values, selectedPoint, allowedDificultades, allowedColorPresas);
+                const errors = validateFields(
+                    values,
+                    selectedPoint,
+                    allowedDificultades,
+                    allowedColorPresas,
+                    rutasActivasZona,
+                    {
+                        minRouteSeparation: MIN_ROUTE_SEPARATION,
+                        excludeRutaId: idRuta,
+                    }
+                );
                 if (Object.keys(errors).length > 0) {
                     if (errors.nombre) setFieldError(nombreInput, errors.nombre);
                     if (errors.dificultad) setFieldError(dificultadSelect, errors.dificultad);

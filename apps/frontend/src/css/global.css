@@ -385,9 +385,41 @@ body {
   filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.5));
 }
 
+.ruta-visual-content {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity 220ms ease, transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ruta-visual-content-simple {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ruta-visual-content-detailed {
+  opacity: 0;
+  transform: scale(0.72);
+}
+
+.ruta-marker.is-detailed .ruta-visual-content-simple {
+  opacity: 0;
+  transform: scale(1.42);
+}
+
+.ruta-marker.is-detailed .ruta-visual-content-detailed {
+  opacity: 1;
+  transform: scale(1);
+}
+
 .ruta-hitbox {
   fill: transparent;
   cursor: pointer;
+}
+
+.ruta-color-dot {
+  stroke: #ffffff;
+  stroke-width: 2;
+  pointer-events: none;
 }
 
 .ruta-dot {
