@@ -666,9 +666,9 @@ body {
 }
 
 .perfil-stats-badge.is-flash {
-  background: #f0f0c9;
-  border-color: #b6b06a;
-  color: #5f5b1a;
+  background: #ffffc5;
+  border-color: #e5d558;
+  color: #52511b;
 }
 
 .perfil-stats-pill {
@@ -739,7 +739,7 @@ body {
 }
 
 .perfil-stats-bar-fill.is-flash {
-  background: #a6a622;
+  background: #e9d435;
 }
 
 .perfil-stats-bar-fill.is-bloque {

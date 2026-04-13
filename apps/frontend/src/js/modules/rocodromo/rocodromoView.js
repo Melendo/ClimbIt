@@ -5,7 +5,7 @@ import { renderSectionDivider } from '../../components/sectionDivider.js';
 import {
   bindHeatmapInteractions,
   buildEscaladorStatsViewModel,
-  renderMonthlyActivityCards,
+  renderRocodromoRoutesOverviewStatsCard,
   renderRouteTypesStatsCard,
   renderStatsSection,
   renderTotalRoutesStatsCard,
@@ -382,15 +382,15 @@ export function renderRocodromoEstadisticas(container, data) {
           <div class="perfil-estadisticas-view mt-3 px-0">
             ${renderStatsSection({
               title: 'Total de Rutas Escaladas',
+              content: renderRocodromoRoutesOverviewStatsCard(statsViewModel.totals),
+            })}
+            ${renderStatsSection({
+              title: 'Ratio de Flash',
               content: renderTotalRoutesStatsCard(statsViewModel.totals),
             })}
             ${renderStatsSection({
               title: 'Tipos de Rutas Escaladas',
               content: renderRouteTypesStatsCard(statsViewModel.totals),
-            })}
-            ${renderStatsSection({
-              title: 'Actividad mensual',
-              content: renderMonthlyActivityCards(statsViewModel.monthly),
             })}
           </div>
         </div>

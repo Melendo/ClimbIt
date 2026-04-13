@@ -105,6 +105,9 @@ export function buildEscaladorStatsViewModel(estadisticas = {}, now = new Date()
   const totalFlash = toSafeCount(estadisticas.totalFlash);
   const totalBloques = toSafeCount(estadisticas.totalBloques);
   const totalVias = toSafeCount(estadisticas.totalVias);
+  const totalRutasActivasRocodromo = toSafeCount(
+    estadisticas.totalRutasActivasRocodromo
+  );
   const rutasFlashPct = totalRutas > 0 ? (totalFlash / totalRutas) * 100 : 0;
   const bloquesPct = totalRutas > 0 ? (totalBloques / totalRutas) * 100 : 0;
   const viasPct = totalRutas > 0 ? (totalVias / totalRutas) * 100 : 0;
@@ -124,6 +127,7 @@ export function buildEscaladorStatsViewModel(estadisticas = {}, now = new Date()
       totalFlash,
       totalBloques,
       totalVias,
+      totalRutasActivasRocodromo,
       rutasFlashPct,
       bloquesPct,
       viasPct,
@@ -131,6 +135,41 @@ export function buildEscaladorStatsViewModel(estadisticas = {}, now = new Date()
     },
     monthly: buildMonthlyActivityViewModel(actividadMensual, now),
   };
+}
+
+export function renderRocodromoRoutesOverviewStatsCard(totals = {}) {
+  const totalRutas = toSafeCount(totals.totalRutas);
+  const totalRutasActivasRocodromo = toSafeCount(
+    totals.totalRutasActivasRocodromo
+  );
+  const completadasSobreActivasPct =
+    totalRutasActivasRocodromo > 0
+      ? Math.min(100, (totalRutas / totalRutasActivasRocodromo) * 100)
+      : 0;
+
+  return `
+    <div class="perfil-stats-card">
+      <div class="perfil-stats-badges">
+        <div class="perfil-stats-badge is-completed">
+          <span class="perfil-stats-badge-value">${totalRutas}</span>
+          <span class="perfil-stats-badge-label">Completado</span>
+        </div>
+        <div class="perfil-stats-badge">
+          <span class="perfil-stats-badge-value">${totalRutasActivasRocodromo}</span>
+          <span class="perfil-stats-badge-label">Rutas activas</span>
+        </div>
+      </div>
+      <p class="perfil-stats-text">
+        Has escalado un total de ${totalRutas} rutas de las ${totalRutasActivasRocodromo} que hay activas.
+      </p>
+      <div class="perfil-stats-bar">
+        <span class="perfil-stats-bar-fill is-completed" style="width: ${formatPct(completadasSobreActivasPct)};"></span>
+      </div>
+      <div class="perfil-stats-bar-labels">
+        <span>${formatPct(completadasSobreActivasPct)}</span>
+      </div>
+    </div>
+  `;
 }
 
 export function renderStatsSection({ title, content }) {

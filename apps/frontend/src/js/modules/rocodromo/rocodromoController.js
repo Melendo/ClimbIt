@@ -17,6 +17,7 @@ const DEFAULT_ESCALADOR_STATS = {
     totalFlash: 0,
     totalCompletado: 0,
     totalProyecto: 0,
+    totalRutasActivasRocodromo: 0,
     porcentajeFlash: 0,
     totalBloques: 0,
     totalVias: 0,
@@ -77,6 +78,7 @@ function normalizeEscaladorStats(rawStats = {}) {
         totalFlash: toSafeNumber(rawStats.totalFlash),
         totalCompletado: toSafeNumber(rawStats.totalCompletado),
         totalProyecto: toSafeNumber(rawStats.totalProyecto),
+        totalRutasActivasRocodromo: toSafeNumber(rawStats.totalRutasActivasRocodromo),
         porcentajeFlash: toSafeNumber(rawStats.porcentajeFlash),
         totalBloques: toSafeNumber(rawStats.totalBloques),
         totalVias: toSafeNumber(rawStats.totalVias),
@@ -119,29 +121,17 @@ async function cargarEscaladorBasico() {
 }
 
 async function cargarEstadisticasEscaladorPorRocodromo(idRocodromo) {
-    const now = new Date();
-    const params = new URLSearchParams({
-        year: String(now.getFullYear()),
-        month: String(now.getMonth() + 1),
-    });
-
-    const [resumenResponse, tiposResponse, actividadResponse] = await Promise.all([
+    const [resumenResponse, tiposResponse] = await Promise.all([
         fetchClient(`/escaladores/stats/rocodromo/${idRocodromo}/resumen`),
         fetchClient(`/escaladores/stats/rocodromo/${idRocodromo}/tipos`),
-        fetchClient(`/escaladores/stats/rocodromo/${idRocodromo}/actividad-mensual?${params.toString()}`),
     ]);
 
     const resumen = await resumenResponse.json();
     const tipos = await tiposResponse.json();
-    const actividadPayload = await actividadResponse.json();
-    const actividadMensual = Array.isArray(actividadPayload?.actividadMensual)
-        ? actividadPayload.actividadMensual
-        : [];
 
     return normalizeEscaladorStats({
         ...resumen,
         ...tipos,
-        actividadMensual,
     });
 }
 
