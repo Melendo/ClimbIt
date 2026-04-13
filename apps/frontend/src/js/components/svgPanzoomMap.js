@@ -3,6 +3,8 @@ import panzoom from 'panzoom';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const DEFAULT_SVG_SIZE = 1000;
 const DEFAULT_CLICK_THRESHOLD = 10;
+const DEFAULT_DETAIL_ZOOM_THRESHOLD = 1.8;
+const DEFAULT_DETAIL_ZOOM_HYSTERESIS = 0.2;
 
 const svgCache = new Map();
 
@@ -25,6 +27,8 @@ export function createSvgPanzoomMap(options) {
         svgContent = null,
         svgSize = DEFAULT_SVG_SIZE,
         clickThreshold = DEFAULT_CLICK_THRESHOLD,
+        detailZoomThreshold = DEFAULT_DETAIL_ZOOM_THRESHOLD,
+        allowMarkerPointSelection = false,
         enablePointSelection = false,
         getMarkerData = (item) => ({
             x: toNumberOrNull(item?.posX),
@@ -44,6 +48,7 @@ export function createSvgPanzoomMap(options) {
     let panzoomInstance = null;
     let selectionLayer = null;
     let selectedPoint = null;
+    let markersDetailedMode = null;
 
     const normalizePoint = (point) => {
         const x = toNumberOrNull(point?.x);
@@ -170,6 +175,35 @@ export function createSvgPanzoomMap(options) {
                 });
             };
 
+            const getMarkerDetailMode = (currentScale = 1) => {
+                const safeScale = currentScale > 0 ? currentScale : 1;
+
+                if (markersDetailedMode === true) {
+                    return safeScale >= detailZoomThreshold - DEFAULT_DETAIL_ZOOM_HYSTERESIS;
+                }
+
+                if (markersDetailedMode === false) {
+                    return safeScale >= detailZoomThreshold + DEFAULT_DETAIL_ZOOM_HYSTERESIS;
+                }
+
+                return safeScale >= detailZoomThreshold;
+            };
+
+            const updateMarkerDetailMode = (currentScale = 1) => {
+                const nextDetailedMode = getMarkerDetailMode(currentScale);
+
+                if (markersDetailedMode === nextDetailedMode) {
+                    return;
+                }
+
+                markersDetailedMode = nextDetailedMode;
+                markerLayer.querySelectorAll('.ruta-marker').forEach((markerGroup) => {
+                    markerGroup.classList.toggle('is-detailed', markersDetailedMode);
+                });
+            };
+
+            markersDetailedMode = null;
+
             items.forEach((item) => {
                 const marker = getMarkerData(item) || {};
                 const x = toNumberOrNull(marker.x);
@@ -188,6 +222,15 @@ export function createSvgPanzoomMap(options) {
 
                 const markerVisual = document.createElementNS(SVG_NS, 'g');
                 markerVisual.setAttribute('class', 'ruta-visual');
+
+                const markerVisualContent = document.createElementNS(SVG_NS, 'g');
+                markerVisualContent.setAttribute('class', 'ruta-visual-content ruta-visual-content-detailed');
+
+                const markerSimpleVisual = document.createElementNS(SVG_NS, 'g');
+                markerSimpleVisual.setAttribute('class', 'ruta-visual ruta-visual-simple');
+
+                const markerSimpleContent = document.createElementNS(SVG_NS, 'g');
+                markerSimpleContent.setAttribute('class', 'ruta-visual-content ruta-visual-content-simple');
 
                 const touchHitbox = document.createElementNS(SVG_NS, 'circle');
                 touchHitbox.setAttribute('cx', '0');
@@ -214,8 +257,15 @@ export function createSvgPanzoomMap(options) {
                     holdColorRing.setAttribute('stroke-width', '6');
                     holdColorRing.setAttribute('stroke-linecap', 'butt');
                     holdColorRing.setAttribute('stroke-dasharray', `${holdRingDashLength} ${holdRingAxisGap}`);
-                    markerVisual.appendChild(holdColorRing);
+                    markerVisualContent.appendChild(holdColorRing);
                 }
+
+                const simpleColorCircle = document.createElementNS(SVG_NS, 'circle');
+                simpleColorCircle.setAttribute('cx', '0');
+                simpleColorCircle.setAttribute('cy', '0');
+                simpleColorCircle.setAttribute('r', '14');
+                simpleColorCircle.setAttribute('class', 'ruta-color-dot');
+                simpleColorCircle.setAttribute('fill', holdColor || '#9ca3af');
 
                 const markerCircle = document.createElementNS(SVG_NS, 'circle');
                 markerCircle.setAttribute('cx', '0');
@@ -261,21 +311,33 @@ export function createSvgPanzoomMap(options) {
                     const isClick = deltaX <= clickThreshold && deltaY <= clickThreshold;
 
                     if (isClick) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        triggerMarkerClick();
+                        if (typeof onMarkerClick === 'function') {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            triggerMarkerClick();
+                        }
                     }
                 });
 
                 markerGroup.addEventListener('click', (event) => {
+                    if (typeof onMarkerClick !== 'function') {
+                        return;
+                    }
+
                     event.preventDefault();
                     event.stopPropagation();
                     triggerMarkerClick();
                 });
 
-                markerVisual.appendChild(touchHitbox);
-                markerVisual.appendChild(markerCircle);
+                markerSimpleContent.appendChild(simpleColorCircle);
+                markerSimpleVisual.appendChild(markerSimpleContent);
+
+                markerVisualContent.appendChild(markerCircle);
+                markerVisual.appendChild(markerVisualContent);
+
                 markerGroup.appendChild(markerVisual);
+                markerGroup.appendChild(markerSimpleVisual);
+                markerGroup.appendChild(touchHitbox);
                 markerLayer.appendChild(markerGroup);
             });
 
@@ -286,7 +348,7 @@ export function createSvgPanzoomMap(options) {
             if (enablePointSelection) {
                 svgElement.addEventListener('pointerdown', (event) => {
                     const isMarkerTarget = typeof event.target.closest === 'function' && event.target.closest('.ruta-marker');
-                    if (isMarkerTarget) return;
+                    if (isMarkerTarget && !allowMarkerPointSelection) return;
 
                     mapStartX = event.clientX;
                     mapStartY = event.clientY;
@@ -294,7 +356,7 @@ export function createSvgPanzoomMap(options) {
 
                 svgElement.addEventListener('pointerup', (event) => {
                     const isMarkerTarget = typeof event.target.closest === 'function' && event.target.closest('.ruta-marker');
-                    if (isMarkerTarget) return;
+                    if (isMarkerTarget && !allowMarkerPointSelection) return;
 
                     const deltaX = Math.abs(event.clientX - mapStartX);
                     const deltaY = Math.abs(event.clientY - mapStartY);
@@ -360,6 +422,7 @@ export function createSvgPanzoomMap(options) {
             };
 
             updateMarkerScale(panzoomInstance.getTransform().scale);
+            updateMarkerDetailMode(panzoomInstance.getTransform().scale);
             clampPanToViewport();
 
             panzoomInstance.on('pan', () => {
@@ -369,6 +432,7 @@ export function createSvgPanzoomMap(options) {
             panzoomInstance.on('zoom', () => {
                 const { scale } = panzoomInstance.getTransform();
                 updateMarkerScale(scale);
+                updateMarkerDetailMode(scale);
                 clampPanToViewport();
             });
         } catch (err) {
