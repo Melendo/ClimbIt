@@ -462,6 +462,32 @@ describe('PistaRepositoryPostgres', () => {
     });
   });
 
+  describe('obtenerTotalPistasActivasPorRocodromo', () => {
+    it('deberia retornar total de pistas activas del rocodromo', async () => {
+      mockPistaModel.sequelize.query.mockResolvedValue([{ totalActivas: 9 }]);
+
+      const resultado = await repository.obtenerTotalPistasActivasPorRocodromo(10);
+
+      expect(mockPistaModel.sequelize.query).toHaveBeenCalledWith(
+        expect.stringContaining('AND p."Activo" = true'),
+        expect.objectContaining({
+          replacements: expect.objectContaining({
+            idRocodromo: 10,
+          }),
+        })
+      );
+      expect(resultado).toBe(9);
+    });
+
+    it('deberia retornar 0 cuando no hay pistas activas', async () => {
+      mockPistaModel.sequelize.query.mockResolvedValue([]);
+
+      const resultado = await repository.obtenerTotalPistasActivasPorRocodromo(10);
+
+      expect(resultado).toBe(0);
+    });
+  });
+
   describe('obtenerTiposEstadisticasEscaladorPorRocodromo', () => {
     it('deberia retornar distribucion por tipo filtrada por rocodromo', async () => {
       mockPistaModel.sequelize.query.mockResolvedValue([

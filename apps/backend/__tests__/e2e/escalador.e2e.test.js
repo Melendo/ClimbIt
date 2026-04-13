@@ -419,6 +419,7 @@ describe('E2E: Escalador', () => {
         totalFlash: 1,
         totalCompletado: 1,
         totalProyecto: 1,
+        totalRutasActivasRocodromo: 3,
         porcentajeFlash: expect.any(Number),
       });
     });
@@ -466,6 +467,7 @@ describe('E2E: Escalador', () => {
         totalFlash: 0,
         totalCompletado: 0,
         totalProyecto: 0,
+        totalRutasActivasRocodromo: 0,
         porcentajeFlash: 0,
       });
     });

@@ -17,6 +17,7 @@ describe('ObtenerResumenEstadisticasRocodromoEscalador', () => {
       obtenerResumenEstadisticasEscaladorPorRocodromo: jest
         .fn()
         .mockResolvedValue({ totalRutas: 5, totalFlash: 2 }),
+      obtenerTotalPistasActivasPorRocodromo: jest.fn().mockResolvedValue(12),
     };
 
     const useCase = new ObtenerResumenEstadisticasRocodromoEscalador(
@@ -32,14 +33,24 @@ describe('ObtenerResumenEstadisticasRocodromoEscalador', () => {
     expect(
       mockPistaRepository.obtenerResumenEstadisticasEscaladorPorRocodromo
     ).toHaveBeenCalledWith(4, 9);
-    expect(resultado).toEqual({ totalRutas: 5, totalFlash: 2 });
+    expect(
+      mockPistaRepository.obtenerTotalPistasActivasPorRocodromo
+    ).toHaveBeenCalledWith(9);
+    expect(resultado).toEqual({
+      totalRutas: 5,
+      totalFlash: 2,
+      totalRutasActivasRocodromo: 12,
+    });
   });
 
   it('deberia lanzar NotFoundError si no existe escalador', async () => {
     const useCase = new ObtenerResumenEstadisticasRocodromoEscalador(
       { encontrarPorApodo: jest.fn().mockResolvedValue(null) },
       { encontrarPorId: jest.fn() },
-      { obtenerResumenEstadisticasEscaladorPorRocodromo: jest.fn() }
+      {
+        obtenerResumenEstadisticasEscaladorPorRocodromo: jest.fn(),
+        obtenerTotalPistasActivasPorRocodromo: jest.fn(),
+      }
     );
 
     await expect(
@@ -51,7 +62,10 @@ describe('ObtenerResumenEstadisticasRocodromoEscalador', () => {
     const useCase = new ObtenerResumenEstadisticasRocodromoEscalador(
       { encontrarPorApodo: jest.fn().mockResolvedValue({ id: 1 }) },
       { encontrarPorId: jest.fn().mockResolvedValue(null) },
-      { obtenerResumenEstadisticasEscaladorPorRocodromo: jest.fn() }
+      {
+        obtenerResumenEstadisticasEscaladorPorRocodromo: jest.fn(),
+        obtenerTotalPistasActivasPorRocodromo: jest.fn(),
+      }
     );
 
     await expect(
@@ -63,7 +77,10 @@ describe('ObtenerResumenEstadisticasRocodromoEscalador', () => {
     const useCase = new ObtenerResumenEstadisticasRocodromoEscalador(
       { encontrarPorApodo: jest.fn().mockRejectedValue(new Error('db fail')) },
       { encontrarPorId: jest.fn() },
-      { obtenerResumenEstadisticasEscaladorPorRocodromo: jest.fn() }
+      {
+        obtenerResumenEstadisticasEscaladorPorRocodromo: jest.fn(),
+        obtenerTotalPistasActivasPorRocodromo: jest.fn(),
+      }
     );
 
     await expect(

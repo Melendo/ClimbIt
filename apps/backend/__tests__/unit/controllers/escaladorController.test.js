@@ -457,7 +457,11 @@ describe('Unit: EscaladorController', () => {
     it('obtenerResumenEstadisticasRocodromo responde 200 con datos filtrados', async () => {
       const useCases = {
         obtenerResumenEstadisticasRocodromo: {
-          execute: jest.fn().mockResolvedValue({ totalRutas: 4, totalFlash: 1 }),
+          execute: jest.fn().mockResolvedValue({
+            totalRutas: 4,
+            totalFlash: 1,
+            totalRutasActivasRocodromo: 11,
+          }),
         },
       };
       const controller = new EscaladorController(useCases);
@@ -474,7 +478,11 @@ describe('Unit: EscaladorController', () => {
         idRocodromo: 7,
       });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.body).toEqual({ totalRutas: 4, totalFlash: 1 });
+      expect(res.body).toEqual({
+        totalRutas: 4,
+        totalFlash: 1,
+        totalRutasActivasRocodromo: 11,
+      });
     });
 
     it('obtenerTiposEstadisticasRocodromo responde 200 con datos filtrados', async () => {
