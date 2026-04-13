@@ -568,6 +568,33 @@ class PistaRepositoryPostgres extends pistaRepository {
     }
   }
 
+  async obtenerTotalPistasActivasPorRocodromo(idRocodromo) {
+    try {
+      const rows = await this.PistaModel.sequelize.query(
+        `
+          SELECT
+            COUNT(*)::int AS "totalActivas"
+          FROM "Pistas" p
+          INNER JOIN "Zonas" z ON z."IDZona" = p."IDZona"
+          WHERE z."IDRoco" = :idRocodromo
+            AND p."Activo" = true
+        `,
+        {
+          replacements: { idRocodromo },
+          type: QueryTypes.SELECT,
+        }
+      );
+
+      return Number(rows[0]?.totalActivas) || 0;
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage:
+          'Error al obtener total de pistas activas del rocodromo',
+        internalCode: 'PISTA_STATS_ACTIVAS_ROCODROMO_DB_FAILED',
+      });
+    }
+  }
+
   async obtenerTiposEstadisticasEscaladorPorRocodromo(idEscalador, idRocodromo) {
     try {
       const filas = await this.PistaModel.sequelize.query(

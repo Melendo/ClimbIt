@@ -25,10 +25,20 @@ class ObtenerResumenEstadisticasRocodromoEscalador {
         throw new NotFoundError('Rocodromo no encontrado', 'ROCODROMO_NOT_FOUND');
       }
 
-      return this.pistaRepository.obtenerResumenEstadisticasEscaladorPorRocodromo(
-        escalador.id,
-        rocodromo.id
-      );
+      const resumenEscalador =
+        await this.pistaRepository.obtenerResumenEstadisticasEscaladorPorRocodromo(
+          escalador.id,
+          rocodromo.id
+        );
+      const totalRutasActivasRocodromo =
+        await this.pistaRepository.obtenerTotalPistasActivasPorRocodromo(
+          rocodromo.id
+        );
+
+      return {
+        ...resumenEscalador,
+        totalRutasActivasRocodromo,
+      };
     } catch (error) {
       if (error instanceof AppError) {
         throw error;
