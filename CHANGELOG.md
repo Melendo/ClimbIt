@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-16
+
+### Añadido
+
+#### Funcionalidades Usuario
+- **Autenticación**:
+  - Registro e inicio de sesión mas fluido
+- **Perfil**:
+  - Edición de apodo.
+  - Edición de descripción.
+  - Cambio de foto de perfil desde una galería disponible.
+  - Visualización ampliada del perfil con estadísticas.
+- **Rocódromos**:
+  - Actualizadas tarjetas de rocódromos
+  - Visualización de información de un rocódromo.
+  - Subida y actualización de información del rocódromo.
+  - Consulta de zonas y escalas de dificultad.
+  - Visualización de estadísticas del escalador por rocódromo.
+- **Zonas**:
+  - Visualización del mapa dinámico de cada zona.
+  - Mejora de la interfaz en las zonas
+  - Filtrado de rutas en base a tipo y dificultad
+- **Rutas**:
+  - Visualización de información de una ruta.
+  - Valoración de rutas.
+  - Creación de rutas
+  - Edición de datos de ruta.
+  - Borrado lógico de rutas.
+- **Estadísticas**:
+  - Resumen global de actividad del escalador.
+  - Distribución por tipos de ruta.
+  - Actividad mensual.
+  - Dificultad máxima por rocódromo.
+  - Estadísticas públicas por apodo.
+- **Experiencia móvil**:
+  - Aplicación instalable como PWA.
+  - Soporte visual adaptado a móvil.
+  - Modo de lectura sin conexión.
+
 ## [0.1.0] - 2026-02-16
 
 ### Añadido
@@ -23,9 +62,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Suscripción y desuscripción.
   - Listado de "Mis Rocódromos" para acceso rápido.
   - Navegación por zonas de los rocódromos.
-- **Pistas**:
-  - Listado de pistas por zona con información visual.
-  - Detalle individual de la pista.
+- **Rutas**:
+  - Listado de rutas por zona con información visual.
+  - Detalle individual de la ruta.
   - Actualización de estado (flash, completado y proyecto).
 
 #### Infraestructura y DevOps
