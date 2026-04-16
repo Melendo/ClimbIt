@@ -63,7 +63,7 @@ describe('SuscribirseRocodromoUseCase', () => {
 
     await expect(
       suscribirseRocodromo.execute(datosEntrada)
-    ).rejects.toThrow('Error al suscribirse al rocódromo: Rocódromo con ID 999 no encontrado');
+    ).rejects.toThrow('Rocódromo con ID 999 no encontrado');
 
     expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(datosEntrada.idRocodromo);
     expect(mockEscaladorRepository.estaSuscrito).not.toHaveBeenCalled();
@@ -88,7 +88,7 @@ describe('SuscribirseRocodromoUseCase', () => {
 
     await expect(
       suscribirseRocodromo.execute(datosEntrada)
-    ).rejects.toThrow('Error al suscribirse al rocódromo: El escalador TestClimber ya está suscrito al rocódromo Boulder Central');
+    ).rejects.toThrow('El escalador TestClimber ya está suscrito al rocódromo Boulder Central');
 
     expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(datosEntrada.idRocodromo);
     expect(mockEscaladorRepository.estaSuscrito).toHaveBeenCalledWith(
@@ -119,7 +119,7 @@ describe('SuscribirseRocodromoUseCase', () => {
 
     await expect(
       suscribirseRocodromo.execute(datosEntrada)
-    ).rejects.toThrow('Error al suscribirse al rocódromo: Error al guardar la suscripción');
+    ).rejects.toThrow('Error al suscribirse al rocódromo');
 
     expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(datosEntrada.idRocodromo);
     expect(mockEscaladorRepository.estaSuscrito).toHaveBeenCalledWith(

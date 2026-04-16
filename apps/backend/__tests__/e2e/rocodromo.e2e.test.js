@@ -8,11 +8,12 @@ const db = await dbPromise;
 describe('E2E: Rocodromos', () => {
   let rocodromoConZonas;
   let rocodromoSinZonas;
+  let rocodromoParaActualizar;
   const zonasCreadas = [];
   let token;
 
   beforeAll(async () => {
-    token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'admin' });
+    token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'Admin' });
     
     rocodromoConZonas = await db.Rocodromo.create({
       nombre: 'Roco Con Zonas Integration',
@@ -24,14 +25,19 @@ describe('E2E: Rocodromos', () => {
       ubicacion: 'Test Location 2',
     });
 
+    rocodromoParaActualizar = await db.Rocodromo.create({
+      nombre: 'Roco Actualizar Integration',
+      ubicacion: 'Test Location 3',
+    });
+
     zonasCreadas.push(await db.Zona.create({
       idRoco: rocodromoConZonas.id,
-      tipo: 'Zona Boulder',
+      nombre: 'Zona Boulder',
     }));
 
     zonasCreadas.push(await db.Zona.create({
       idRoco: rocodromoConZonas.id,
-      tipo: 'Zona Cuerda',
+      nombre: 'Zona Cuerda',
     }));
   });
 
@@ -41,6 +47,7 @@ describe('E2E: Rocodromos', () => {
     }
     if (rocodromoConZonas) await rocodromoConZonas.destroy();
     if (rocodromoSinZonas) await rocodromoSinZonas.destroy();
+    if (rocodromoParaActualizar) await rocodromoParaActualizar.destroy();
     
     await db.sequelize.close();
   });
@@ -55,9 +62,9 @@ describe('E2E: Rocodromos', () => {
       expect(response.body).toBeInstanceOf(Array);
       expect(response.body).toHaveLength(2);
       
-      const tipos = response.body.map(z => z.tipo);
-      expect(tipos).toContain('Zona Boulder');
-      expect(tipos).toContain('Zona Cuerda');
+      const nombres = response.body.map(z => z.nombre);
+      expect(nombres).toContain('Zona Boulder');
+      expect(nombres).toContain('Zona Cuerda');
     });
 
     it('debería obtener una lista vacía para un rocódromo existente sin zonas', async () => {
@@ -153,8 +160,9 @@ describe('E2E: Rocodromos', () => {
         .get(`/rocodromos/${rocodromoConZonas.id}`)
         .expect(401);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain('Acceso denegado');
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
+      expect(response.body.error).toContain('Acceso denegado');
     });
 
     it('debería retornar 422 si el id no es entero positivo', async () => {
@@ -201,8 +209,30 @@ describe('E2E: Rocodromos', () => {
         })
         .expect(401);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain('Acceso denegado');
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
+      expect(response.body.error).toContain('Acceso denegado');
+    });
+  });
+
+  describe('PUT /rocodromos/:id', () => {
+    it('deberia actualizar la informacion del rocodromo', async () => {
+      const response = await request(app)
+        .put(`/rocodromos/${rocodromoParaActualizar.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          nombre: 'Roco Actualizado E2E',
+          ubicacion: 'Ubicacion Actualizada E2E',
+          descripcion: 'Descripcion actualizada',
+          horarios: 'L-V 10-22',
+        })
+        .expect(200);
+
+      expect(response.body).toHaveProperty('id', rocodromoParaActualizar.id);
+      expect(response.body).toHaveProperty('nombre', 'Roco Actualizado E2E');
+      expect(response.body).toHaveProperty('ubicacion', 'Ubicacion Actualizada E2E');
+      expect(response.body).toHaveProperty('descripcion', 'Descripcion actualizada');
+      expect(response.body).toHaveProperty('horarios', 'L-V 10-22');
     });
   });
 });

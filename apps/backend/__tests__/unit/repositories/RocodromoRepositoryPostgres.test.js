@@ -1,4 +1,11 @@
-import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
+import {
+  describe,
+  it,
+  expect,
+  jest,
+  beforeEach,
+  afterEach,
+} from '@jest/globals';
 import RocodromoRepositoryPostgres from '../../../src/infrastructure/repositories/rocodromoRepositoryPostgres.js';
 import Rocodromo from '../../../src/domain/rocodromos/Rocodromo.js';
 
@@ -40,14 +47,14 @@ describe('RocodromoRepositoryPostgres', () => {
       const resultado = repository._toDomain(null);
       expect(resultado).toBeNull();
     });
-    
+
     it('debería lanzar error si falla la creación del dominio', () => {
-       const modeloInvalido = {
+      const modeloInvalido = {
         id: 'no-number', // Esto debería fallar en el constructor de Rocodromo
         nombre: 'Roco Fail',
         ubicacion: 'Nowhere',
       };
-      
+
       expect(() => repository._toDomain(modeloInvalido)).toThrow();
     });
   });
@@ -61,8 +68,8 @@ describe('RocodromoRepositoryPostgres', () => {
         nombre: 'Roco Test',
         ubicacion: 'Ciudad Test',
         zonas: [
-          { id: 101, idRoco: 1, tipo: 'Boulder' },
-          { id: 102, idRoco: 1, tipo: 'Cuerda' },
+          { id: 101, idRoco: 1, nombre: 'Boulder', mapa: 'boulder-map.png' },
+          { id: 102, idRoco: 1, nombre: 'Cuerda', mapa: 'cuerda-map.png' },
         ],
       };
 
@@ -73,18 +80,24 @@ describe('RocodromoRepositoryPostgres', () => {
 
       // Assert
       expect(mockRocodromoModel.findByPk).toHaveBeenCalledWith(idRocodromo, {
-        include: 'zonas',
+        include: [{
+          association: 'zonas',
+          separate: true,
+          order: [['id', 'ASC']],
+        }],
       });
       expect(resultado).toHaveLength(2);
       expect(resultado[0]).toEqual({
         id: 101,
         idRoco: 1,
-        tipo: 'Boulder',
+        nombre: 'Boulder',
+        mapa: 'boulder-map.png',
       });
       expect(resultado[1]).toEqual({
         id: 102,
         idRoco: 1,
-        tipo: 'Cuerda',
+        nombre: 'Cuerda',
+        mapa: 'cuerda-map.png',
       });
     });
 

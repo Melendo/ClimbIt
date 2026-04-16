@@ -9,6 +9,7 @@ describe('obtenerPistaPorIdUseCase', () => {
         idZona: 1,
         nombre: 'Ex1',
         dificultad: '3a',
+        tipo: 'boulder',
       })),
       obtenerEstado: jest.fn(async () => 'Flash'),
     };
@@ -38,6 +39,7 @@ describe('obtenerPistaPorIdUseCase', () => {
         idZona: 1,
         nombre: 'Ex1',
         dificultad: '3a',
+        tipo: 'boulder',
       })),
       obtenerEstado: jest.fn(),
     };
@@ -65,6 +67,7 @@ describe('obtenerPistaPorIdUseCase', () => {
         idZona: 1,
         nombre: 'Ex1',
         dificultad: '3a',
+        tipo: 'boulder',
       })),
       obtenerEstado: jest.fn(),
     };

@@ -38,6 +38,7 @@ describe('crearEscaladorUseCase', () => {
     expect(mockTokenService.crear).toHaveBeenCalledWith({
       correo: 'juan@example.com',
       apodo: 'JuanClimb',
+      rol: 'Escalador',
     });
     expect(resultado).toEqual({ token: 'token_jwt_simulado' });
   });
@@ -65,8 +66,8 @@ describe('crearEscaladorUseCase', () => {
     );
 
     const datos = { correo: '', contrasena: '123', apodo: 'Juan' };
-    await expect(() => crearEscalador.execute(datos)).rejects.toThrow(
-      `Error al crear el escalador`
+    await expect(crearEscalador.execute(datos)).rejects.toThrow(
+      /correo inválido/i
     );
   });
 });

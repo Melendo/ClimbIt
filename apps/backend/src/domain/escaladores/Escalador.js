@@ -1,15 +1,22 @@
 class Escalador {
   /**
-   * @param {number|null} id - El ID único del escalador (null si es nuevo)
-   * @param {string} correo - El correo del escalador
-   * @param {string} contrasena - La contraseña del escalador
-   * @param {string} apodo - El apodo del escalador
+   * @param {number|null} id
+   * @param {string} correo
+   * @param {string} contrasena
+   * @param {string} apodo
+   * @param {string|null} descripcion
+  * @param {number|null} idFotoPerfil
+   * @param {boolean} activo
    */
-  constructor(id, correo, contrasena, apodo) {
+  constructor(id, correo, contrasena, apodo, descripcion = null, idFotoPerfil = null, activo = true) {
     this.id = id;
     this.correo = correo;
     this.contrasena = contrasena;
     this.apodo = apodo;
+    this.descripcion = descripcion;
+    this.idFotoPerfil = idFotoPerfil;
+    this.activo = activo;
+    this.isAdmin = false;
 
     if (typeof this.correo !== 'string' || this.correo.trim() === '') {
       throw new Error(`correo inválido: Debe ser una cadena no vacía.`);

@@ -13,7 +13,7 @@ describe('E2E: Zonas', () => {
   let token;
 
   beforeAll(async () => {
-    token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'admin' });
+    token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'Admin' });
     
     rocodromo = await db.Rocodromo.create({
       nombre: 'Roco Zonas Integration',
@@ -22,24 +22,26 @@ describe('E2E: Zonas', () => {
 
     zonaConPistas = await db.Zona.create({
       idRoco: rocodromo.id,
-      tipo: 'Zona Con Pistas Test',
+      nombre: 'Zona Con Pistas Test',
     });
 
     zonaSinPistas = await db.Zona.create({
       idRoco: rocodromo.id,
-      tipo: 'Zona Vacía Test',
+      nombre: 'Zona Vacia Test',
     });
 
     pistasCreadas.push(await db.Pista.create({
       idZona: zonaConPistas.id,
       nombre: 'Pista Test 1',
       dificultad: '5a',
+      tipo: 'via',
     }));
 
     pistasCreadas.push(await db.Pista.create({
       idZona: zonaConPistas.id,
       nombre: 'Pista Test 2',
       dificultad: '7b',
+      tipo: 'via',
     }));
   });
 
@@ -69,14 +71,14 @@ describe('E2E: Zonas', () => {
       expect(nombres).toContain('Pista Test 2');
     });
 
-    it('debería obtener una lista vacía para una zona existente sin pistas', async () => {
+    it('debería retornar 404 para una zona existente sin pistas activas', async () => {
       const response = await request(app)
         .get(`/zonas/pistas/${zonaSinPistas.id}`)
         .set('Authorization', `Bearer ${token}`)
-        .expect(200);
+        .expect(404);
 
-      expect(response.body).toBeInstanceOf(Array);
-      expect(response.body).toHaveLength(0);
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.error).toMatch(/no encontrada|sin pistas/i);
     });
 
     it('debería retornar 404 para una zona que no existe', async () => {
@@ -122,9 +124,9 @@ describe('E2E: Zonas', () => {
         .expect(201);
 
       expect(response.body).toHaveProperty('id');
-      expect(response.body).toHaveProperty('tipo');
+      expect(response.body).toHaveProperty('nombre');
       expect(response.body).toHaveProperty('idRoco');
-      expect(response.body.tipo).toBe('Zona Nueva E2E');
+      expect(response.body.nombre).toBe('Zona Nueva E2E');
       expect(response.body.idRoco).toBe(rocodromo.id);
 
       // Limpiar
@@ -141,11 +143,12 @@ describe('E2E: Zonas', () => {
         })
         .expect(401);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain('Acceso denegado');
+      expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
+      expect(response.body.error).toContain('Acceso denegado');
     });
 
-    it('debería retornar 500 si el rocódromo no existe', async () => {
+    it('debería retornar 404 si el rocódromo no existe', async () => {
       const response = await request(app)
         .post('/zonas/create')
         .set('Authorization', `Bearer ${token}`)
@@ -153,9 +156,10 @@ describe('E2E: Zonas', () => {
           idRoco: 999999,
           nombre: 'Zona Nueva',
         })
-        .expect(500);
+        .expect(404);
 
       expect(response.body).toHaveProperty('error');
+      expect(response.body).toHaveProperty('code', 'ROCODROMO_NOT_FOUND');
       expect(response.body.error).toContain('no existe');
     });
   });

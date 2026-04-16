@@ -1,3 +1,9 @@
+import {
+  AppError,
+  InternalServerError,
+  NotFoundError,
+} from '../../domain/sharedObjects/AppError.js';
+
 class CambiarEstadoPista {
   constructor(pistaRepository, escaladorRepository) {
     this.pistaRepository = pistaRepository;
@@ -7,13 +13,19 @@ class CambiarEstadoPista {
     try {
       const pista = await this.pistaRepository.obtenerPorId(idPista);
       if (!pista) {
-        throw new Error(`Pista con ID ${idPista} no encontrada`);
+        throw new NotFoundError(
+          `Pista con ID ${idPista} no encontrada`,
+          'PISTA_NOT_FOUND'
+        );
       }
 
       const escalador =
         await this.escaladorRepository.encontrarPorApodo(escaladorApodo);
       if (!escalador) {
-        throw new Error(`Escalador con apodo ${escaladorApodo} no encontrado`);
+        throw new NotFoundError(
+          `Escalador con apodo ${escaladorApodo} no encontrado`,
+          'ESCALADOR_NOT_FOUND'
+        );
       }
 
       // Convertir estado a minúsculas para que coincida con el ENUM
@@ -25,15 +37,21 @@ class CambiarEstadoPista {
           escalador.id,
           estadoNormalizado
         );
-      }else{
+      } else {
         await this.pistaRepository.eliminarEstadoPista(idPista, escalador.id);
       }
       return {
         mensaje: `Estado de la pista con ID ${idPista} cambiado a ${nuevoEstado} exitosamente.`,
       };
     } catch (error) {
-      throw new Error(
-        `Error al cambiar el estado de la pista: ${error.message}`
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      throw new InternalServerError(
+        'Error al cambiar el estado de la pista',
+        'PISTA_CHANGE_STATE_FAILED',
+        error
       );
     }
   }

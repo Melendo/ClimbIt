@@ -35,6 +35,16 @@ export default (sequelize, DataTypes) => {
         allowNull: false,
         field: 'Estado',
       },
+      fechaCompletado: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        field: 'FechaCompletado',
+      },
+      valoracion: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        field: 'Valoracion',
+      },
     },
     {
       sequelize,

@@ -95,6 +95,6 @@ describe('ObtenerRocodromosSuscritos', () => {
     const obtenerSuscritos = new ObtenerRocodromosSuscritos(mockRepository);
 
     // Act & Assert
-    await expect(obtenerSuscritos.execute(apodo)).rejects.toThrow(errorMsg);
+    await expect(obtenerSuscritos.execute(apodo)).rejects.toThrow('Error al obtener rocódromos suscritos');
   });
 });

@@ -43,6 +43,42 @@ export default (sequelize, DataTypes) => {
         allowNull: true,
         field: 'Dificultad',
       },
+      tipo: {
+        // eslint-disable-next-line new-cap
+        type: DataTypes.ENUM('boulder', 'via'),
+        allowNull: false,
+        field: 'Tipo',
+      },
+      colorPresas: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: 'ColorPresas',
+      },
+      imagenUrl: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: 'ImagenURL',
+      },
+      posX: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        field: 'PosX',
+      },
+      posY: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        field: 'PosY',
+      },
+      fechaCreacion: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        field: 'FechaCreacion',
+      },
+      fechaRetirada: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        field: 'FechaRetirada',
+      },
       activo: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
@@ -54,6 +90,7 @@ export default (sequelize, DataTypes) => {
       sequelize,
       modelName: 'Pista',
       tableName: 'Pistas',
+      createdAt: false,
     }
   );
   return Pista;

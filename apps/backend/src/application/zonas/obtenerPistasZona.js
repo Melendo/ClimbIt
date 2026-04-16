@@ -1,3 +1,8 @@
+import {
+  AppError,
+  InternalServerError,
+} from '../../domain/sharedObjects/AppError.js';
+
 class ObtenerPistasZona {
   constructor(zonaRepository, escaladorRepository) {
     this.zonaRepository = zonaRepository;
@@ -17,7 +22,15 @@ class ObtenerPistasZona {
 
       return await this.zonaRepository.obtenerPistasDeZona(id, idEscalador);
     } catch (error) {
-      throw new Error(`Error al obtener la zona por ID: ${error.message}`);
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      throw new InternalServerError(
+        'Error al obtener las pistas de la zona',
+        'ZONA_GET_PISTAS_FAILED',
+        error
+      );
     }
   }
 }

@@ -25,7 +25,7 @@ describe('ZonaRepositoryPostgres', () => {
       const modeloSequelize = {
         id: 1,
         idRoco: 2,
-        tipo: 'Zona Principal',
+        nombre: 'Zona Principal',
       };
 
       const resultado = repository._toDomain(modeloSequelize);
@@ -33,7 +33,7 @@ describe('ZonaRepositoryPostgres', () => {
       expect(resultado).toBeInstanceOf(Zona);
       expect(resultado.id).toBe(1);
       expect(resultado.idRoco).toBe(2);
-      expect(resultado.tipo).toBe('Zona Principal');
+      expect(resultado.nombre).toBe('Zona Principal');
     });
 
     it('debería retornar null si el modelo es null', () => {
@@ -46,7 +46,7 @@ describe('ZonaRepositoryPostgres', () => {
        const modeloInvalido = {
         id: 1,
         idRoco: 1, 
-        tipo: '', // Esto debería fallar en el constructor de Zona
+        nombre: '', // Esto debería fallar en el constructor de Zona
       };
       
       expect(() => repository._toDomain(modeloInvalido)).toThrow();
@@ -62,8 +62,36 @@ describe('ZonaRepositoryPostgres', () => {
         idRoco: 10,
         tipo: 'Zona Test',
         pistas: [
-          { id: 101, idZona: 1, nombre: 'Pista A', dificultad: '5a', escaladores: [] },
-          { id: 102, idZona: 1, nombre: 'Pista B', dificultad: '6b', escaladores: [] },
+          {
+            id: 101,
+            idZona: 1,
+            nombre: 'Pista A',
+            dificultad: '5a',
+            colorPresas: 'rojo',
+            tipo: 'via',
+            imagenUrl: '/uploads/imagenes_pistas/a.png',
+            posX: 10,
+            posY: 20,
+            fechaCreacion: null,
+            fechaRetirada: null,
+            activo: true,
+            escaladores: [],
+          },
+          {
+            id: 102,
+            idZona: 1,
+            nombre: 'Pista B',
+            dificultad: '6b',
+            colorPresas: 'azul',
+            tipo: 'via',
+            imagenUrl: '/uploads/imagenes_pistas/b.png',
+            posX: 11,
+            posY: 21,
+            fechaCreacion: null,
+            fechaRetirada: null,
+            activo: true,
+            escaladores: [],
+          },
         ],
       };
 
@@ -78,17 +106,29 @@ describe('ZonaRepositoryPostgres', () => {
           {
             association: 'pistas',
             include: [],
+            where: {
+              activo: true,
+            },
           },
         ],
       });
       expect(resultado).toHaveLength(2);
-      expect(resultado[0]).toEqual({
-        id: 101,
-        idZona: 1,
-        nombre: 'Pista A',
-        dificultad: '5a',
-        estado: null,
-      });
+      expect(resultado[0]).toEqual(
+        expect.objectContaining({
+          id: 101,
+          idZona: 1,
+          nombre: 'Pista A',
+          dificultad: '5a',
+          colorPresas: 'rojo',
+          tipo: 'via',
+          imagenUrl: '/uploads/imagenes_pistas/a.png',
+          posX: 10,
+          posY: 20,
+          fechaCreacion: null,
+          fechaRetirada: null,
+          estado: null,
+        })
+      );
     });
 
     it('debería retornar null si la zona no existe', async () => {

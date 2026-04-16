@@ -1,9 +1,16 @@
 // Importamos los controladores de los diferentes modulos y las funciones de UI
 import { mainContainer, showLoading, showError } from './ui.js';
-import { isAuthenticated } from './client.js';
-import { perfilCmd } from '../modules/escalador/escaladorController.js';
-import { crearPistaCmd, infoPistaCmd } from '../modules/pista/pistaController.js';
-import { misRocodromosCmd, buscarRocodromosCmd, crearRocodromoCmd } from '../modules/rocodromo/rocodromoController.js';
+import { isAuthenticated, canManageRocodromo } from './client.js';
+import { perfilCmd, editarPerfilCmd } from '../modules/escalador/escaladorController.js';
+import { crearRutaCmd, infoRutaCmd, modificarRutaCmd } from '../modules/ruta/rutaController.js';
+import {
+    misRocodromosCmd,
+    buscarRocodromosCmd,
+    crearRocodromoCmd,
+    infoRocoCmd,
+    modificarRocodromoCmd,
+    rocodromoEstadisticasCmd,
+} from '../modules/rocodromo/rocodromoController.js';
 import { mapaZonaCmd, crearZonaCmd } from '../modules/zona/zonaController.js';
 import { homeCmd } from '../modules/home/homeController.js';
 import { error404Cmd } from '../modules/error/errorController.js';
@@ -51,18 +58,42 @@ export async function handleNavigation() {
         else if (hash === '#registro') {
             registroCmd(mainContainer);
         }
-        else if (hash === '#crearPista') {
-            crearPistaCmd(mainContainer);
+        else if (baseRoute === '#crearRuta') {
+            const idRocodromo = obtenerParametroDesdeHash('idRocodromo');
+            const idZona = obtenerParametroDesdeHash('idZona');
+
+            if (!canManageRocodromo(idRocodromo)) {
+                showError('No tienes permisos para crear rutas en este rocódromo.');
+                return;
+            }
+
+            await crearRutaCmd(mainContainer, { idRocodromo, idZona });
         }
-        else if (hash.startsWith('#infoPista')) {
+        else if (hash.startsWith('#infoRuta')) {
             const id = obtenerParametroDesdeHash('id');
-            await infoPistaCmd(mainContainer, id);
+            await infoRutaCmd(mainContainer, id);
+        }
+        else if (hash.startsWith('#modificarRuta')) {
+            const id = obtenerParametroDesdeHash('id');
+            await modificarRutaCmd(mainContainer, id);
         }
         else if (hash === '#misRocodromos') {
             await misRocodromosCmd(mainContainer);
         }
         else if (hash === '#buscarRocodromos') {
             await buscarRocodromosCmd(mainContainer);
+        }
+        else if (hash.startsWith('#infoRoco')) {
+            const id = obtenerParametroDesdeHash('id');
+            await infoRocoCmd(mainContainer, id);
+        }
+        else if (hash.startsWith('#modificarRocodromo')) {
+            const id = obtenerParametroDesdeHash('id');
+            await modificarRocodromoCmd(mainContainer, id);
+        }
+        else if (hash.startsWith('#rocodromoEstadisticas')) {
+            const id = obtenerParametroDesdeHash('id');
+            await rocodromoEstadisticasCmd(mainContainer, id);
         }
         else if (hash === '#crearRocodromo') {
             crearRocodromoCmd(mainContainer);
@@ -82,6 +113,9 @@ export async function handleNavigation() {
         }
         else if (hash === '#perfil') {
             await perfilCmd(mainContainer);
+        }
+        else if (hash === '#editarPerfil') {
+            await editarPerfilCmd(mainContainer);
         }
         else {
             error404Cmd(mainContainer);
