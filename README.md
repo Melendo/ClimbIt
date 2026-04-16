@@ -2,7 +2,9 @@
 
 ## 1. Descripción del proyecto
 
-ClimbIt es una aplicación web/móvil que permite a un usuario registrarse para crear su perfil de “escalador” con el cual podrá asignarse a un rocódromo existente. Estos rocódromos añadidos tendrán un registro actualizado de las rutas que hay activas. Estas rutas pueden tener una dificultad asignada de base y además si un escalador marca como completada una ruta puede dar su opinión sobre el nivel de dificultad de esta. Completando rutas subirás el nivel de tu perfil y se actualizará estadísticas sobre tu progreso en la escalada permitiéndote compararlo con tu grupo de amigos.
+ClimbIt es una aplicación web y móvil pensada para organizar la actividad de escaladores dentro de rocódromos. La aplicación permite a cada usuario registrarse como escalador, gestionar su perfil, suscribirse a rocódromos y consultar la información de sus zonas y rutas.
+
+Además de la consulta de rutas, el usuario puede marcar el estado de las rutas, valorar su dificultad y seguir su progreso mediante estadísticas personales y por rocódromo. La interfaz está diseñada para funcionar en dispositivos móvil, e incluye soporte PWA para ofrecer una experiencia más cercana a una app instalada.
 
 ## 2. Guía de instalación
 
@@ -106,7 +108,7 @@ Esto iniciará:
 
 #### Acceder a la aplicación
 
-- **Frontend:** [http://localhost:8080](http://localhost:5173)
+- **Frontend:** [http://localhost:5173](http://localhost:5173)
 - **Backend API:** [http://localhost:3000](http://localhost:3000)
 - **pgAdmin:** [http://localhost:5050](http://localhost:5050)
 
