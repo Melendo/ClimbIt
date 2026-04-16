@@ -42,6 +42,12 @@ body {
   color: #fff !important;
 }
 
+.btn-check:checked + .btn-outline-primary {
+  background-color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+  color: #fff !important;
+}
+
 .text-primary {
   color: #c75a14 !important;
 }
@@ -469,6 +475,9 @@ body {
   background: linear-gradient(to top, rgba(0, 0, 0, 0.78), transparent);
 }
 
+#tipo-segmented{
+  color: darkgrey;
+}
 /* ========================================
    Perfil - cambio de foto
    ======================================== */
