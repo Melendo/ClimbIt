@@ -83,22 +83,13 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
           </div>
           <div class="invalid-feedback d-block"></div>
         </div>
-  
-        <p class="text-muted small fw-semibold text-uppercase mb-2">Opcionales</p>
-  
+
         <div class="mb-3">
-          <label for="nombre" class="form-label">Nombre</label>
-          <input
-            type="text"
-            class="form-control"
-            name="nombre"
-            id="nombre"
-            maxlength="100"
-            placeholder="Ej: Placa central"
-          />
+          <label for="colorPresas" class="form-label">Color de presas</label>
+          <select class="form-select" name="colorPresas" id="colorPresas"></select>
           <div class="invalid-feedback"></div>
         </div>
-  
+
         <div class="mb-3">
           <label for="dificultad" class="form-label">Dificultad</label>
           <select class="form-select" name="dificultad" id="dificultad"></select>
@@ -106,30 +97,45 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
         </div>
 
         <div class="mb-3">
-          <label for="colorPresas" class="form-label">Color de presas</label>
-          <select class="form-select" name="colorPresas" id="colorPresas"></select>
-          <div class="invalid-feedback"></div>
-        </div>
-  
-        <div class="row g-2">
-          <div class="col-6">
-            <label for="fechaCreacion" class="form-label">Fecha de creación</label>
-            <input type="date" class="form-control" name="fechaCreacion" id="fechaCreacion" />
-            <div class="invalid-feedback"></div>
-          </div>
-          <div class="col-6">
-            <label for="fechaRetirada" class="form-label">Fecha de retirada</label>
-            <input type="date" class="form-control" name="fechaRetirada" id="fechaRetirada" />
-            <div class="invalid-feedback"></div>
-          </div>
-        </div>
-  
-        <div class="mb-3">
-          <label for="imagen" class="form-label">Imagen (opcional)</label>
+          <label for="imagen" class="form-label">Foto ruta</label>
           <input type="file" class="form-control" name="imagen" id="imagen" accept="image/*" />
           <div class="invalid-feedback"></div>
         </div>
-  
+
+        <details class="mb-3 border rounded-3 bg-white shadow-sm overflow-hidden">
+          <summary class="d-flex align-items-center justify-content-between gap-2 px-3 py-2 fw-semibold text-dark" style="cursor: pointer; list-style: none;">
+            <span>Campos adicionales</span>
+            <span class="material-icons text-muted">expand_more</span>
+          </summary>
+          <div class="px-3 pb-3 pt-1">
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre</label>
+              <input
+                type="text"
+                class="form-control"
+                name="nombre"
+                id="nombre"
+                maxlength="100"
+                placeholder="Ej: Placa central"
+              />
+              <div class="invalid-feedback"></div>
+            </div>
+
+            <div class="row g-2">
+              <div class="col-6">
+                <label for="fechaCreacion" class="form-label">Fecha de creación</label>
+                <input type="date" class="form-control" name="fechaCreacion" id="fechaCreacion" />
+                <div class="invalid-feedback"></div>
+              </div>
+              <div class="col-6">
+                <label for="fechaRetirada" class="form-label">Fecha de retirada</label>
+                <input type="date" class="form-control" name="fechaRetirada" id="fechaRetirada" />
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+          </div>
+        </details>
+
         <div id="form-alert" class="alert d-none" role="alert"></div>
   
         <button type="submit" id="crear-ruta-submit" class="btn btn-primary w-100" ${contextError ? 'disabled' : ''}>${submitText}</button>
