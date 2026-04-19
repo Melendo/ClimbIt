@@ -11,9 +11,10 @@ import {
   renderStatsSection,
   renderTotalRoutesStatsCard,
 } from '../../components/escaladorStats.js';
+import { escapeHtml } from '../../components/formHelpers.js';
 import { renderEditableField, initEditableField } from '../../components/editableField.js';
 // Función auxiliar para mostrar un valor o un texto de fallback si el valor es nulo
-function renderValueOrFallback(value, fallback = 'No disponible') {
+function renderValueOrFallback(value, fallback = 'Sin descripcion...') {
   if (value === null || value === undefined) return fallback;
   const normalized = String(value).trim();
   return normalized || fallback;
@@ -23,9 +24,18 @@ function renderValueOrFallback(value, fallback = 'No disponible') {
 export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false, canManage = false) {
   const id = rocodromo?.id;
   const nombre = renderValueOrFallback(rocodromo?.nombre, 'Rocódromo sin nombre');
-  const ubicacion = renderValueOrFallback(rocodromo?.ubicacion);
-  const descripcion = renderValueOrFallback(rocodromo?.descripcion);
-  const horarios = renderValueOrFallback(rocodromo?.horarios);
+  const ubicacion = renderValueOrFallback(rocodromo?.ubicacion, 'Ubicación no disponible');
+  const descripcion = renderValueOrFallback(rocodromo?.descripcion, 'Sin descripción...');
+  const horarios = renderValueOrFallback(rocodromo?.horarios, 'Horarios no disponibles');
+  const ubicacionRaw =
+    typeof rocodromo?.ubicacion === 'string' ? rocodromo.ubicacion.trim() : '';
+  const mapsUrl = ubicacionRaw
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ubicacionRaw)}`
+    : '';
+  const nombreSafe = escapeHtml(nombre);
+  const ubicacionSafe = escapeHtml(ubicacion);
+  const descripcionSafe = escapeHtml(descripcion);
+  const horariosSafe = escapeHtml(horarios);
   const logoSrc = rocodromo?.logoSrc || '/assets/rocodromoDefecto.jpg';
 
   container.innerHTML = `
@@ -49,14 +59,13 @@ export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false, 
       </div>
     </div>
 
-    <div class="card-body flex-grow-1 overflow-auto">
-      <div class="d-flex flex-column align-items-center mb-4">
-        <div class="position-relative" style="width: 140px; height: 140px;">
+    <div class="card-body flex-grow-1 overflow-auto rocodromo-info-page">
+      <section class="rocodromo-info-hero mb-4">
+        <div class="position-relative rocodromo-info-logo-wrap">
           <img
             src="${logoSrc}"
-            alt="Logo de ${nombre}"
-            class="rounded-4 border"
-            style="width: 140px; height: 140px; object-fit: cover;"
+            alt="Logo de ${nombreSafe}"
+            class="rounded-4 border rocodromo-info-logo"
           >
           ${canManage ? `
             <button type="button" id="btn-actualizar-logo-roco" class="btn btn-dark btn-sm position-absolute bottom-0 end-0 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; border-radius: 999px;" aria-label="Actualizar logo" title="Actualizar logo">
@@ -65,18 +74,39 @@ export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false, 
             <input type="file" id="input-logo-roco" class="d-none" accept="image/*" />
           ` : ''}
         </div>
-        <h4 class="mt-3 mb-1 text-center">${nombre}</h4>
-        <p class="text-muted mb-0 text-center">${ubicacion}</p>
-      </div>
+        <h4 class="mt-3 mb-1 text-center rocodromo-info-title">${nombreSafe}</h4>
+      </section>
 
-      <div class="list-group list-group-flush border rounded-3 overflow-hidden">
-        <div class="list-group-item">
-          <p class="text-muted small text-uppercase fw-semibold mb-1">Descripción</p>
-          <p class="mb-0">${descripcion}</p>
+      <div class="rocodromo-info-sections">
+        ${renderSectionDivider({ label: 'Ubicacion' })}
+        <div class="rocodromo-info-section-card">
+          <div class="rocodromo-info-location-section-row" aria-label="Ubicación del rocódromo">
+            <p class="mb-0 rocodromo-info-section-text rocodromo-info-location-section-text">${ubicacionSafe}</p>
+            ${mapsUrl
+    ? `
+            <a
+              href="${mapsUrl}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn-outline-primary btn-sm rocodromo-info-maps-btn"
+              aria-label="Abrir ubicación en Google Maps"
+              title="Abrir en Google Maps"
+            >
+              <span class="material-icons" style="font-size: 18px; line-height: 1;">map</span>
+            </a>
+            `
+    : ''}
+          </div>
         </div>
-        <div class="list-group-item">
-          <p class="text-muted small text-uppercase fw-semibold mb-1">Horarios</p>
-          <p class="mb-0">${horarios}</p>
+
+        ${renderSectionDivider({ label: 'Descripcion' })}
+        <div class="rocodromo-info-section-card">
+          <p class="mb-0 rocodromo-info-section-text text-center">${descripcionSafe}</p>
+        </div>
+
+        ${renderSectionDivider({ label: 'Horarios' })}
+        <div class="rocodromo-info-section-card">
+          <p class="mb-0 rocodromo-info-section-text">${horariosSafe}</p>
         </div>
       </div>
 
@@ -169,7 +199,7 @@ export function renderModificarRocodromo(container, callbacks, initialValues = {
               placeholder: 'Describe el rocódromo',
               maxLength: 255,
               inputTag: 'textarea',
-              rows: 4,
+              rows: 6,
             })}
           </div>
 
@@ -181,7 +211,7 @@ export function renderModificarRocodromo(container, callbacks, initialValues = {
               placeholder: 'Ej: L-V 09:00-22:00',
               maxLength: 255,
               inputTag: 'textarea',
-              rows: 3,
+              rows: 6,
             })}
           </div>
 
