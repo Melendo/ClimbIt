@@ -14,7 +14,7 @@ const DEFAULT_ALLOWED_MIME_TYPES = [
 ];
 
 const SVG_MIME_TYPE = 'image/svg+xml';
-const DEFAULT_MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
+const DEFAULT_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 const WEBP_MIME_TYPE = 'image/webp';
 const RASTER_SOURCE_MIME_TYPES = new Set([
   'image/jpeg',

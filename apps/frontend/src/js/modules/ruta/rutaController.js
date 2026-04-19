@@ -18,7 +18,7 @@ import { showToast } from '../../components/toast.js';
 const RUTA_IMAGE_PLACEHOLDER = '/assets/placeholder.jpg';
 
 const TIPOS_PISTA = ['boulder', 'via'];
-const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
 const MIN_ROUTE_SEPARATION = 18;
 
 function canRateRutaByEstado(estado) {
