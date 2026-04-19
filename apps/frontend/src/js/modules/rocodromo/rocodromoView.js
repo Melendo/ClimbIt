@@ -11,6 +11,7 @@ import {
   renderStatsSection,
   renderTotalRoutesStatsCard,
 } from '../../components/escaladorStats.js';
+import { renderEditableField, initEditableField } from '../../components/editableField.js';
 // Función auxiliar para mostrar un valor o un texto de fallback si el valor es nulo
 function renderValueOrFallback(value, fallback = 'No disponible') {
   if (value === null || value === undefined) return fallback;
@@ -93,6 +94,43 @@ export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false, 
 }
 
 export function renderModificarRocodromo(container, callbacks, initialValues = {}) {
+  const renderRocodromoField = ({
+    prefix,
+    label,
+    value,
+    placeholder,
+    maxLength,
+    inputTag = 'input',
+    rows,
+  }) => renderEditableField({
+    prefix,
+    wrapperClass: 'w-100',
+    titleHtml: `<label for="roco-${prefix}-input" class="form-label">${label}</label>`,
+    viewContent: '',
+    inputValue: String(value || ''),
+    inputTag,
+    inputClasses: 'form-control',
+    inputAttributes: {
+      name: prefix,
+      autocomplete: 'off',
+      autocapitalize: 'off',
+      autocorrect: 'off',
+      spellcheck: 'false',
+    },
+    placeholder,
+    ariaLabel: label,
+    maxLength,
+    rows,
+    domPrefix: 'roco',
+    dataAttrPrefix: 'data-roco',
+    showView: false,
+    showEditButton: false,
+    showFieldActions: false,
+    startInEditMode: true,
+    feedbackHtml: '<div class="invalid-feedback"></div>',
+    feedbackInInputWrap: true,
+  });
+
   container.innerHTML = `
     <div class="d-flex flex-column" style="height: 100dvh; overflow: hidden;">
       <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
@@ -104,27 +142,47 @@ export function renderModificarRocodromo(container, callbacks, initialValues = {
       <div class="card-body flex-grow-1 overflow-auto bg-light">
         <form id="form-modificar-rocodromo" novalidate>
           <div class="mb-3">
-            <label for="nombre" class="form-label">Nombre</label>
-            <input type="text" class="form-control" name="nombre" id="nombre" maxlength="100" placeholder="Ej: ClimbIt Center" />
-            <div class="invalid-feedback"></div>
+            ${renderRocodromoField({
+              prefix: 'nombre',
+              label: 'Nombre',
+              value: initialValues?.nombre,
+              placeholder: 'Ej: ClimbIt Center',
+              maxLength: 100,
+            })}
           </div>
 
           <div class="mb-3">
-            <label for="ubicacion" class="form-label">Ubicación</label>
-            <input type="text" class="form-control" name="ubicacion" id="ubicacion" maxlength="255" placeholder="Ej: Calle Principal 123, Madrid" />
-            <div class="invalid-feedback"></div>
+            ${renderRocodromoField({
+              prefix: 'ubicacion',
+              label: 'Ubicación',
+              value: initialValues?.ubicacion,
+              placeholder: 'Ej: Calle Principal 123, Madrid',
+              maxLength: 255,
+            })}
           </div>
 
           <div class="mb-3">
-            <label for="descripcion" class="form-label">Descripción</label>
-            <textarea class="form-control" name="descripcion" id="descripcion" rows="4" placeholder="Describe el rocódromo"></textarea>
-            <div class="invalid-feedback"></div>
+            ${renderRocodromoField({
+              prefix: 'descripcion',
+              label: 'Descripción',
+              value: initialValues?.descripcion,
+              placeholder: 'Describe el rocódromo',
+              maxLength: 255,
+              inputTag: 'textarea',
+              rows: 4,
+            })}
           </div>
 
           <div class="mb-3">
-            <label for="horarios" class="form-label">Horario</label>
-            <textarea class="form-control" name="horarios" id="horarios" rows="3" placeholder="Ej: L-V 09:00-22:00"></textarea>
-            <div class="invalid-feedback"></div>
+            ${renderRocodromoField({
+              prefix: 'horarios',
+              label: 'Horario',
+              value: initialValues?.horarios,
+              placeholder: 'Ej: L-V 09:00-22:00',
+              maxLength: 255,
+              inputTag: 'textarea',
+              rows: 3,
+            })}
           </div>
 
           <div id="form-alert" class="alert d-none" role="alert"></div>
@@ -136,17 +194,41 @@ export function renderModificarRocodromo(container, callbacks, initialValues = {
   `;
 
   const form = container.querySelector('#form-modificar-rocodromo');
-  const nombreInput = container.querySelector('#nombre');
-  const ubicacionInput = container.querySelector('#ubicacion');
-  const descripcionInput = container.querySelector('#descripcion');
-  const horariosInput = container.querySelector('#horarios');
+  const nombreInput = container.querySelector('#roco-nombre-input');
+  const ubicacionInput = container.querySelector('#roco-ubicacion-input');
+  const descripcionInput = container.querySelector('#roco-descripcion-input');
+  const horariosInput = container.querySelector('#roco-horarios-input');
   const alertBox = container.querySelector('#form-alert');
   const submitButton = container.querySelector('#modificar-roco-submit');
 
-  nombreInput.value = String(initialValues?.nombre || '');
-  ubicacionInput.value = String(initialValues?.ubicacion || '');
-  descripcionInput.value = String(initialValues?.descripcion || '');
-  horariosInput.value = String(initialValues?.horarios || '');
+  initEditableField(container, {
+    prefix: 'nombre',
+    initialValue: String(initialValues?.nombre || ''),
+    maxLength: 100,
+    domPrefix: 'roco',
+    dataAttrPrefix: 'data-roco',
+  });
+  initEditableField(container, {
+    prefix: 'ubicacion',
+    initialValue: String(initialValues?.ubicacion || ''),
+    maxLength: 255,
+    domPrefix: 'roco',
+    dataAttrPrefix: 'data-roco',
+  });
+  initEditableField(container, {
+    prefix: 'descripcion',
+    initialValue: String(initialValues?.descripcion || ''),
+    maxLength: 255,
+    domPrefix: 'roco',
+    dataAttrPrefix: 'data-roco',
+  });
+  initEditableField(container, {
+    prefix: 'horarios',
+    initialValue: String(initialValues?.horarios || ''),
+    maxLength: 255,
+    domPrefix: 'roco',
+    dataAttrPrefix: 'data-roco',
+  });
 
   [nombreInput, ubicacionInput, descripcionInput, horariosInput].forEach((el) => {
     el.addEventListener('input', () => callbacks.onFieldChange(el, alertBox));
