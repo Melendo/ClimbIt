@@ -41,6 +41,8 @@ services:
       PORT: 3000
       # Conexión a la DB usando el nombre del servicio 'db'
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
     volumes:
       - backend_uploads:/app/uploads
     depends_on:

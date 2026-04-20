@@ -2,7 +2,7 @@
 
 :root {
   --bs-font-sans-serif: 'Montserrat', sans-serif;
-  --bs-primary: #c75a14;
+  --bs-primary: #e77f1e;
   --app-max-width: 400px;
   --vh: 1vh;
   --app-height: calc(var(--vh) * 100);
@@ -15,8 +15,8 @@ body {
 
 /* Override Bootstrap primary color */
 .btn-primary {
-  background-color: #c75a14 !important;
-  border-color: #c75a14 !important;
+  background-color: #e77f1e !important;
+  border-color: #e77f1e !important;
   color: #fff !important;
 }
 
@@ -24,48 +24,51 @@ body {
 .btn-primary:focus,
 .btn-primary:active,
 .btn-primary.active {
-  background-color: #ab4910 !important;
-  border-color: #ab4910 !important;
+  background-color: #b96518 !important;
+  border-color: #b96518 !important;
 }
 
 .btn-outline-primary {
-  color: #c75a14 !important;
-  border-color: #c75a14 !important;
+  color: #e77f1e !important;
+  border-color: #e77f1e !important;
 }
 
 .btn-outline-primary:hover,
 .btn-outline-primary:focus,
 .btn-outline-primary:active,
 .btn-outline-primary.active {
-  background-color: #c75a14 !important;
-  border-color: #c75a14 !important;
+  background-color: #e77f1e !important;
+  border-color: #e77f1e !important;
   color: #fff !important;
 }
 
-.btn-check:checked + .btn-outline-primary {
-  background-color: var(--bs-primary) !important;
-  border-color: var(--bs-primary) !important;
+.btn-check:checked + .btn-outline-primary,
+.btn-check:checked + .btn-outline-primary:hover,
+.btn-check:checked + .btn-outline-primary:focus,
+.btn-check:checked + .btn-outline-primary:active {
+  background-color: #e77f1e !important;
+  border-color: #e77f1e !important;
   color: #fff !important;
 }
 
 .text-primary {
-  color: #c75a14 !important;
+  color: #e77f1e !important;
 }
 
 .bg-primary {
-  background-color: #c75a14 !important;
+  background-color: #e77f1e !important;
 }
 
 .border-primary {
-  border-color: #c75a14 !important;
+  border-color: #e77f1e !important;
 }
 
 .btn-link {
-  color: #c75a14 !important;
+  color: #e77f1e !important;
 }
 
 .btn-link:hover {
-  color: #ab4910 !important;
+  color: #b96518 !important;
 }
 
 /* Mantener blanco el icono en botones negros de editar perfil */
@@ -160,6 +163,7 @@ body {
 #app-container.app-vertical-layout > .app-content.app-shell {
   height: 100dvh;
   height: var(--app-height);
+  border-top: 0 !important;
 }
 
 /* En móvil: contenido a pantalla completa */
@@ -457,6 +461,16 @@ body {
     0 4px 6px rgba(0, 0, 0, 0.20);
 }
 
+.rocodromo-card-content {
+  min-width: 0;
+}
+
+.rocodromo-card-text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ========================================
    Vista crear ruta
    ======================================== */
@@ -473,6 +487,50 @@ body {
 
 .crear-ruta-mapa-overlay {
   background: linear-gradient(to top, rgba(0, 0, 0, 0.78), transparent);
+}
+
+.ruta-image-modal-content {
+  background: #0e0e0e;
+  color: #fff;
+}
+
+.ruta-image-modal-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem 1rem;
+  overflow: hidden;
+  touch-action: none;
+  cursor: default;
+}
+
+.ruta-image-modal-body.is-zoomed {
+  cursor: grab;
+}
+
+.ruta-image-modal-body.is-dragging {
+  cursor: grabbing;
+}
+
+.ruta-image-modal-stage {
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ruta-image-modal-img {
+  width: 100%;
+  max-height: calc(100dvh - 110px);
+  object-fit: contain;
+  border-radius: 0.5rem;
+  background: #000;
+  transform-origin: 0 0;
+  transition: transform 120ms ease;
+  user-select: none;
+  pointer-events: none;
+  will-change: transform;
 }
 
 /* ========================================
@@ -661,6 +719,88 @@ body {
   padding: 20px 16px 24px;
 }
 
+.rocodromo-info-page {
+  padding: 20px 16px 24px;
+  /*background:
+    radial-gradient(circle at 10% -10%, rgba(199, 90, 20, 0.13), transparent 50%),
+    radial-gradient(circle at 92% -18%, rgba(29, 29, 29, 0.08), transparent 42%);*/
+}
+
+.rocodromo-info-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 14px 14px;
+  margin-bottom: 8px;
+}
+
+.rocodromo-info-logo-wrap {
+  width: 144px;
+  height: 144px;
+}
+
+.rocodromo-info-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rocodromo-info-title {
+  max-width: 100%;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+
+.rocodromo-info-location-section-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rocodromo-info-location-section-text {
+  flex: 1;
+  min-width: 0;
+  color: #6c757d;
+}
+
+.rocodromo-info-maps-btn {
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 999px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rocodromo-info-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.rocodromo-info-section-card {
+  margin: 0 6px;
+  background: #fff;
+  padding-left: 16px;
+}
+
+.rocodromo-info-section-text {
+  color: #2d2d2d;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.rocodromo-info-details-item {
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+}
+
 .rocodromo-stats-hero {
   display: flex;
   flex-direction: column;
@@ -680,7 +820,7 @@ body {
   border-radius: 999px;
   object-fit: cover;
   border: 3px solid #ffffff;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
   background: #ffffff;
 }
 
@@ -973,8 +1113,8 @@ body {
 }
 
 .perfil-heatmap-day.is-high {
-  background: #d97924;
-  border-color: #c86b17;
+  background: #e77f1e;
+  border-color: #d4701a;
 }
 
 .perfil-heatmap-legend {
@@ -1057,7 +1197,7 @@ body {
   width: 100%;
   max-width: 24px;
   border-radius: 6px;
-  background: linear-gradient(180deg, #f6a44a 0%, #d97924 100%);
+  background: linear-gradient(180deg, #f5ad5e 0%, #e77f1e 100%);
   min-height: 8px;
 }
 
@@ -1179,7 +1319,7 @@ body {
 .perfil-descripcion-view p {
   display: inline-block;
   max-width: 100%;
-  white-space: normal;
+  white-space: pre-wrap;
   overflow-wrap: anywhere;
   word-break: break-word;
 }

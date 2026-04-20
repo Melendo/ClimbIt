@@ -9,6 +9,8 @@
   ],
   "scripts": {
     "dev": "lerna run start --parallel",
+    "allow-scripts": "allow-scripts && npm run --workspace=backend allow-scripts",
+    "setup": "npm install && npm run allow-scripts",
     "test": "lerna run test",
     "test:coverage": "lerna run test:coverage",
     "clean": "lerna clean",
@@ -23,6 +25,7 @@
   "type": "module",
   "devDependencies": {
     "@eslint/js": "9.37.0",
+    "@lavamoat/allow-scripts": "5.0.1",
     "eslint": "9.37.0",
     "eslint-config-google": "0.14.0",
     "eslint-config-prettier": "10.1.8",
@@ -36,5 +39,14 @@
   },
   "lint-staged": {
     "**/*.{js,mjs}": "eslint --fix"
+  },
+  "lavamoat": {
+    "allowScripts": {      
+      "lerna>nx#22.6.5": true,
+      "eslint-plugin-jest>jest>@jest/core>jest-resolve>unrs-resolver#1.11.1": true
+    }
+  },
+  "overrides": {
+    "serialize-javascript": "7.0.5"
   }
 }

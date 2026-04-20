@@ -5,6 +5,7 @@ import {
 } from '../../components/rutaRating.js';
 import { escapeHtml } from '../../components/formHelpers.js';
 import { renderPresaColorIcon } from '../../components/rutaCardIndicators.js';
+import { renderRutaImageModal, setupRutaImageModal } from '../../components/rutaImageModal.js';
 
 function toDateInputValue(value) {
   if (!value) return '';
@@ -83,22 +84,13 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
           </div>
           <div class="invalid-feedback d-block"></div>
         </div>
-  
-        <p class="text-muted small fw-semibold text-uppercase mb-2">Opcionales</p>
-  
+
         <div class="mb-3">
-          <label for="nombre" class="form-label">Nombre</label>
-          <input
-            type="text"
-            class="form-control"
-            name="nombre"
-            id="nombre"
-            maxlength="100"
-            placeholder="Ej: Placa central"
-          />
+          <label for="colorPresas" class="form-label">Color de presas</label>
+          <select class="form-select" name="colorPresas" id="colorPresas"></select>
           <div class="invalid-feedback"></div>
         </div>
-  
+
         <div class="mb-3">
           <label for="dificultad" class="form-label">Dificultad</label>
           <select class="form-select" name="dificultad" id="dificultad"></select>
@@ -106,30 +98,45 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
         </div>
 
         <div class="mb-3">
-          <label for="colorPresas" class="form-label">Color de presas</label>
-          <select class="form-select" name="colorPresas" id="colorPresas"></select>
-          <div class="invalid-feedback"></div>
-        </div>
-  
-        <div class="row g-2">
-          <div class="col-6">
-            <label for="fechaCreacion" class="form-label">Fecha de creación</label>
-            <input type="date" class="form-control" name="fechaCreacion" id="fechaCreacion" />
-            <div class="invalid-feedback"></div>
-          </div>
-          <div class="col-6">
-            <label for="fechaRetirada" class="form-label">Fecha de retirada</label>
-            <input type="date" class="form-control" name="fechaRetirada" id="fechaRetirada" />
-            <div class="invalid-feedback"></div>
-          </div>
-        </div>
-  
-        <div class="mb-3">
-          <label for="imagen" class="form-label">Imagen (opcional)</label>
+          <label for="imagen" class="form-label">Foto ruta</label>
           <input type="file" class="form-control" name="imagen" id="imagen" accept="image/*" />
           <div class="invalid-feedback"></div>
         </div>
-  
+
+        <details class="mb-3 border rounded-3 bg-white shadow-sm overflow-hidden">
+          <summary class="d-flex align-items-center justify-content-between gap-2 px-3 py-2 fw-semibold text-dark" style="cursor: pointer; list-style: none;">
+            <span>Campos adicionales</span>
+            <span class="material-icons text-muted">expand_more</span>
+          </summary>
+          <div class="px-3 pb-3 pt-1">
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre</label>
+              <input
+                type="text"
+                class="form-control"
+                name="nombre"
+                id="nombre"
+                maxlength="100"
+                placeholder="Ej: Placa central"
+              />
+              <div class="invalid-feedback"></div>
+            </div>
+
+            <div class="row g-2">
+              <div class="col-6">
+                <label for="fechaCreacion" class="form-label">Fecha de creación</label>
+                <input type="date" class="form-control" name="fechaCreacion" id="fechaCreacion" />
+                <div class="invalid-feedback"></div>
+              </div>
+              <div class="col-6">
+                <label for="fechaRetirada" class="form-label">Fecha de retirada</label>
+                <input type="date" class="form-control" name="fechaRetirada" id="fechaRetirada" />
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+          </div>
+        </details>
+
         <div id="form-alert" class="alert d-none" role="alert"></div>
   
         <button type="submit" id="crear-ruta-submit" class="btn btn-primary w-100" ${contextError ? 'disabled' : ''}>${submitText}</button>
@@ -296,6 +303,10 @@ export function renderInfoRuta(container, ruta, callbacks) {
   const activoBadgeClass = activo ? 'text-bg-success' : 'text-bg-secondary';
   const canManage = Boolean(ruta?.canManage);
   const backHref = ruta?.backHref || '#misRocodromos';
+  const rutaNombre = nombre || 'Sin nombre';
+  const rutaNombreSafe = escapeHtml(rutaNombre);
+  const rutaImageSrc = ruta?.imagenSrc || '/assets/placeholder.webp';
+  const rutaImageModalId = `ruta-image-modal-${ruta?.id || 'detalle'}`;
   const ratingSummary = {
     averageRating: Number(ruta?.ratingSummary?.averageRating) || 0,
     numValoraciones: Number(ruta?.ratingSummary?.numValoraciones) || 0,
@@ -308,8 +319,8 @@ export function renderInfoRuta(container, ruta, callbacks) {
   <!-- Imagen hero con overlay -->
   <div class="position-relative" style="height: 45dvh; min-height: 280px;">
     <img 
-      src="${ruta?.imagenSrc || '/assets/placeholder.jpg'}" 
-      alt="Imagen de la ruta ${nombre || ''}" 
+      src="${rutaImageSrc}" 
+      alt="Imagen de la ruta ${rutaNombreSafe}" 
       class="w-100 h-100" 
       style="object-fit: cover;"
     />
@@ -321,7 +332,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
     </a>
   
     ${canManage ? `
-    <div class="position-absolute bottom-0 end-0 m-3 d-flex gap-2" style="z-index: 3;">
+    <div class="position-absolute top-0 end-0 m-3 d-flex gap-2" style="z-index: 3;">
       <button type="button" id="btn-modificar-ruta" class="btn btn-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(255,255,255,0.85);" aria-label="Modificar ruta" title="Modificar ruta">
         <span class="material-icons" style="font-size: 20px;">edit</span>
       </button>
@@ -329,11 +340,23 @@ export function renderInfoRuta(container, ruta, callbacks) {
         <span class="material-icons" style="font-size: 20px;">delete</span>
       </button>
     </div>` : ''}
+
+    <button
+      type="button"
+      class="btn btn-dark d-flex align-items-center justify-content-center position-absolute bottom-0 end-0 m-3"
+      aria-label="Ampliar foto de la ruta"
+      title="Ampliar foto"
+      data-bs-toggle="modal"
+      data-bs-target="#${rutaImageModalId}"
+      style="z-index: 3; width: 40px; height: 40px; background: rgba(0,0,0,0.48); border-color: rgba(255,255,255,0.35);"
+    >
+      <span class="material-icons" style="font-size: 20px;">zoom_in</span>
+    </button>
     
     <!-- Info sobre la imagen -->
     <div class="position-absolute bottom-0 start-0 end-0 p-4 text-white">
       ${hasDificultad ? `<span class="badge mb-2" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); font-size: 0.9rem; padding: 6px 12px;">${dificultad}</span>` : ''}
-      <h1 class="fs-4 fw-semibold mb-0">${nombre || 'Sin nombre'}</h1>
+      <h1 class="fs-4 fw-semibold mb-0">${rutaNombreSafe}</h1>
     </div>
   </div>
   
@@ -341,7 +364,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
   <div class="flex-grow-1 d-flex flex-column">
     
     <!-- Tu progreso y acciones -->
-    <div class="bg-white px-4 py-4 border-bottom">
+    <div class="bg-white px-4 py-4">
       <div class="d-flex align-items-center justify-content-between mb-3">
         <div>
           <p class="text-muted small mb-1 text-uppercase" style="letter-spacing: 0.5px;">Tu progreso</p>
@@ -408,7 +431,14 @@ export function renderInfoRuta(container, ruta, callbacks) {
     </div>
   
   </div>
-</div>`;
+</div>
+
+${renderRutaImageModal({
+  modalId: rutaImageModalId,
+  title: rutaNombre,
+  imageSrc: rutaImageSrc,
+  imageAlt: `Imagen ampliada de la ruta ${rutaNombre}`,
+})}`;
   
   setupRutaEstadoButtons(container, callbacks.onEstadoChange);
   const ratingSectionController = setupRutaRatingSection(container, {
@@ -432,6 +462,8 @@ export function renderInfoRuta(container, ruta, callbacks) {
         callbacks.onDeleteRoute(ruta, eliminarRutaBtn);
       });
     }
+
+  setupRutaImageModal(container, { modalId: rutaImageModalId });
   }
 
   

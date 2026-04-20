@@ -5,6 +5,7 @@ const DEFAULT_SVG_SIZE = 1000;
 const DEFAULT_CLICK_THRESHOLD = 10;
 const DEFAULT_DETAIL_ZOOM_THRESHOLD = 1.8;
 const DEFAULT_DETAIL_ZOOM_HYSTERESIS = 0.2;
+const DEFAULT_MARKER_HITBOX_RADIUS = 11;
 
 const svgCache = new Map();
 
@@ -235,7 +236,7 @@ export function createSvgPanzoomMap(options) {
                 const touchHitbox = document.createElementNS(SVG_NS, 'circle');
                 touchHitbox.setAttribute('cx', '0');
                 touchHitbox.setAttribute('cy', '0');
-                touchHitbox.setAttribute('r', '58');
+                touchHitbox.setAttribute('r', String(DEFAULT_MARKER_HITBOX_RADIUS));
                 touchHitbox.setAttribute('class', 'ruta-hitbox');
 
                 const holdColor = typeof marker.holdColor === 'string'

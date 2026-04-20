@@ -11,8 +11,10 @@ import {
   renderStatsSection,
   renderTotalRoutesStatsCard,
 } from '../../components/escaladorStats.js';
+import { escapeHtml } from '../../components/formHelpers.js';
+import { renderEditableField, initEditableField } from '../../components/editableField.js';
 // Función auxiliar para mostrar un valor o un texto de fallback si el valor es nulo
-function renderValueOrFallback(value, fallback = 'No disponible') {
+function renderValueOrFallback(value, fallback = 'Sin descripcion...') {
   if (value === null || value === undefined) return fallback;
   const normalized = String(value).trim();
   return normalized || fallback;
@@ -22,9 +24,18 @@ function renderValueOrFallback(value, fallback = 'No disponible') {
 export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false, canManage = false) {
   const id = rocodromo?.id;
   const nombre = renderValueOrFallback(rocodromo?.nombre, 'Rocódromo sin nombre');
-  const ubicacion = renderValueOrFallback(rocodromo?.ubicacion);
-  const descripcion = renderValueOrFallback(rocodromo?.descripcion);
-  const horarios = renderValueOrFallback(rocodromo?.horarios);
+  const ubicacion = renderValueOrFallback(rocodromo?.ubicacion, 'Ubicación no disponible');
+  const descripcion = renderValueOrFallback(rocodromo?.descripcion, 'Sin descripción...');
+  const horarios = renderValueOrFallback(rocodromo?.horarios, 'Horarios no disponibles');
+  const ubicacionRaw =
+    typeof rocodromo?.ubicacion === 'string' ? rocodromo.ubicacion.trim() : '';
+  const mapsUrl = ubicacionRaw
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ubicacionRaw)}`
+    : '';
+  const nombreSafe = escapeHtml(nombre);
+  const ubicacionSafe = escapeHtml(ubicacion);
+  const descripcionSafe = escapeHtml(descripcion);
+  const horariosSafe = escapeHtml(horarios);
   const logoSrc = rocodromo?.logoSrc || '/assets/rocodromoDefecto.jpg';
 
   container.innerHTML = `
@@ -48,14 +59,13 @@ export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false, 
       </div>
     </div>
 
-    <div class="card-body flex-grow-1 overflow-auto">
-      <div class="d-flex flex-column align-items-center mb-4">
-        <div class="position-relative" style="width: 140px; height: 140px;">
+    <div class="card-body flex-grow-1 overflow-auto rocodromo-info-page">
+      <section class="rocodromo-info-hero mb-4">
+        <div class="position-relative rocodromo-info-logo-wrap">
           <img
             src="${logoSrc}"
-            alt="Logo de ${nombre}"
-            class="rounded-4 border"
-            style="width: 140px; height: 140px; object-fit: cover;"
+            alt="Logo de ${nombreSafe}"
+            class="rounded-4 border rocodromo-info-logo"
           >
           ${canManage ? `
             <button type="button" id="btn-actualizar-logo-roco" class="btn btn-dark btn-sm position-absolute bottom-0 end-0 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; border-radius: 999px;" aria-label="Actualizar logo" title="Actualizar logo">
@@ -64,18 +74,39 @@ export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false, 
             <input type="file" id="input-logo-roco" class="d-none" accept="image/*" />
           ` : ''}
         </div>
-        <h4 class="mt-3 mb-1 text-center">${nombre}</h4>
-        <p class="text-muted mb-0 text-center">${ubicacion}</p>
-      </div>
+        <h4 class="mt-3 mb-1 text-center rocodromo-info-title">${nombreSafe}</h4>
+      </section>
 
-      <div class="list-group list-group-flush border rounded-3 overflow-hidden">
-        <div class="list-group-item">
-          <p class="text-muted small text-uppercase fw-semibold mb-1">Descripción</p>
-          <p class="mb-0">${descripcion}</p>
+      <div class="rocodromo-info-sections">
+        ${renderSectionDivider({ label: 'Ubicacion' })}
+        <div class="rocodromo-info-section-card">
+          <div class="rocodromo-info-location-section-row" aria-label="Ubicación del rocódromo">
+            <p class="mb-0 rocodromo-info-section-text rocodromo-info-location-section-text">${ubicacionSafe}</p>
+            ${mapsUrl
+    ? `
+            <a
+              href="${mapsUrl}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn-outline-primary btn-sm rocodromo-info-maps-btn"
+              aria-label="Abrir ubicación en Google Maps"
+              title="Abrir en Google Maps"
+            >
+              <span class="material-icons" style="font-size: 18px; line-height: 1;">map</span>
+            </a>
+            `
+    : ''}
+          </div>
         </div>
-        <div class="list-group-item">
-          <p class="text-muted small text-uppercase fw-semibold mb-1">Horarios</p>
-          <p class="mb-0">${horarios}</p>
+
+        ${renderSectionDivider({ label: 'Descripcion' })}
+        <div class="rocodromo-info-section-card">
+          <p class="mb-0 rocodromo-info-section-text text-center">${descripcionSafe}</p>
+        </div>
+
+        ${renderSectionDivider({ label: 'Horarios' })}
+        <div class="rocodromo-info-section-card">
+          <p class="mb-0 rocodromo-info-section-text">${horariosSafe}</p>
         </div>
       </div>
 
@@ -93,6 +124,43 @@ export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false, 
 }
 
 export function renderModificarRocodromo(container, callbacks, initialValues = {}) {
+  const renderRocodromoField = ({
+    prefix,
+    label,
+    value,
+    placeholder,
+    maxLength,
+    inputTag = 'input',
+    rows,
+  }) => renderEditableField({
+    prefix,
+    wrapperClass: 'w-100',
+    titleHtml: `<label for="roco-${prefix}-input" class="form-label">${label}</label>`,
+    viewContent: '',
+    inputValue: String(value || ''),
+    inputTag,
+    inputClasses: 'form-control',
+    inputAttributes: {
+      name: prefix,
+      autocomplete: 'off',
+      autocapitalize: 'off',
+      autocorrect: 'off',
+      spellcheck: 'false',
+    },
+    placeholder,
+    ariaLabel: label,
+    maxLength,
+    rows,
+    domPrefix: 'roco',
+    dataAttrPrefix: 'data-roco',
+    showView: false,
+    showEditButton: false,
+    showFieldActions: false,
+    startInEditMode: true,
+    feedbackHtml: '<div class="invalid-feedback"></div>',
+    feedbackInInputWrap: true,
+  });
+
   container.innerHTML = `
     <div class="d-flex flex-column" style="height: 100dvh; overflow: hidden;">
       <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
@@ -104,27 +172,47 @@ export function renderModificarRocodromo(container, callbacks, initialValues = {
       <div class="card-body flex-grow-1 overflow-auto bg-light">
         <form id="form-modificar-rocodromo" novalidate>
           <div class="mb-3">
-            <label for="nombre" class="form-label">Nombre</label>
-            <input type="text" class="form-control" name="nombre" id="nombre" maxlength="100" placeholder="Ej: ClimbIt Center" />
-            <div class="invalid-feedback"></div>
+            ${renderRocodromoField({
+              prefix: 'nombre',
+              label: 'Nombre',
+              value: initialValues?.nombre,
+              placeholder: 'Ej: ClimbIt Center',
+              maxLength: 100,
+            })}
           </div>
 
           <div class="mb-3">
-            <label for="ubicacion" class="form-label">Ubicación</label>
-            <input type="text" class="form-control" name="ubicacion" id="ubicacion" maxlength="255" placeholder="Ej: Calle Principal 123, Madrid" />
-            <div class="invalid-feedback"></div>
+            ${renderRocodromoField({
+              prefix: 'ubicacion',
+              label: 'Ubicación',
+              value: initialValues?.ubicacion,
+              placeholder: 'Ej: Calle Principal 123, Madrid',
+              maxLength: 255,
+            })}
           </div>
 
           <div class="mb-3">
-            <label for="descripcion" class="form-label">Descripción</label>
-            <textarea class="form-control" name="descripcion" id="descripcion" rows="4" placeholder="Describe el rocódromo"></textarea>
-            <div class="invalid-feedback"></div>
+            ${renderRocodromoField({
+              prefix: 'descripcion',
+              label: 'Descripción',
+              value: initialValues?.descripcion,
+              placeholder: 'Describe el rocódromo',
+              maxLength: 255,
+              inputTag: 'textarea',
+              rows: 6,
+            })}
           </div>
 
           <div class="mb-3">
-            <label for="horarios" class="form-label">Horario</label>
-            <textarea class="form-control" name="horarios" id="horarios" rows="3" placeholder="Ej: L-V 09:00-22:00"></textarea>
-            <div class="invalid-feedback"></div>
+            ${renderRocodromoField({
+              prefix: 'horarios',
+              label: 'Horario',
+              value: initialValues?.horarios,
+              placeholder: 'Ej: L-V 09:00-22:00',
+              maxLength: 255,
+              inputTag: 'textarea',
+              rows: 6,
+            })}
           </div>
 
           <div id="form-alert" class="alert d-none" role="alert"></div>
@@ -136,17 +224,41 @@ export function renderModificarRocodromo(container, callbacks, initialValues = {
   `;
 
   const form = container.querySelector('#form-modificar-rocodromo');
-  const nombreInput = container.querySelector('#nombre');
-  const ubicacionInput = container.querySelector('#ubicacion');
-  const descripcionInput = container.querySelector('#descripcion');
-  const horariosInput = container.querySelector('#horarios');
+  const nombreInput = container.querySelector('#roco-nombre-input');
+  const ubicacionInput = container.querySelector('#roco-ubicacion-input');
+  const descripcionInput = container.querySelector('#roco-descripcion-input');
+  const horariosInput = container.querySelector('#roco-horarios-input');
   const alertBox = container.querySelector('#form-alert');
   const submitButton = container.querySelector('#modificar-roco-submit');
 
-  nombreInput.value = String(initialValues?.nombre || '');
-  ubicacionInput.value = String(initialValues?.ubicacion || '');
-  descripcionInput.value = String(initialValues?.descripcion || '');
-  horariosInput.value = String(initialValues?.horarios || '');
+  initEditableField(container, {
+    prefix: 'nombre',
+    initialValue: String(initialValues?.nombre || ''),
+    maxLength: 100,
+    domPrefix: 'roco',
+    dataAttrPrefix: 'data-roco',
+  });
+  initEditableField(container, {
+    prefix: 'ubicacion',
+    initialValue: String(initialValues?.ubicacion || ''),
+    maxLength: 255,
+    domPrefix: 'roco',
+    dataAttrPrefix: 'data-roco',
+  });
+  initEditableField(container, {
+    prefix: 'descripcion',
+    initialValue: String(initialValues?.descripcion || ''),
+    maxLength: 255,
+    domPrefix: 'roco',
+    dataAttrPrefix: 'data-roco',
+  });
+  initEditableField(container, {
+    prefix: 'horarios',
+    initialValue: String(initialValues?.horarios || ''),
+    maxLength: 255,
+    domPrefix: 'roco',
+    dataAttrPrefix: 'data-roco',
+  });
 
   [nombreInput, ubicacionInput, descripcionInput, horariosInput].forEach((el) => {
     el.addEventListener('input', () => callbacks.onFieldChange(el, alertBox));

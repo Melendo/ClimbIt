@@ -32,9 +32,9 @@ export function renderRocodromoCard(rocodromo, { estaSuscrito = false } = {}) {
           >
         </a>
 
-        <div class="d-flex flex-column flex-grow-1 min-w-0 pe-5">
-          <a href="#mapaZona?id=${id}" class="d-block text-decoration-none text-dark fw-semibold text-truncate">${nombre}</a>
-          <a href="#mapaZona?id=${id}" class="d-block text-decoration-none text-muted text-truncate">
+        <div class="d-flex flex-column flex-grow-1 rocodromo-card-content pe-5">
+          <a href="#mapaZona?id=${id}" class="d-block text-decoration-none text-dark fw-semibold rocodromo-card-text-truncate">${nombre}</a>
+          <a href="#mapaZona?id=${id}" class="d-block text-decoration-none text-muted rocodromo-card-text-truncate">
             <small>${ubicacion}</small>
           </a>
         </div>
