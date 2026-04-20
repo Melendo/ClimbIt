@@ -5,6 +5,7 @@ import {
 } from '../../components/rutaRating.js';
 import { escapeHtml } from '../../components/formHelpers.js';
 import { renderPresaColorIcon } from '../../components/rutaCardIndicators.js';
+import { renderRutaImageModal, setupRutaImageModal } from '../../components/rutaImageModal.js';
 
 function toDateInputValue(value) {
   if (!value) return '';
@@ -302,6 +303,10 @@ export function renderInfoRuta(container, ruta, callbacks) {
   const activoBadgeClass = activo ? 'text-bg-success' : 'text-bg-secondary';
   const canManage = Boolean(ruta?.canManage);
   const backHref = ruta?.backHref || '#misRocodromos';
+  const rutaNombre = nombre || 'Sin nombre';
+  const rutaNombreSafe = escapeHtml(rutaNombre);
+  const rutaImageSrc = ruta?.imagenSrc || '/assets/placeholder.jpg';
+  const rutaImageModalId = `ruta-image-modal-${ruta?.id || 'detalle'}`;
   const ratingSummary = {
     averageRating: Number(ruta?.ratingSummary?.averageRating) || 0,
     numValoraciones: Number(ruta?.ratingSummary?.numValoraciones) || 0,
@@ -314,8 +319,8 @@ export function renderInfoRuta(container, ruta, callbacks) {
   <!-- Imagen hero con overlay -->
   <div class="position-relative" style="height: 45dvh; min-height: 280px;">
     <img 
-      src="${ruta?.imagenSrc || '/assets/placeholder.jpg'}" 
-      alt="Imagen de la ruta ${nombre || ''}" 
+      src="${rutaImageSrc}" 
+      alt="Imagen de la ruta ${rutaNombreSafe}" 
       class="w-100 h-100" 
       style="object-fit: cover;"
     />
@@ -327,7 +332,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
     </a>
   
     ${canManage ? `
-    <div class="position-absolute bottom-0 end-0 m-3 d-flex gap-2" style="z-index: 3;">
+    <div class="position-absolute top-0 end-0 m-3 d-flex gap-2" style="z-index: 3;">
       <button type="button" id="btn-modificar-ruta" class="btn btn-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(255,255,255,0.85);" aria-label="Modificar ruta" title="Modificar ruta">
         <span class="material-icons" style="font-size: 20px;">edit</span>
       </button>
@@ -335,11 +340,23 @@ export function renderInfoRuta(container, ruta, callbacks) {
         <span class="material-icons" style="font-size: 20px;">delete</span>
       </button>
     </div>` : ''}
+
+    <button
+      type="button"
+      class="btn btn-dark d-flex align-items-center justify-content-center position-absolute bottom-0 end-0 m-3"
+      aria-label="Ampliar foto de la ruta"
+      title="Ampliar foto"
+      data-bs-toggle="modal"
+      data-bs-target="#${rutaImageModalId}"
+      style="z-index: 3; width: 40px; height: 40px; background: rgba(0,0,0,0.48); border-color: rgba(255,255,255,0.35);"
+    >
+      <span class="material-icons" style="font-size: 20px;">zoom_in</span>
+    </button>
     
     <!-- Info sobre la imagen -->
     <div class="position-absolute bottom-0 start-0 end-0 p-4 text-white">
       ${hasDificultad ? `<span class="badge mb-2" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); font-size: 0.9rem; padding: 6px 12px;">${dificultad}</span>` : ''}
-      <h1 class="fs-4 fw-semibold mb-0">${nombre || 'Sin nombre'}</h1>
+      <h1 class="fs-4 fw-semibold mb-0">${rutaNombreSafe}</h1>
     </div>
   </div>
   
@@ -414,7 +431,14 @@ export function renderInfoRuta(container, ruta, callbacks) {
     </div>
   
   </div>
-</div>`;
+</div>
+
+${renderRutaImageModal({
+  modalId: rutaImageModalId,
+  title: rutaNombre,
+  imageSrc: rutaImageSrc,
+  imageAlt: `Imagen ampliada de la ruta ${rutaNombre}`,
+})}`;
   
   setupRutaEstadoButtons(container, callbacks.onEstadoChange);
   const ratingSectionController = setupRutaRatingSection(container, {
@@ -438,6 +462,8 @@ export function renderInfoRuta(container, ruta, callbacks) {
         callbacks.onDeleteRoute(ruta, eliminarRutaBtn);
       });
     }
+
+  setupRutaImageModal(container, { modalId: rutaImageModalId });
   }
 
   
