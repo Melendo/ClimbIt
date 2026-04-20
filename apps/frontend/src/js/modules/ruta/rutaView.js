@@ -305,7 +305,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
   const backHref = ruta?.backHref || '#misRocodromos';
   const rutaNombre = nombre || 'Sin nombre';
   const rutaNombreSafe = escapeHtml(rutaNombre);
-  const rutaImageSrc = ruta?.imagenSrc || '/assets/placeholder.jpg';
+  const rutaImageSrc = ruta?.imagenSrc || '/assets/placeholder.webp';
   const rutaImageModalId = `ruta-image-modal-${ruta?.id || 'detalle'}`;
   const ratingSummary = {
     averageRating: Number(ruta?.ratingSummary?.averageRating) || 0,

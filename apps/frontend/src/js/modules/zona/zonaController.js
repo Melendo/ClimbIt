@@ -10,7 +10,7 @@ import { showLoading, showError } from '../../core/ui.js';
 * @param {HTMLElement} container Contenedor donde renderizar la vista
 * @param {number} idRocodromo ID del rocódromo
 */
-const RUTA_IMAGE_PLACEHOLDER = '/assets/placeholder.jpg';
+const RUTA_IMAGE_PLACEHOLDER = '/assets/placeholder.webp';
 const ZONA_FILTERS_STORAGE_PREFIX = 'mapaZona:filtros';
 
 function normalizeDificultades(dificultades) {

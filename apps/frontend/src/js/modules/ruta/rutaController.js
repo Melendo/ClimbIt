@@ -15,7 +15,7 @@ import { fetchClient, canManageRocodromo, fetchImageObjectUrl, fetchSvgText, get
 import { showError, showLoading, showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
 import { showToast } from '../../components/toast.js';
 
-const RUTA_IMAGE_PLACEHOLDER = '/assets/placeholder.jpg';
+const RUTA_IMAGE_PLACEHOLDER = '/assets/placeholder.webp';
 
 const TIPOS_PISTA = ['boulder', 'via'];
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;

@@ -2,7 +2,7 @@
 
 :root {
   --bs-font-sans-serif: 'Montserrat', sans-serif;
-  --bs-primary: #c75a14;
+  --bs-primary: #cf7620;
   --app-max-width: 400px;
   --vh: 1vh;
   --app-height: calc(var(--vh) * 100);
@@ -15,8 +15,8 @@ body {
 
 /* Override Bootstrap primary color */
 .btn-primary {
-  background-color: #c75a14 !important;
-  border-color: #c75a14 !important;
+  background-color: #cf7620 !important;
+  border-color: #cf7620 !important;
   color: #fff !important;
 }
 
@@ -24,42 +24,51 @@ body {
 .btn-primary:focus,
 .btn-primary:active,
 .btn-primary.active {
-  background-color: #ab4910 !important;
-  border-color: #ab4910 !important;
+  background-color: #b96518 !important;
+  border-color: #b96518 !important;
 }
 
 .btn-outline-primary {
-  color: #c75a14 !important;
-  border-color: #c75a14 !important;
+  color: #cf7620 !important;
+  border-color: #cf7620 !important;
 }
 
 .btn-outline-primary:hover,
 .btn-outline-primary:focus,
 .btn-outline-primary:active,
 .btn-outline-primary.active {
-  background-color: #c75a14 !important;
-  border-color: #c75a14 !important;
+  background-color: #cf7620 !important;
+  border-color: #cf7620 !important;
+  color: #fff !important;
+}
+
+.btn-check:checked + .btn-outline-primary,
+.btn-check:checked + .btn-outline-primary:hover,
+.btn-check:checked + .btn-outline-primary:focus,
+.btn-check:checked + .btn-outline-primary:active {
+  background-color: #cf7620 !important;
+  border-color: #cf7620 !important;
   color: #fff !important;
 }
 
 .text-primary {
-  color: #c75a14 !important;
+  color: #cf7620 !important;
 }
 
 .bg-primary {
-  background-color: #c75a14 !important;
+  background-color: #cf7620 !important;
 }
 
 .border-primary {
-  border-color: #c75a14 !important;
+  border-color: #cf7620 !important;
 }
 
 .btn-link {
-  color: #c75a14 !important;
+  color: #cf7620 !important;
 }
 
 .btn-link:hover {
-  color: #ab4910 !important;
+  color: #b96518 !important;
 }
 
 /* Mantener blanco el icono en botones negros de editar perfil */
@@ -1103,8 +1112,8 @@ body {
 }
 
 .perfil-heatmap-day.is-high {
-  background: #d97924;
-  border-color: #c86b17;
+  background: #cf7620;
+  border-color: #b96518;
 }
 
 .perfil-heatmap-legend {
@@ -1187,7 +1196,7 @@ body {
   width: 100%;
   max-width: 24px;
   border-radius: 6px;
-  background: linear-gradient(180deg, #f6a44a 0%, #d97924 100%);
+  background: linear-gradient(180deg, #f5ad5e 0%, #cf7620 100%);
   min-height: 8px;
 }
 

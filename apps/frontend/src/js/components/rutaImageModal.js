@@ -7,7 +7,7 @@ export function renderRutaImageModal({
   imageAlt,
 }) {
   const safeTitle = escapeHtml(title || 'Ruta');
-  const safeSrc = escapeHtml(imageSrc || '/assets/placeholder.jpg');
+  const safeSrc = escapeHtml(imageSrc || '/assets/placeholder.webp');
   const safeAlt = escapeHtml(imageAlt || `Imagen ampliada de la ruta ${safeTitle}`);
 
   return `

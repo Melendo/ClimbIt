@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-04-20
+
+### Arreglado
+
+#### Funcionalidades Usuario
+- **Rutas**:
+  - Arreglado el hitbox de las rutas en los mapas de zona
+
+### Modificado
+
+#### Funcionalidades Usuario
+- **Rocódromos**:
+  - Modificada la vista de la información de rocódromo
+- **Rutas**:
+  - Redistribución de los formularios de creación y modificación de ruta
+- **Autenticación**:
+  - Cambiado el tiempo de sesión a 12h
+
+### Seguridad
+
+- Mejoras de seguridad
+
 ## [0.2.0] - 2026-04-16
 
 ### Añadido

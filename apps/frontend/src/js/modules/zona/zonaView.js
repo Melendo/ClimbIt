@@ -326,7 +326,7 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                         <a href="#infoRuta?id=${ruta.id}" class="text-decoration-none text-dark">
                             <div class="card h-100 border-0 shadow-sm zona-card overflow-hidden">
                                 <div class="position-relative" style="aspect-ratio: 3/4;">
-                                    <img src="${ruta.imagenSrc || '/assets/placeholder.jpg'}" class="card-img-top w-100 h-100" style="object-fit: cover;" alt="${ruta.nombre}">
+                                    <img src="${ruta.imagenSrc || '/assets/placeholder.webp'}" class="card-img-top w-100 h-100" style="object-fit: cover;" alt="${ruta.nombre}">
                                     
                                     ${renderRutaColorStateIndicator(ruta)}
                                     <div class="position-absolute bottom-0 start-0 end-0 p-3 zona-card-overlay"></div>
