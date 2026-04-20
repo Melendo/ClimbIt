@@ -479,6 +479,50 @@ body {
   background: linear-gradient(to top, rgba(0, 0, 0, 0.78), transparent);
 }
 
+.ruta-image-modal-content {
+  background: #0e0e0e;
+  color: #fff;
+}
+
+.ruta-image-modal-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem 1rem;
+  overflow: hidden;
+  touch-action: none;
+  cursor: default;
+}
+
+.ruta-image-modal-body.is-zoomed {
+  cursor: grab;
+}
+
+.ruta-image-modal-body.is-dragging {
+  cursor: grabbing;
+}
+
+.ruta-image-modal-stage {
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ruta-image-modal-img {
+  width: 100%;
+  max-height: calc(100dvh - 110px);
+  object-fit: contain;
+  border-radius: 0.5rem;
+  background: #000;
+  transform-origin: 0 0;
+  transition: transform 120ms ease;
+  user-select: none;
+  pointer-events: none;
+  will-change: transform;
+}
+
 /* ========================================
    Perfil - cambio de foto
    ======================================== */
