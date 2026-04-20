@@ -364,7 +364,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
   <div class="flex-grow-1 d-flex flex-column">
     
     <!-- Tu progreso y acciones -->
-    <div class="bg-white px-4 py-4 border-bottom">
+    <div class="bg-white px-4 py-4">
       <div class="d-flex align-items-center justify-content-between mb-3">
         <div>
           <p class="text-muted small mb-1 text-uppercase" style="letter-spacing: 0.5px;">Tu progreso</p>

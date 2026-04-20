@@ -2,7 +2,7 @@
 
 :root {
   --bs-font-sans-serif: 'Montserrat', sans-serif;
-  --bs-primary: #cf7620;
+  --bs-primary: #e77f1e;
   --app-max-width: 400px;
   --vh: 1vh;
   --app-height: calc(var(--vh) * 100);
@@ -15,8 +15,8 @@ body {
 
 /* Override Bootstrap primary color */
 .btn-primary {
-  background-color: #cf7620 !important;
-  border-color: #cf7620 !important;
+  background-color: #e77f1e !important;
+  border-color: #e77f1e !important;
   color: #fff !important;
 }
 
@@ -29,16 +29,16 @@ body {
 }
 
 .btn-outline-primary {
-  color: #cf7620 !important;
-  border-color: #cf7620 !important;
+  color: #e77f1e !important;
+  border-color: #e77f1e !important;
 }
 
 .btn-outline-primary:hover,
 .btn-outline-primary:focus,
 .btn-outline-primary:active,
 .btn-outline-primary.active {
-  background-color: #cf7620 !important;
-  border-color: #cf7620 !important;
+  background-color: #e77f1e !important;
+  border-color: #e77f1e !important;
   color: #fff !important;
 }
 
@@ -46,25 +46,25 @@ body {
 .btn-check:checked + .btn-outline-primary:hover,
 .btn-check:checked + .btn-outline-primary:focus,
 .btn-check:checked + .btn-outline-primary:active {
-  background-color: #cf7620 !important;
-  border-color: #cf7620 !important;
+  background-color: #e77f1e !important;
+  border-color: #e77f1e !important;
   color: #fff !important;
 }
 
 .text-primary {
-  color: #cf7620 !important;
+  color: #e77f1e !important;
 }
 
 .bg-primary {
-  background-color: #cf7620 !important;
+  background-color: #e77f1e !important;
 }
 
 .border-primary {
-  border-color: #cf7620 !important;
+  border-color: #e77f1e !important;
 }
 
 .btn-link {
-  color: #cf7620 !important;
+  color: #e77f1e !important;
 }
 
 .btn-link:hover {
@@ -163,6 +163,7 @@ body {
 #app-container.app-vertical-layout > .app-content.app-shell {
   height: 100dvh;
   height: var(--app-height);
+  border-top: 0 !important;
 }
 
 /* En móvil: contenido a pantalla completa */
@@ -1112,8 +1113,8 @@ body {
 }
 
 .perfil-heatmap-day.is-high {
-  background: #cf7620;
-  border-color: #b96518;
+  background: #e77f1e;
+  border-color: #d4701a;
 }
 
 .perfil-heatmap-legend {
@@ -1196,7 +1197,7 @@ body {
   width: 100%;
   max-width: 24px;
   border-radius: 6px;
-  background: linear-gradient(180deg, #f5ad5e 0%, #cf7620 100%);
+  background: linear-gradient(180deg, #f5ad5e 0%, #e77f1e 100%);
   min-height: 8px;
 }
 
