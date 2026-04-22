@@ -77,6 +77,20 @@ class PistaRepositoryPostgres extends pistaRepository {
     }
   }
 
+  async obtenerPorPosicion(posX, posY, zonaId) {
+    try {
+      const pistaModel = await this.PistaModel.findOne({
+        where: { posX, posY, idZona: zonaId, activo: true },
+      });
+      return pistaModel ? this._toDomain(pistaModel) : null;
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al obtener pista por posición',
+        internalCode: 'PISTA_FIND_BY_POSITION_DB_FAILED',
+      });
+    } 
+  }
+
   async cambiarEstado(idPista, idEscalador, nuevoEstado) {
     try {
       const fechaCompletado = ['flash', 'completado'].includes(nuevoEstado)

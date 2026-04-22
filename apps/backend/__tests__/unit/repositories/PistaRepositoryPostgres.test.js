@@ -11,6 +11,7 @@ describe('PistaRepositoryPostgres', () => {
     mockPistaModel = {
       create: jest.fn(),
       findByPk: jest.fn(),
+      findOne: jest.fn(),
       findAll: jest.fn(),
       sequelize: {
         query: jest.fn(),
@@ -99,6 +100,49 @@ describe('PistaRepositoryPostgres', () => {
       });
       expect(resultado).toBeInstanceOf(Pista);
       expect(resultado.id).toBe(1);
+    });
+  });
+
+  describe('obtenerPorPosicion', () => {
+    it('debería devolver una pista de dominio cuando existe una pista activa en la posicion', async () => {
+      const modeloEncontrado = {
+        id: 7,
+        idZona: 3,
+        nombre: 'Pista XY',
+        dificultad: '6a',
+        tipo: 'via',
+        posX: 10,
+        posY: 20,
+        activo: true,
+      };
+
+      mockPistaModel.findOne.mockResolvedValue(modeloEncontrado);
+
+      const resultado = await repository.obtenerPorPosicion(10, 20, 3);
+
+      expect(mockPistaModel.findOne).toHaveBeenCalledWith({
+        where: { posX: 10, posY: 20, idZona: 3, activo: true },
+      });
+      expect(resultado).toBeInstanceOf(Pista);
+      expect(resultado.id).toBe(7);
+      expect(resultado.posX).toBe(10);
+      expect(resultado.posY).toBe(20);
+    });
+
+    it('debería devolver null cuando no hay pista activa en la posicion', async () => {
+      mockPistaModel.findOne.mockResolvedValue(null);
+
+      const resultado = await repository.obtenerPorPosicion(1, 2, 9);
+
+      expect(resultado).toBeNull();
+    });
+
+    it('debería mapear errores de base de datos al buscar por posicion', async () => {
+      mockPistaModel.findOne.mockRejectedValue(new Error('DB down'));
+
+      await expect(repository.obtenerPorPosicion(1, 2, 9)).rejects.toThrow(
+        'Error al obtener pista por posición'
+      );
     });
   });
 
