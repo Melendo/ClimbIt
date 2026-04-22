@@ -202,7 +202,6 @@ class PistaRepositoryPostgres extends pistaRepository {
           },
         ],
       });
-      console.log('PistaModel con valoraciones:', JSON.stringify(pistaModel));
       if (!pistaModel) {
         throw new NotFoundError(
           `Obtener valoración total: Pista con ID ${idPista} no encontrada`,
@@ -520,6 +519,7 @@ class PistaRepositoryPostgres extends pistaRepository {
           INNER JOIN "Zonas" z ON z."IDZona" = p."IDZona"
           WHERE ep."IDEscalador" = :idEscalador
             AND z."IDRoco" = :idRocodromo
+            AND p."Activo" = true
           GROUP BY ep."Estado"
         `,
         {
@@ -608,6 +608,7 @@ class PistaRepositoryPostgres extends pistaRepository {
           WHERE ep."IDEscalador" = :idEscalador
             AND z."IDRoco" = :idRocodromo
             AND ep."Estado" IN ('flash', 'completado')
+            AND p."Activo" = true
           GROUP BY p."Tipo"
         `,
         {

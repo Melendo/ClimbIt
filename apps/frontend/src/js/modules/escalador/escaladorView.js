@@ -22,16 +22,16 @@ function renderPerfilStats(statsViewModel) {
       ${renderSectionDivider({ label: 'Estadisticas' })}
       <div class="perfil-estadisticas-view mt-3">
         ${renderStatsSection({
+          title: 'Actividad mensual',
+          content: renderMonthlyActivityCards(statsViewModel.monthly),
+        })}
+        ${renderStatsSection({
           title: 'Total de Rutas Escaladas',
           content: renderTotalRoutesStatsCard(statsViewModel.totals),
         })}
         ${renderStatsSection({
           title: 'Tipos de Rutas Escaladas',
           content: renderRouteTypesStatsCard(statsViewModel.totals),
-        })}
-        ${renderStatsSection({
-          title: 'Actividad mensual',
-          content: renderMonthlyActivityCards(statsViewModel.monthly),
         })}
       </div>
     </div>
