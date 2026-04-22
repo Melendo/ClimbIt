@@ -45,6 +45,8 @@ describe('E2E: Pistas', () => {
         nombre: 'E2E Test',
         dificultad: '6a',
         tipo: 'via',
+        posX: 11,
+        posY: 22,
       };
       token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'Admin' });
     });
@@ -145,6 +147,70 @@ describe('E2E: Pistas', () => {
       expect(response.body).toHaveProperty('error');
       expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_EXPIRED');
       expect(response.body.error).toMatch(/El token ha expirado/);
+    });
+
+    it('debería fallar al crear una pista si ya existe una pista activa en la misma posición XY', async () => {
+      const pistaActiva = await db.Pista.create({
+        idZona: zona.id,
+        nombre: 'Pista Activa XY',
+        dificultad: '6a',
+        tipo: 'via',
+        posX: 31,
+        posY: 41,
+        activo: true,
+        fechaCreacion: new Date(),
+      });
+
+      const response = await request(app)
+        .post('/pistas/create')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          idZona: zona.id,
+          nombre: 'Intento Duplicado XY',
+          dificultad: '6a',
+          tipo: 'via',
+          posX: 31,
+          posY: 41,
+        })
+        .expect(422);
+
+      expect(response.body).toHaveProperty('code', 'PISTA_POSICION_OCUPADA');
+      expect(response.body.error).toContain('Ya existe una pista activa en la posición (31, 41)');
+
+      await db.Pista.destroy({ where: { id: pistaActiva.id } });
+    });
+
+    it('debería permitir crear una pista en la misma posición XY si las existentes están inactivas', async () => {
+      const pistaInactiva = await db.Pista.create({
+        idZona: zona.id,
+        nombre: 'Pista Inactiva XY',
+        dificultad: '6a',
+        tipo: 'via',
+        posX: 51,
+        posY: 61,
+        activo: false,
+        fechaCreacion: new Date(),
+      });
+
+      const response = await request(app)
+        .post('/pistas/create')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          idZona: zona.id,
+          nombre: 'Nueva Sobre XY Inactiva',
+          dificultad: '6a',
+          tipo: 'via',
+          posX: 51,
+          posY: 61,
+        })
+        .expect(201);
+
+      expect(response.body).toHaveProperty('id');
+      expect(response.body.posX).toBe(51);
+      expect(response.body.posY).toBe(61);
+
+      await db.Pista.destroy({ where: { id: response.body.id } });
+      await db.Pista.destroy({ where: { id: pistaInactiva.id } });
     });
   });
 
