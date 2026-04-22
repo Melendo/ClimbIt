@@ -1157,6 +1157,7 @@ body {
   flex-direction: column;
   gap: 4px;
   text-align: center;
+  justify-content: space-between;
 }
 
 .perfil-monthly-label {

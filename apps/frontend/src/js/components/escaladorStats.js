@@ -25,11 +25,11 @@ function formatPct(value) {
 }
 
 function resolveHeatmapToneClass(count) {
-  if (count >= 5) {
+  if (count >= 8) {
     return 'is-high';
   }
 
-  if (count >= 3) {
+  if (count >= 4) {
     return 'is-mid';
   }
 
@@ -302,6 +302,25 @@ export function renderMonthlyActivityCards(monthly = {}) {
     .join('');
 
   return `
+    <div class="perfil-stats-card perfil-monthly-summary">
+      <div class="perfil-monthly-metrics">
+        <div class="perfil-monthly-metric">
+          <span class="perfil-monthly-label">Rutas este mes</span>
+          <span class="perfil-monthly-value">${monthly.totalMonthlyRoutes || 0}</span>
+        </div>
+        <div class="perfil-monthly-metric">
+          <span class="perfil-monthly-label">Dias activo</span>
+          <span class="perfil-monthly-value">${monthly.activeDays || 0}</span>
+        </div>
+        <div class="perfil-monthly-metric">
+          <span class="perfil-monthly-label">Media por dia</span>
+          <span class="perfil-monthly-value">${toSafePercentage(monthly.avgRoutesPerActiveDay).toFixed(1)}</span>
+        </div>
+      </div>
+      <div class="perfil-monthly-chart" style="grid-template-columns: repeat(${weeklyTotals.length}, minmax(0, 1fr));">
+        ${weeklyBarsHtml}
+      </div>
+    </div>
     <div class="perfil-stats-card perfil-heatmap-card" data-heatmap-card>
       <div class="perfil-heatmap-header">
         <span class="perfil-heatmap-month">${escapeHtml(monthly.monthTitle || '')}</span>
@@ -321,31 +340,12 @@ export function renderMonthlyActivityCards(monthly = {}) {
         </span>
         <span class="perfil-heatmap-legend-item">
           <span class="perfil-heatmap-day is-mid perfil-heatmap-legend-swatch"></span>
-          <span>3-5 rutas</span>
+          <span>4-7 rutas</span>
         </span>
         <span class="perfil-heatmap-legend-item">
           <span class="perfil-heatmap-day is-high perfil-heatmap-legend-swatch"></span>
-          <span>5+ rutas</span>
+          <span>8+ rutas</span>
         </span>
-      </div>
-    </div>
-    <div class="perfil-stats-card perfil-monthly-summary">
-      <div class="perfil-monthly-metrics">
-        <div class="perfil-monthly-metric">
-          <span class="perfil-monthly-label">Rutas este mes</span>
-          <span class="perfil-monthly-value">${monthly.totalMonthlyRoutes || 0}</span>
-        </div>
-        <div class="perfil-monthly-metric">
-          <span class="perfil-monthly-label">Dias activo</span>
-          <span class="perfil-monthly-value">${monthly.activeDays || 0}</span>
-        </div>
-        <div class="perfil-monthly-metric">
-          <span class="perfil-monthly-label">Media por dia</span>
-          <span class="perfil-monthly-value">${toSafePercentage(monthly.avgRoutesPerActiveDay).toFixed(1)}</span>
-        </div>
-      </div>
-      <div class="perfil-monthly-chart" style="grid-template-columns: repeat(${weeklyTotals.length}, minmax(0, 1fr));">
-        ${weeklyBarsHtml}
       </div>
     </div>
   `;
