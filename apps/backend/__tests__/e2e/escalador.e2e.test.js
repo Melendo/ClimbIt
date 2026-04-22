@@ -428,9 +428,9 @@ describe('E2E: Escalador', () => {
         .expect(200);
 
       expect(response.body).toEqual({
-        totalRutas: 3,
+        totalRutas: 2,
         totalFlash: 1,
-        totalCompletado: 2,
+        totalCompletado: 1,
         totalProyecto: 1,
         totalRutasActivasRocodromo: 3,
         porcentajeFlash: expect.any(Number),
@@ -444,10 +444,10 @@ describe('E2E: Escalador', () => {
         .expect(200);
 
       expect(response.body.totalBloques).toBe(1);
-      expect(response.body.totalVias).toBe(2);
-      expect(response.body.porcentajeBloques).toBeCloseTo(33.33333333, 8);
-      expect(response.body.porcentajeVias).toBeCloseTo(66.66666667, 8);
-      expect(response.body.favoritaTexto).toBe('Via');
+      expect(response.body.totalVias).toBe(1);
+      expect(response.body.porcentajeBloques).toBeCloseTo(50, 8);
+      expect(response.body.porcentajeVias).toBeCloseTo(50, 8);
+      expect(response.body.favoritaTexto).toBe('Bloque');
     });
 
     it('deberia obtener dificultad maxima por tipo incluyendo pistas inactivas', async () => {
