@@ -77,6 +77,20 @@ class PistaRepositoryPostgres extends pistaRepository {
     }
   }
 
+  async obtenerPorPosicion(posX, posY, zonaId) {
+    try {
+      const pistaModel = await this.PistaModel.findOne({
+        where: { posX, posY, idZona: zonaId, activo: true },
+      });
+      return pistaModel ? this._toDomain(pistaModel) : null;
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al obtener pista por posición',
+        internalCode: 'PISTA_FIND_BY_POSITION_DB_FAILED',
+      });
+    } 
+  }
+
   async cambiarEstado(idPista, idEscalador, nuevoEstado) {
     try {
       const fechaCompletado = ['flash', 'completado'].includes(nuevoEstado)
@@ -202,7 +216,6 @@ class PistaRepositoryPostgres extends pistaRepository {
           },
         ],
       });
-      console.log('PistaModel con valoraciones:', JSON.stringify(pistaModel));
       if (!pistaModel) {
         throw new NotFoundError(
           `Obtener valoración total: Pista con ID ${idPista} no encontrada`,
@@ -520,6 +533,7 @@ class PistaRepositoryPostgres extends pistaRepository {
           INNER JOIN "Zonas" z ON z."IDZona" = p."IDZona"
           WHERE ep."IDEscalador" = :idEscalador
             AND z."IDRoco" = :idRocodromo
+            AND p."Activo" = true
           GROUP BY ep."Estado"
         `,
         {
@@ -608,6 +622,7 @@ class PistaRepositoryPostgres extends pistaRepository {
           WHERE ep."IDEscalador" = :idEscalador
             AND z."IDRoco" = :idRocodromo
             AND ep."Estado" IN ('flash', 'completado')
+            AND p."Activo" = true
           GROUP BY p."Tipo"
         `,
         {

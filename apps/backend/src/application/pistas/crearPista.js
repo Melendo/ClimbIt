@@ -62,6 +62,14 @@ class CrearPista {
           }
         }
       }
+
+      const pistaActivaExistente = await this.pistaRepository.obtenerPorPosicion(data.posX, data.posY, data.idZona);
+      if (pistaActivaExistente) {
+        throw new ValidationError(
+          `Ya existe una pista activa en la posición (${data.posX}, ${data.posY})`,
+          'PISTA_POSICION_OCUPADA'
+        );
+      }
       
       const nuevaPista = new Pista(
         null,

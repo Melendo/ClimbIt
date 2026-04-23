@@ -490,6 +490,8 @@ body {
 }
 
 .ruta-image-modal-content {
+  --ruta-modal-image-max-height: calc(100dvh - 110px);
+  --ruta-modal-transform-transition: transform 120ms ease;
   background: #0e0e0e;
   color: #fff;
 }
@@ -500,6 +502,7 @@ body {
   justify-content: center;
   padding: 0.5rem 0.75rem 1rem;
   overflow: hidden;
+  overscroll-behavior: contain;
   touch-action: none;
   cursor: default;
 }
@@ -514,20 +517,20 @@ body {
 
 .ruta-image-modal-stage {
   width: 100%;
-  min-height: 100%;
   display: flex;
+  min-height: 100%;
   align-items: center;
   justify-content: center;
 }
 
 .ruta-image-modal-img {
   width: 100%;
-  max-height: calc(100dvh - 110px);
+  max-height: var(--ruta-modal-image-max-height);
   object-fit: contain;
   border-radius: 0.5rem;
   background: #000;
   transform-origin: 0 0;
-  transition: transform 120ms ease;
+  transition: var(--ruta-modal-transform-transition);
   user-select: none;
   pointer-events: none;
   will-change: transform;
@@ -1157,6 +1160,7 @@ body {
   flex-direction: column;
   gap: 4px;
   text-align: center;
+  justify-content: space-between;
 }
 
 .perfil-monthly-label {

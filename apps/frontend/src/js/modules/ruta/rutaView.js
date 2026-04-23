@@ -98,8 +98,21 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
         </div>
 
         <div class="mb-3">
-          <label for="imagen" class="form-label">Foto ruta</label>
-          <input type="file" class="form-control" name="imagen" id="imagen" accept="image/*" />
+          <label class="form-label">Foto ruta</label>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2 flex-fill" id="imagen-camara-btn" aria-label="Tomar foto con cámara">
+              <span class="material-icons" style="font-size: 20px; line-height: 1;">photo_camera</span>
+              <span>Cámara</span>
+            </button>
+            <button type="button" class="btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2 flex-fill" id="imagen-galeria-btn" aria-label="Seleccionar foto de galería">
+              <span class="material-icons" style="font-size: 20px; line-height: 1;">photo_library</span>
+              <span>Galería</span>
+            </button>
+          </div>
+          <input type="file" class="d-none" id="imagen-camara-input" accept="image/*" capture="environment" aria-hidden="true" tabindex="-1" />
+          <input type="file" class="d-none" id="imagen-galeria-input" accept="image/*" aria-hidden="true" tabindex="-1" />
+          <input type="hidden" name="imagen" id="imagen" />
+          <div id="imagen-selected-name" class="form-text">Sin imagen seleccionada</div>
           <div class="invalid-feedback"></div>
         </div>
 
@@ -153,6 +166,11 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
   const fechaCreacionInput = container.querySelector('#fechaCreacion');
   const fechaRetiradaInput = container.querySelector('#fechaRetirada');
   const imagenInput = container.querySelector('#imagen');
+  const imagenCamaraBtn = container.querySelector('#imagen-camara-btn');
+  const imagenGaleriaBtn = container.querySelector('#imagen-galeria-btn');
+  const imagenCamaraInput = container.querySelector('#imagen-camara-input');
+  const imagenGaleriaInput = container.querySelector('#imagen-galeria-input');
+  const imagenSelectedName = container.querySelector('#imagen-selected-name');
   const mapaViewport = container.querySelector('#crearRutaMapaViewport');
   const coordsBadge = container.querySelector('#coordenadasSeleccionadas');
   const submitButton = container.querySelector('#crear-ruta-submit');
@@ -214,6 +232,36 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
   dificultadSelect.disabled = true;
   setDificultadOptions([], 'Selecciona tipo de ruta');
   
+  let selectedImagenFile = null;
+
+  const setSelectedImagen = (file) => {
+    selectedImagenFile = file || null;
+    imagenSelectedName.textContent = selectedImagenFile ? `Imagen seleccionada: ${selectedImagenFile.name}` : 'Sin imagen seleccionada';
+    callbacks.onFieldChange(imagenInput, alertBox);
+  };
+
+  const handleNativeInputChange = (nativeInput) => {
+    const file = nativeInput.files?.[0] || null;
+    setSelectedImagen(file);
+    nativeInput.value = '';
+  };
+
+  imagenCamaraBtn?.addEventListener('click', () => {
+    imagenCamaraInput?.click();
+  });
+
+  imagenGaleriaBtn?.addEventListener('click', () => {
+    imagenGaleriaInput?.click();
+  });
+
+  imagenCamaraInput?.addEventListener('change', () => {
+    handleNativeInputChange(imagenCamaraInput);
+  });
+
+  imagenGaleriaInput?.addEventListener('change', () => {
+    handleNativeInputChange(imagenGaleriaInput);
+  });
+
   [nombreInput, dificultadSelect, colorPresasSelect, tipoBoulderInput, tipoViaInput, fechaCreacionInput, fechaRetiradaInput, imagenInput].forEach((el) => {
     el.addEventListener('input', () => callbacks.onFieldChange(el, alertBox));
     el.addEventListener('change', () => callbacks.onFieldChange(el, alertBox));
@@ -245,7 +293,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
       tipo: tipoBoulderInput.checked ? 'boulder' : tipoViaInput.checked ? 'via' : '',
       fechaCreacion: fechaCreacionInput.value,
       fechaRetirada: fechaRetiradaInput.value,
-      imagen: imagenInput.files?.[0] || null,
+      imagen: selectedImagenFile,
     };
     
     callbacks.onSubmit(values, {

@@ -874,7 +874,7 @@ export async function infoRutaCmd(container, id) {
                         method: 'DELETE',
                     });
 
-                    window.location.hash = '#misRocodromos';
+                    window.location.hash = `#mapaZona?id=${zonaContext.idRocodromo}&zona=${idZonaRuta}`;
                 } catch (err) {
                     if (deleteButton) {
                         deleteButton.disabled = false;

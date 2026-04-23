@@ -2,7 +2,16 @@ import { escapeHtml } from '../../components/formHelpers.js';
 import { renderRutaColorStateIndicator } from '../../components/rutaCardIndicators.js';
 import { renderRutasProgressBar, calcularRutasCompletadas } from '../../components/rutasProgressBar.js';
 
-export function renderMapaZona(container, data, onZonaSelect, initialZonaId = null, onMapaRender = null, onMapaToggle = null, onFiltersApply = null) {
+export function renderMapaZona(
+    container,
+    data,
+    onZonaSelect,
+    initialZonaId = null,
+    onMapaRender = null,
+    onMapaToggle = null,
+    onFiltersApply = null,
+    onRutaImageLoad = null,
+) {
     const {
         rocodromo,
         zonas,
@@ -153,6 +162,118 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
     };
 
     let currentZonaId = zonaInicial?.id || null;
+    let activeLoadRequest = 0;
+    let imageObserver = null;
+    let imageLoadController = null;
+    const imageObjectUrls = new Set();
+
+    const revokeObjectUrls = () => {
+        imageObjectUrls.forEach((url) => {
+            URL.revokeObjectURL(url);
+        });
+        imageObjectUrls.clear();
+    };
+
+    const teardownImageLazyLoading = () => {
+        if (imageObserver) {
+            imageObserver.disconnect();
+            imageObserver = null;
+        }
+
+        if (imageLoadController) {
+            imageLoadController.abort();
+            imageLoadController = null;
+        }
+
+        revokeObjectUrls();
+    };
+
+    const setupImageLazyLoading = (requestId) => {
+        if (typeof onRutaImageLoad !== 'function') {
+            return;
+        }
+
+        const lazyImages = Array.from(
+            rutasContainer.querySelectorAll('img[data-ruta-id][data-has-image="true"]')
+        );
+
+        if (lazyImages.length === 0) {
+            return;
+        }
+
+        imageLoadController = new AbortController();
+        const { signal } = imageLoadController;
+
+        const loadImage = async (imgEl) => {
+            if (!imgEl || signal.aborted || requestId !== activeLoadRequest) {
+                return;
+            }
+
+            if (imgEl.dataset.state === 'loading' || imgEl.dataset.state === 'loaded') {
+                return;
+            }
+
+            const idRuta = Number(imgEl.dataset.rutaId);
+            if (!Number.isInteger(idRuta) || idRuta < 1) {
+                return;
+            }
+
+            imgEl.dataset.state = 'loading';
+
+            try {
+                const src = await onRutaImageLoad(idRuta, signal);
+
+                if (signal.aborted || requestId !== activeLoadRequest || !imgEl.isConnected) {
+                    if (typeof src === 'string' && src.startsWith('blob:')) {
+                        URL.revokeObjectURL(src);
+                    }
+                    return;
+                }
+
+                if (typeof src === 'string' && src.length > 0) {
+                    imgEl.src = src;
+                    imgEl.dataset.state = 'loaded';
+
+                    if (src.startsWith('blob:')) {
+                        imageObjectUrls.add(src);
+                    }
+                }
+            } catch (err) {
+                if (err?.name === 'AbortError' || signal.aborted) {
+                    return;
+                }
+                imgEl.dataset.state = 'error';
+            }
+        };
+
+        if (typeof window !== 'undefined' && 'IntersectionObserver' in window) {
+            imageObserver = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        if (!entry.isIntersecting) {
+                            return;
+                        }
+
+                        const target = entry.target;
+                        imageObserver?.unobserve(target);
+                        loadImage(target);
+                    });
+                },
+                {
+                    root: rutasContainer,
+                    rootMargin: '200px 0px',
+                    threshold: 0.01,
+                }
+            );
+
+            lazyImages.forEach((imgEl) => imageObserver.observe(imgEl));
+            return;
+        }
+
+        lazyImages.forEach((imgEl) => {
+            loadImage(imgEl);
+        });
+    };
 
     const setMapaExpandido = (expandido) => {
         mapaContainer.classList.toggle('mapa-rocodromo-fullscreen', expandido);
@@ -254,6 +375,9 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
 
     const loadZonas = async (idZona, direction = null) => {
         if (!idZona) return;
+        const requestId = ++activeLoadRequest;
+
+        teardownImageLazyLoading();
 
         // Validar que la zona existe en la lista (para evitar errores si viene un id raro en URL)
         const zonaExists = zonas.some(z => z.id == idZona);
@@ -282,11 +406,18 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
 
         // Cargar rutas usando el callback
         const rutas = await onZonaSelect(idZona);
+        if (requestId !== activeLoadRequest) {
+            return;
+        }
+
         const rutasCompletadas = calcularRutasCompletadas(rutas);
         const progressBarHtml = renderRutasProgressBar(rutas.length, rutasCompletadas);
 
         if (typeof onMapaRender === 'function') {
             await onMapaRender(idZona, rutas || []);
+            if (requestId !== activeLoadRequest) {
+                return;
+            }
         }
 
         // Renderizar rutas
@@ -326,7 +457,17 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
                         <a href="#infoRuta?id=${ruta.id}" class="text-decoration-none text-dark">
                             <div class="card h-100 border-0 shadow-sm zona-card overflow-hidden">
                                 <div class="position-relative" style="aspect-ratio: 3/4;">
-                                    <img src="${ruta.imagenSrc || '/assets/placeholder.webp'}" class="card-img-top w-100 h-100" style="object-fit: cover;" alt="${ruta.nombre}">
+                                      <img
+                                          src="${ruta.imagenSrc || '/assets/placeholder.webp'}"
+                                          class="card-img-top w-100 h-100"
+                                          style="object-fit: cover;"
+                                          alt="${ruta.nombre}"
+                                          data-ruta-id="${ruta.id}"
+                                          data-has-image="${Boolean(ruta.imagenUrl)}"
+                                          data-state="idle"
+                                          loading="lazy"
+                                          decoding="async"
+                                      >
                                     
                                     ${renderRutaColorStateIndicator(ruta)}
                                     <div class="position-absolute bottom-0 start-0 end-0 p-3 zona-card-overlay"></div>
@@ -339,6 +480,8 @@ export function renderMapaZona(container, data, onZonaSelect, initialZonaId = nu
         }).join('')}
             </div>
         `;
+
+        setupImageLazyLoading(requestId);
     };
 
     selector.addEventListener('change', (e) => loadZonas(e.target.value));

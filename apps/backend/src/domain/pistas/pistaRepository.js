@@ -8,6 +8,10 @@ class PistaRepository {
     throw new Error('Método "obtenerPorId" no implementado');
   }
 
+  async obtenerPorPosicion(id) {
+    throw new Error('Método "obtenerPorPosicion" no implementado');
+  }
+
   async cambiarEstado(id, nuevoEstado) {
     throw new Error('Método "cambiarEstado" no implementado');
   }
