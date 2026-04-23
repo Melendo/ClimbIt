@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-04-23
+
+### Arreglado
+
+#### Funcionalidades Usuario
+- **Rutas**:
+  - Impedida la creación de rutas activas en coordenadas ya ocupadas dentro de una misma zona.
+  - Corregida la navegación tras eliminar una ruta para volver al mapa de su zona.
+- **Zonas**:
+  - Corregida la carga de imágenes de rutas para evitar fallos visuales durante el cambio de zona.
+  - Corregido el cierre del modal de imagen ampliada para evitar bloqueos de navegación en móvil.
+
+### Modificado
+
+#### Funcionalidades Usuario
+- **Rutas**:
+  - Añadidos controles para seleccionar foto desde Cámara o Galería en crear y modificar ruta.
+- **Perfil**:
+  - Reordenada la sección de estadísticas para priorizar la actividad mensual y ajustados umbrales del mapa de calor.
+- **Interfaz**:
+  - Actualizado el color primario de la aplicación.
+- **Experiencia móvil**:
+  - Optimizada la carga diferida de imágenes de rutas en tarjetas de zona.
+  - Mejorada la estrategia de caché PWA para imágenes de rutas y respuestas de la API.
+
 ## [0.2.1] - 2026-04-20
 
 ### Arreglado
