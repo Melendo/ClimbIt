@@ -154,8 +154,8 @@ export async function fetchClient(url, options = {}) {
     return response;
 }
 
-export async function fetchImageObjectUrl(url) {
-    const response = await fetchClient(url);
+export async function fetchImageObjectUrl(url, options = {}) {
+    const response = await fetchClient(url, options);
     const blob = await response.blob();
     return URL.createObjectURL(blob);
 }
