@@ -9,9 +9,14 @@ function createResMock() {
     statusCode: null,
     body: null,
     sentFile: null,
+    headers: {},
   };
   res.status = jest.fn((code) => {
     res.statusCode = code;
+    return res;
+  });
+  res.set = jest.fn((headerName, value) => {
+    res.headers[headerName] = value;
     return res;
   });
   res.json = jest.fn((payload) => {

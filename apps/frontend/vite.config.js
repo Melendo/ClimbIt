@@ -73,12 +73,30 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /\/(escaladores|pistas|rocodromos|zonas)\b.*/i,
+            urlPattern: /\/pistas\/\d+\/imagen$/i,
+            method: 'GET',
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'pistas-images-cache',
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 20,
+              },
+              cacheableResponse: {
+                statuses: [200],
+              },
+            },
+          },
+          {
+            urlPattern: /\/(escaladores|rocodromos|zonas)\b.*|\/pistas\b(?!\/\d+\/imagen$).*/i,
             method: 'GET',
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
               networkTimeoutSeconds: 10,
+              matchOptions: {
+                ignoreSearch: false,
+              },
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 15,

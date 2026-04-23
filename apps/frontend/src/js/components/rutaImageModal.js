@@ -1,5 +1,34 @@
 import { escapeHtml } from './formHelpers.js';
 
+const ZOOM_LIMITS = {
+  min: 1,
+  max: 4,
+  wheelStep: 0.25,
+};
+
+function cleanupBootstrapModalArtifacts() {
+  const backdrops = document.querySelectorAll('.modal-backdrop');
+  backdrops.forEach((backdrop) => backdrop.remove());
+
+  document.body.classList.remove('modal-open');
+  document.body.style.removeProperty('padding-right');
+  document.body.style.removeProperty('overflow');
+}
+
+function getTouchDistance(touchA, touchB) {
+  return Math.hypot(
+    touchA.clientX - touchB.clientX,
+    touchA.clientY - touchB.clientY,
+  );
+}
+
+function getTouchMidpoint(touchA, touchB, rect) {
+  return {
+    x: ((touchA.clientX + touchB.clientX) / 2) - rect.left,
+    y: ((touchA.clientY + touchB.clientY) / 2) - rect.top,
+  };
+}
+
 export function renderRutaImageModal({
   modalId,
   title,
@@ -42,49 +71,43 @@ export function setupRutaImageModal(container, { modalId }) {
     return;
   }
 
-  let zoomLevel = 1;
-  let translateX = 0;
-  let translateY = 0;
-  let isDragging = false;
-  let dragPointerId = null;
-  let lastPointerX = 0;
-  let lastPointerY = 0;
-  let pinchStartDistance = null;
-  let pinchStartZoom = 1;
-  let baseOffsetX = 0;
-  let baseOffsetY = 0;
-  let baseWidth = 0;
-  let baseHeight = 0;
-  const MIN_ZOOM = 1;
-  const MAX_ZOOM = 4;
-  const STEP = 0.25;
+  const state = {
+    zoomLevel: 1,
+    translateX: 0,
+    translateY: 0,
+    isDragging: false,
+    dragPointerId: null,
+    lastPointerX: 0,
+    lastPointerY: 0,
+    pinchStartDistance: null,
+    pinchStartZoom: 1,
+    baseOffsetX: 0,
+    baseOffsetY: 0,
+    baseWidth: 0,
+    baseHeight: 0,
+  };
+  const teardownController = new AbortController();
 
-  const clampZoom = (value) => Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, value));
+  const clampZoom = (value) => Math.max(ZOOM_LIMITS.min, Math.min(ZOOM_LIMITS.max, value));
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-  const touchDistance = (touchA, touchB) => Math.hypot(
-    touchA.clientX - touchB.clientX,
-    touchA.clientY - touchB.clientY,
-  );
-  const touchMidpoint = (touchA, touchB, rect) => ({
-    x: ((touchA.clientX + touchB.clientX) / 2) - rect.left,
-    y: ((touchA.clientY + touchB.clientY) / 2) - rect.top,
-  });
+
+  const isModalVisible = () => imageModal.classList.contains('show');
 
   const updateBaseMetrics = () => {
     const stageRect = modalBody.getBoundingClientRect();
     const imgRect = modalImage.getBoundingClientRect();
-    baseOffsetX = imgRect.left - stageRect.left;
-    baseOffsetY = imgRect.top - stageRect.top;
-    baseWidth = imgRect.width;
-    baseHeight = imgRect.height;
+    state.baseOffsetX = imgRect.left - stageRect.left;
+    state.baseOffsetY = imgRect.top - stageRect.top;
+    state.baseWidth = imgRect.width;
+    state.baseHeight = imgRect.height;
   };
 
   const constrainPan = () => {
     const stageRect = modalBody.getBoundingClientRect();
     const stageWidth = stageRect.width;
     const stageHeight = stageRect.height;
-    const scaledWidth = baseWidth * zoomLevel;
-    const scaledHeight = baseHeight * zoomLevel;
+    const scaledWidth = state.baseWidth * state.zoomLevel;
+    const scaledHeight = state.baseHeight * state.zoomLevel;
 
     const minEffectiveX = scaledWidth > stageWidth
       ? stageWidth - scaledWidth
@@ -99,43 +122,74 @@ export function setupRutaImageModal(container, { modalId }) {
       ? 0
       : (stageHeight - scaledHeight) / 2;
 
-    const effectiveX = baseOffsetX + translateX;
-    const effectiveY = baseOffsetY + translateY;
-    translateX = clamp(effectiveX, minEffectiveX, maxEffectiveX) - baseOffsetX;
-    translateY = clamp(effectiveY, minEffectiveY, maxEffectiveY) - baseOffsetY;
+    const effectiveX = state.baseOffsetX + state.translateX;
+    const effectiveY = state.baseOffsetY + state.translateY;
+    state.translateX = clamp(effectiveX, minEffectiveX, maxEffectiveX) - state.baseOffsetX;
+    state.translateY = clamp(effectiveY, minEffectiveY, maxEffectiveY) - state.baseOffsetY;
   };
 
   const applyTransform = () => {
     constrainPan();
-    modalImage.style.transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(${zoomLevel})`;
-    modalBody.classList.toggle('is-zoomed', zoomLevel > 1);
-    modalBody.classList.toggle('is-dragging', isDragging);
+    modalImage.style.transform = `translate3d(${state.translateX}px, ${state.translateY}px, 0) scale(${state.zoomLevel})`;
+    modalBody.classList.toggle('is-zoomed', state.zoomLevel > 1);
+    modalBody.classList.toggle('is-dragging', state.isDragging);
   };
 
   const setZoomAtPoint = (targetZoom, pointX, pointY) => {
     const newZoom = clampZoom(targetZoom);
-    if (Math.abs(newZoom - zoomLevel) < 0.001) {
+    if (Math.abs(newZoom - state.zoomLevel) < 0.001) {
       return;
     }
 
-    const imagePointX = (pointX - baseOffsetX - translateX) / zoomLevel;
-    const imagePointY = (pointY - baseOffsetY - translateY) / zoomLevel;
-    zoomLevel = newZoom;
-    translateX = pointX - baseOffsetX - (imagePointX * zoomLevel);
-    translateY = pointY - baseOffsetY - (imagePointY * zoomLevel);
+    const imagePointX = (pointX - state.baseOffsetX - state.translateX) / state.zoomLevel;
+    const imagePointY = (pointY - state.baseOffsetY - state.translateY) / state.zoomLevel;
+    state.zoomLevel = newZoom;
+    state.translateX = pointX - state.baseOffsetX - (imagePointX * state.zoomLevel);
+    state.translateY = pointY - state.baseOffsetY - (imagePointY * state.zoomLevel);
     applyTransform();
   };
 
   const resetTransform = () => {
-    zoomLevel = 1;
-    translateX = 0;
-    translateY = 0;
-    isDragging = false;
-    dragPointerId = null;
+    state.zoomLevel = 1;
+    state.translateX = 0;
+    state.translateY = 0;
+    state.isDragging = false;
+    state.dragPointerId = null;
     modalImage.style.transformOrigin = '0 0';
     modalImage.style.transform = 'translate3d(0, 0, 0) scale(1)';
     updateBaseMetrics();
     applyTransform();
+  };
+
+  const resetPinchState = () => {
+    state.pinchStartDistance = null;
+    state.pinchStartZoom = state.zoomLevel;
+  };
+
+  const forceCloseAndCleanup = () => {
+    if (!imageModal.isConnected || !isModalVisible()) {
+      cleanupBootstrapModalArtifacts();
+      return;
+    }
+
+    const modalInstance = window.bootstrap?.Modal?.getInstance(imageModal);
+    if (modalInstance) {
+      modalInstance.hide();
+    } else {
+      imageModal.classList.remove('show');
+      imageModal.style.display = 'none';
+      imageModal.setAttribute('aria-hidden', 'true');
+    }
+
+    cleanupBootstrapModalArtifacts();
+  };
+
+  const onNavigationExit = () => {
+    forceCloseAndCleanup();
+    resetPinchState();
+    if (!teardownController.signal.aborted) {
+      teardownController.abort();
+    }
   };
 
   modalBody.addEventListener('wheel', (event) => {
@@ -143,18 +197,18 @@ export function setupRutaImageModal(container, { modalId }) {
     const rect = modalBody.getBoundingClientRect();
     const pointX = event.clientX - rect.left;
     const pointY = event.clientY - rect.top;
-    const direction = event.deltaY < 0 ? STEP : -STEP;
-    setZoomAtPoint(zoomLevel + direction, pointX, pointY);
+    const direction = event.deltaY < 0 ? ZOOM_LIMITS.wheelStep : -ZOOM_LIMITS.wheelStep;
+    setZoomAtPoint(state.zoomLevel + direction, pointX, pointY);
   }, { passive: false });
 
   modalBody.addEventListener('pointerdown', (event) => {
-    if (zoomLevel <= 1) {
+    if (state.zoomLevel <= 1) {
       return;
     }
-    isDragging = true;
-    dragPointerId = event.pointerId;
-    lastPointerX = event.clientX;
-    lastPointerY = event.clientY;
+    state.isDragging = true;
+    state.dragPointerId = event.pointerId;
+    state.lastPointerX = event.clientX;
+    state.lastPointerY = event.clientY;
     if (typeof modalBody.setPointerCapture === 'function') {
       modalBody.setPointerCapture(event.pointerId);
     }
@@ -162,24 +216,24 @@ export function setupRutaImageModal(container, { modalId }) {
   });
 
   modalBody.addEventListener('pointermove', (event) => {
-    if (!isDragging || dragPointerId !== event.pointerId) {
+    if (!state.isDragging || state.dragPointerId !== event.pointerId) {
       return;
     }
-    const deltaX = event.clientX - lastPointerX;
-    const deltaY = event.clientY - lastPointerY;
-    lastPointerX = event.clientX;
-    lastPointerY = event.clientY;
-    translateX += deltaX;
-    translateY += deltaY;
+    const deltaX = event.clientX - state.lastPointerX;
+    const deltaY = event.clientY - state.lastPointerY;
+    state.lastPointerX = event.clientX;
+    state.lastPointerY = event.clientY;
+    state.translateX += deltaX;
+    state.translateY += deltaY;
     applyTransform();
   });
 
   const stopDragging = (event) => {
-    if (dragPointerId !== null && event.pointerId !== dragPointerId) {
+    if (state.dragPointerId !== null && event.pointerId !== state.dragPointerId) {
       return;
     }
-    isDragging = false;
-    dragPointerId = null;
+    state.isDragging = false;
+    state.dragPointerId = null;
     applyTransform();
   };
 
@@ -189,42 +243,55 @@ export function setupRutaImageModal(container, { modalId }) {
 
   modalBody.addEventListener('touchstart', (event) => {
     if (event.touches.length === 2) {
-      pinchStartDistance = touchDistance(event.touches[0], event.touches[1]);
-      pinchStartZoom = zoomLevel;
+      state.pinchStartDistance = getTouchDistance(event.touches[0], event.touches[1]);
+      state.pinchStartZoom = state.zoomLevel;
     }
   }, { passive: true });
 
   modalBody.addEventListener('touchmove', (event) => {
-    if (event.touches.length !== 2 || !pinchStartDistance) {
+    if (event.touches.length !== 2 || !state.pinchStartDistance) {
       return;
     }
     event.preventDefault();
-    isDragging = false;
-    dragPointerId = null;
-    const currentDistance = touchDistance(event.touches[0], event.touches[1]);
-    const ratio = currentDistance / pinchStartDistance;
+    state.isDragging = false;
+    state.dragPointerId = null;
+    const currentDistance = getTouchDistance(event.touches[0], event.touches[1]);
+    const ratio = currentDistance / state.pinchStartDistance;
     const rect = modalBody.getBoundingClientRect();
-    const midPoint = touchMidpoint(event.touches[0], event.touches[1], rect);
-    setZoomAtPoint(pinchStartZoom * ratio, midPoint.x, midPoint.y);
+    const midpoint = getTouchMidpoint(event.touches[0], event.touches[1], rect);
+    setZoomAtPoint(state.pinchStartZoom * ratio, midpoint.x, midpoint.y);
   }, { passive: false });
-
-  const resetPinchState = () => {
-    pinchStartDistance = null;
-    pinchStartZoom = zoomLevel;
-  };
 
   modalBody.addEventListener('touchend', resetPinchState, { passive: true });
   modalBody.addEventListener('touchcancel', resetPinchState, { passive: true });
+
+  window.addEventListener('resize', () => {
+    if (!isModalVisible()) {
+      return;
+    }
+    updateBaseMetrics();
+    applyTransform();
+  }, { signal: teardownController.signal });
 
   imageModal.addEventListener('shown.bs.modal', () => {
     requestAnimationFrame(() => {
       resetTransform();
     });
   });
+  imageModal.addEventListener('hide.bs.modal', () => {
+    cleanupBootstrapModalArtifacts();
+  });
   imageModal.addEventListener('hidden.bs.modal', () => {
     resetTransform();
     resetPinchState();
+    cleanupBootstrapModalArtifacts();
   });
+
+  // En navegadores Chromium móviles, volver atrás puede cambiar el hash
+  // antes de que Bootstrap complete el cierre y deje el backdrop bloqueando.
+  window.addEventListener('hashchange', onNavigationExit, { signal: teardownController.signal });
+  window.addEventListener('popstate', onNavigationExit, { signal: teardownController.signal });
+  window.addEventListener('pagehide', onNavigationExit, { signal: teardownController.signal });
 
   resetTransform();
 }

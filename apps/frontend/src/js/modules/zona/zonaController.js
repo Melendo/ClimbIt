@@ -164,19 +164,6 @@ function filterRutas(rutas, filtros, dificultadIndexByTipo) {
     });
 }
 
-async function resolveRutaImageSrc(ruta) {
-    if (!ruta?.imagenUrl) {
-        return RUTA_IMAGE_PLACEHOLDER;
-    }
-    
-    try {
-        return await fetchImageObjectUrl(`/pistas/${ruta.id}/imagen`);
-    } catch (err) {
-        console.warn('No se pudo cargar la imagen de la ruta:', err.message);
-        return RUTA_IMAGE_PLACEHOLDER;
-    }
-}
-
 function resolveRutaColorPresasRgb(ruta, colorScaleMap) {
     const colorName = ruta?.colorPresas || ruta?.color || ruta?.dificultad;
     return resolveColorScaleRgb(colorName, colorScaleMap);
@@ -341,6 +328,16 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
                 // Estado de filtros centralizado para mantener mapa y tarjetas sincronizados.
                 Object.assign(filtrosActivos, normalizeFiltrosState(nextFiltros, dificultadOrderByTipo));
                 saveZonaFilters(idRocodromo, filtrosActivos);
+            },
+            async (idRuta, signal) => {
+                try {
+                    return await fetchImageObjectUrl(`/pistas/${idRuta}/imagen`, { signal });
+                } catch (err) {
+                    if (err?.name !== 'AbortError') {
+                        console.warn(`No se pudo cargar la imagen de la ruta ${idRuta}:`, err.message);
+                    }
+                    throw err;
+                }
             }
         );
 
@@ -366,17 +363,12 @@ async function cargarRutasZona(idZona, colorScaleMap = {}) {
         const rutasRes = await fetchClient(`/zonas/pistas/${idZona}`);
         const rutas = await rutasRes.json();
         
-        // Mapear configuración de estado para la vista
-        const rutasConImagen = await Promise.all(
-            rutas.map(async (ruta) => ({
-                ...ruta,
-                statusConfig: ESTADOS_CONFIG[ruta.estado] || ESTADOS_CONFIG.nada,
-                colorPresasRgb: resolveRutaColorPresasRgb(ruta, colorScaleMap),
-                imagenSrc: await resolveRutaImageSrc(ruta),
-            }))
-        );
-        
-        return rutasConImagen;
+        return rutas.map((ruta) => ({
+            ...ruta,
+            statusConfig: ESTADOS_CONFIG[ruta.estado] || ESTADOS_CONFIG.nada,
+            colorPresasRgb: resolveRutaColorPresasRgb(ruta, colorScaleMap),
+            imagenSrc: RUTA_IMAGE_PLACEHOLDER,
+        }));
     } catch (err) {
         console.error(`Error al cargar rutas de la zona ${idZona}:`, err);
         return [];

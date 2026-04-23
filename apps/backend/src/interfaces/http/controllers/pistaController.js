@@ -314,6 +314,7 @@ class PistaController {
       );
 
       await fs.access(filePath);
+      res.set('Cache-Control', 'private, max-age=0, must-revalidate');
       return res.sendFile(filePath);
     } catch (error) {
       if (error.code === 'ENOENT') {
