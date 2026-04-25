@@ -48,7 +48,7 @@ export default defineConfig({
         skipWaiting: true,
         clientsClaim: true,
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/(escaladores|pistas|rocodromos|zonas)\b/],
+        navigateFallbackDenylist: [/^\/(escaladores|pistas|rocodromos|zonas|amistades)\b/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/.*/i,
@@ -88,7 +88,7 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /\/(escaladores|rocodromos|zonas)\b.*|\/pistas\b(?!\/\d+\/imagen$).*/i,
+            urlPattern: /\/(escaladores|rocodromos|zonas|amistades)\b.*|\/pistas\b(?!\/\d+\/imagen$).*/i,
             method: 'GET',
             handler: 'NetworkFirst',
             options: {
@@ -148,6 +148,10 @@ export default defineConfig({
         changeOrigin: true,
       },
       '/rocodromos': {
+        target: 'http://localhost:' + PORT,
+        changeOrigin: true,
+      },
+      '/amistades': {
         target: 'http://localhost:' + PORT,
         changeOrigin: true,
       },
