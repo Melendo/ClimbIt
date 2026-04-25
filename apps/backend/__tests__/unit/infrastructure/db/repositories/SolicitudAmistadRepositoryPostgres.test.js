@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
-import SolicitudAmistadRepositoryPostgres from '../../../src/infrastructure/repositories/solicitudAmistadRepositoryPostgres.js';
-import SolicitudAmistad from '../../../src/domain/amistades/SolicitudAmistad.js';
+import SolicitudAmistadRepositoryPostgres from '../../../../../src/infrastructure/repositories/solicitudAmistadRepositoryPostgres.js';
+import SolicitudAmistad from '../../../../../src/domain/amistades/SolicitudAmistad.js';
 
 describe('SolicitudAmistadRepositoryPostgres', () => {
   let repository;

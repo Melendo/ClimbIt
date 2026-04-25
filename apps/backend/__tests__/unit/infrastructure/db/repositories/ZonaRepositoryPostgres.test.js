@@ -1,6 +1,6 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
-import ZonaRepositoryPostgres from '../../../src/infrastructure/repositories/zonaRepositoryPostgres.js';
-import Zona from '../../../src/domain/zonas/Zona.js';
+import ZonaRepositoryPostgres from '../../../../../src/infrastructure/repositories/zonaRepositoryPostgres.js';
+import Zona from '../../../../../src/domain/zonas/Zona.js';
 
 describe('ZonaRepositoryPostgres', () => {
   let repository;

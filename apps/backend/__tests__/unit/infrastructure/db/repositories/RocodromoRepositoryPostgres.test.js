@@ -6,8 +6,8 @@ import {
   beforeEach,
   afterEach,
 } from '@jest/globals';
-import RocodromoRepositoryPostgres from '../../../src/infrastructure/repositories/rocodromoRepositoryPostgres.js';
-import Rocodromo from '../../../src/domain/rocodromos/Rocodromo.js';
+import RocodromoRepositoryPostgres from '../../../../../src/infrastructure/repositories/rocodromoRepositoryPostgres.js';
+import Rocodromo from '../../../../../src/domain/rocodromos/Rocodromo.js';
 
 describe('RocodromoRepositoryPostgres', () => {
   let repository;
