@@ -45,6 +45,22 @@ class AmistadController {
       return next(error);
     }
   }
+
+  async consultarPerfilAmigo(req, res, next) {
+    try {
+      const apodoSolicitante = req.user.apodo;
+      const { apodo } = req.params;
+
+      const resultado = await this.useCases.consultarPerfilAmigo.execute({
+        apodoSolicitante,
+        apodoPerfil: apodo,
+      });
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      return next(error);
+    }
+  }
 }
 
 export default AmistadController;

@@ -1,5 +1,5 @@
 import express from 'express';
-import { body } from 'express-validator';
+import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyToken from '../middlewares/verifyToken.js';
 import containerPromise from '../../../infrastructure/container.js';
@@ -51,5 +51,24 @@ router.post(
 router.get('/mis-amigos', verifyToken, (req, res, next) => {
   amistadController.listarAmigos(req, res, next);
 });
+
+const consultarPerfilAmigoValidators = [
+  param('apodo')
+    .trim()
+    .notEmpty()
+    .withMessage('apodo es requerido')
+    .isLength({ min: 1, max: 20 })
+    .withMessage('apodo debe tener entre 1 y 20 caracteres'),
+];
+
+router.get(
+  '/perfil/:apodo',
+  verifyToken,
+  consultarPerfilAmigoValidators,
+  validate,
+  (req, res, next) => {
+    amistadController.consultarPerfilAmigo(req, res, next);
+  }
+);
 
 export default router;
