@@ -48,4 +48,8 @@ router.post(
   }
 );
 
+router.get('/mis-amigos', verifyToken, (req, res, next) => {
+  amistadController.listarAmigos(req, res, next);
+});
+
 export default router;

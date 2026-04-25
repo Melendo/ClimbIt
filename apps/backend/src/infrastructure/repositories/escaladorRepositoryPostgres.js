@@ -1,4 +1,4 @@
-import { col, fn, where } from 'sequelize';
+import { col, fn, Op, where } from 'sequelize';
 import escaladorRepository from '../../domain/escaladores/escaladorRepository.js';
 import Escalador from '../../domain/escaladores/Escalador.js';
 import Rocodromo from '../../domain/rocodromos/Rocodromo.js';
@@ -89,6 +89,41 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
       throw mapRepositoryError(error, {
         fallbackMessage: 'Error al buscar escalador por apodo (insensible)',
         internalCode: 'ESCALADOR_FIND_BY_NICKNAME_INSENSITIVE_FAILED',
+      });
+    }
+  }
+
+  async encontrarPorId(id) {
+    try {
+      const escaladorModel = await this.EscaladorModel.findByPk(id);
+      return this._toDomain(escaladorModel);
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al buscar escalador por ID',
+        internalCode: 'ESCALADOR_FIND_BY_ID_FAILED',
+      });
+    }
+  }
+
+  async encontrarPorIds(ids) {
+    try {
+      if (!Array.isArray(ids) || ids.length === 0) {
+        return [];
+      }
+
+      const escaladoresModel = await this.EscaladorModel.findAll({
+        where: {
+          id: {
+            [Op.in]: ids,
+          },
+        },
+      });
+
+      return escaladoresModel.map((escaladorModel) => this._toDomain(escaladorModel));
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al buscar escaladores por IDs',
+        internalCode: 'ESCALADOR_FIND_BY_IDS_FAILED',
       });
     }
   }

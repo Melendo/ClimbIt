@@ -35,6 +35,16 @@ class AmistadController {
       return next(error);
     }
   }
+
+  async listarAmigos(req, res, next) {
+    try {
+      const apodoEscalador = req.user.apodo;
+      const resultado = await this.useCases.listarAmigos.execute({ apodoEscalador });
+      res.status(200).json(resultado);
+    } catch (error) {
+      return next(error);
+    }
+  }
 }
 
 export default AmistadController;
