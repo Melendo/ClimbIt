@@ -18,6 +18,23 @@ class AmistadController {
       return next(error);
     }
   }
+
+  async responderSolicitud(req, res, next) {
+    try {
+      const apodoDestinatario = req.user.apodo;
+      const { idSolicitud, respuesta } = req.body;
+
+      const resultado = await this.useCases.responderSolicitud.execute({
+        apodoDestinatario,
+        idSolicitud,
+        respuesta,
+      });
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      return next(error);
+    }
+  }
 }
 
 export default AmistadController;

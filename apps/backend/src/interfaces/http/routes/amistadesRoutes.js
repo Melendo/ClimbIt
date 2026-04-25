@@ -27,4 +27,25 @@ router.post(
   }
 );
 
+const responderSolicitudValidators = [
+  body('idSolicitud')
+    .toInt()
+    .isInt({ min: 1 })
+    .withMessage('idSolicitud debe ser un entero positivo'),
+  body('respuesta')
+    .trim()
+    .isIn(['aceptada', 'rechazada'])
+    .withMessage('respuesta debe ser aceptada o rechazada'),
+];
+
+router.post(
+  '/responder',
+  verifyToken,
+  responderSolicitudValidators,
+  validate,
+  (req, res, next) => {
+    amistadController.responderSolicitud(req, res, next);
+  }
+);
+
 export default router;
