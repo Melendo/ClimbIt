@@ -3,8 +3,8 @@ class SolicitudAmistadRepository {
     throw new Error('Método "crear" no implementado');
   }
 
-  async encontrarPendientePorPareja() {
-    throw new Error('Método "encontrarPendientePorPareja" no implementado');
+  async existePendienteEntreEscaladores() {
+    throw new Error('Método "existePendienteEntreEscaladores" no implementado');
   }
 
   async encontrarPorId() {

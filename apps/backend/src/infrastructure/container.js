@@ -12,6 +12,8 @@ import PistaRepositoryPostgres from './repositories/pistaRepositoryPostgres.js';
 import ZonaRepositoryPostgres from './repositories/zonaRepositoryPostgres.js';
 import RocodromoRepositoryPostgres from './repositories/rocodromoRepositoryPostgres.js';
 import FotosPerfilRepositoryPostgres from './repositories/fotosPerfilRepositoryPostgres.js';
+import SolicitudAmistadRepositoryPostgres from './repositories/solicitudAmistadRepositoryPostgres.js';
+import AmistadRepositoryPostgres from './repositories/amistadRepositoryPostgres.js';
 
 // Servicios de infra (Seguridad etc)
 import passwordService from './security/passwordService.js';
@@ -62,11 +64,14 @@ import ObtenerRocodromos from '../application/rocodromos/obtenerRocodromos.js';
 import ObtenerInformacionRocodromo from '../application/rocodromos/obtenerInformacionRocodromo.js';
 import ObtenerEscalasDificultad from '../application/rocodromos/obtenerEscalasDificultad.js';
 
+import EnviarSolicitudAmistad from '../application/amistades/enviarSolicitudAmistad.js';
+
 // Controladores (interfaces HTTP)
 import EscaladorController from '../interfaces/http/controllers/escaladorController.js';
 import PistaController from '../interfaces/http/controllers/pistaController.js';
 import ZonaController from '../interfaces/http/controllers/zonaController.js';
 import RocodromoController from '../interfaces/http/controllers/rocodromoController.js';
+import AmistadController from '../interfaces/http/controllers/amistadController.js';
 
 // --- Composición / Inyección de dependencias ---
 
@@ -81,6 +86,10 @@ async function inicializarContainer() {
   const zonaRepository = new ZonaRepositoryPostgres(db.Zona);
   const rocodromoRepository = new RocodromoRepositoryPostgres(db.Rocodromo);
   const fotosPerfilRepository = new FotosPerfilRepositoryPostgres(db.FotosPerfil);
+  const solicitudAmistadRepository = new SolicitudAmistadRepositoryPostgres(
+    db.SolicitudAmistad
+  );
+  const amistadRepository = new AmistadRepositoryPostgres(db.Amistad);
 
   // 2) Instancia del caso de uso con el repositorio inyectado
   const crearEscaladorUseCase = new CrearEscalador(
@@ -201,6 +210,11 @@ async function inicializarContainer() {
   const obtenerEscalasDificultadUseCase = new ObtenerEscalasDificultad(
     rocodromoRepository
   );
+  const enviarSolicitudAmistadUseCase = new EnviarSolicitudAmistad(
+    escaladorRepository,
+    solicitudAmistadRepository,
+    amistadRepository
+  );
 
   // 3) Instancia del caso de uso con el repositorio inyectado
   const escaladorUseCases = {
@@ -254,12 +268,16 @@ async function inicializarContainer() {
     obtenerInformacion: obtenerInformacionRocodromoUseCase,
     obtenerEscalasDificultad: obtenerEscalasDificultadUseCase,
   };
+  const amistadUseCases = {
+    enviarSolicitud: enviarSolicitudAmistadUseCase,
+  };
 
   // 4) Instancia del controlador con los casos de uso inyectados
   const escaladorController = new EscaladorController(escaladorUseCases);
   const pistaController = new PistaController(pistaUseCases);
   const zonaController = new ZonaController(zonaUseCases);
   const rocodromoController = new RocodromoController(rocodromoUseCases);
+  const amistadController = new AmistadController(amistadUseCases);
 
   // 5) Retornar las instancias que serán consumidas por las rutas
   return {
@@ -267,6 +285,7 @@ async function inicializarContainer() {
     pistaController,
     zonaController,
     rocodromoController,
+    amistadController,
   };
 }
 

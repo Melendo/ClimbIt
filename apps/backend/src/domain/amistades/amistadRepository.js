@@ -3,8 +3,8 @@ class AmistadRepository {
     throw new Error('Método "crear" no implementado');
   }
 
-  async encontrarPorEscaladores() {
-    throw new Error('Método "encontrarPorEscaladores" no implementado');
+  async existeAmistadEntreEscaladores() {
+    throw new Error('Método "existeAmistadEntreEscaladores" no implementado');
   }
 
   async eliminarPorEscaladores() {
