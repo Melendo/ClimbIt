@@ -110,6 +110,25 @@ class SolicitudAmistadRepositoryPostgres extends SolicitudAmistadRepository {
       });
     }
   }
+
+  async eliminarEntreEscaladores(idEscalador1, idEscalador2, transaction = null) {
+    try {
+      return await this.SolicitudAmistadModel.destroy({
+        where: {
+          [Op.or]: [
+            { idRemitente: idEscalador1, idDestinatario: idEscalador2 },
+            { idRemitente: idEscalador2, idDestinatario: idEscalador1 },
+          ],
+        },
+        transaction,
+      });
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al eliminar solicitudes entre escaladores',
+        internalCode: 'SOLICITUD_AMISTAD_DELETE_BETWEEN_FAILED',
+      });
+    }
+  }
 }
 
 export default SolicitudAmistadRepositoryPostgres;

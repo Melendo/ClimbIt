@@ -18,6 +18,10 @@ class SolicitudAmistadRepository {
   async eliminarPorId() {
     throw new Error('Método "eliminarPorId" no implementado');
   }
+
+  async eliminarEntreEscaladores() {
+    throw new Error('Método "eliminarEntreEscaladores" no implementado');
+  }
 }
 
 export default SolicitudAmistadRepository;

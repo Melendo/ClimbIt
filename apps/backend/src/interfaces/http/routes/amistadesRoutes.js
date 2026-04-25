@@ -71,4 +71,23 @@ router.get(
   }
 );
 
+const eliminarAmigoValidators = [
+  param('apodoAmigo')
+    .trim()
+    .notEmpty()
+    .withMessage('apodoAmigo es requerido')
+    .isLength({ min: 1, max: 20 })
+    .withMessage('apodoAmigo debe tener entre 1 y 20 caracteres'),
+];
+
+router.delete(
+  '/:apodoAmigo',
+  verifyToken,
+  eliminarAmigoValidators,
+  validate,
+  (req, res, next) => {
+    amistadController.eliminarAmigo(req, res, next);
+  }
+);
+
 export default router;

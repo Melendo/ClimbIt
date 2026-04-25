@@ -61,6 +61,22 @@ class AmistadController {
       return next(error);
     }
   }
+
+  async eliminarAmigo(req, res, next) {
+    try {
+      const apodoSolicitante = req.user.apodo;
+      const { apodoAmigo } = req.params;
+
+      const resultado = await this.useCases.eliminarAmigo.execute({
+        apodoSolicitante,
+        apodoAmigo,
+      });
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      return next(error);
+    }
+  }
 }
 
 export default AmistadController;
