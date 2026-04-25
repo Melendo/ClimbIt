@@ -1,4 +1,4 @@
-import { col, fn, Op, where } from 'sequelize';
+import { col, fn, literal, Op, where } from 'sequelize';
 import escaladorRepository from '../../domain/escaladores/escaladorRepository.js';
 import Escalador from '../../domain/escaladores/Escalador.js';
 import Rocodromo from '../../domain/rocodromos/Rocodromo.js';
@@ -89,6 +89,39 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
       throw mapRepositoryError(error, {
         fallbackMessage: 'Error al buscar escalador por apodo (insensible)',
         internalCode: 'ESCALADOR_FIND_BY_NICKNAME_INSENSITIVE_FAILED',
+      });
+    }
+  }
+
+  async buscarPorApodoSimilitud(cadena, limite = 10, excludeApodo = null) {
+    try {
+      const searchWhere = {
+        apodo: {
+          [Op.iLike]: `%${cadena}%`,
+        },
+      };
+
+      if (excludeApodo) {
+        searchWhere.apodo = {
+          ...searchWhere.apodo,
+          [Op.ne]: excludeApodo,
+        };
+      }
+
+      const escaladoresModel = await this.EscaladorModel.findAll({
+        where: searchWhere,
+        limit: limite,
+        order: [
+          [literal(`CASE WHEN "Apodo" ILIKE '${cadena}%' THEN 0 ELSE 1 END`), 'ASC'],
+          [fn('LENGTH', col('Apodo')), 'ASC']
+        ],
+      });
+
+      return escaladoresModel.map((escaladorModel) => this._toDomain(escaladorModel));
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al buscar escaladores por apodo',
+        internalCode: 'ESCALADOR_SEARCH_BY_NICKNAME_FAILED',
       });
     }
   }

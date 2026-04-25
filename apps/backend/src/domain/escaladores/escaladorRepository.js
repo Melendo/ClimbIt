@@ -16,6 +16,10 @@ class EscaladorRepository {
     throw new Error('Método "encontrarPorApodoInsensitive" no implementado');
   }
 
+  async buscarPorApodoSimilitud(cadena, limite, excludeId) {
+    throw new Error('Método "buscarPorApodoSimilitud" no implementado');
+  }
+
   async encontrarPorId(id) {
     throw new Error('Método "encontrarPorId" no implementado');
   }
