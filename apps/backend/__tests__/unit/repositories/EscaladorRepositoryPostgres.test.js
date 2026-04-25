@@ -320,4 +320,26 @@ describe('EscaladorRepositoryPostgres', () => {
       ).rejects.toThrow('Error al desuscribirse del rocódromo: Error de base de datos');
     });
   });
+
+  describe('buscarPorApodoSimilitud', () => {
+    it('debería buscar escaladores por apodo, limitar resultados y mapearlos', async () => {
+      mockEscaladorModel.findAll = jest.fn().mockResolvedValue([
+        { id: 2, apodo: 'alex', correo: 'a@a.com', contrasena: '1' },
+        { id: 3, apodo: 'alexander', correo: 'b@b.com', contrasena: '1' }
+      ]);
+
+      const resultado = await repository.buscarPorApodoSimilitud('alex', 10, 1);
+
+      expect(mockEscaladorModel.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          limit: 10,
+          where: expect.any(Object),
+          order: expect.any(Array)
+        })
+      );
+      expect(resultado).toHaveLength(2);
+      expect(resultado[0]).toBeInstanceOf(Escalador);
+      expect(resultado[0].apodo).toBe('alex');
+    });
+  });
 });

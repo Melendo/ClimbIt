@@ -755,4 +755,36 @@ describe('E2E: Escalador', () => {
       expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
     });
   });
+
+  describe('Buscar escaladores', () => {
+    it('debería encontrar escaladores por coincidencia de apodo excluyendo al que busca', async () => {
+      // E2ETester fue creado en otro test, y ApodoActualizado también
+      const response = await request(app)
+        .get('/escaladores/buscar?q=test')
+        .set('Authorization', `Bearer ${tokenSuscripcion}`) // SuscripcionTester busca 'test'
+        .expect(200);
+
+      expect(Array.isArray(response.body)).toBe(true);
+      // SuscripcionTester -> test
+      // E2ETester -> test
+      // ApodoOriginal ya cambió
+      expect(response.body.length).toBeGreaterThan(0);
+      expect(response.body.some(e => e.apodo === 'E2ETester' || e.apodo === 'SuscripcionTester' || e.apodo === 'DescripcionTester')).toBe(true);
+
+      // Verify that tokenSuscripcion (SuscripcionTester) is not in the list if the search matched him
+      const foundMe = response.body.find(e => e.apodo === 'SuscripcionTester');
+      expect(foundMe).toBeUndefined();
+    });
+
+    it('debería retornar 422 si la búsqueda tiene menos de 2 caracteres', async () => {
+      const response = await request(app)
+        .get('/escaladores/buscar?q=a')
+        .set('Authorization', `Bearer ${tokenSuscripcion}`)
+        .expect(422);
+
+      expect(response.body).toHaveProperty('status', 'invalid_request');
+      const fields = response.body.errors.map((e) => e.field);
+      expect(fields).toContain('q');
+    });
+  });
 });
