@@ -37,6 +37,46 @@ export async function socialCmd(container) {
                 return amigosConFoto.filter(amigo => 
                     amigo.apodo && amigo.apodo.toLowerCase().includes(lowerQuery)
                 );
+            },
+            onSearchNewFriends: async (query) => {
+                if (!query || query.length < 2) return [];
+                try {
+                    const searchRes = await fetchClient(`/escaladores/buscar?q=${encodeURIComponent(query)}`);
+                    const resultados = await searchRes.json();
+                    return await Promise.all(
+                        resultados.map(usuario => resolverFotoPerfil(usuario))
+                    );
+                } catch (err) {
+                    console.error('Error al buscar nuevos amigos:', err);
+                    return [];
+                }
+            },
+            onSendFriendRequest: async (apodoDestinatario) => {
+                try {
+                    const res = await fetchClient('/amistades/enviar', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ apodoDestinatario })
+                    });
+                    return await res.json();
+                } catch (err) {
+                    if (err.response) {
+                        try {
+                            const errorBody = await err.response.json();
+                            if (errorBody && errorBody.error) {
+                                throw new Error(errorBody.error);
+                            }
+                        } catch (e) {
+                            if (e.message !== err.message) {
+                                throw e;
+                            }
+                        }
+                    }
+                    console.error('Error al enviar solicitud de amistad:', err);
+                    throw err;
+                }
             }
         };
 
