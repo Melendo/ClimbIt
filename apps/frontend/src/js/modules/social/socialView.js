@@ -1,6 +1,15 @@
 import { renderNavbar } from '../../components/navbar.js';
 import { showConfirmModal } from '../../components/modal.js';
 import { showToast } from '../../components/toast.js';
+import { escapeHtml } from '../../components/formHelpers.js';
+import { renderSectionDivider } from '../../components/sectionDivider.js';
+import {
+  buildEscaladorStatsViewModel,
+  renderMonthlyActivityCards,
+  renderRouteTypesStatsCard,
+  renderStatsSection,
+  renderTotalRoutesStatsCard,
+} from '../../components/escaladorStats.js';
 
 export function renderSocialView(container, amigos, solicitudes, callbacks) {
     // Generar el HTML inicial
@@ -113,19 +122,21 @@ export function renderSocialView(container, amigos, solicitudes, callbacks) {
             const descripcion = amigo.descripcion || 'Sin descripción...';
 
             return `
-            <div class="border rounded-3 bg-white p-2 position-relative card-box-shadow social-amigo-card">
-                <div class="card-body d-flex align-items-center p-2">
-                    <img src="${amigo.fotoSrc}" alt="Foto de ${amigo.apodo}" class="rounded-circle ms-1 me-2 social-amigo-foto" />
-                    <div class="flex-grow-1 overflow-hidden">
-                        <p class="mb-1 py-1 fs-5 fw-bold text-dark social-amigo-text text-truncate">${amigo.apodo}</p>
-                        <p class="text-muted small mb-0 social-amigo-desc">${descripcion}</p>
-                    </div>
-                    <div class="text-center border-start ps-3 py-1 pe-2 flex-shrink-0">
-                        <small class="text-muted d-block mb-1 social-amigo-rutas-label">RUTAS<br>ESTE MES</small>
-                        <span class="fs-4 fw-bold">0</span>
+            <a href="#amigoPerfil?apodo=${encodeURIComponent(amigo.apodo)}" class="text-decoration-none text-dark d-block">
+                <div class="border rounded-3 bg-white p-2 position-relative card-box-shadow social-amigo-card">
+                    <div class="card-body d-flex align-items-center p-2">
+                        <img src="${amigo.fotoSrc}" alt="Foto de ${amigo.apodo}" class="rounded-circle ms-1 me-2 social-amigo-foto" />
+                        <div class="flex-grow-1 overflow-hidden">
+                            <p class="mb-1 py-1 fs-5 fw-bold text-dark social-amigo-text text-truncate">${amigo.apodo}</p>
+                            <p class="text-muted small mb-0 social-amigo-desc">${descripcion}</p>
+                        </div>
+                        <div class="text-center border-start ps-3 py-1 pe-2 flex-shrink-0">
+                            <small class="text-muted d-block mb-1 social-amigo-rutas-label">RUTAS<br>ESTE MES</small>
+                            <span class="fs-4 fw-bold">0</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </a>
         `}).join('');
     };
 
@@ -449,4 +460,108 @@ export function renderSocialView(container, amigos, solicitudes, callbacks) {
             }, 300);
         });
     }
+}
+
+// eslint-disable-next-line no-unused-vars
+function renderPerfilFieldTitle(text) {
+  return `<p class="text-muted small text-uppercase fw-semibold mb-1 perfil-field-title">${text}</p>`;
+}
+
+function renderPerfilStats(statsViewModel) {
+  return `
+    <div class="perfil-estadisticas-wrap mt-4">
+      ${renderSectionDivider({ label: 'Estadisticas' })}
+      <div class="perfil-estadisticas-view mt-3">
+        ${renderStatsSection({
+          title: 'Actividad mensual',
+          content: renderMonthlyActivityCards(statsViewModel.monthly),
+        })}
+        ${renderStatsSection({
+          title: 'Total de Rutas Escaladas',
+          content: renderTotalRoutesStatsCard(statsViewModel.totals),
+        })}
+        ${renderStatsSection({
+          title: 'Tipos de Rutas Escaladas',
+          content: renderRouteTypesStatsCard(statsViewModel.totals),
+        })}
+      </div>
+    </div>
+  `;
+}
+
+export function renderAmigoPerfil(container, escalador, callbacks) {
+    const { apodo, descripcion, fotoSrc, estadisticas = {} } = escalador;
+
+    const avatar = fotoSrc || '/assets/johnDoe.png';
+    const apodoLimpio = typeof apodo === 'string' ? apodo.trim() : '';
+    const descripcionLimpia = typeof descripcion === 'string' ? descripcion.trim() : '';
+    const descripcionVisible = descripcionLimpia && descripcionLimpia.toLowerCase() !== 'null'
+        ? escapeHtml(descripcionLimpia)
+        : '';
+    const statsViewModel = buildEscaladorStatsViewModel(estadisticas);
+
+    container.innerHTML = `
+        <!-- Cabecera -->
+        <div class="card-header bg-white d-flex align-items-center justify-content-between py-3 px-3 position-relative perfil-header shadow-sm border-bottom">
+            <button class="btn btn-link text-dark p-0 me-2 d-flex align-items-center text-decoration-none" onclick="history.back()" aria-label="Volver atrás">
+                <span class="material-icons me-2 fw-bold">arrow_back</span>
+                <span class="fw-bold fs-5 text-dark font-monospace">Perfil de Amigo</span>
+            </button>
+            <button class="btn btn-danger d-flex align-items-center justify-content-center p-2 rounded-2 btn-delete-friend" aria-label="Eliminar amigo">
+                <span class="material-icons">delete</span>
+            </button>
+        </div>
+
+        <!-- Contenido del perfil -->
+        <div class="card-body flex-grow-1 overflow-auto bg-light pb-5 pt-4">
+            <!-- Sección de información del perfil -->
+            <div class="text-center mb-4 bg-white rounded-4 p-4 shadow-sm mx-3">
+                <div class="position-relative d-inline-block mb-3">
+                    <img 
+                        src="${avatar}" 
+                        alt="Foto de perfil" 
+                        class="rounded-circle perfil-avatar border border-3 border-light shadow-sm" 
+                        style="width: 120px; height: 120px; object-fit: cover;"
+                    />
+                </div>
+                <div class="perfil-apodo-wrap">
+                    <div class="perfil-apodo-view w-100">
+                        <div class="perfil-apodo-view-content">
+                            <h5 class="fw-bold mb-0 font-monospace fs-4">${escapeHtml(apodoLimpio) || 'Sin apodo'}</h5>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="perfil-descripcion-wrap mt-3">
+                    ${renderSectionDivider({ label: 'Descripcion' })}
+                    <div class="perfil-descripcion-view w-100 mt-2">
+                        <div class="perfil-descripcion-view-content text-center">
+                            ${descripcionVisible
+                                ? `<p class="text-muted mb-0 font-monospace">${descripcionVisible}</p>`
+                                : '<p class="text-muted mb-0 small fst-italic font-monospace">Sin descripcion...</p>'}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-3">
+                ${renderPerfilStats(statsViewModel)}
+            </div>
+        </div>
+    `;
+
+    const btnDelete = container.querySelector('.btn-delete-friend');
+    btnDelete.addEventListener('click', async () => {
+        const confirmado = await showConfirmModal({
+            title: 'Eliminar Amigo',
+            message: `¿Estás seguro de que quieres eliminar a <strong>${escapeHtml(apodoLimpio)}</strong> de tu lista de amigos?`,
+            confirmText: 'Eliminar',
+            cancelText: 'Cancelar',
+            confirmClass: 'btn-danger'
+        });
+
+        if (confirmado) {
+            callbacks.onDeleteFriend(apodoLimpio);
+        }
+    });
 }

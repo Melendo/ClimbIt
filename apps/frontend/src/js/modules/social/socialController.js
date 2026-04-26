@@ -1,4 +1,4 @@
-import { renderSocialView } from './socialView.js';
+import { renderSocialView, renderAmigoPerfil } from './socialView.js';
 import { fetchClient, fetchImageObjectUrl } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
 
@@ -130,5 +130,59 @@ export async function socialCmd(container) {
         renderSocialView(container, amigosConFoto, solicitudesConFoto, callbacks);
     } catch (err) {
         showError(`Error al cargar sección social: ${err.message}`);
+    }
+}
+
+export async function amigoPerfilCmd(container, apodo) {
+    if (!apodo) {
+        showError('No se especificó un amigo.');
+        return;
+    }
+    
+    showLoading();
+    try {
+        const [perfilRes, resumenRes, tiposRes, mensualRes] = await Promise.all([
+            fetchClient(`/amistades/perfil/${apodo}`),
+            fetchClient(`/escaladores/public/${apodo}/stats/resumen`),
+            fetchClient(`/escaladores/public/${apodo}/stats/tipos`),
+            fetchClient(`/escaladores/public/${apodo}/stats/actividad-mensual`)
+        ]);
+
+        const perfilBase = await perfilRes.json();
+        const resumen = await resumenRes.json();
+        const tipos = await tiposRes.json();
+        const mensual = await mensualRes.json();
+
+        const escaladorData = await resolverFotoPerfil(perfilBase);
+
+        escaladorData.estadisticas = {
+            totalRutas: resumen.totalRutas,
+            totalFlash: resumen.totalFlash,
+            totalBloques: tipos.totalBloques,
+            totalVias: tipos.totalVias,
+            actividadMensual: mensual
+        };
+
+        const callbacks = {
+            onDeleteFriend: async (amigoApodo) => {
+                try {
+                    await fetchClient(`/amistades/${amigoApodo}`, {
+                        method: 'DELETE'
+                    });
+                    import('../../components/toast.js').then(({ showToast }) => {
+                        showToast(`Has eliminado a ${amigoApodo} de tus amigos`, { variant: 'success' });
+                    });
+                    window.location.hash = '#social';
+                } catch (err) {
+                    import('../../components/toast.js').then(({ showToast }) => {
+                        showToast(`Error al eliminar amigo: ${err.message}`, { variant: 'danger' });
+                    });
+                }
+            }
+        };
+
+        renderAmigoPerfil(container, escaladorData, callbacks);
+    } catch (err) {
+        showError(`Error al cargar el perfil del amigo: ${err.message}`);
     }
 }
