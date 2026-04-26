@@ -129,6 +129,42 @@ class SolicitudAmistadRepositoryPostgres extends SolicitudAmistadRepository {
       });
     }
   }
+
+  async obtenerPendientesPorDestinatario(idDestinatario) {
+    try {
+      const solicitudes = await this.SolicitudAmistadModel.findAll({
+        where: {
+          idDestinatario,
+          estado: 'pendiente',
+        },
+        include: [
+          {
+            association: 'remitente',
+            attributes: ['id', 'apodo', 'descripcion', 'idFotoPerfil'],
+          },
+        ],
+        order: [['createdAt', 'DESC']],
+      });
+
+      return solicitudes.map((solicitud) => {
+        const domainModel = this._toDomain(solicitud);
+        // Adjuntar datos del remitente que no forman parte del dominio estricto
+        // pero que son necesarios para la vista.
+        domainModel.remitente = {
+          id: solicitud.remitente.id,
+          apodo: solicitud.remitente.apodo,
+          descripcion: solicitud.remitente.descripcion,
+          idFotoPerfil: solicitud.remitente.idFotoPerfil,
+        };
+        return domainModel;
+      });
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al obtener solicitudes pendientes',
+        internalCode: 'SOLICITUD_AMISTAD_GET_PENDING_FAILED',
+      });
+    }
+  }
 }
 
 export default SolicitudAmistadRepositoryPostgres;

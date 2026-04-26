@@ -52,6 +52,10 @@ router.get('/mis-amigos', verifyToken, (req, res, next) => {
   amistadController.listarAmigos(req, res, next);
 });
 
+router.get('/solicitudes-pendientes', verifyToken, (req, res, next) => {
+  amistadController.listarSolicitudesPendientes(req, res, next);
+});
+
 const consultarPerfilAmigoValidators = [
   param('apodo')
     .trim()

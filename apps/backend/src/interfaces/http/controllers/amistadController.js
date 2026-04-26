@@ -62,6 +62,17 @@ class AmistadController {
     }
   }
 
+  async listarSolicitudesPendientes(req, res, next) {
+    try {
+      const apodoEscalador = req.user.apodo;
+      const resultado = await this.useCases.listarSolicitudesPendientes.execute({ apodoEscalador });
+      res.status(200).json(resultado);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+
   async eliminarAmigo(req, res, next) {
     try {
       const apodoSolicitante = req.user.apodo;

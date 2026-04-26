@@ -22,6 +22,10 @@ class SolicitudAmistadRepository {
   async eliminarEntreEscaladores() {
     throw new Error('Método "eliminarEntreEscaladores" no implementado');
   }
+
+  async obtenerPendientesPorDestinatario() {
+    throw new Error('Método "obtenerPendientesPorDestinatario" no implementado');
+  }
 }
 
 export default SolicitudAmistadRepository;

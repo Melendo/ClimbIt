@@ -69,6 +69,7 @@ import ResponderSolicitudAmistad from '../application/amistades/responderSolicit
 import ListarAmigos from '../application/amistades/listarAmigos.js';
 import ConsultarPerfilAmigo from '../application/amistades/consultarPerfilAmigo.js';
 import EliminarAmigo from '../application/amistades/eliminarAmigo.js';
+import ListarSolicitudesPendientes from '../application/amistades/listarSolicitudesPendientes.js';
 
 // Controladores (interfaces HTTP)
 import EscaladorController from '../interfaces/http/controllers/escaladorController.js';
@@ -240,6 +241,10 @@ async function inicializarContainer() {
     solicitudAmistadRepository,
     db.sequelize
   );
+  const listarSolicitudesPendientesUseCase = new ListarSolicitudesPendientes(
+    escaladorRepository,
+    solicitudAmistadRepository
+  );
 
   // 3) Instancia del caso de uso con el repositorio inyectado
   const escaladorUseCases = {
@@ -300,6 +305,7 @@ async function inicializarContainer() {
     listarAmigos: listarAmigosUseCase,
     consultarPerfilAmigo: consultarPerfilAmigoUseCase,
     eliminarAmigo: eliminarAmigoUseCase,
+    listarSolicitudesPendientes: listarSolicitudesPendientesUseCase,
   };
 
   // 4) Instancia del controlador con los casos de uso inyectados
