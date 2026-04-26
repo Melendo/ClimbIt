@@ -2,7 +2,7 @@ import { renderNavbar } from '../../components/navbar.js';
 import { showConfirmModal } from '../../components/modal.js';
 import { showToast } from '../../components/toast.js';
 
-export function renderSocialView(container, amigos, callbacks) {
+export function renderSocialView(container, amigos, solicitudes, callbacks) {
     // Generar el HTML inicial
     container.innerHTML = `
         <div class="card-header bg-white d-flex align-items-center justify-content-center py-3 position-relative">
@@ -14,8 +14,9 @@ export function renderSocialView(container, amigos, callbacks) {
         
         <div class="bg-light border-bottom border-top py-2 px-3 d-flex align-items-center justify-content-center position-relative shadow-sm social-mis-amigos-bar">
             <span class="fw-bold text-dark social-mis-amigos-text">Mis Amigos</span>
-            <button class="btn btn-link text-dark p-0 position-absolute end-0 me-3" id="btn-mailbox" aria-label="Buzón de solicitudes">
+            <button class="btn btn-link text-dark p-0 position-absolute end-0 me-3 position-relative btn-open-mailbox" id="btn-mailbox" aria-label="Buzón de solicitudes">
                 <span class="material-icons social-mailbox-icon">markunread_mailbox</span>
+                <span class="notification-dot ${solicitudes && solicitudes.length > 0 ? 'active' : ''}"></span>
             </button>
         </div>
 
@@ -39,6 +40,25 @@ export function renderSocialView(container, amigos, callbacks) {
             </div>
         </div>
         ${renderNavbar()}
+
+        <!-- Modal Buzón de Solicitudes -->
+        <div class="modal fade" id="mailboxModal" tabindex="-1" aria-labelledby="mailboxModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
+                <div class="modal-content border-0">
+                    <div class="modal-header border-0 bg-white align-items-center px-4 py-3 border-bottom shadow-sm">
+                        <button type="button" class="btn btn-link text-dark text-decoration-none p-0 d-flex align-items-center" data-bs-dismiss="modal">
+                            <span class="material-icons me-2 fw-bold">arrow_back</span>
+                            <span class="fw-bold fs-5 text-dark">Buzón</span>
+                        </button>
+                    </div>
+                    <div class="modal-body bg-white p-0">
+                        <div id="mailbox-solicitudes-container" class="d-flex flex-column">
+                            <!-- Solicitudes se insertan aquí -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Modal Añadir nuevo Amigo -->
         <div class="modal fade" id="addFriendModal" tabindex="-1" aria-labelledby="addFriendModalLabel" aria-hidden="true">
@@ -112,6 +132,51 @@ export function renderSocialView(container, amigos, callbacks) {
     // Renderizado inicial
     renderLista(amigos, false);
 
+    const mailboxContainer = container.querySelector('#mailbox-solicitudes-container');
+    const notificationDot = container.querySelector('.notification-dot');
+    
+    const renderSolicitudes = (lista) => {
+        if (!lista || lista.length === 0) {
+            mailboxContainer.innerHTML = `
+                <div class="text-center mt-5 px-3">
+                    <span class="material-icons text-muted mb-3" style="font-size: 48px;">mark_email_read</span>
+                    <h5 class="fw-bold text-dark mb-2">Bandeja vacía</h5>
+                    <p class="text-muted small">No tienes solicitudes de amistad pendientes. ¡Busca nuevos amigos para escalar!</p>
+                </div>
+            `;
+            if (notificationDot) notificationDot.classList.remove('active');
+            return;
+        }
+
+        if (notificationDot) notificationDot.classList.add('active');
+        mailboxContainer.innerHTML = lista.map(sol => {
+            const r = sol.remitente;
+            const desc = r.descripcion || 'Sin descripción...';
+            // Backend migth return `idSolicitud` or just `id` depending on how it's mapped in the usecase
+            const sId = sol.idSolicitud || sol.id;
+            return `
+            <div class="solicitud-card" data-id="${sId}">
+                <div class="solicitud-user-info">
+                    <img src="${r.fotoSrc}" alt="Foto de ${r.apodo}" class="solicitud-avatar" />
+                    <div class="solicitud-details">
+                        <span class="solicitud-apodo font-monospace">${r.apodo}</span>
+                        <span class="solicitud-desc font-monospace">${desc}</span>
+                    </div>
+                </div>
+                <div class="solicitud-actions">
+                    <button class="btn-solicitud-action btn-accept" aria-label="Aceptar">
+                        <span class="material-icons">check</span>
+                    </button>
+                    <button class="btn-solicitud-action btn-reject" aria-label="Rechazar">
+                        <span class="material-icons">close</span>
+                    </button>
+                </div>
+            </div>
+            `;
+        }).join('');
+    };
+    renderSolicitudes(solicitudes);
+
     // Evento de búsqueda
     let searchTimeout;
     searchInput.addEventListener('input', (e) => {
@@ -126,9 +191,9 @@ export function renderSocialView(container, amigos, callbacks) {
         }, 300); // Pequeño debounce
     });
 
-    // Configuración del modal para evitar que se quede bloqueada la pantalla en móviles al pulsar 'atrás'
-    const modalEl = container.querySelector('#addFriendModal');
-    if (modalEl) {
+    // Configuración de los modales para evitar que se quede bloqueada la pantalla en móviles al pulsar 'atrás'
+    const modals = container.querySelectorAll('.modal');
+    modals.forEach(modalEl => {
         const cleanupBootstrapModalArtifacts = () => {
             const backdrops = document.querySelectorAll('.modal-backdrop');
             backdrops.forEach((backdrop) => backdrop.remove());
@@ -175,7 +240,7 @@ export function renderSocialView(container, amigos, callbacks) {
             teardownController = new AbortController();
             
             // Truco del historial para capturar el botón atrás del móvil
-            history.pushState({ modal: 'addFriendModal' }, '', location.href);
+            history.pushState({ modal: modalEl.id }, '', location.href);
 
             window.addEventListener('popstate', handlePopState, { signal: teardownController.signal });
             window.addEventListener('hashchange', forceCloseAndCleanup, { signal: teardownController.signal });
@@ -183,7 +248,7 @@ export function renderSocialView(container, amigos, callbacks) {
         });
 
         modalEl.addEventListener('hide.bs.modal', () => {
-            if (history.state && history.state.modal === 'addFriendModal') {
+            if (history.state && history.state.modal === modalEl.id) {
                 history.back(); // Eliminar el estado del modal si se cierra por la UI
             }
         });
@@ -195,7 +260,7 @@ export function renderSocialView(container, amigos, callbacks) {
                 teardownController = null;
             }
         });
-    }
+    });
 
     // Delegación de eventos global de la vista
     if (container._socialClickHandler) {
@@ -203,8 +268,20 @@ export function renderSocialView(container, amigos, callbacks) {
     }
 
     container._socialClickHandler = async (e) => {
+        // Botón Buzón
+        if (e.target.closest('.btn-open-mailbox')) {
+            const mailboxModalEl = container.querySelector('#mailboxModal');
+            if (mailboxModalEl) {
+                let modal = window.bootstrap.Modal.getInstance(mailboxModalEl);
+                if (!modal) modal = new window.bootstrap.Modal(mailboxModalEl);
+                modal.show();
+            }
+            return;
+        }
+
         // Botón Añadir Amigo
         if (e.target.closest('.btn-open-add-friend-modal')) {
+            const modalEl = container.querySelector('#addFriendModal');
             if (modalEl) {
                 // Limpiar busquedas previas
                 const input = modalEl.querySelector('#modal-search-new-friends');
@@ -218,12 +295,13 @@ export function renderSocialView(container, amigos, callbacks) {
                 }
                 modal.show();
             }
+            return;
         }
 
         // Botón Enviar Solicitud
-        const btn = e.target.closest('.btn-send-friend-request');
-        if (btn) {
-            const apodo = btn.getAttribute('data-apodo');
+        const btnSend = e.target.closest('.btn-send-friend-request');
+        if (btnSend) {
+            const apodo = btnSend.getAttribute('data-apodo');
             const confirmado = await showConfirmModal({
                 title: 'Añadir Amigo',
                 message: `¿Deseas enviar una solicitud de amistad a <strong>${apodo}</strong>?`,
@@ -234,14 +312,82 @@ export function renderSocialView(container, amigos, callbacks) {
             if (confirmado) {
                 try {
                     await callbacks.onSendFriendRequest(apodo);
-                    btn.disabled = true;
-                    btn.innerHTML = '<span class="material-icons">check</span>';
-                    btn.style.backgroundColor = '#198754'; // Success green
-                    btn.style.borderColor = '#198754';
+                    btnSend.disabled = true;
+                    btnSend.innerHTML = '<span class="material-icons">check</span>';
+                    btnSend.style.backgroundColor = '#198754'; // Success green
+                    btnSend.style.borderColor = '#198754';
                 } catch (err) {
                     showToast('Error al enviar la solicitud: ' + err.message, { variant: 'danger' });
                 }
             }
+            return;
+        }
+
+        // Acciones del Buzón (Aceptar / Rechazar)
+        const btnAccept = e.target.closest('.btn-accept');
+        const btnReject = e.target.closest('.btn-reject');
+        
+        if (btnAccept || btnReject) {
+            const isAccept = !!btnAccept;
+            const btn = isAccept ? btnAccept : btnReject;
+            const card = btn.closest('.solicitud-card');
+            const idSolicitud = card.getAttribute('data-id');
+            const apodo = card.querySelector('.solicitud-apodo').textContent;
+
+            const actionText = isAccept ? 'aceptar' : 'rechazar';
+            const actionConfirmText = isAccept ? 'Aceptar solicitud' : 'Rechazar solicitud';
+            const actionConfirmClass = isAccept ? 'btn-success' : 'btn-danger';
+
+            const confirmado = await showConfirmModal({
+                title: 'Solicitud de Amistad',
+                message: `¿Seguro que deseas ${actionText} la solicitud de <strong>${apodo}</strong>?`,
+                confirmText: actionConfirmText,
+                confirmClass: actionConfirmClass
+            });
+
+            if (confirmado) {
+                try {
+                    btn.disabled = true;
+                    const otherBtn = card.querySelector(isAccept ? '.btn-reject' : '.btn-accept');
+                    if (otherBtn) otherBtn.disabled = true;
+
+                    if (isAccept) {
+                        await callbacks.onAcceptRequest(idSolicitud);
+                        btn.classList.add('state-accepted');
+                        btn.innerHTML = '<span class="material-icons fw-bold">check</span>';
+                        if (otherBtn) otherBtn.style.display = 'none';
+                        showToast(`Has aceptado la solicitud de ${apodo}`, { variant: 'success' });
+                        
+                        // Recargar la lista de amigos principal
+                        const nuevosAmigos = await callbacks.onRefreshFriends();
+                        renderLista(nuevosAmigos, false);
+                    } else {
+                        await callbacks.onRejectRequest(idSolicitud);
+                        btn.classList.add('state-rejected');
+                        btn.innerHTML = '<span class="material-icons fw-bold">close</span>';
+                        if (otherBtn) otherBtn.style.display = 'none';
+                        showToast(`Has rechazado la solicitud de ${apodo}`, { variant: 'danger' });
+                    }
+
+                    // Quitar la solicitud de la lista en memoria local
+                    const index = solicitudes.findIndex(s => (s.idSolicitud || s.id) == idSolicitud);
+                    if (index !== -1) {
+                        solicitudes.splice(index, 1);
+                    }
+
+                    // Esperar un poco para que el usuario vea el cambio de estado antes de que desaparezca (opcional)
+                    setTimeout(() => {
+                        renderSolicitudes(solicitudes);
+                    }, 1500);
+
+                } catch (err) {
+                    showToast(`Error al ${actionText} solicitud: ` + err.message, { variant: 'danger' });
+                    btn.disabled = false;
+                    const otherBtn = card.querySelector(isAccept ? '.btn-reject' : '.btn-accept');
+                    if (otherBtn) otherBtn.disabled = false;
+                }
+            }
+            return;
         }
     };
 
