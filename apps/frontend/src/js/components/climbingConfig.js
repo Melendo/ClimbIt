@@ -118,6 +118,51 @@ export function resolveColorScaleRgb(colorName, colorScaleMap = {}, fallbackColo
   return normalizeColorToRgb(scaleColor) || fallbackColor;
 }
 
+export function normalizeTipo(tipo) {
+  const normalized = String(tipo || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+
+  if (normalized === 'bloque' || normalized === 'boulder') return 'boulder';
+  if (normalized === 'via') return 'via';
+  return normalized;
+}
+
+/**
+ * Resuelve los metadatos de dificultad coloreada para una ruta
+ * @param {Object} ruta - La ruta
+ * @param {Object} escalas - Las escalas de dificultad cargadas del rocódromo
+ * @param {Object} colorScaleMap - Mapa de colores
+ * @returns {Object} Objeto con difficultyIsColor y difficultyColorRgb
+ */
+export function resolveDifficultyColorMetadata(ruta, escalas, colorScaleMap = {}) {
+  if (!ruta || !escalas) {
+    return {
+      difficultyIsColor: false,
+      difficultyColorRgb: resolveColorScaleRgb(ruta?.dificultad, colorScaleMap),
+    };
+  }
+
+  const tipoRuta = normalizeTipo(ruta?.tipo);
+  const escalaByTipo = tipoRuta === 'boulder' 
+    ? escalas?.escalaDificultadBloque 
+    : tipoRuta === 'via' 
+    ? escalas?.escalaDificultadVia 
+    : null;
+
+  const difficultyIsColor = Boolean(escalaByTipo?.isColor);
+  const difficultyColorRgb = difficultyIsColor 
+    ? resolveColorScaleRgb(ruta?.dificultad, colorScaleMap)
+    : resolveColorScaleRgb(ruta?.dificultad, colorScaleMap);
+
+  return {
+    difficultyIsColor,
+    difficultyColorRgb,
+  };
+}
+
 export async function loadColorScaleMap() {
   return { ...DEFAULT_COLOR_SCALE_MAP };
 }

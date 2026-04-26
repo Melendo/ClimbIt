@@ -4,7 +4,7 @@ import {
   setupRutaRatingSection,
 } from '../../components/rutaRating.js';
 import { escapeHtml } from '../../components/formHelpers.js';
-import { renderPresaColorIcon } from '../../components/rutaCardIndicators.js';
+import { renderPresaColorIcon, renderMedallaColorIcon } from '../../components/rutaCardIndicators.js';
 import { renderRutaImageModal, setupRutaImageModal } from '../../components/rutaImageModal.js';
 
 function toDateInputValue(value) {
@@ -403,7 +403,16 @@ export function renderInfoRuta(container, ruta, callbacks) {
     
     <!-- Info sobre la imagen -->
     <div class="position-absolute bottom-0 start-0 end-0 p-4 text-white">
-      ${hasDificultad ? `<span class="badge mb-2" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); font-size: 0.9rem; padding: 6px 12px;">${dificultad}</span>` : ''}
+      ${hasDificultad && ruta?.difficultyIsColor ? `
+        <div class="mb-2">
+          ${renderMedallaColorIcon({
+            color: ruta.difficultyColorRgb || 'rgb(158, 158, 158)',
+            size: 40,
+            title: `Dificultad: ${dificultad}`,
+            ariaLabel: `Dificultad ${dificultad}`,
+          })}
+        </div>
+      ` : hasDificultad ? `<span class="badge mb-2" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); font-size: 0.9rem; padding: 6px 12px;">${dificultad}</span>` : ''}
       <h1 class="fs-4 fw-semibold mb-0">${rutaNombreSafe}</h1>
     </div>
   </div>
@@ -464,7 +473,16 @@ export function renderInfoRuta(container, ruta, callbacks) {
         <div class="col-6">
           <div class="small text-muted text-uppercase">Dificultad</div>
           <div class="mt-1">
-            <span class="badge bg-primary shadow-sm border border-light">${escapeHtml(dificultadLabel)}</span>
+            ${hasDificultad ? (ruta?.difficultyIsColor ? `
+              <div style="display: inline-flex; align-items: center;">
+                ${renderMedallaColorIcon({
+                  color: ruta.difficultyColorRgb || 'rgb(158, 158, 158)',
+                  size: 32,
+                  title: `Dificultad: ${dificultadLabel}`,
+                  ariaLabel: `Dificultad ${dificultadLabel}`,
+                })}
+              </div>
+            ` : `<span class="badge bg-primary shadow-sm border border-light">${escapeHtml(dificultadLabel)}</span>`) : '<span class="text-muted">Sin dificultad</span>'}
           </div>
         </div>
         <div class="col-6">
