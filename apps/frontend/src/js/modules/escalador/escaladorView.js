@@ -84,9 +84,9 @@ export function renderPerfil(container, escalador, callbacks) {
               </a>
             </li>
             <li>
-              <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-menu-placeholder="cambiar-contrasena">
-                <span class="material-icons" style="font-size: 18px;">lock</span>
-                <span>Cambiar contraseña</span>
+              <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-menu-placeholder="tutorial" id="header-tutorial-btn">
+                <span class="material-icons" style="font-size: 18px;">school</span>
+                <span>Tutorial</span>
               </a>
             </li>
             <li><hr class="dropdown-divider"></li>
@@ -149,6 +149,14 @@ export function renderPerfil(container, escalador, callbacks) {
       e.preventDefault();
     });
   });
+
+  const headerTutorialBtn = container.querySelector('#header-tutorial-btn');
+  if (headerTutorialBtn && typeof callbacks.onOpenTutorial === 'function') {
+    headerTutorialBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      callbacks.onOpenTutorial();
+    });
+  }
 
   const headerLogoutBtn = container.querySelector('#header-logout-btn');
   headerLogoutBtn.addEventListener('click', async (e) => {

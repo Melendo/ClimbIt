@@ -1,5 +1,5 @@
 import { renderMapaZona, renderCrearZona } from './zonaView.js';
-import { ESTADOS_CONFIG, loadColorScaleMap, resolveColorScaleRgb } from '../../components/climbingConfig.js';
+import { ESTADOS_CONFIG, loadColorScaleMap, resolveColorScaleRgb, normalizeTipo, resolveDifficultyColorMetadata } from '../../components/climbingConfig.js';
 import { createSvgPanzoomMap } from '../../components/svgPanzoomMap.js';
 import { fetchClient, canManageRocodromo, fetchImageObjectUrl, fetchSvgText } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
@@ -30,18 +30,6 @@ function buildDificultadOptions(escala) {
             label: dificultad,
         };
     });
-}
-
-function normalizeTipo(tipo) {
-    const normalized = String(tipo || '')
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .trim()
-        .toLowerCase();
-
-    if (normalized === 'bloque' || normalized === 'boulder') return 'boulder';
-    if (normalized === 'via') return 'via';
-    return normalized;
 }
 
 function buildZonaFiltersStorageKey(idRocodromo) {
@@ -219,11 +207,12 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
             boulder: [],
             via: [],
         };
+        let escalas = null;
         const filtrosActivos = loadZonaFilters(idRocodromo);
 
         try {
             const escalasRes = await fetchClient(`/rocodromos/${idRocodromo}/escalasDificultad`);
-            const escalas = await escalasRes.json();
+            escalas = await escalasRes.json();
 
             dificultadOptionsByTipo = {
                 boulder: buildDificultadOptions(escalas?.escalaDificultadBloque),
@@ -247,7 +236,7 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
             if (!idZona) return [];
 
             if (!rutasCache.has(idZona)) {
-                const rutas = await cargarRutasZona(idZona, colorScaleMap);
+                const rutas = await cargarRutasZona(idZona, colorScaleMap, escalas);
                 rutasCache.set(idZona, rutas);
             }
 
@@ -356,19 +345,26 @@ export async function mapaZonaCmd(container, idRocodromo, initialZonaId = null) 
 /**
 * Función auxiliar para obtener las rutas de una zona
 * @param {number} idZona ID de la zona
+* @param {Object} colorScaleMap Mapa de colores de dificultad
+* @param {Object} escalas Escalas de dificultad cargadas del rocódromo
 * @returns {Promise<Array>} Lista de rutas
 */
-async function cargarRutasZona(idZona, colorScaleMap = {}) {
+async function cargarRutasZona(idZona, colorScaleMap = {}, escalas = null) {
     try {
         const rutasRes = await fetchClient(`/zonas/pistas/${idZona}`);
         const rutas = await rutasRes.json();
         
-        return rutas.map((ruta) => ({
-            ...ruta,
-            statusConfig: ESTADOS_CONFIG[ruta.estado] || ESTADOS_CONFIG.nada,
-            colorPresasRgb: resolveRutaColorPresasRgb(ruta, colorScaleMap),
-            imagenSrc: RUTA_IMAGE_PLACEHOLDER,
-        }));
+        return rutas.map((ruta) => {
+            const difficultyMetadata = resolveDifficultyColorMetadata(ruta, escalas, colorScaleMap);
+            return {
+                ...ruta,
+                statusConfig: ESTADOS_CONFIG[ruta.estado] || ESTADOS_CONFIG.nada,
+                colorPresasRgb: resolveRutaColorPresasRgb(ruta, colorScaleMap),
+                difficultyIsColor: difficultyMetadata.difficultyIsColor,
+                difficultyColorRgb: difficultyMetadata.difficultyColorRgb,
+                imagenSrc: RUTA_IMAGE_PLACEHOLDER,
+            };
+        });
     } catch (err) {
         console.error(`Error al cargar rutas de la zona ${idZona}:`, err);
         return [];

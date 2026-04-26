@@ -31,13 +31,19 @@ export function createSvgPanzoomMap(options) {
         detailZoomThreshold = DEFAULT_DETAIL_ZOOM_THRESHOLD,
         allowMarkerPointSelection = false,
         enablePointSelection = false,
-        getMarkerData = (item) => ({
-            x: toNumberOrNull(item?.posX),
-            y: toNumberOrNull(item?.posY),
-            color: item?.statusConfig?.color || '#6b7280',
-            holdColor: item?.colorPresasRgb || null,
-            payload: item,
-        }),
+        getMarkerData = (item) => {
+            // Detectar si es Flash: usar verde en lugar del amarillo
+            const isFlash = item?.statusConfig?.icon === 'bolt';
+            const displayColor = isFlash ? '#16a34a' : (item?.statusConfig?.color || '#6b7280');
+            return {
+                x: toNumberOrNull(item?.posX),
+                y: toNumberOrNull(item?.posY),
+                color: displayColor,
+                holdColor: item?.colorPresasRgb || null,
+                stateIcon: isFlash ? 'bolt' : null,
+                payload: item,
+            };
+        },
         onMarkerClick = null,
         onMapPointSelect = null,
     } = options || {};
@@ -275,6 +281,19 @@ export function createSvgPanzoomMap(options) {
                 markerCircle.setAttribute('class', 'ruta-dot');
                 markerCircle.setAttribute('fill', marker.color || '#6b7280');
 
+                let detailedFlashBolt = null;
+                if (marker.stateIcon === 'bolt') {
+                    detailedFlashBolt = document.createElementNS(SVG_NS, 'polygon');
+                    detailedFlashBolt.setAttribute('class', 'flash-bolt-icon');
+                    // Solo se muestra en modo detallado: se dibuja en la capa detailed.
+                    detailedFlashBolt.setAttribute('points', '-3,-14 5,-14 1,-2 10,-2 -5,15 -1,3 -10,3');
+                    detailedFlashBolt.setAttribute('fill', '#faca2a');
+                    detailedFlashBolt.setAttribute('stroke', '#333333');
+                    detailedFlashBolt.setAttribute('stroke-width', '1.2');
+                    detailedFlashBolt.setAttribute('stroke-linejoin', 'round');
+                    detailedFlashBolt.setAttribute('pointer-events', 'none');
+                }
+
                 let startX = 0;
                 let startY = 0;
                 let lastMarkerActivationAt = 0;
@@ -331,9 +350,13 @@ export function createSvgPanzoomMap(options) {
                 });
 
                 markerSimpleContent.appendChild(simpleColorCircle);
+
                 markerSimpleVisual.appendChild(markerSimpleContent);
 
                 markerVisualContent.appendChild(markerCircle);
+                if (detailedFlashBolt) {
+                    markerVisualContent.appendChild(detailedFlashBolt);
+                }
                 markerVisual.appendChild(markerVisualContent);
 
                 markerGroup.appendChild(markerVisual);

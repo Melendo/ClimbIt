@@ -9,6 +9,7 @@ import {
     getEstadoConfig,
     normalizeColorName,
     resolveColorScaleRgb,
+    resolveDifficultyColorMetadata,
 } from '../../components/climbingConfig.js';
 import { showConfirmModal } from '../../components/modal.js';
 import { fetchClient, canManageRocodromo, fetchImageObjectUrl, fetchSvgText, getTokenPayload } from '../../core/client.js';
@@ -757,6 +758,21 @@ export async function infoRutaCmd(container, id) {
         ruta.canRateRating = canRateRutaByEstado(ruta.estado);
         ruta.ratingSummary = ratingSummary;
         ruta.colorPresasRgb = resolveColorScaleRgb(ruta?.colorPresas, colorScaleMap);
+
+        // Cargar escalas del rocódromo para metadatos de dificultad coloreada
+        let escalas = null;
+        if (zonaContext?.idRocodromo) {
+            try {
+                const escalasRes = await fetchClient(`/rocodromos/${zonaContext.idRocodromo}/escalasDificultad`);
+                escalas = await escalasRes.json();
+            } catch (err) {
+                console.warn('No se pudieron cargar las escalas de dificultad del rocódromo:', err.message);
+            }
+        }
+
+        const difficultyMetadata = resolveDifficultyColorMetadata(ruta, escalas, colorScaleMap);
+        ruta.difficultyIsColor = difficultyMetadata.difficultyIsColor;
+        ruta.difficultyColorRgb = difficultyMetadata.difficultyColorRgb;
 
         if (ruta?.imagenUrl) {
             try {

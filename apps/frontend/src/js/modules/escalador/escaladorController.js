@@ -253,6 +253,9 @@ async function renderPerfilConDatos(container, renderFn) {
                 removeToken();
                 window.location.hash = '#home';
             },
+            onOpenTutorial: () => {
+                showToast('Tutorial disponible proximamente.');
+            },
             onUpdateDescripcion: async (descripcion) => {
                 try {
                     const response = await fetchClient('/escaladores/actualizarDescripcion', {
