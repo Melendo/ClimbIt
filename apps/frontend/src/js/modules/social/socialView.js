@@ -41,13 +41,13 @@ export function renderSocialView(container, amigos, callbacks) {
         ${renderNavbar()}
 
         <!-- Modal Añadir nuevo Amigo -->
-        <div class="modal fade modal-fullscreen-sm-down" id="addFriendModal" tabindex="-1" aria-labelledby="addFriendModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal fade" id="addFriendModal" tabindex="-1" aria-labelledby="addFriendModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
                 <div class="modal-content border-0">
                     <div class="modal-header border-0 bg-white align-items-center px-4 py-3">
                         <button type="button" class="btn btn-link text-dark text-decoration-none p-0 d-flex align-items-center" data-bs-dismiss="modal">
                             <span class="material-icons me-2 fw-bold">arrow_back</span>
-                            <span class="fw-bold fs-5 text-dark font-monospace">Añadir nuevo Amigo</span>
+                            <span class="fw-bold fs-5 text-dark">Añadir nuevo Amigo</span>
                         </button>
                     </div>
                     <div class="modal-body bg-white p-3">
@@ -80,7 +80,7 @@ export function renderSocialView(container, amigos, callbacks) {
                     <div class="text-center mt-4 px-2">
                         <h5 class="fst-italic mb-3">Aún no tienes ningún amigo</h5>
                         <p class="fst-italic mb-4">Envialé una solicitud a esa<br>persona especial del rocódromo</p>
-                        <button class="btn text-white fw-bold d-inline-flex align-items-center gap-1 px-4 py-2 btn-open-add-friend-modal" style="border-radius: 8px; background-color: #e57c2a; border-color: #e57c2a;">
+                        <button class="btn text-white fw-bold d-inline-flex align-items-center gap-1 px-4 py-2 social-add-friend-btn btn-open-add-friend-modal">
                             <span class="material-icons">person_add</span> Añadir Amigo
                         </button>
                     </div>
@@ -126,10 +126,85 @@ export function renderSocialView(container, amigos, callbacks) {
         }, 300); // Pequeño debounce
     });
 
-    // Delegación de eventos para abrir el modal
-    container.addEventListener('click', (e) => {
+    // Configuración del modal para evitar que se quede bloqueada la pantalla en móviles al pulsar 'atrás'
+    const modalEl = container.querySelector('#addFriendModal');
+    if (modalEl) {
+        const cleanupBootstrapModalArtifacts = () => {
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach((backdrop) => backdrop.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('padding-right');
+            document.body.style.removeProperty('overflow');
+        };
+
+        let teardownController = null;
+
+        const forceCloseAndCleanup = () => {
+            if (!modalEl.isConnected || !modalEl.classList.contains('show')) {
+                cleanupBootstrapModalArtifacts();
+                if (teardownController) {
+                    teardownController.abort();
+                    teardownController = null;
+                }
+                return;
+            }
+            const modalInstance = window.bootstrap?.Modal?.getInstance(modalEl);
+            if (modalInstance) {
+                modalInstance.hide();
+            } else {
+                modalEl.classList.remove('show');
+                modalEl.style.display = 'none';
+                modalEl.setAttribute('aria-hidden', 'true');
+            }
+            cleanupBootstrapModalArtifacts();
+            if (teardownController) {
+                teardownController.abort();
+                teardownController = null;
+            }
+        };
+
+        const handlePopState = () => {
+            if (modalEl.classList.contains('show')) {
+                const modalInstance = window.bootstrap?.Modal?.getInstance(modalEl);
+                if (modalInstance) modalInstance.hide();
+            }
+        };
+
+        modalEl.addEventListener('show.bs.modal', () => {
+            if (teardownController) teardownController.abort();
+            teardownController = new AbortController();
+            
+            // Truco del historial para capturar el botón atrás del móvil
+            history.pushState({ modal: 'addFriendModal' }, '', location.href);
+
+            window.addEventListener('popstate', handlePopState, { signal: teardownController.signal });
+            window.addEventListener('hashchange', forceCloseAndCleanup, { signal: teardownController.signal });
+            window.addEventListener('pagehide', forceCloseAndCleanup, { signal: teardownController.signal });
+        });
+
+        modalEl.addEventListener('hide.bs.modal', () => {
+            if (history.state && history.state.modal === 'addFriendModal') {
+                history.back(); // Eliminar el estado del modal si se cierra por la UI
+            }
+        });
+
+        modalEl.addEventListener('hidden.bs.modal', () => {
+            cleanupBootstrapModalArtifacts();
+            if (teardownController) {
+                teardownController.abort();
+                teardownController = null;
+            }
+        });
+    }
+
+    // Delegación de eventos global de la vista
+    if (container._socialClickHandler) {
+        container.removeEventListener('click', container._socialClickHandler);
+    }
+
+    container._socialClickHandler = async (e) => {
+        // Botón Añadir Amigo
         if (e.target.closest('.btn-open-add-friend-modal')) {
-            const modalEl = document.getElementById('addFriendModal');
             if (modalEl) {
                 // Limpiar busquedas previas
                 const input = modalEl.querySelector('#modal-search-new-friends');
@@ -137,11 +212,40 @@ export function renderSocialView(container, amigos, callbacks) {
                 const results = modalEl.querySelector('#new-friends-results');
                 if (results) results.innerHTML = '';
 
-                const modal = new window.bootstrap.Modal(modalEl);
+                let modal = window.bootstrap.Modal.getInstance(modalEl);
+                if (!modal) {
+                    modal = new window.bootstrap.Modal(modalEl);
+                }
                 modal.show();
             }
         }
-    });
+
+        // Botón Enviar Solicitud
+        const btn = e.target.closest('.btn-send-friend-request');
+        if (btn) {
+            const apodo = btn.getAttribute('data-apodo');
+            const confirmado = await showConfirmModal({
+                title: 'Añadir Amigo',
+                message: `¿Deseas enviar una solicitud de amistad a <strong>${apodo}</strong>?`,
+                confirmText: 'Enviar solicitud',
+                confirmClass: 'btn-primary'
+            });
+
+            if (confirmado) {
+                try {
+                    await callbacks.onSendFriendRequest(apodo);
+                    btn.disabled = true;
+                    btn.innerHTML = '<span class="material-icons">check</span>';
+                    btn.style.backgroundColor = '#198754'; // Success green
+                    btn.style.borderColor = '#198754';
+                } catch (err) {
+                    showToast('Error al enviar la solicitud: ' + err.message, { variant: 'danger' });
+                }
+            }
+        }
+    };
+
+    container.addEventListener('click', container._socialClickHandler);
 
     // Lógica del modal de nuevos amigos
     const modalSearchInput = container.querySelector('#modal-search-new-friends');
@@ -161,11 +265,11 @@ export function renderSocialView(container, amigos, callbacks) {
             const descripcion = usuario.descripcion || 'Sin descripción...';
             const isAmigo = amigos.some(a => a.apodo === usuario.apodo);
             const btnHTML = isAmigo 
-                ? `<button class="btn ms-2 d-flex align-items-center justify-content-center flex-shrink-0 text-white" disabled style="width: 40px; height: 40px; padding: 0; background-color: #198754; border-color: #198754;">
-                        <span class="material-icons">check</span>
+                ? `<button class="btn ms-2 d-flex align-items-center justify-content-center flex-shrink-0 text-white" disabled style="width: 28px; height: 28px; padding: 0; background-color: #198754; border-color: #198754; border-radius: 4px;">
+                        <span class="material-icons" style="font-size: 20px;">check</span>
                    </button>`
-                : `<button class="btn social-add-friend-btn ms-2 d-flex align-items-center justify-content-center flex-shrink-0 text-white btn-send-friend-request" data-apodo="${usuario.apodo}" style="width: 40px; height: 40px; padding: 0;">
-                        <span class="material-icons">person_add</span>
+                : `<button class="btn social-add-friend-btn ms-2 d-flex align-items-center justify-content-center flex-shrink-0 text-white btn-send-friend-request" data-apodo="${usuario.apodo}" style="width: 28px; height: 28px; padding: 0; border-radius: 4px;">
+                        <span class="material-icons" style="font-size: 20px;">person_add</span>
                    </button>`;
 
             return `
@@ -173,7 +277,7 @@ export function renderSocialView(container, amigos, callbacks) {
                 <div class="card-body d-flex align-items-center p-2">
                     <img src="${usuario.fotoSrc}" alt="Foto de ${usuario.apodo}" class="rounded-circle ms-1 me-3 social-amigo-foto" />
                     <div class="flex-grow-1 overflow-hidden pe-2">
-                        <p class="mb-1 py-1 fs-5 fw-bold text-dark social-amigo-text text-truncate font-monospace">${usuario.apodo}</p>
+                        <p class="mb-1 py-1 fs-6 fw-bold text-dark social-amigo-text text-truncate font-monospace">${usuario.apodo}</p>
                         <p class="text-muted small mb-0 social-amigo-desc font-monospace">${descripcion}</p>
                     </div>
                     ${btnHTML}
@@ -199,30 +303,4 @@ export function renderSocialView(container, amigos, callbacks) {
             }, 300);
         });
     }
-
-    // Delegación de evento para enviar solicitud
-    container.addEventListener('click', async (e) => {
-        const btn = e.target.closest('.btn-send-friend-request');
-        if (btn) {
-            const apodo = btn.getAttribute('data-apodo');
-            const confirmado = await showConfirmModal({
-                title: 'Añadir Amigo',
-                message: `¿Deseas enviar una solicitud de amistad a <strong>${apodo}</strong>?`,
-                confirmText: 'Enviar solicitud',
-                confirmClass: 'btn-primary'
-            });
-
-            if (confirmado) {
-                try {
-                    await callbacks.onSendFriendRequest(apodo);
-                    btn.disabled = true;
-                    btn.innerHTML = '<span class="material-icons">check</span>';
-                    btn.style.backgroundColor = '#198754'; // Success green
-                    btn.style.borderColor = '#198754';
-                } catch (err) {
-                    showToast('Error al enviar la solicitud: ' + err.message, { variant: 'danger' });
-                }
-            }
-        }
-    });
 }
