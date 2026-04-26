@@ -30,9 +30,9 @@ export const ESTADOS_CONFIG = Object.freeze({
     aliases: ['completado'],
   },
   proyecto: {
-    icon: 'sync',
-    color: '#2563eb',
-    bg: '#dbeafe',
+    icon: 'gps_fixed',
+    color: '#a855f7',
+    bg: '#f3e8ff',
     texto: 'En proyecto',
     backend: 'Proyecto',
     aliases: ['proyecto', 'en-progreso'],
