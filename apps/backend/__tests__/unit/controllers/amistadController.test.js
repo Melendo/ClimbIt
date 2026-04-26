@@ -120,4 +120,19 @@ describe('Unit: AmistadController', () => {
 
     expect(next).toHaveBeenCalledWith(expectedError);
   });
+
+  it('listarSolicitudesPendientes responde 200 con la lista', async () => {
+    const useCases = {
+      listarSolicitudesPendientes: { execute: jest.fn().mockResolvedValue([{ id: 1, remitente: { apodo: 'ana' } }]) },
+    };
+    const controller = new AmistadController(useCases);
+    const req = { user: { apodo: 'ivan' } };
+    const res = createResMock();
+
+    await controller.listarSolicitudesPendientes(req, res, () => {});
+
+    expect(useCases.listarSolicitudesPendientes.execute).toHaveBeenCalledWith({ apodoEscalador: 'ivan' });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.body).toEqual([{ id: 1, remitente: { apodo: 'ana' } }]);
+  });
 });

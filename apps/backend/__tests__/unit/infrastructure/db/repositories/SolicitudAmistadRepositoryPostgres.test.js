@@ -12,6 +12,7 @@ describe('SolicitudAmistadRepositoryPostgres', () => {
       findOne: jest.fn(),
       findByPk: jest.fn(),
       destroy: jest.fn(),
+      findAll: jest.fn(),
     };
 
     repository = new SolicitudAmistadRepositoryPostgres(mockSolicitudModel);
@@ -103,5 +104,32 @@ describe('SolicitudAmistadRepositoryPostgres', () => {
       expect.objectContaining({ transaction: null })
     );
     expect(count).toBe(2);
+  });
+
+  it('obtenerPendientesPorDestinatario retorna array de dominio con datos de remitente', async () => {
+    const mockDbData = [
+      {
+        id: 10,
+        idRemitente: 2,
+        idDestinatario: 5,
+        estado: 'pendiente',
+        createdAt: new Date('2026-04-25T00:00:00.000Z'),
+        remitente: { id: 2, apodo: 'juan', descripcion: 'test', idFotoPerfil: null }
+      }
+    ];
+    mockSolicitudModel.findAll.mockResolvedValue(mockDbData);
+
+    const result = await repository.obtenerPendientesPorDestinatario(5);
+
+    expect(mockSolicitudModel.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { idDestinatario: 5, estado: 'pendiente' },
+        include: expect.any(Array)
+      })
+    );
+    expect(result).toHaveLength(1);
+    expect(result[0]).toBeInstanceOf(SolicitudAmistad);
+    expect(result[0].id).toBe(10);
+    expect(result[0].remitente).toEqual({ id: 2, apodo: 'juan', descripcion: 'test', idFotoPerfil: null });
   });
 });

@@ -183,6 +183,38 @@ describe('E2E: Amistades', () => {
     });
   });
 
+  describe('GET /amistades/solicitudes-pendientes', () => {
+    it('debería listar las solicitudes pendientes para el usuario autenticado', async () => {
+      // Limpiamos solicitudes previas para evitar error de constraint único
+      await db.SolicitudAmistad.destroy({
+        where: {
+          idRemitente: escaladorTercero.id,
+          idDestinatario: escaladorOrigen.id
+        }
+      });
+
+      // Creamos una solicitud pendiente para que haya resultados
+      const nuevaSolicitud = await db.SolicitudAmistad.create({
+        idRemitente: escaladorTercero.id,
+        idDestinatario: escaladorOrigen.id,
+        estado: 'pendiente',
+      });
+
+      const response = await request(app)
+        .get('/amistades/solicitudes-pendientes')
+        .set('Authorization', `Bearer ${tokenOrigen}`)
+        .expect(200);
+
+      expect(response.body).toBeInstanceOf(Array);
+      expect(response.body.length).toBeGreaterThanOrEqual(1);
+      
+      const solicitudDevuelta = response.body.find(s => s.idSolicitud === nuevaSolicitud.id);
+      expect(solicitudDevuelta).toBeDefined();
+      expect(solicitudDevuelta.idRemitente).toBe(escaladorTercero.id);
+      expect(solicitudDevuelta.apodo).toBe(escaladorTercero.apodo);
+    });
+  });
+
   describe('GET /amistades/perfil/:apodo', () => {
     it('debería permitir ver el perfil completo de un amigo', async () => {
       const response = await request(app)
