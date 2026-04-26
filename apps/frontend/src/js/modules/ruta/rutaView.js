@@ -152,7 +152,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
 
         <div id="form-alert" class="alert d-none" role="alert"></div>
   
-        <button type="submit" id="crear-ruta-submit" class="btn btn-primary w-100" ${contextError ? 'disabled' : ''}>${submitText}</button>
+        <button type="submit" id="crear-ruta-submit" class="btn btn-primary w-100" ${contextError ? 'disabled' : ''} data-submit-text="${submitText}">${submitText}</button>
       </form>
     </div>
   </div>`;
@@ -281,6 +281,22 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
   tipoBoulderInput.addEventListener('change', handleTipoChange);
   tipoViaInput.addEventListener('change', handleTipoChange);
   
+  const setSubmitLoading = () => {
+    const originalText = submitButton.dataset.submitText || submitButton.textContent.trim();
+    submitButton.dataset.submitText = originalText;
+    submitButton.disabled = true;
+    submitButton.innerHTML = `
+      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+      ${originalText}…
+    `;
+  };
+
+  const clearSubmitLoading = () => {
+    const originalText = submitButton.dataset.submitText || submitButton.textContent.trim();
+    submitButton.disabled = false;
+    submitButton.textContent = originalText;
+  };
+
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     
@@ -308,6 +324,8 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
       alertBox,
       submitButton,
       coordsBadge,
+      setSubmitLoading,
+      clearSubmitLoading,
     });
   });
   

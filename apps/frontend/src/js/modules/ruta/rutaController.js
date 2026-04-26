@@ -588,6 +588,8 @@ export async function crearRutaCmd(container, params = {}) {
                 imagenInput,
                 alertBox,
                 submitButton,
+                setSubmitLoading,
+                clearSubmitLoading,
             } = fields;
 
             if (contextError) {
@@ -684,7 +686,7 @@ export async function crearRutaCmd(container, params = {}) {
                 formData.append('imagen', values.imagen);
             }
 
-            submitButton.setAttribute('disabled', 'disabled');
+            setSubmitLoading?.();
 
             // Crear ruta
             try {
@@ -714,7 +716,7 @@ export async function crearRutaCmd(container, params = {}) {
                 }
                 showFormAlert(alertBox, 'danger', `Error al crear ruta: ${err.message}`);
             } finally {
-                submitButton.removeAttribute('disabled');
+                clearSubmitLoading?.();
             }
         }
     };
@@ -1100,6 +1102,8 @@ export async function modificarRutaCmd(container, id) {
                     imagenInput,
                     alertBox,
                     submitButton,
+                    setSubmitLoading,
+                    clearSubmitLoading,
                 } = fields;
 
                 if (contextError) {
@@ -1193,7 +1197,7 @@ export async function modificarRutaCmd(container, id) {
                     body.fechaRetirada = fechaRetiradaIso;
                 }
 
-                submitButton.setAttribute('disabled', 'disabled');
+                setSubmitLoading?.();
 
                 try {
                     await fetchClient(`/pistas/${idRuta}`, {
@@ -1230,7 +1234,7 @@ export async function modificarRutaCmd(container, id) {
 
                     showFormAlert(alertBox, 'danger', `Error al modificar ruta: ${err.message}`);
                 } finally {
-                    submitButton.removeAttribute('disabled');
+                    clearSubmitLoading?.();
                 }
             },
         };
