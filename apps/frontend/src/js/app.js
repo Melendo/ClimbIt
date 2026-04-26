@@ -5,6 +5,9 @@ import { initConnectivityBanner } from './core/ui.js';
 registerSW({ immediate: true });
 
 function updateViewportHeightVariable() {
+	const tag = document.activeElement?.tagName;
+	if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
 	const viewportHeight = window.visualViewport?.height || window.innerHeight;
 	document.documentElement.style.setProperty('--vh', `${viewportHeight * 0.01}px`);
 }
