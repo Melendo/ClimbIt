@@ -18,6 +18,26 @@ async function resolverFotoPerfil(usuario) {
     }
 }
 
+async function resolverAmigoCompleto(amigo) {
+    const amigoConFoto = await resolverFotoPerfil(amigo);
+    
+    try {
+        const statsRes = await fetchClient(`/escaladores/public/${amigo.apodo}/stats/actividad-mensual`);
+        if (statsRes.ok) {
+            const mensualBody = await statsRes.json();
+            const actividad = mensualBody.actividadMensual;
+            const rutasEsteMes = Array.isArray(actividad) 
+                ? actividad.reduce((total, diaInfo) => total + (Number(diaInfo.rutas) || 0), 0)
+                : 0;
+            return { ...amigoConFoto, rutasEsteMes };
+        }
+        return { ...amigoConFoto, rutasEsteMes: 0 };
+    } catch (err) {
+        console.warn(`No se pudo cargar la actividad mensual de ${amigo.apodo}:`, err.message);
+        return { ...amigoConFoto, rutasEsteMes: 0 };
+    }
+}
+
 export async function socialCmd(container) {
     showLoading();
     try {
@@ -29,7 +49,7 @@ export async function socialCmd(container) {
         const solicitudes = await solicitudesRes.json();
         
         const amigosConFoto = await Promise.all(
-            amigos.map(amigo => resolverFotoPerfil(amigo))
+            amigos.map(amigo => resolverAmigoCompleto(amigo))
         );
 
         const solicitudesConFoto = await Promise.all(
@@ -122,7 +142,7 @@ export async function socialCmd(container) {
                 const response = await fetchClient('/amistades/mis-amigos');
                 const nuevosAmigos = await response.json();
                 return await Promise.all(
-                    nuevosAmigos.map(amigo => resolverFotoPerfil(amigo))
+                    nuevosAmigos.map(amigo => resolverAmigoCompleto(amigo))
                 );
             }
         };
@@ -151,7 +171,8 @@ export async function amigoPerfilCmd(container, apodo) {
         const perfilBase = await perfilRes.json();
         const resumen = await resumenRes.json();
         const tipos = await tiposRes.json();
-        const mensual = await mensualRes.json();
+        const mensualBody = await mensualRes.json();
+        const mensual = mensualBody.actividadMensual || [];
 
         const escaladorData = await resolverFotoPerfil(perfilBase);
 

@@ -132,7 +132,7 @@ export function renderSocialView(container, amigos, solicitudes, callbacks) {
                         </div>
                         <div class="text-center border-start ps-3 py-1 pe-2 flex-shrink-0">
                             <small class="text-muted d-block mb-1 social-amigo-rutas-label">RUTAS<br>ESTE MES</small>
-                            <span class="fs-4 fw-bold">0</span>
+                            <span class="fs-4 fw-bold">${amigo.rutasEsteMes || 0}</span>
                         </div>
                     </div>
                 </div>

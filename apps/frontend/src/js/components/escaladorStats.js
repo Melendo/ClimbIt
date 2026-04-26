@@ -170,7 +170,7 @@ export function renderRocodromoRoutesOverviewStatsCard(totals = {}) {
         </div>
       </div>
       <p class="perfil-stats-text">
-        Has escalado un total de ${totalRutas} rutas de las ${totalRutasActivasRocodromo} que hay activas.
+        Se han escalado un total de ${totalRutas} rutas de las ${totalRutasActivasRocodromo} que hay activas.
       </p>
       <div class="perfil-stats-bar">
         <span class="perfil-stats-bar-fill is-completed" style="width: ${formatPct(completadasSobreActivasPct)};"></span>
@@ -205,7 +205,7 @@ export function renderTotalRoutesStatsCard(totals = {}) {
         </div>
       </div>
       <p class="perfil-stats-text">
-        Has escalado un total de ${totals.totalRutas || 0} rutas, de las cuales ${totals.totalFlash || 0} han sido a la primera.
+        Se han escalado un total de ${totals.totalRutas || 0} rutas, de las cuales ${totals.totalFlash || 0} han sido a la primera.
       </p>
       <div class="perfil-stats-bar">
         <span class="perfil-stats-bar-fill is-completed" style="width: 100%;"></span>
@@ -231,7 +231,7 @@ export function renderRouteTypesStatsCard(totals = {}) {
           <span class="perfil-stats-pill-value">${totals.totalVias || 0}</span>
         </div>
       </div>
-      <p class="perfil-stats-text">${totals.favoritaTexto || 'Bloque'} es tu tipo de ruta más escalado.</p>
+      <p class="perfil-stats-text">${totals.favoritaTexto || 'Bloque'} es el tipo de ruta más escalado.</p>
       <div class="perfil-stats-bar is-split">
         <span class="perfil-stats-bar-fill is-bloque" style="width: ${formatPct(totals.bloquesPct)};"></span>
         <span class="perfil-stats-bar-fill is-via" style="width: ${formatPct(totals.viasPct)};"></span>
