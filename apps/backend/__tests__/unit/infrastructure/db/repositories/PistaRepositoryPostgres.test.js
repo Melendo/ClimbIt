@@ -1,6 +1,6 @@
 import { describe, jest } from '@jest/globals';
-import PistaRepositoryPostgres from '../../../src/infrastructure/repositories/pistaRepositoryPostgres.js';
-import Pista from '../../../src/domain/pistas/Pista.js';
+import PistaRepositoryPostgres from '../../../../../src/infrastructure/repositories/pistaRepositoryPostgres.js';
+import Pista from '../../../../../src/domain/pistas/Pista.js';
 
 describe('PistaRepositoryPostgres', () => {
   let repository;

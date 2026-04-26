@@ -12,6 +12,13 @@ describe('E2E: Pistas', () => {
   let escalaVia;
 
   beforeAll(async () => {
+    // Limpiar posibles restos de ejecuciones anteriores fallidas
+    await db.Zona.destroy({ where: { nombre: 'Zona Bloque Test' } });
+    const rocoHuerfano = await db.Rocodromo.findOne({ where: { ubicacion: 'Test Location' } });
+    if (rocoHuerfano) await rocoHuerfano.destroy();
+    const escalaHuerfana = await db.EscalaDificultad.findOne({ where: { nombre: 'Escala Via Test' } });
+    if (escalaHuerfana) await escalaHuerfana.destroy();
+
     rocodromo = await db.Rocodromo.create({
       nombre: 'Roco Test',
       ubicacion: 'Test Location',

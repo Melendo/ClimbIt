@@ -14,7 +14,21 @@ describe('E2E: Rocodromos', () => {
 
   beforeAll(async () => {
     token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'Admin' });
-    
+
+    // Limpiar posibles restos de ejecuciones anteriores fallidas
+    const nombresRoco = [
+      'Roco Con Zonas Integration',
+      'Roco Sin Zonas Integration',
+      'Roco Actualizar Integration',
+    ];
+    const ubicacionesRoco = ['Test Location 1', 'Test Location 2', 'Test Location 3'];
+    const rocosHuerfanos = await db.Rocodromo.findAll({ where: { ubicacion: ubicacionesRoco } });
+    for (const roco of rocosHuerfanos) {
+      await db.Zona.destroy({ where: { idRoco: roco.id } });
+      await roco.destroy();
+    }
+    await db.Rocodromo.destroy({ where: { nombre: nombresRoco } });
+
     rocodromoConZonas = await db.Rocodromo.create({
       nombre: 'Roco Con Zonas Integration',
       ubicacion: 'Test Location 1',

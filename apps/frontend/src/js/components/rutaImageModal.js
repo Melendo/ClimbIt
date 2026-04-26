@@ -86,7 +86,7 @@ export function setupRutaImageModal(container, { modalId }) {
     baseWidth: 0,
     baseHeight: 0,
   };
-  const teardownController = new AbortController();
+  let teardownController = null;
 
   const clampZoom = (value) => Math.max(ZOOM_LIMITS.min, Math.min(ZOOM_LIMITS.max, value));
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
@@ -169,6 +169,10 @@ export function setupRutaImageModal(container, { modalId }) {
   const forceCloseAndCleanup = () => {
     if (!imageModal.isConnected || !isModalVisible()) {
       cleanupBootstrapModalArtifacts();
+      if (teardownController) {
+        teardownController.abort();
+        teardownController = null;
+      }
       return;
     }
 
@@ -182,13 +186,16 @@ export function setupRutaImageModal(container, { modalId }) {
     }
 
     cleanupBootstrapModalArtifacts();
+    if (teardownController) {
+      teardownController.abort();
+      teardownController = null;
+    }
   };
 
-  const onNavigationExit = () => {
-    forceCloseAndCleanup();
-    resetPinchState();
-    if (!teardownController.signal.aborted) {
-      teardownController.abort();
+  const handlePopState = () => {
+    if (imageModal.classList.contains('show')) {
+      const modalInstance = window.bootstrap?.Modal?.getInstance(imageModal);
+      if (modalInstance) modalInstance.hide();
     }
   };
 
@@ -265,33 +272,47 @@ export function setupRutaImageModal(container, { modalId }) {
   modalBody.addEventListener('touchend', resetPinchState, { passive: true });
   modalBody.addEventListener('touchcancel', resetPinchState, { passive: true });
 
-  window.addEventListener('resize', () => {
-    if (!isModalVisible()) {
-      return;
-    }
-    updateBaseMetrics();
-    applyTransform();
-  }, { signal: teardownController.signal });
+  imageModal.addEventListener('show.bs.modal', () => {
+    if (teardownController) teardownController.abort();
+    teardownController = new AbortController();
+    
+    // Truco del historial para capturar el botón atrás del móvil
+    history.pushState({ modal: modalId }, '', location.href);
+
+    window.addEventListener('resize', () => {
+      if (!isModalVisible()) {
+        return;
+      }
+      updateBaseMetrics();
+      applyTransform();
+    }, { signal: teardownController.signal });
+
+    window.addEventListener('popstate', handlePopState, { signal: teardownController.signal });
+    window.addEventListener('hashchange', forceCloseAndCleanup, { signal: teardownController.signal });
+    window.addEventListener('pagehide', forceCloseAndCleanup, { signal: teardownController.signal });
+  });
 
   imageModal.addEventListener('shown.bs.modal', () => {
     requestAnimationFrame(() => {
       resetTransform();
     });
   });
+
   imageModal.addEventListener('hide.bs.modal', () => {
-    cleanupBootstrapModalArtifacts();
+    if (history.state && history.state.modal === modalId) {
+      history.back(); // Eliminar el estado del modal si se cierra por la UI
+    }
   });
+
   imageModal.addEventListener('hidden.bs.modal', () => {
     resetTransform();
     resetPinchState();
     cleanupBootstrapModalArtifacts();
+    if (teardownController) {
+      teardownController.abort();
+      teardownController = null;
+    }
   });
-
-  // En navegadores Chromium móviles, volver atrás puede cambiar el hash
-  // antes de que Bootstrap complete el cierre y deje el backdrop bloqueando.
-  window.addEventListener('hashchange', onNavigationExit, { signal: teardownController.signal });
-  window.addEventListener('popstate', onNavigationExit, { signal: teardownController.signal });
-  window.addEventListener('pagehide', onNavigationExit, { signal: teardownController.signal });
 
   resetTransform();
 }

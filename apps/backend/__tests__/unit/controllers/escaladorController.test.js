@@ -571,4 +571,43 @@ describe('Unit: EscaladorController', () => {
       });
     });
   });
+
+  describe('buscarEscaladores', () => {
+    it('responde 200 con la lista de escaladores excluyendo el id del usuario', async () => {
+      const mockResult = [{ id: 2, apodo: 'alex', idFotoPerfil: null }];
+      const useCases = {
+        buscarEscaladoresPorNombre: { execute: jest.fn().mockResolvedValue(mockResult) },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = {
+        query: { q: 'ale' },
+        user: { apodo: 'userApodo' },
+      };
+      const res = createResMock();
+
+      await controller.buscarEscaladores(req, res, () => {});
+
+      expect(useCases.buscarEscaladoresPorNombre.execute).toHaveBeenCalledWith('ale', 'userApodo');
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.body).toEqual(mockResult);
+    });
+
+    it('responde 500 si el caso de uso falla', async () => {
+      const expectedError = new Error('algo falló');
+      const useCases = {
+        buscarEscaladoresPorNombre: { execute: jest.fn().mockRejectedValue(expectedError) },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = {
+        query: { q: 'ale' },
+        user: { id: 1 },
+      };
+      const res = createResMock();
+      const next = jest.fn();
+
+      await controller.buscarEscaladores(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(expectedError);
+    });
+  });
 });

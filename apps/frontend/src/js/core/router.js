@@ -15,6 +15,7 @@ import { mapaZonaCmd, crearZonaCmd } from '../modules/zona/zonaController.js';
 import { homeCmd } from '../modules/home/homeController.js';
 import { error404Cmd } from '../modules/error/errorController.js';
 import { loginCmd, registroCmd } from '../modules/autenticacion/authController.js';
+import { socialCmd, amigoPerfilCmd } from '../modules/social/socialController.js';
 
 // Rutas públicas que no requieren autenticación
 const PUBLIC_ROUTES = ['#home', '#login', '#registro', ''];
@@ -116,6 +117,13 @@ export async function handleNavigation() {
         }
         else if (hash === '#editarPerfil') {
             await editarPerfilCmd(mainContainer);
+        }
+        else if (hash === '#social') {
+            await socialCmd(mainContainer);
+        }
+        else if (hash.startsWith('#amigoPerfil')) {
+            const apodo = obtenerParametroDesdeHash('apodo');
+            await amigoPerfilCmd(mainContainer, apodo);
         }
         else {
             error404Cmd(mainContainer);

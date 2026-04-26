@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
-import FotosPerfilRepositoryPostgres from '../../../src/infrastructure/repositories/fotosPerfilRepositoryPostgres.js';
-import FotosPerfil from '../../../src/domain/fotosPerfil/FotosPerfil.js';
+import FotosPerfilRepositoryPostgres from '../../../../../src/infrastructure/repositories/fotosPerfilRepositoryPostgres.js';
+import FotosPerfil from '../../../../../src/domain/fotosPerfil/FotosPerfil.js';
 
 describe('FotosPerfilRepositoryPostgres', () => {
   let repository;

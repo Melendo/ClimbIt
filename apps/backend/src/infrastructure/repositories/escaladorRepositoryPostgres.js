@@ -1,4 +1,4 @@
-import { col, fn, where } from 'sequelize';
+import { col, fn, literal, Op, where } from 'sequelize';
 import escaladorRepository from '../../domain/escaladores/escaladorRepository.js';
 import Escalador from '../../domain/escaladores/Escalador.js';
 import Rocodromo from '../../domain/rocodromos/Rocodromo.js';
@@ -89,6 +89,74 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
       throw mapRepositoryError(error, {
         fallbackMessage: 'Error al buscar escalador por apodo (insensible)',
         internalCode: 'ESCALADOR_FIND_BY_NICKNAME_INSENSITIVE_FAILED',
+      });
+    }
+  }
+
+  async buscarPorApodoSimilitud(cadena, limite = 10, excludeApodo = null) {
+    try {
+      const searchWhere = {
+        apodo: {
+          [Op.iLike]: `%${cadena}%`,
+        },
+      };
+
+      if (excludeApodo) {
+        searchWhere.apodo = {
+          ...searchWhere.apodo,
+          [Op.ne]: excludeApodo,
+        };
+      }
+
+      const escaladoresModel = await this.EscaladorModel.findAll({
+        where: searchWhere,
+        limit: limite,
+        order: [
+          [literal(`CASE WHEN "Apodo" ILIKE '${cadena}%' THEN 0 ELSE 1 END`), 'ASC'],
+          [fn('LENGTH', col('Apodo')), 'ASC']
+        ],
+      });
+
+      return escaladoresModel.map((escaladorModel) => this._toDomain(escaladorModel));
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al buscar escaladores por apodo',
+        internalCode: 'ESCALADOR_SEARCH_BY_NICKNAME_FAILED',
+      });
+    }
+  }
+
+  async encontrarPorId(id) {
+    try {
+      const escaladorModel = await this.EscaladorModel.findByPk(id);
+      return this._toDomain(escaladorModel);
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al buscar escalador por ID',
+        internalCode: 'ESCALADOR_FIND_BY_ID_FAILED',
+      });
+    }
+  }
+
+  async encontrarPorIds(ids) {
+    try {
+      if (!Array.isArray(ids) || ids.length === 0) {
+        return [];
+      }
+
+      const escaladoresModel = await this.EscaladorModel.findAll({
+        where: {
+          id: {
+            [Op.in]: ids,
+          },
+        },
+      });
+
+      return escaladoresModel.map((escaladorModel) => this._toDomain(escaladorModel));
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al buscar escaladores por IDs',
+        internalCode: 'ESCALADOR_FIND_BY_IDS_FAILED',
       });
     }
   }

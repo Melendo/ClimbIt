@@ -42,10 +42,10 @@ body {
   color: #fff !important;
 }
 
-.btn-check:checked + .btn-outline-primary,
-.btn-check:checked + .btn-outline-primary:hover,
-.btn-check:checked + .btn-outline-primary:focus,
-.btn-check:checked + .btn-outline-primary:active {
+.btn-check:checked+.btn-outline-primary,
+.btn-check:checked+.btn-outline-primary:hover,
+.btn-check:checked+.btn-outline-primary:focus,
+.btn-check:checked+.btn-outline-primary:active {
   background-color: #e77f1e !important;
   border-color: #e77f1e !important;
   color: #fff !important;
@@ -155,12 +155,12 @@ body {
 }
 
 /* Contenido centrado con ancho máximo */
-#app-container.app-vertical-layout > .app-content {
+#app-container.app-vertical-layout>.app-content {
   width: 100%;
   max-width: var(--app-max-width);
 }
 
-#app-container.app-vertical-layout > .app-content.app-shell {
+#app-container.app-vertical-layout>.app-content.app-shell {
   height: 100dvh;
   height: var(--app-height);
   border-top: 0 !important;
@@ -173,12 +173,12 @@ body {
     padding-bottom: var(--safe-area-inset-bottom);
   }
 
-  #app-container.app-vertical-layout > .app-content {
+  #app-container.app-vertical-layout>.app-content {
     max-width: 100%;
   }
 
   /* Cards a pantalla completa en móvil (solo la card principal) */
-  #app-container.app-vertical-layout > .app-content.app-shell {
+  #app-container.app-vertical-layout>.app-content.app-shell {
     border-radius: 0 !important;
     border-left: none !important;
     border-right: none !important;
@@ -186,8 +186,8 @@ body {
     min-height: var(--app-height);
   }
 
-  #app-container.app-vertical-layout > .app-content.app-shell > .card-header,
-  #app-container.app-vertical-layout > .app-content.app-shell > .card-footer {
+  #app-container.app-vertical-layout>.app-content.app-shell>.card-header,
+  #app-container.app-vertical-layout>.app-content.app-shell>.card-footer {
     border-radius: 0 !important;
   }
 }
@@ -241,7 +241,7 @@ body {
   color: var(--bs-primary) !important;
 }
 
-.app-shell > .card-footer {
+.app-shell>.card-footer {
   padding-bottom: calc(0.5rem + var(--safe-area-inset-bottom)) !important;
 }
 
@@ -288,12 +288,10 @@ body {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.4),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent);
   animation: shimmer 2s infinite;
 }
 
@@ -455,7 +453,7 @@ body {
   stroke-width: 3;
 }
 
-.card-box-shadow{
+.card-box-shadow {
   box-shadow:
     0 8px 12px rgba(0, 0, 0, 0.25),
     0 4px 6px rgba(0, 0, 0, 0.20);
@@ -606,7 +604,7 @@ body {
   background-color: #dee2e6;
 }
 
-.perfil-photo-modal-body > .perfil-photo-section-divider {
+.perfil-photo-modal-body>.perfil-photo-section-divider {
   margin-bottom: 0.5rem;
 }
 
@@ -1232,6 +1230,7 @@ body {
 }
 
 @media (max-width: 480px) {
+
   .perfil-stats-badges,
   .perfil-stats-choices {
     justify-content: center;
@@ -1243,6 +1242,7 @@ body {
 }
 
 @media (max-width: 350px) {
+
   .perfil-stats-badges,
   .perfil-stats-choices {
     grid-template-columns: minmax(0, 1fr);
@@ -1424,4 +1424,207 @@ body {
     flex: 1 1 auto;
     max-height: none;
   }
+}
+
+/* ========================================
+   Vista Social
+   ======================================== */
+.social-header-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.social-mis-amigos-bar {
+  z-index: 1;
+}
+
+.social-mis-amigos-text {
+  letter-spacing: 1px;
+}
+
+.social-mailbox-icon {
+  font-size: 28px;
+}
+
+.social-search-icon {
+  font-size: 18px;
+  color: #f08c3a;
+}
+
+.social-search-input {
+  border-radius: 8px;
+  border-color: #f08c3a;
+  color: #f08c3a;
+}
+
+.social-search-input::placeholder {
+  color: #f08c3a;
+  opacity: 0.7;
+}
+
+.social-add-friend-btn {
+  border-radius: 8px;
+  background-color: #e57c2a;
+  border-color: #e57c2a;
+}
+
+.social-add-friend-btn:hover,
+.social-add-friend-btn:focus,
+.social-add-friend-btn:active {
+  background-color: #e57c2a !important;
+  border-color: #e57c2a !important;
+  color: #fff !important;
+}
+
+.social-lista-container {
+  height: calc(100vh - 280px);
+}
+
+.social-amigo-card {
+  margin: 0 12px;
+}
+
+.social-amigo-foto {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+}
+
+.social-amigo-text {
+  font-size: 0.75rem;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.social-amigo-desc {
+  font-size: 0.75rem;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.social-amigo-rutas-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.5px;
+}
+
+/* ========================================
+   Buzón de Solicitudes (Mailbox Modal)
+   ======================================== */
+
+.notification-dot {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  background-color: var(--bs-primary);
+  border-radius: 50%;
+  border: 2px solid #fff;
+  /* Adds contrast against the button */
+  display: none;
+}
+
+.notification-dot.active {
+  display: block;
+}
+
+.solicitud-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.solicitud-card:last-child {
+  border-bottom: none;
+}
+
+.solicitud-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.solicitud-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.solicitud-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.solicitud-apodo {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #212529;
+}
+
+.solicitud-desc {
+  font-size: 0.8rem;
+  color: #6c757d;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.solicitud-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-solicitud-action {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  color: white;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.btn-solicitud-action.btn-accept {
+  background-color: #28a745;
+}
+
+.btn-solicitud-action.btn-reject {
+  background-color: #dc3545;
+}
+
+.btn-solicitud-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-solicitud-action.state-accepted {
+  background-color: transparent !important;
+  color: #28a745;
+}
+
+.btn-solicitud-action.state-rejected {
+  background-color: transparent !important;
+  color: #dc3545;
 }

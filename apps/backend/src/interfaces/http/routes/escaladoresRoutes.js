@@ -548,5 +548,34 @@ router.put(
     escaladorController.actualizarFotoPerfil(req, res, next);
   }
 );
+/**
+ * GET /escaladores/buscar
+ * Busca escaladores por similitud en el apodo
+ *
+ * Parámetros esperados (query):
+ * - q (@param {String} , requerido): Cadena a buscar en el apodo (min 2 caracteres)
+ *
+ * Requiere: Token JWT válido en header Authorization
+ *
+ * Respuesta esperada: @return {Array} Lista de escaladores ordenados por coincidencia
+ */
+const buscarEscaladoresValidators = [
+  query('q')
+    .isString()
+    .trim()
+    .notEmpty()
+    .withMessage('El parámetro de búsqueda es requerido')
+    .isLength({ min: 2 })
+    .withMessage('La búsqueda debe tener al menos 2 caracteres'),
+];
 
+router.get(
+  '/buscar',
+  verifyToken,
+  buscarEscaladoresValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.buscarEscaladores(req, res, next);
+  }
+);
 export default router;

@@ -384,6 +384,18 @@ class EscaladorController {
       return next(error);
     }
   }
+  async buscarEscaladores(req, res, next) {
+    try {
+      const q = req.query.q;
+      const excludeApodo = req.user.apodo;
+
+      const resultados = await this.useCases.buscarEscaladoresPorNombre.execute(q, excludeApodo);
+
+      res.status(200).json(resultados);
+    } catch (error) {
+      return next(error);
+    }
+  }
 }
 
 export default EscaladorController;
