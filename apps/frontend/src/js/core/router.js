@@ -16,6 +16,7 @@ import { homeCmd } from '../modules/home/homeController.js';
 import { error404Cmd } from '../modules/error/errorController.js';
 import { loginCmd, registroCmd } from '../modules/autenticacion/authController.js';
 import { socialCmd, amigoPerfilCmd } from '../modules/social/socialController.js';
+import { tutorialCmd } from '../modules/tutorial/tutorialController.js';
 
 // Rutas públicas que no requieren autenticación
 const PUBLIC_ROUTES = ['#home', '#login', '#registro', ''];
@@ -58,6 +59,9 @@ export async function handleNavigation() {
         }
         else if (hash === '#registro') {
             registroCmd(mainContainer);
+        }
+        else if (hash === '#tutorial') {
+            tutorialCmd(mainContainer);
         }
         else if (baseRoute === '#crearRuta') {
             const idRocodromo = obtenerParametroDesdeHash('idRocodromo');

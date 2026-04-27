@@ -114,8 +114,8 @@ function registroApodoCmd(container) {
                 saveToken(data.token);
                 // Cebar cache dinámica antes de navegar para mejorar la disponibilidad offline.
                 await warmUpAppDataCache();
-                // Redirigir al listado de rocódromos
-                window.location.hash = '#misRocodromos';
+                // Redirigir al tutorial tras completar el registro
+                window.location.hash = '#tutorial';
             } else {
                 throw new Error('No se recibió el token de autenticación');
             }
