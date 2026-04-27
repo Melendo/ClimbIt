@@ -4,6 +4,28 @@ import { showLoading, showError } from '../../core/ui.js';
 
 const PERFIL_PLACEHOLDER = '/assets/johnDoe.png';
 
+function buildActividadParams() {
+    const now = new Date();
+    const params = new URLSearchParams({
+        year: String(now.getFullYear()),
+        month: String(now.getMonth() + 1)
+    });
+    return params.toString();
+}
+
+function buildActividadStats(actividadMensual) {
+    const actividad = Array.isArray(actividadMensual) ? actividadMensual : [];
+    const rutasEsteMes = actividad
+        .reduce((total, diaInfo) => total + (Number(diaInfo?.rutas) || 0), 0);
+    const diasActivos = actividad
+        .filter((diaInfo) => Number(diaInfo?.rutas) > 0).length;
+
+    return {
+        rutasEsteMes,
+        diasActivos,
+    };
+}
+
 async function resolverFotoPerfil(usuario) {
     if (!usuario?.idFotoPerfil) {
         return { ...usuario, fotoSrc: PERFIL_PLACEHOLDER };
@@ -22,19 +44,49 @@ async function resolverAmigoCompleto(amigo) {
     const amigoConFoto = await resolverFotoPerfil(amigo);
     
     try {
-        const statsRes = await fetchClient(`/escaladores/public/${amigo.apodo}/stats/actividad-mensual`);
+        const actividadParams = buildActividadParams();
+        const statsRes = await fetchClient(
+            `/escaladores/public/${amigo.apodo}/stats/actividad-mensual?${actividadParams}`
+        );
         if (statsRes.ok) {
             const mensualBody = await statsRes.json();
             const actividad = mensualBody.actividadMensual;
-            const rutasEsteMes = Array.isArray(actividad) 
-                ? actividad.reduce((total, diaInfo) => total + (Number(diaInfo.rutas) || 0), 0)
-                : 0;
-            return { ...amigoConFoto, rutasEsteMes };
+            const { rutasEsteMes, diasActivos } = buildActividadStats(actividad);
+            return { ...amigoConFoto, rutasEsteMes, diasActivos };
         }
-        return { ...amigoConFoto, rutasEsteMes: 0 };
+        return { ...amigoConFoto, rutasEsteMes: 0, diasActivos: 0 };
     } catch (err) {
         console.warn(`No se pudo cargar la actividad mensual de ${amigo.apodo}:`, err.message);
-        return { ...amigoConFoto, rutasEsteMes: 0 };
+        return { ...amigoConFoto, rutasEsteMes: 0, diasActivos: 0 };
+    }
+}
+
+async function resolverEscaladorActual() {
+    try {
+        const perfilRes = await fetchClient('/escaladores/perfil');
+        if (!perfilRes.ok) {
+            return null;
+        }
+        const perfil = await perfilRes.json();
+        const escaladorConFoto = await resolverFotoPerfil(perfil);
+        const actividadParams = buildActividadParams();
+        const actividadRes = await fetchClient(
+            `/escaladores/stats/actividad-mensual?${actividadParams}`
+        );
+        let actividadMensual = [];
+        if (actividadRes.ok) {
+            const actividadBody = await actividadRes.json();
+            actividadMensual = actividadBody?.actividadMensual || [];
+        }
+        const { rutasEsteMes, diasActivos } = buildActividadStats(actividadMensual);
+        return {
+            ...escaladorConFoto,
+            rutasEsteMes,
+            diasActivos,
+        };
+    } catch (err) {
+        console.warn('No se pudo cargar el escalador actual:', err.message);
+        return null;
     }
 }
 
@@ -125,9 +177,10 @@ export async function socialCmd(container) {
     showLoading();
 
     try {
-        const [amigos, solicitudes] = await Promise.all([
+        const [amigos, solicitudes, escaladorActual] = await Promise.all([
             safeGetArray('/amistades/mis-amigos', 'No se pudo cargar la lista de amigos'),
-            safeGetArray('/amistades/solicitudes-pendientes', 'No se pudo cargar el buzón de solicitudes')
+            safeGetArray('/amistades/solicitudes-pendientes', 'No se pudo cargar el buzón de solicitudes'),
+            resolverEscaladorActual()
         ]);
         
         const amigosConFoto = await Promise.all(
@@ -154,10 +207,10 @@ export async function socialCmd(container) {
             })
         );
         const callbacks = buildSocialCallbacks(amigosConFoto);
-        renderSocialView(container, amigosConFoto, solicitudesConFoto, callbacks);
+        renderSocialView(container, amigosConFoto, solicitudesConFoto, escaladorActual, callbacks);
     } catch (err) {
         console.warn('Error al cargar sección social:', err.message);
-        renderSocialView(container, [], [], buildSocialCallbacks([]));
+        renderSocialView(container, [], [], null, buildSocialCallbacks([]));
     }
 }
 

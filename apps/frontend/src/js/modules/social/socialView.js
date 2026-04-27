@@ -11,40 +11,62 @@ import {
   renderTotalRoutesStatsCard,
 } from '../../components/escaladorStats.js';
 
-export function renderSocialView(container, amigos, solicitudes, callbacks) {
+export function renderSocialView(container, amigos, solicitudes, escaladorActual, callbacks) {
     // Generar el HTML inicial
     container.innerHTML = `
-        <div class="card-header bg-white d-flex align-items-center justify-content-center py-3 position-relative">
+        <div class="card-header bg-white d-flex align-items-center justify-content-center py-3 position-relative social-header">
             <div class="d-flex align-items-center gap-2">
                 <img src="/icons/apple-touch-icon.png" alt="Logo de ClimbIt" class="social-header-logo" />
-                <span class="fw-bold fs-5">ClimbIt</span>
+                <span class="fw-bold" style="font-size: 1.5rem;">ClimbIt</span>
             </div>
-        </div>
-        
-        <div class="bg-light border-bottom border-top py-2 px-3 d-flex align-items-center justify-content-center position-relative shadow-sm social-mis-amigos-bar">
-            <span class="fw-bold text-dark social-mis-amigos-text">Mis Amigos</span>
-            <button class="btn btn-link text-dark p-0 position-absolute end-0 me-3 position-relative btn-open-mailbox" id="btn-mailbox" aria-label="Buzón de solicitudes">
+            <button class="btn text-muted p-0 border-0 d-flex align-items-center position-absolute top-50 end-0 translate-middle-y me-3 position-relative btn-open-mailbox" id="btn-mailbox" aria-label="Buzón de solicitudes">
                 <span class="material-icons social-mailbox-icon">markunread_mailbox</span>
                 <span class="notification-dot ${solicitudes && solicitudes.length > 0 ? 'active' : ''}"></span>
             </button>
         </div>
 
-        <div class="d-flex flex-column flex-grow-1 overflow-hidden bg-white">
-            <div class="p-3">
-                <div class="d-flex justify-content-between gap-2 mb-3 ${amigos.length === 0 ? 'd-none' : ''}">
-                    <div class="d-flex gap-2 w-100">
-                        <div class="position-relative flex-grow-1">
-                            <span class="material-icons position-absolute top-50 start-0 translate-middle-y ms-2 social-search-icon" alt="Icono de búsqueda">search</span>
-                            <input type="text" id="search-amigos-input" class="form-control fw-medium ps-4 social-search-input" placeholder="Buscar amigos" />
+        <div class="social-tabs-bar" role="tablist">
+            <button type="button" class="social-tab-btn is-active" data-social-tab="amigos" aria-selected="true">Mis Amigos</button>
+            <button type="button" class="social-tab-btn" data-social-tab="ranking" aria-selected="false">Ranking Mensual</button>
+        </div>
+
+        <div class="d-flex flex-column flex-grow-1 overflow-hidden bg-white social-content-body">
+            <div class="social-tab-panels flex-grow-1 overflow-hidden">
+                <div class="social-tab-panel is-active" data-social-panel="amigos">
+                    <div class="p-3 d-flex flex-column h-100">
+                        <div class="d-flex justify-content-between gap-2 mb-3 ${amigos.length === 0 ? 'd-none' : ''}">
+                            <div class="d-flex gap-2 w-100">
+                                <div class="position-relative flex-grow-1">
+                                    <span class="material-icons position-absolute top-50 start-0 translate-middle-y ms-2 social-search-icon" alt="Icono de búsqueda">search</span>
+                                    <input type="text" id="search-amigos-input" class="form-control fw-medium ps-4 social-search-input" placeholder="Buscar amigos" />
+                                </div>
+                                <button class="btn text-white fw-bold d-flex align-items-center gap-1 social-add-friend-btn btn-open-add-friend-modal">
+                                    <span class="material-icons" alt="Icono de añadir amigo" aria-label="Añadir amigo" style="font-size: 18px;">person_add</span>
+                                </button>
+                            </div>
                         </div>
-                        <button class="btn text-white fw-bold d-flex align-items-center gap-1 social-add-friend-btn btn-open-add-friend-modal">
-                            <span class="material-icons" alt="Icono de añadir amigo" aria-label="Añadir amigo" style="font-size: 18px;">person_add</span>
-                        </button>
+
+                        <div id="lista-amigos-container" class="d-flex flex-column gap-3 overflow-auto pb-4 social-lista-container">
+                            <!-- La lista se inserta aquí -->
+                        </div>
                     </div>
                 </div>
-                
-                <div id="lista-amigos-container" class="d-flex flex-column gap-3 overflow-auto pb-4 social-lista-container">
-                    <!-- La lista se inserta aquí -->
+
+                <div class="social-tab-panel social-ranking-panel" data-social-panel="ranking">
+                    <div class="p-3 d-flex flex-column h-100 social-ranking-panel-body">
+                        <div class="d-flex align-items-center justify-content-between gap-2 mb-3 social-ranking-controls">
+                            <span class="text-muted small fw-semibold social-ranking-title">Ranking mensual</span>
+                            <select id="ranking-metric-select" class="form-select form-select-sm social-ranking-select" aria-label="Seleccionar estadística del ranking">
+                                <option value="rutas" selected>Rutas Escaladas</option>
+                                <option value="dias">Dias Activo</option>
+                            </select>
+                        </div>
+
+                        <div id="ranking-list" class="d-flex flex-column gap-3 overflow-auto pb-4 social-lista-container social-ranking-list">
+                            <!-- Ranking se inserta aquí -->
+                        </div>
+                        <div id="ranking-self-sticky" class="social-ranking-sticky d-none"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -95,6 +117,22 @@ export function renderSocialView(container, amigos, solicitudes, callbacks) {
 
     const listaContainer = container.querySelector('#lista-amigos-container');
     const searchInput = container.querySelector('#search-amigos-input');
+    const rankingList = container.querySelector('#ranking-list');
+    const rankingSelect = container.querySelector('#ranking-metric-select');
+    const tabButtons = Array.from(container.querySelectorAll('[data-social-tab]'));
+    const tabPanels = Array.from(container.querySelectorAll('[data-social-panel]'));
+    let amigosBase = Array.isArray(amigos) ? [...amigos] : [];
+    const escaladorActualSafe = escaladorActual && escaladorActual.apodo ? escaladorActual : null;
+
+    const rankingMetricMap = {
+        rutas: { key: 'rutasEsteMes', label: 'Rutas' },
+        dias: { key: 'diasActivos', label: 'Días activos' },
+    };
+
+    const getMetricValue = (item, metricKey) => {
+        const value = Number(item?.[metricKey]);
+        return Number.isFinite(value) ? value : 0;
+    };
 
     const renderLista = (lista, isSearch = false) => {
         if (!lista || lista.length === 0) {
@@ -140,8 +178,145 @@ export function renderSocialView(container, amigos, solicitudes, callbacks) {
         `}).join('');
     };
 
+    const buildRankingDataset = () => {
+        const dataset = Array.isArray(amigosBase) ? [...amigosBase] : [];
+        if (escaladorActualSafe) {
+            const exists = dataset.some((item) => item.apodo === escaladorActualSafe.apodo);
+            if (!exists) {
+                dataset.push(escaladorActualSafe);
+            }
+        }
+        return dataset;
+    };
+
+    const renderRankingList = () => {
+        if (!rankingList || !rankingSelect) {
+            return;
+        }
+        const metricKey = rankingMetricMap[rankingSelect.value]?.key || 'rutasEsteMes';
+        const metricLabel = rankingMetricMap[rankingSelect.value]?.label || 'Rutas este mes';
+        const dataset = buildRankingDataset();
+        const sorted = [...dataset].sort((a, b) => {
+            const diff = getMetricValue(b, metricKey) - getMetricValue(a, metricKey);
+            if (diff !== 0) return diff;
+            const nameA = (a?.apodo || '').toString();
+            const nameB = (b?.apodo || '').toString();
+            return nameA.localeCompare(nameB, 'es', { sensitivity: 'base' });
+        });
+
+        if (!sorted.length) {
+            rankingList.innerHTML = `
+                <div class="text-center mt-4 px-2">
+                    <h5 class="fst-italic mb-3 text-muted">Aún no hay datos para el ranking</h5>
+                </div>
+            `;
+            return;
+        }
+
+        rankingList.innerHTML = sorted.map((item, index) => {
+            const position = index + 1;
+            const avatar = item.fotoSrc || '/assets/johnDoe.png';
+            const apodo = escapeHtml(item.apodo || '');
+            const metricValue = getMetricValue(item, metricKey);
+            const rankClass = position === 1
+                ? 'is-gold'
+                : position === 2
+                    ? 'is-silver'
+                    : position === 3
+                        ? 'is-bronze'
+                        : 'is-default';
+            const rankCardClass = position === 1
+                ? 'is-rank-gold'
+                : position === 2
+                    ? 'is-rank-silver'
+                    : position === 3
+                        ? 'is-rank-bronze'
+                        : '';
+            const isSelf = escaladorActualSafe && item.apodo === escaladorActualSafe.apodo;
+
+            return `
+                <div class="social-ranking-card ${rankCardClass} ${isSelf ? 'is-self' : ''}" data-apodo="${apodo}" ${isSelf ? 'data-ranking-self="true"' : ''}>
+                    <div class="social-ranking-rank ${rankClass}">
+                        <span class="social-ranking-rank-number">${position}</span>
+                    </div>
+                    <div class="social-ranking-divider" aria-hidden="true"></div>
+                    <div class="social-ranking-user">
+                        <img src="${avatar}" alt="Foto de ${apodo}" class="social-ranking-avatar" />
+                        <span class="social-ranking-name">${apodo}</span>
+                    </div>
+                    <div class="social-ranking-divider" aria-hidden="true"></div>
+                    <div class="social-ranking-metric">
+                        <span class="social-ranking-metric-label">${metricLabel}</span>
+                        <span class="social-ranking-metric-value">${metricValue}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        const stickyContainer = container.querySelector('#ranking-self-sticky');
+        if (!stickyContainer) {
+            return;
+        }
+        const selfCard = rankingList.querySelector('[data-ranking-self="true"]');
+        if (!selfCard) {
+            stickyContainer.classList.add('d-none');
+            stickyContainer.innerHTML = '';
+            stickyContainer.classList.remove('is-top', 'is-bottom');
+            if (container._rankingScrollHandler) {
+                rankingList.removeEventListener('scroll', container._rankingScrollHandler);
+                container._rankingScrollHandler = null;
+            }
+            return;
+        }
+
+        const stickyClone = selfCard.cloneNode(true);
+        stickyClone.classList.add('is-sticky');
+        stickyContainer.innerHTML = '';
+        stickyContainer.appendChild(stickyClone);
+        stickyContainer.classList.remove('d-none');
+
+        const updateStickyPlacement = () => {
+            const listRect = rankingList.getBoundingClientRect();
+            const cardRect = selfCard.getBoundingClientRect();
+            const isAbove = cardRect.bottom < listRect.top + 4;
+            const isBelow = cardRect.top > listRect.bottom - 4;
+
+            if (!isAbove && !isBelow) {
+                stickyContainer.classList.add('d-none');
+                stickyContainer.classList.remove('is-top', 'is-bottom');
+                return;
+            }
+
+            stickyContainer.classList.remove('d-none');
+            stickyContainer.classList.toggle('is-top', isAbove);
+            stickyContainer.classList.toggle('is-bottom', isBelow);
+        };
+
+        updateStickyPlacement();
+        if (container._rankingScrollHandler) {
+            rankingList.removeEventListener('scroll', container._rankingScrollHandler);
+        }
+        container._rankingScrollHandler = () => {
+            updateStickyPlacement();
+        };
+        rankingList.addEventListener('scroll', container._rankingScrollHandler, { passive: true });
+        if (container._rankingResizeHandler) {
+            window.removeEventListener('resize', container._rankingResizeHandler);
+        }
+        container._rankingResizeHandler = () => {
+            updateStickyPlacement();
+        };
+        window.addEventListener('resize', container._rankingResizeHandler, { passive: true });
+    };
+
+    const updateAmigosBase = (lista) => {
+        amigosBase = Array.isArray(lista) ? [...lista] : [];
+    };
+
     // Renderizado inicial
-    renderLista(amigos, false);
+    updateAmigosBase(amigos);
+    renderLista(amigosBase, false);
+    renderRankingList();
 
     const mailboxContainer = container.querySelector('#mailbox-solicitudes-container');
     const notificationDot = container.querySelector('.notification-dot');
@@ -190,16 +365,56 @@ export function renderSocialView(container, amigos, solicitudes, callbacks) {
 
     // Evento de búsqueda
     let searchTimeout;
-    searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.trim();
-        
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(async () => {
-            if (query.length >= 2 || query.length === 0) {
-                const resultados = await callbacks.onSearch(query);
-                renderLista(resultados, query.length >= 2);
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                if (query.length >= 2 || query.length === 0) {
+                    const lowerQuery = query.toLowerCase();
+                    const resultados = query.length >= 2
+                        ? amigosBase.filter((amigo) =>
+                            amigo.apodo && amigo.apodo.toLowerCase().includes(lowerQuery)
+                        )
+                        : amigosBase;
+                    renderLista(resultados, query.length >= 2);
+                }
+            }, 300); // Pequeño debounce
+        });
+    }
+
+    if (rankingSelect) {
+        rankingSelect.addEventListener('change', () => {
+            renderRankingList();
+        });
+    }
+
+    const setActiveTab = (tabId) => {
+        tabButtons.forEach((btn) => {
+            const isActive = btn.dataset.socialTab === tabId;
+            btn.classList.toggle('is-active', isActive);
+            btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+        tabPanels.forEach((panel) => {
+            const isActive = panel.dataset.socialPanel === tabId;
+            panel.classList.toggle('is-active', isActive);
+        });
+        if (tabId === 'ranking') {
+            renderRankingList();
+        } else {
+            const stickyContainer = container.querySelector('#ranking-self-sticky');
+            if (stickyContainer) {
+                stickyContainer.classList.add('d-none');
+                stickyContainer.classList.remove('is-top', 'is-bottom');
             }
-        }, 300); // Pequeño debounce
+        }
+    };
+
+    tabButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            setActiveTab(btn.dataset.socialTab);
+        });
     });
 
     // Configuración de los modales para evitar que se quede bloqueada la pantalla en móviles al pulsar 'atrás'
@@ -371,7 +586,9 @@ export function renderSocialView(container, amigos, solicitudes, callbacks) {
                         
                         // Recargar la lista de amigos principal
                         const nuevosAmigos = await callbacks.onRefreshFriends();
-                        renderLista(nuevosAmigos, false);
+                        updateAmigosBase(nuevosAmigos);
+                        renderLista(amigosBase, false);
+                        renderRankingList();
                     } else {
                         await callbacks.onRejectRequest(idSolicitud);
                         btn.classList.add('state-rejected');
@@ -420,7 +637,7 @@ export function renderSocialView(container, amigos, solicitudes, callbacks) {
 
         newFriendsResults.innerHTML = lista.map(usuario => {
             const descripcion = usuario.descripcion || 'Sin descripción...';
-            const isAmigo = amigos.some(a => a.apodo === usuario.apodo);
+            const isAmigo = amigosBase.some(a => a.apodo === usuario.apodo);
             const btnHTML = isAmigo 
                 ? `<button class="btn ms-2 d-flex align-items-center justify-content-center flex-shrink-0 text-white" disabled style="width: 28px; height: 28px; padding: 0; background-color: #198754; border-color: #198754; border-radius: 4px;">
                         <span class="material-icons" style="font-size: 20px;">check</span>
