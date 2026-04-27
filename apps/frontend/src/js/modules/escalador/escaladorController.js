@@ -259,7 +259,7 @@ async function renderPerfilConDatos(container, renderFn) {
                 window.location.hash = '#home';
             },
             onOpenTutorial: () => {
-                showToast('Tutorial disponible proximamente.');
+                window.location.hash = '#tutorial';
             },
             onUpdateDescripcion: async (descripcion) => {
                 try {
