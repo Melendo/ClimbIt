@@ -291,7 +291,10 @@ export function renderMisRocodromos(container, rocodromos) {
   if (!Array.isArray(rocodromos) || rocodromos.length === 0) {
     rocodromosHTML = `
           <div class="col-12 d-flex flex-column align-items-center justify-content-start pt-3">
-            <div class="alert alert-info text-center mb-3">No estás suscrito a ningún rocódromo.</div>
+            <h5 class="fst-italic mb-3 text-center">Aún no estás suscrito a ningún rocódromo</h5>
+            <p class="fst-italic mb-4 text-center">
+              Busca un rocódromo al que suscribirte y comienza tu aventura escalando.
+            </p>
             <a href="#buscarRocodromos" class="btn btn-primary">
               <span class="material-icons align-middle me-1">search</span>
               Buscar rocódromos
