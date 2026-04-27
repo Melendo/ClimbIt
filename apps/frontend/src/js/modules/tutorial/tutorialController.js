@@ -2,31 +2,31 @@ import { renderTutorial } from './tutorialView.js';
 
 const TUTORIAL_SLIDES = [
   {
-    image: '/assets/slide1Tutorial.jpeg',
+    image: '/assets/slide1Tutorial.webp',
     alt: 'Logo de ClimbIt con el menu inferior resaltado',
     title: '¡Hola, escalador!',
     text: 'Estás a un clic de llevar tu progreso al siguiente nivel. Usa el menú inferior para moverte entre tus Rocódromos, ver tus Estadísticas o picarte con tus amigos en la sección Social.',
   },
   {
-    image: '/assets/slide2Tutorial.jpeg',
+    image: '/assets/slide2Tutorial.webp',
     alt: 'Lista de búsqueda con estrellas para suscribirse a rocódromos',
     title: 'Busca tu rocódromo',
     text: 'Dale a la lupa y busca los centros donde escalas habitualmente. Pulsa la estrella para suscribirte; así aparecerán siempre en tu inicio para que no pierdas ni un segundo antes de empezar a calentar.',
   },
   {
-    image: '/assets/slide3Tutorial.jpeg',
+    image: '/assets/slide3Tutorial.webp',
     alt: 'Mapa cenital con zonas del rocódromo',
     title: 'Explora las vías',
     text: 'Cada rocódromo se divide en zonas con un mapa dinámico. Filtra por dificultad con el embudo o cambia de zona para encontrar tu próximo reto. ¡Haz zoom para ver cuáles has encadenado ya!',
   },
   {
-    image: '/assets/slide4Tutorial.jpeg',
+    image: '/assets/slide4Tutorial.webp',
     alt: 'Detalle de la ruta con botones de Flash y Completado',
     title: 'Marca tu progreso',
     text: '¿Te lo has sacado a la primera? Marca Flash. ¿Es tu cuenta pendiente? Guárdalo como Proyecto. Registra cada pegue, valora la calidad de la ruta y mira cómo sube tu nivel.',
   },
   {
-    image: '/assets/slide5Tutorial.jpeg',
+    image: '/assets/slide5Tutorial.webp',
     alt: 'Perfil con mapa de calor y estadisticas',
     title: 'Analiza y compite',
     text: 'En tu perfil verás tu Mapa de Calor y estadísticas mensuales. ¿Quieres más motivación? Añade a tus amigos por su apodo y lucha por el número 1 en el Ranking Mensual. ¡A muerte!',
