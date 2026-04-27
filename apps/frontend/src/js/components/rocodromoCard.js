@@ -1,6 +1,6 @@
 import { renderSubscribeButton } from './subscribeButton.js';
 
-const ROCODROMO_LOGO_PLACEHOLDER = '/assets/rocodromoDefecto.jpg';
+const ROCODROMO_LOGO_PLACEHOLDER = '/assets/rocodromoDefecto.webp';
 
 export function renderRocodromoCard(rocodromo, { estaSuscrito = false } = {}) {
   const id = rocodromo?.id;

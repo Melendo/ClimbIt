@@ -1,5 +1,5 @@
 import { renderPerfil, renderEditarPerfil } from './escaladorView.js';
-import { fetchClient, fetchImageObjectUrl, removeToken, saveToken } from '../../core/client.js';
+import { fetchClient, fetchImageObjectUrl, removeToken, saveToken, clearUserCache } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
 import { showToast } from '../../components/toast.js';
 import { showProfilePhotoModal } from '../../components/profilePhotoModal.js';
@@ -243,14 +243,19 @@ async function renderPerfilConDatos(container, renderFn) {
 
     try {
         const [escalador, estadisticas] = await Promise.all([
-            cargarPerfilEscalador(),
+            cargarPerfilEscalador().catch(() => ({
+                apodo: 'Escalador',
+                descripcion: '',
+                fotoSrc: PERFIL_PLACEHOLDER,
+            })),
             cargarEstadisticasEscalador().catch(() => getDefaultEscaladorStats())
         ]);
         escalador.estadisticas = normalizeEscaladorStats(estadisticas);
 
         const callbacks = {
-            onLogout: () => {
+            onLogout: async () => {
                 removeToken();
+                await clearUserCache();
                 window.location.hash = '#home';
             },
             onOpenTutorial: () => {

@@ -36,7 +36,7 @@ export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false, 
   const ubicacionSafe = escapeHtml(ubicacion);
   const descripcionSafe = escapeHtml(descripcion);
   const horariosSafe = escapeHtml(horarios);
-  const logoSrc = rocodromo?.logoSrc || '/assets/rocodromoDefecto.jpg';
+  const logoSrc = rocodromo?.logoSrc || '/assets/rocodromoDefecto.webp';
 
   container.innerHTML = `
     <div class="d-flex flex-column" style="height: 100dvh; overflow: hidden;">
@@ -467,7 +467,7 @@ export function renderRocodromoEstadisticas(container, data) {
   const statsViewModel = buildEscaladorStatsViewModel(estadisticas);
   const rocodromoNombre = renderValueOrFallback(rocodromo?.nombre, 'Rocodromo');
   const escaladorApodo = renderValueOrFallback(escalador?.apodo, 'Escalador');
-  const logoSrc = rocodromo?.logoSrc || '/assets/rocodromoDefecto.jpg';
+  const logoSrc = rocodromo?.logoSrc || '/assets/rocodromoDefecto.webp';
   const avatarSrc = escalador?.fotoSrc || '/assets/johnDoe.png';
 
   container.innerHTML = `
