@@ -4,7 +4,7 @@ export function renderTutorial(container, slides) {
       return `
         <article class="tutorial-slide" aria-hidden="true">
           <div class="tutorial-slide-media">
-            <img class="tutorial-slide-image" src="${slide.image}" alt="${slide.alt}" />
+            <img class="tutorial-slide-image" src="${slide.image}" alt="${slide.alt}" draggable="false" />
           </div>
           <div class="tutorial-slide-content">
             <p class="tutorial-slide-title">${slide.title}</p>
@@ -60,6 +60,7 @@ export function renderTutorial(container, slides) {
     </div>
   `;
 
+  const carousel = container.querySelector('.tutorial-carousel');
   const track = container.querySelector('.tutorial-track');
   const slidesItems = Array.from(container.querySelectorAll('.tutorial-slide'));
   const dots = Array.from(container.querySelectorAll('.tutorial-dot'));
@@ -68,6 +69,7 @@ export function renderTutorial(container, slides) {
   const skipBtn = container.querySelector('.tutorial-skip-btn');
 
   return {
+    carousel,
     track,
     slides: slidesItems,
     dots,

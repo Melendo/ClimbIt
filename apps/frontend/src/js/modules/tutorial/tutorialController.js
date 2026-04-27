@@ -37,10 +37,18 @@ function finishTutorial() {
   window.location.hash = '#misRocodromos';
 }
 
+const SWIPE_THRESHOLD_PX = 48;
+const SWIPE_MAX_VERTICAL_DELTA_PX = 80;
+
 export function tutorialCmd(container) {
   const view = renderTutorial(container, TUTORIAL_SLIDES);
   const totalSlides = TUTORIAL_SLIDES.length;
   let currentIndex = 0;
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchCurrentX = 0;
+  let touchCurrentY = 0;
+  let isTouchTracking = false;
 
   const updateView = () => {
     view.track.style.transform = `translateX(-${currentIndex * 100}%)`;
@@ -68,23 +76,86 @@ export function tutorialCmd(container) {
     }
   };
 
-  view.skipBtn.addEventListener('click', finishTutorial);
-
-  view.prevBtn.addEventListener('click', () => {
+  const goToPrevSlide = () => {
     if (currentIndex === 0) {
       return;
     }
     currentIndex -= 1;
     updateView();
-  });
+  };
 
-  view.nextBtn.addEventListener('click', () => {
+  const goToNextSlide = () => {
     if (currentIndex >= totalSlides - 1) {
       finishTutorial();
       return;
     }
     currentIndex += 1;
     updateView();
+  };
+
+  view.skipBtn.addEventListener('click', finishTutorial);
+
+  view.prevBtn.addEventListener('click', () => {
+    goToPrevSlide();
+  });
+
+  view.nextBtn.addEventListener('click', () => {
+    goToNextSlide();
+  });
+
+  view.carousel.addEventListener('touchstart', (event) => {
+    if (event.touches.length !== 1) {
+      isTouchTracking = false;
+      return;
+    }
+    const [touch] = event.touches;
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    touchCurrentX = touch.clientX;
+    touchCurrentY = touch.clientY;
+    isTouchTracking = true;
+  });
+
+  view.carousel.addEventListener(
+    'touchmove',
+    (event) => {
+      if (!isTouchTracking || event.touches.length !== 1) {
+        return;
+      }
+
+      const [touch] = event.touches;
+      touchCurrentX = touch.clientX;
+      touchCurrentY = touch.clientY;
+
+      const deltaX = Math.abs(touchCurrentX - touchStartX);
+      const deltaY = Math.abs(touchCurrentY - touchStartY);
+
+      if (deltaX > 8 && deltaX > deltaY) {
+        event.preventDefault();
+      }
+    },
+    { passive: false }
+  );
+
+  view.carousel.addEventListener('touchend', () => {
+    if (!isTouchTracking) {
+      return;
+    }
+
+    const deltaX = touchCurrentX - touchStartX;
+    const deltaY = Math.abs(touchCurrentY - touchStartY);
+    isTouchTracking = false;
+
+    if (deltaY > SWIPE_MAX_VERTICAL_DELTA_PX || Math.abs(deltaX) < SWIPE_THRESHOLD_PX) {
+      return;
+    }
+
+    if (deltaX < 0) {
+      goToNextSlide();
+      return;
+    }
+
+    goToPrevSlide();
   });
 
   view.dots.forEach((dot, index) => {
