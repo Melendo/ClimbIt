@@ -37,7 +37,7 @@ export function renderMapaZona(
                     <span class="material-icons align-middle">arrow_back</span>
                 </a>
                 <a href="${infoRocodromoHref}" class="d-flex align-items-center gap-2 text-dark text-decoration-none flex-grow-1 overflow-hidden" aria-label="Ver información del rocódromo">
-                    <img src="${rocodromo?.logoSrc || '/assets/rocodromoDefecto.jpg'}" alt="Icono rocódromo" class="rounded-circle flex-shrink-0" style="width: 32px; height: 32px; object-fit: cover;">
+                    <img src="${rocodromo?.logoSrc || '/assets/rocodromoDefecto.webp'}" alt="Icono rocódromo" class="rounded-circle flex-shrink-0" style="width: 32px; height: 32px; object-fit: cover;">
                     <span class="fw-medium text-truncate">${nombreRocodromo}</span>
                 </a>
                 <button type="button" id="btnEstadisticas" class="btn btn-sm btn-light d-flex align-items-center gap-1 flex-shrink-0" aria-label="Ver estadísticas" title="Ver estadísticas disponible pronto">

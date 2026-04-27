@@ -5,6 +5,20 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 const PORT = process.env.PORT || 3000;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const STATIC_PRECACHE_ASSETS = [
+  'icons/apple-touch-icon.png',
+  'icons/favicon.ico',
+  'icons/pwa-128x128.png',
+  'icons/pwa-192x192.png',
+  'icons/pwa-512x512.png',
+  'icons/presa.png',
+  'assets/Roco.svg',
+  'assets/johnDoe.png',
+  'assets/medalla.svg',
+  'assets/placeholder.webp',
+  'assets/presa.svg',
+  'assets/rocodromoDefecto.webp',
+];
 
 export default defineConfig({
   plugins: [
@@ -12,7 +26,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['icons/apple-touch-icon.png'],
+      includeAssets: STATIC_PRECACHE_ASSETS,
       manifest: {
         name: 'ClimbIt',
         short_name: 'ClimbIt',
@@ -88,18 +102,55 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /\/(escaladores|rocodromos|zonas|amistades)\b.*|\/pistas\b(?!\/\d+\/imagen$).*/i,
+            urlPattern: /\/escaladores\/fotos-perfil\/\d+$|\/rocodromos\/\d+\/logo$/i,
             method: 'GET',
-            handler: 'NetworkFirst',
+            handler: 'StaleWhileRevalidate',
             options: {
-              cacheName: 'api-cache',
-              networkTimeoutSeconds: 10,
+              cacheName: 'images-cache',
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24,
+              },
+              cacheableResponse: {
+                statuses: [200],
+              },
+            },
+          },
+          {
+            urlPattern:
+              /\/escaladores\/(perfil|stats\/resumen|stats\/tipos|stats\/actividad-mensual(?:\?.*)?|mis-rocodromos)$|\/amistades\/(mis-amigos|solicitudes-pendientes)$|\/rocodromos(?:\/\d+)?$/i,
+            method: 'GET',
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'api-dynamic-data',
               matchOptions: {
                 ignoreSearch: false,
               },
               expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 15,
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 6,
+              },
+              cacheableResponse: {
+                statuses: [200],
+              },
+            },
+          },
+          {
+            urlPattern: /\/zonas\b.*|\/pistas\b(?!\/\d+\/imagen$).*|\/rocodromos\/zonas\/\d+\b.*|\/rocodromos\/\d+\/escalasDificultad\b.*/i,
+            method: 'GET',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-cache',
+              networkTimeoutSeconds: 4,
+              matchOptions: {
+                ignoreSearch: false,
+              },
+              expiration: {
+                maxEntries: 300,
+                maxAgeSeconds: 60 * 60 * 6,
+              },
+              cacheableResponse: {
+                statuses: [200],
               },
             },
           },

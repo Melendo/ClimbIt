@@ -9,7 +9,7 @@ import {
 import { fetchClient, fetchImageObjectUrl, canManageRocodromo } from '../../core/client.js';
 import { showLoading, showError, showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
 
-const ROCODROMO_LOGO_PLACEHOLDER = '/assets/rocodromoDefecto.jpg';
+const ROCODROMO_LOGO_PLACEHOLDER = '/assets/rocodromoDefecto.webp';
 const PERFIL_PLACEHOLDER = '/assets/johnDoe.png';
 const MAX_LOGO_SIZE_BYTES = 3 * 1024 * 1024;
 const DEFAULT_ESCALADOR_STATS = {

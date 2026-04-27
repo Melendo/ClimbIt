@@ -1,11 +1,11 @@
 // Contenedor principal donde se renderiza el contenido
+import { showToast } from '../components/toast.js';
+
 const appContainer = document.getElementById('app-container');
 export const mainContainer = appContainer.querySelector('.app-content') || appContainer;
 
 let connectivityBanner = null;
 let connectivityBannerInitialized = false;
-
-
 
 function ensureConnectivityBanner() {
     if (connectivityBanner) {
@@ -64,6 +64,11 @@ export function showLoading() {
 }
 
 export function showError(message) {
+    if (typeof message === 'string' && message.includes('Sin conexión: la app está en modo lectura')) {
+        showToast(message, { variant: 'danger' });
+        return;
+    }
+
     if (mainContainer) {
         mainContainer.innerHTML = `
         <div class="card-header bg-white d-flex align-items-center justify-content-between gap-2 py-3">

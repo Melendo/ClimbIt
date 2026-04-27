@@ -1,5 +1,5 @@
 import { renderLogin, renderRegistroEmail, renderRegistroPassword, renderRegistroApodo } from './authView.js';
-import { fetchClient, saveToken } from '../../core/client.js';
+import { fetchClient, saveToken, warmUpAppDataCache } from '../../core/client.js';
 
 // Controlador de login en una sola vista
 export function loginCmd(container) {
@@ -25,6 +25,8 @@ export function loginCmd(container) {
             // Guardar el token
             if (data.token) {
                 saveToken(data.token);
+                // Cebar cache dinámica antes de navegar para mejorar la disponibilidad offline.
+                await warmUpAppDataCache();
                 // Redirigir al listado de rocódromos
                 window.location.hash = '#misRocodromos';
             } else {
@@ -110,6 +112,8 @@ function registroApodoCmd(container) {
             // Guardar el token JWT
             if (data.token) {
                 saveToken(data.token);
+                // Cebar cache dinámica antes de navegar para mejorar la disponibilidad offline.
+                await warmUpAppDataCache();
                 // Redirigir al listado de rocódromos
                 window.location.hash = '#misRocodromos';
             } else {

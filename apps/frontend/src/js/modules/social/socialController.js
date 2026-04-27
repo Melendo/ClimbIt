@@ -38,15 +38,97 @@ async function resolverAmigoCompleto(amigo) {
     }
 }
 
+async function safeGetArray(endpoint, warningMessage) {
+    try {
+        const response = await fetchClient(endpoint);
+        const parsed = await response.json();
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (err) {
+        console.warn(`${warningMessage}:`, err.message);
+        return [];
+    }
+}
+
+async function responderSolicitud(idSolicitud, respuesta) {
+    const res = await fetchClient('/amistades/responder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idSolicitud, respuesta })
+    });
+    return await res.json();
+}
+
+function buildSocialCallbacks(amigosConFoto) {
+    return {
+        onSearch: (query) => {
+            if (!query || query.length < 2) {
+                return amigosConFoto;
+            }
+            const lowerQuery = query.toLowerCase();
+            return amigosConFoto.filter((amigo) =>
+                amigo.apodo && amigo.apodo.toLowerCase().includes(lowerQuery)
+            );
+        },
+        onSearchNewFriends: async (query) => {
+            if (!query || query.length < 2) return [];
+            try {
+                const searchRes = await fetchClient(`/escaladores/buscar?q=${encodeURIComponent(query)}`);
+                const resultados = await searchRes.json();
+                return await Promise.all(
+                    resultados.map((usuario) => resolverFotoPerfil(usuario))
+                );
+            } catch (err) {
+                console.error('Error al buscar nuevos amigos:', err);
+                return [];
+            }
+        },
+        onSendFriendRequest: async (apodoDestinatario) => {
+            try {
+                const res = await fetchClient('/amistades/enviar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ apodoDestinatario })
+                });
+                return await res.json();
+            } catch (err) {
+                if (err.response) {
+                    try {
+                        const errorBody = await err.response.json();
+                        if (errorBody && errorBody.error) {
+                            throw new Error(errorBody.error);
+                        }
+                    } catch (e) {
+                        if (e.message !== err.message) {
+                            throw e;
+                        }
+                    }
+                }
+                console.error('Error al enviar solicitud de amistad:', err);
+                throw err;
+            }
+        },
+        onAcceptRequest: async (idSolicitud) => await responderSolicitud(idSolicitud, 'aceptada'),
+        onRejectRequest: async (idSolicitud) => await responderSolicitud(idSolicitud, 'rechazada'),
+        onRefreshFriends: async () => {
+            const nuevosAmigos = await safeGetArray('/amistades/mis-amigos', 'No se pudo refrescar la lista de amigos');
+            if (!nuevosAmigos.length) {
+                return amigosConFoto;
+            }
+            return await Promise.all(nuevosAmigos.map((amigo) => resolverAmigoCompleto(amigo)));
+        }
+    };
+}
+
 export async function socialCmd(container) {
     showLoading();
+
     try {
-        const [amigosRes, solicitudesRes] = await Promise.all([
-            fetchClient('/amistades/mis-amigos'),
-            fetchClient('/amistades/solicitudes-pendientes')
+        const [amigos, solicitudes] = await Promise.all([
+            safeGetArray('/amistades/mis-amigos', 'No se pudo cargar la lista de amigos'),
+            safeGetArray('/amistades/solicitudes-pendientes', 'No se pudo cargar el buzón de solicitudes')
         ]);
-        const amigos = await amigosRes.json();
-        const solicitudes = await solicitudesRes.json();
         
         const amigosConFoto = await Promise.all(
             amigos.map(amigo => resolverAmigoCompleto(amigo))
@@ -71,85 +153,11 @@ export async function socialCmd(container) {
                 return { ...sol, remitente: remitenteConFoto };
             })
         );
-
-        const callbacks = {
-            onSearch: (query) => {
-                if (!query || query.length < 2) {
-                    return amigosConFoto; // Mostramos lista base si el query es < 2
-                }
-                const lowerQuery = query.toLowerCase();
-                return amigosConFoto.filter(amigo => 
-                    amigo.apodo && amigo.apodo.toLowerCase().includes(lowerQuery)
-                );
-            },
-            onSearchNewFriends: async (query) => {
-                if (!query || query.length < 2) return [];
-                try {
-                    const searchRes = await fetchClient(`/escaladores/buscar?q=${encodeURIComponent(query)}`);
-                    const resultados = await searchRes.json();
-                    return await Promise.all(
-                        resultados.map(usuario => resolverFotoPerfil(usuario))
-                    );
-                } catch (err) {
-                    console.error('Error al buscar nuevos amigos:', err);
-                    return [];
-                }
-            },
-            onSendFriendRequest: async (apodoDestinatario) => {
-                try {
-                    const res = await fetchClient('/amistades/enviar', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ apodoDestinatario })
-                    });
-                    return await res.json();
-                } catch (err) {
-                    if (err.response) {
-                        try {
-                            const errorBody = await err.response.json();
-                            if (errorBody && errorBody.error) {
-                                throw new Error(errorBody.error);
-                            }
-                        } catch (e) {
-                            if (e.message !== err.message) {
-                                throw e;
-                            }
-                        }
-                    }
-                    console.error('Error al enviar solicitud de amistad:', err);
-                    throw err;
-                }
-            },
-            onAcceptRequest: async (idSolicitud) => {
-                const res = await fetchClient('/amistades/responder', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ idSolicitud, respuesta: 'aceptada' })
-                });
-                return await res.json();
-            },
-            onRejectRequest: async (idSolicitud) => {
-                const res = await fetchClient('/amistades/responder', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ idSolicitud, respuesta: 'rechazada' })
-                });
-                return await res.json();
-            },
-            onRefreshFriends: async () => {
-                const response = await fetchClient('/amistades/mis-amigos');
-                const nuevosAmigos = await response.json();
-                return await Promise.all(
-                    nuevosAmigos.map(amigo => resolverAmigoCompleto(amigo))
-                );
-            }
-        };
-
+        const callbacks = buildSocialCallbacks(amigosConFoto);
         renderSocialView(container, amigosConFoto, solicitudesConFoto, callbacks);
     } catch (err) {
-        showError(`Error al cargar sección social: ${err.message}`);
+        console.warn('Error al cargar sección social:', err.message);
+        renderSocialView(container, [], [], buildSocialCallbacks([]));
     }
 }
 
