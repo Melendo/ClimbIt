@@ -40,9 +40,7 @@ describe('CrearZona', () => {
 
     // Assert
     expect(mockRocodromoModel.findByPk).toHaveBeenCalledWith(datosZona.idRoco);
-    expect(mockZonaRepository.crearZona).toHaveBeenCalledWith(
-      expect.any(Zona)
-    );
+    expect(mockZonaRepository.crearZona).toHaveBeenCalledWith(expect.any(Zona));
     expect(resultado).toEqual(zonaCreada);
   });
 

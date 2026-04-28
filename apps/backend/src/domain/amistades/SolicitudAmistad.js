@@ -5,7 +5,9 @@ class SolicitudAmistad {
     }
 
     if (idRemitente === idDestinatario) {
-      throw new Error('Un escalador no puede enviarse una solicitud a sí mismo');
+      throw new Error(
+        'Un escalador no puede enviarse una solicitud a sí mismo'
+      );
     }
 
     const estadosValidos = ['pendiente', 'aceptada', 'rechazada'];

@@ -8,7 +8,7 @@ class ZonaRepositoryPostgres extends ZonaRepository {
     super();
     this.ZonaModel = zonaModel;
   }
-  
+
   // Método privado para mapear
   _toDomain(zonaModel) {
     if (!zonaModel) return null;
@@ -21,10 +21,14 @@ class ZonaRepositoryPostgres extends ZonaRepository {
         zonaModel.activo
       );
     } catch (error) {
-      throw new ValidationError(error.message, 'ZONA_MODEL_MAPPING_FAILED', error);
+      throw new ValidationError(
+        error.message,
+        'ZONA_MODEL_MAPPING_FAILED',
+        error
+      );
     }
   }
-  
+
   async crearZona(zona) {
     try {
       const data = {
@@ -33,7 +37,7 @@ class ZonaRepositoryPostgres extends ZonaRepository {
         mapa: zona.mapa,
       };
       const zonaModel = await this.ZonaModel.create(data);
-      
+
       return this._toDomain(zonaModel);
     } catch (error) {
       throw mapRepositoryError(error, {
@@ -42,42 +46,42 @@ class ZonaRepositoryPostgres extends ZonaRepository {
       });
     }
   }
-  
+
   async obtenerPistasDeZona(idZona, idEscalador) {
     try {
       const includeOptions = [
         {
           association: 'pistas',
           include: idEscalador
-          ? [
-            {
-              association: 'escaladores',
-              where: { id: idEscalador },
-              required: false,
-            },
-          ]
-          : [],
+            ? [
+                {
+                  association: 'escaladores',
+                  where: { id: idEscalador },
+                  required: false,
+                },
+              ]
+            : [],
           where: {
             activo: true,
           },
         },
       ];
-      
+
       const zonaData = await this.ZonaModel.findByPk(idZona, {
         include: includeOptions,
       });
-      
+
       if (!zonaData) {
         return null;
       }
-      
+
       // Mapear las pistas asociadas
       const pistas = zonaData.pistas.map((pista) => {
         let estado = null;
         if (pista.escaladores && pista.escaladores.length > 0) {
           estado = pista.escaladores[0].EscalaPista.estado;
         }
-        
+
         return {
           id: pista.id,
           idZona: pista.idZona,
@@ -93,7 +97,7 @@ class ZonaRepositoryPostgres extends ZonaRepository {
           estado,
         };
       });
-      
+
       return pistas;
     } catch (error) {
       throw mapRepositoryError(error, {
@@ -102,7 +106,7 @@ class ZonaRepositoryPostgres extends ZonaRepository {
       });
     }
   }
-  
+
   async encontrarPorId(idZona) {
     try {
       const zonaModel = await this.ZonaModel.findByPk(idZona);
@@ -114,18 +118,18 @@ class ZonaRepositoryPostgres extends ZonaRepository {
       });
     }
   }
-  
+
   async actualizarMapaZona(idZona, mapaUrl) {
     try {
       const zonaModel = await this.ZonaModel.findByPk(idZona);
-      
+
       if (!zonaModel) {
         return null;
       }
-      
+
       zonaModel.mapa = mapaUrl;
       await zonaModel.save();
-      
+
       return this._toDomain(zonaModel);
     } catch (error) {
       throw mapRepositoryError(error, {
@@ -134,7 +138,6 @@ class ZonaRepositoryPostgres extends ZonaRepository {
       });
     }
   }
-  
 }
 
 export default ZonaRepositoryPostgres;

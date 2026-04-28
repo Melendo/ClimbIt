@@ -5,7 +5,9 @@ class Amistad {
     }
 
     if (idEscalador1 >= idEscalador2) {
-      throw new Error('La amistad debe almacenarse con idEscalador1 menor que idEscalador2');
+      throw new Error(
+        'La amistad debe almacenarse con idEscalador1 menor que idEscalador2'
+      );
     }
 
     this.id = id;

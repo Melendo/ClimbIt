@@ -1,6 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { BadRequestError, NotFoundError } from '../../../domain/sharedObjects/AppError.js';
+import {
+  BadRequestError,
+  NotFoundError,
+} from '../../../domain/sharedObjects/AppError.js';
 
 class RocodromoController {
   constructor(rocodromoUseCases) {
@@ -89,20 +92,16 @@ class RocodromoController {
   async actualizarInformacion(req, res, next) {
     try {
       const { id } = req.params;
-      const {
-        nombre,
-        ubicacion,
-        descripcion,
-        horarios,
-      } = req.body;
+      const { nombre, ubicacion, descripcion, horarios } = req.body;
 
-      const rocodromoActualizado = await this.useCases.actualizarInformacion.execute({
-        idRocodromo: id,
-        nombre,
-        ubicacion,
-        descripcion,
-        horarios
-      });
+      const rocodromoActualizado =
+        await this.useCases.actualizarInformacion.execute({
+          idRocodromo: id,
+          nombre,
+          ubicacion,
+          descripcion,
+          horarios,
+        });
 
       res.status(200).json(rocodromoActualizado);
     } catch (error) {
@@ -116,11 +115,15 @@ class RocodromoController {
 
       if (!req.file) {
         return next(
-          new BadRequestError('El logo es requerido', 'ROCODROMO_LOGO_REQUERIDO')
+          new BadRequestError(
+            'El logo es requerido',
+            'ROCODROMO_LOGO_REQUERIDO'
+          )
         );
       }
 
-      const existingRocodromo = await this.useCases.obtenerInformacion.execute(id);
+      const existingRocodromo =
+        await this.useCases.obtenerInformacion.execute(id);
 
       if (!existingRocodromo) {
         const uploadedPath = path.resolve(
@@ -198,7 +201,11 @@ class RocodromoController {
       res.sendFile(logoPath, (err) => {
         if (err && !res.headersSent) {
           next(
-            new NotFoundError('Logo no encontrado', 'ROCODROMO_LOGO_NOT_FOUND', err)
+            new NotFoundError(
+              'Logo no encontrado',
+              'ROCODROMO_LOGO_NOT_FOUND',
+              err
+            )
           );
         }
       });

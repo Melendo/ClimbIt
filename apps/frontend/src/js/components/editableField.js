@@ -2,7 +2,9 @@ import { renderEditDivider } from './editDivider.js';
 
 function buildAttributes(attributes = {}) {
   return Object.entries(attributes)
-    .filter(([, value]) => value !== null && value !== undefined && value !== false)
+    .filter(
+      ([, value]) => value !== null && value !== undefined && value !== false
+    )
     .map(([key, value]) => {
       if (value === true) {
         return `${key}`;
@@ -52,10 +54,10 @@ export function renderEditableField({
 
   const dividerMarkup = showEditButton
     ? renderEditDivider({
-      buttonId: `${domPrefix}-${prefix}-edit-btn`,
-      label: `Editar ${prefix}`,
-      title: `Editar ${prefix}`,
-    })
+        buttonId: `${domPrefix}-${prefix}-edit-btn`,
+        label: `Editar ${prefix}`,
+        title: `Editar ${prefix}`,
+      })
     : '';
   const showActions = showFieldActions;
   const showEditor = !showView || startInEditMode;
@@ -65,14 +67,18 @@ export function renderEditableField({
   return `
     <div class="${wrapperClass}" ${dataPrefix}-wrap>
       ${titleHtml}
-      ${showView ? `
+      ${
+        showView
+          ? `
       <div class="perfil-${prefix}-view w-100" ${dataPrefix}-view>
         <div class="perfil-${prefix}-view-content">
           ${viewContent || ''}
           ${dividerMarkup}
         </div>
       </div>
-      ` : ''}
+      `
+          : ''
+      }
       <div class="perfil-${prefix}-edit${showEditor ? '' : ' d-none'}" ${dataPrefix}-edit>
         <div class="perfil-input-wrap${isTextarea ? ' is-textarea' : ''}">
           ${inputMarkup}
@@ -89,7 +95,9 @@ export function renderEditableField({
         </div>
         <div class="perfil-input-counter text-muted small text-end mt-1" ${dataPrefix}-counter></div>
         ${feedbackOutside}
-        ${showActions ? `
+        ${
+          showActions
+            ? `
         <div class="perfil-descripcion-actions mt-2">
           <button type="button" class="btn btn-sm btn-outline-secondary" id="${domPrefix}-${prefix}-cancel-btn">
             Cancelar
@@ -98,7 +106,9 @@ export function renderEditableField({
             Guardar
           </button>
         </div>
-        ` : ''}
+        `
+            : ''
+        }
       </div>
     </div>
   `;
@@ -122,18 +132,23 @@ export function initEditableField(container, config) {
   const edit = container.querySelector(`[${dataPrefix}-edit]`);
   const input = container.querySelector(`#${domPrefix}-${prefix}-input`);
   const editBtn = container.querySelector(`#${domPrefix}-${prefix}-edit-btn`);
-  const cancelBtn = container.querySelector(`#${domPrefix}-${prefix}-cancel-btn`);
+  const cancelBtn = container.querySelector(
+    `#${domPrefix}-${prefix}-cancel-btn`
+  );
   const clearBtn = container.querySelector(`#${domPrefix}-${prefix}-clear-btn`);
   const counter = container.querySelector(`[${dataPrefix}-counter]`);
-  const submitBtn = container.querySelector(`#${domPrefix}-${prefix}-submit-btn`);
+  const submitBtn = container.querySelector(
+    `#${domPrefix}-${prefix}-submit-btn`
+  );
 
   if (!wrap || !edit || !input || !clearBtn) {
     return null;
   }
 
-  const initialNormalized = typeof initialValue === 'string'
-    ? initialValue.trim()
-    : (input.value || '').trim();
+  const initialNormalized =
+    typeof initialValue === 'string'
+      ? initialValue.trim()
+      : (input.value || '').trim();
   const counterMax = Number.isInteger(maxLength) ? maxLength : input.maxLength;
 
   const updateCounter = () => {

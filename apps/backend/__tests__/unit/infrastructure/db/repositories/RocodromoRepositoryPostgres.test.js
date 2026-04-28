@@ -80,11 +80,13 @@ describe('RocodromoRepositoryPostgres', () => {
 
       // Assert
       expect(mockRocodromoModel.findByPk).toHaveBeenCalledWith(idRocodromo, {
-        include: [{
-          association: 'zonas',
-          separate: true,
-          order: [['id', 'ASC']],
-        }],
+        include: [
+          {
+            association: 'zonas',
+            separate: true,
+            order: [['id', 'ASC']],
+          },
+        ],
       });
       expect(resultado).toHaveLength(2);
       expect(resultado[0]).toEqual({

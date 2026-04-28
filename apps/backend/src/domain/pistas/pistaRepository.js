@@ -23,7 +23,7 @@ class PistaRepository {
   async obtenerValoracionTotal(idPista) {
     throw new Error('Método "obtenerValoracionTotal" no implementado');
   }
-  
+
   async actualizarImagenUrl(id, imagenUrl) {
     throw new Error('Método "actualizarImagenUrl" no implementado');
   }
@@ -41,22 +41,33 @@ class PistaRepository {
   }
 
   async obtenerResumenEstadisticasEscalador(idEscalador) {
-    throw new Error('Método "obtenerResumenEstadisticasEscalador" no implementado');
+    throw new Error(
+      'Método "obtenerResumenEstadisticasEscalador" no implementado'
+    );
   }
 
   async obtenerTiposEstadisticasEscalador(idEscalador) {
-    throw new Error('Método "obtenerTiposEstadisticasEscalador" no implementado');
+    throw new Error(
+      'Método "obtenerTiposEstadisticasEscalador" no implementado'
+    );
   }
 
   async obtenerActividadMensualEscalador(idEscalador, year, month) {
-    throw new Error('Método "obtenerActividadMensualEscalador" no implementado');
+    throw new Error(
+      'Método "obtenerActividadMensualEscalador" no implementado'
+    );
   }
 
   async obtenerTotalPistasActivasPorRocodromo(idRocodromo) {
-    throw new Error('Método "obtenerTotalPistasActivasPorRocodromo" no implementado');
+    throw new Error(
+      'Método "obtenerTotalPistasActivasPorRocodromo" no implementado'
+    );
   }
 
-  async obtenerDificultadesEscaladasPorTipoEnRocodromo(idEscalador, idRocodromo) {
+  async obtenerDificultadesEscaladasPorTipoEnRocodromo(
+    idEscalador,
+    idRocodromo
+  ) {
     throw new Error(
       'Método "obtenerDificultadesEscaladasPorTipoEnRocodromo" no implementado'
     );

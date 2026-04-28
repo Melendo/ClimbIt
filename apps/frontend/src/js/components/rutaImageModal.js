@@ -18,26 +18,23 @@ function cleanupBootstrapModalArtifacts() {
 function getTouchDistance(touchA, touchB) {
   return Math.hypot(
     touchA.clientX - touchB.clientX,
-    touchA.clientY - touchB.clientY,
+    touchA.clientY - touchB.clientY
   );
 }
 
 function getTouchMidpoint(touchA, touchB, rect) {
   return {
-    x: ((touchA.clientX + touchB.clientX) / 2) - rect.left,
-    y: ((touchA.clientY + touchB.clientY) / 2) - rect.top,
+    x: (touchA.clientX + touchB.clientX) / 2 - rect.left,
+    y: (touchA.clientY + touchB.clientY) / 2 - rect.top,
   };
 }
 
-export function renderRutaImageModal({
-  modalId,
-  title,
-  imageSrc,
-  imageAlt,
-}) {
+export function renderRutaImageModal({ modalId, title, imageSrc, imageAlt }) {
   const safeTitle = escapeHtml(title || 'Ruta');
   const safeSrc = escapeHtml(imageSrc || '/assets/placeholder.webp');
-  const safeAlt = escapeHtml(imageAlt || `Imagen ampliada de la ruta ${safeTitle}`);
+  const safeAlt = escapeHtml(
+    imageAlt || `Imagen ampliada de la ruta ${safeTitle}`
+  );
 
   return `
 <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalId}-label" aria-hidden="true">
@@ -65,7 +62,9 @@ export function renderRutaImageModal({
 export function setupRutaImageModal(container, { modalId }) {
   const imageModal = container.querySelector(`#${modalId}`);
   const modalImage = container.querySelector(`#${modalId}-img`);
-  const modalBody = container.querySelector(`#${modalId} .ruta-image-modal-body`);
+  const modalBody = container.querySelector(
+    `#${modalId} .ruta-image-modal-body`
+  );
 
   if (!imageModal || !modalImage || !modalBody) {
     return;
@@ -88,7 +87,8 @@ export function setupRutaImageModal(container, { modalId }) {
   };
   let teardownController = null;
 
-  const clampZoom = (value) => Math.max(ZOOM_LIMITS.min, Math.min(ZOOM_LIMITS.max, value));
+  const clampZoom = (value) =>
+    Math.max(ZOOM_LIMITS.min, Math.min(ZOOM_LIMITS.max, value));
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
   const isModalVisible = () => imageModal.classList.contains('show');
@@ -109,23 +109,25 @@ export function setupRutaImageModal(container, { modalId }) {
     const scaledWidth = state.baseWidth * state.zoomLevel;
     const scaledHeight = state.baseHeight * state.zoomLevel;
 
-    const minEffectiveX = scaledWidth > stageWidth
-      ? stageWidth - scaledWidth
-      : (stageWidth - scaledWidth) / 2;
-    const maxEffectiveX = scaledWidth > stageWidth
-      ? 0
-      : (stageWidth - scaledWidth) / 2;
-    const minEffectiveY = scaledHeight > stageHeight
-      ? stageHeight - scaledHeight
-      : (stageHeight - scaledHeight) / 2;
-    const maxEffectiveY = scaledHeight > stageHeight
-      ? 0
-      : (stageHeight - scaledHeight) / 2;
+    const minEffectiveX =
+      scaledWidth > stageWidth
+        ? stageWidth - scaledWidth
+        : (stageWidth - scaledWidth) / 2;
+    const maxEffectiveX =
+      scaledWidth > stageWidth ? 0 : (stageWidth - scaledWidth) / 2;
+    const minEffectiveY =
+      scaledHeight > stageHeight
+        ? stageHeight - scaledHeight
+        : (stageHeight - scaledHeight) / 2;
+    const maxEffectiveY =
+      scaledHeight > stageHeight ? 0 : (stageHeight - scaledHeight) / 2;
 
     const effectiveX = state.baseOffsetX + state.translateX;
     const effectiveY = state.baseOffsetY + state.translateY;
-    state.translateX = clamp(effectiveX, minEffectiveX, maxEffectiveX) - state.baseOffsetX;
-    state.translateY = clamp(effectiveY, minEffectiveY, maxEffectiveY) - state.baseOffsetY;
+    state.translateX =
+      clamp(effectiveX, minEffectiveX, maxEffectiveX) - state.baseOffsetX;
+    state.translateY =
+      clamp(effectiveY, minEffectiveY, maxEffectiveY) - state.baseOffsetY;
   };
 
   const applyTransform = () => {
@@ -141,11 +143,15 @@ export function setupRutaImageModal(container, { modalId }) {
       return;
     }
 
-    const imagePointX = (pointX - state.baseOffsetX - state.translateX) / state.zoomLevel;
-    const imagePointY = (pointY - state.baseOffsetY - state.translateY) / state.zoomLevel;
+    const imagePointX =
+      (pointX - state.baseOffsetX - state.translateX) / state.zoomLevel;
+    const imagePointY =
+      (pointY - state.baseOffsetY - state.translateY) / state.zoomLevel;
     state.zoomLevel = newZoom;
-    state.translateX = pointX - state.baseOffsetX - (imagePointX * state.zoomLevel);
-    state.translateY = pointY - state.baseOffsetY - (imagePointY * state.zoomLevel);
+    state.translateX =
+      pointX - state.baseOffsetX - imagePointX * state.zoomLevel;
+    state.translateY =
+      pointY - state.baseOffsetY - imagePointY * state.zoomLevel;
     applyTransform();
   };
 
@@ -199,14 +205,19 @@ export function setupRutaImageModal(container, { modalId }) {
     }
   };
 
-  modalBody.addEventListener('wheel', (event) => {
-    event.preventDefault();
-    const rect = modalBody.getBoundingClientRect();
-    const pointX = event.clientX - rect.left;
-    const pointY = event.clientY - rect.top;
-    const direction = event.deltaY < 0 ? ZOOM_LIMITS.wheelStep : -ZOOM_LIMITS.wheelStep;
-    setZoomAtPoint(state.zoomLevel + direction, pointX, pointY);
-  }, { passive: false });
+  modalBody.addEventListener(
+    'wheel',
+    (event) => {
+      event.preventDefault();
+      const rect = modalBody.getBoundingClientRect();
+      const pointX = event.clientX - rect.left;
+      const pointY = event.clientY - rect.top;
+      const direction =
+        event.deltaY < 0 ? ZOOM_LIMITS.wheelStep : -ZOOM_LIMITS.wheelStep;
+      setZoomAtPoint(state.zoomLevel + direction, pointX, pointY);
+    },
+    { passive: false }
+  );
 
   modalBody.addEventListener('pointerdown', (event) => {
     if (state.zoomLevel <= 1) {
@@ -236,7 +247,10 @@ export function setupRutaImageModal(container, { modalId }) {
   });
 
   const stopDragging = (event) => {
-    if (state.dragPointerId !== null && event.pointerId !== state.dragPointerId) {
+    if (
+      state.dragPointerId !== null &&
+      event.pointerId !== state.dragPointerId
+    ) {
       return;
     }
     state.isDragging = false;
@@ -248,26 +262,44 @@ export function setupRutaImageModal(container, { modalId }) {
   modalBody.addEventListener('pointercancel', stopDragging);
   modalBody.addEventListener('pointerleave', stopDragging);
 
-  modalBody.addEventListener('touchstart', (event) => {
-    if (event.touches.length === 2) {
-      state.pinchStartDistance = getTouchDistance(event.touches[0], event.touches[1]);
-      state.pinchStartZoom = state.zoomLevel;
-    }
-  }, { passive: true });
+  modalBody.addEventListener(
+    'touchstart',
+    (event) => {
+      if (event.touches.length === 2) {
+        state.pinchStartDistance = getTouchDistance(
+          event.touches[0],
+          event.touches[1]
+        );
+        state.pinchStartZoom = state.zoomLevel;
+      }
+    },
+    { passive: true }
+  );
 
-  modalBody.addEventListener('touchmove', (event) => {
-    if (event.touches.length !== 2 || !state.pinchStartDistance) {
-      return;
-    }
-    event.preventDefault();
-    state.isDragging = false;
-    state.dragPointerId = null;
-    const currentDistance = getTouchDistance(event.touches[0], event.touches[1]);
-    const ratio = currentDistance / state.pinchStartDistance;
-    const rect = modalBody.getBoundingClientRect();
-    const midpoint = getTouchMidpoint(event.touches[0], event.touches[1], rect);
-    setZoomAtPoint(state.pinchStartZoom * ratio, midpoint.x, midpoint.y);
-  }, { passive: false });
+  modalBody.addEventListener(
+    'touchmove',
+    (event) => {
+      if (event.touches.length !== 2 || !state.pinchStartDistance) {
+        return;
+      }
+      event.preventDefault();
+      state.isDragging = false;
+      state.dragPointerId = null;
+      const currentDistance = getTouchDistance(
+        event.touches[0],
+        event.touches[1]
+      );
+      const ratio = currentDistance / state.pinchStartDistance;
+      const rect = modalBody.getBoundingClientRect();
+      const midpoint = getTouchMidpoint(
+        event.touches[0],
+        event.touches[1],
+        rect
+      );
+      setZoomAtPoint(state.pinchStartZoom * ratio, midpoint.x, midpoint.y);
+    },
+    { passive: false }
+  );
 
   modalBody.addEventListener('touchend', resetPinchState, { passive: true });
   modalBody.addEventListener('touchcancel', resetPinchState, { passive: true });
@@ -275,21 +307,31 @@ export function setupRutaImageModal(container, { modalId }) {
   imageModal.addEventListener('show.bs.modal', () => {
     if (teardownController) teardownController.abort();
     teardownController = new AbortController();
-    
+
     // Truco del historial para capturar el botón atrás del móvil
     history.pushState({ modal: modalId }, '', location.href);
 
-    window.addEventListener('resize', () => {
-      if (!isModalVisible()) {
-        return;
-      }
-      updateBaseMetrics();
-      applyTransform();
-    }, { signal: teardownController.signal });
+    window.addEventListener(
+      'resize',
+      () => {
+        if (!isModalVisible()) {
+          return;
+        }
+        updateBaseMetrics();
+        applyTransform();
+      },
+      { signal: teardownController.signal }
+    );
 
-    window.addEventListener('popstate', handlePopState, { signal: teardownController.signal });
-    window.addEventListener('hashchange', forceCloseAndCleanup, { signal: teardownController.signal });
-    window.addEventListener('pagehide', forceCloseAndCleanup, { signal: teardownController.signal });
+    window.addEventListener('popstate', handlePopState, {
+      signal: teardownController.signal,
+    });
+    window.addEventListener('hashchange', forceCloseAndCleanup, {
+      signal: teardownController.signal,
+    });
+    window.addEventListener('pagehide', forceCloseAndCleanup, {
+      signal: teardownController.signal,
+    });
   });
 
   imageModal.addEventListener('shown.bs.modal', () => {

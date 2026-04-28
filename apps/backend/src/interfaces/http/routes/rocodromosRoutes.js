@@ -15,7 +15,12 @@ const router = express.Router();
 const container = await containerPromise;
 const { rocodromoController } = container;
 
-const RASTER_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const RASTER_IMAGE_MIME_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+];
 const LOGO_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
 /**
@@ -203,7 +208,9 @@ router.put(
   verifyTokenMiddleware,
   actualizarRocodromoValidators,
   validate,
-  authorizeRocodromoAccess({ resolveRocodromoId: resolveRocodromoIdFromRocodromoParam }),
+  authorizeRocodromoAccess({
+    resolveRocodromoId: resolveRocodromoIdFromRocodromoParam,
+  }),
   (req, res, next) => {
     rocodromoController.actualizarInformacion(req, res, next);
   }
@@ -246,12 +253,14 @@ router.post(
   verifyTokenMiddleware,
   subirLogoRocodromoValidators,
   validate,
-  authorizeRocodromoAccess({ resolveRocodromoId: resolveRocodromoIdFromRocodromoParam }),
+  authorizeRocodromoAccess({
+    resolveRocodromoId: resolveRocodromoIdFromRocodromoParam,
+  }),
   uploadLogoRocodromo.single('logo'),
   validateLogoUpload,
   processUploadedRasterToWebp(),
   (req, res, next) => {
-    console.log("ID del rocódromo:", req.params.id);
+    console.log('ID del rocódromo:', req.params.id);
     rocodromoController.subirLogo(req, res, next);
   }
 );

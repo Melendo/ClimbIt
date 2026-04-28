@@ -48,10 +48,14 @@ export default {
       },
     });
 
-    await queryInterface.addIndex('SolicitudesAmistad', ['IDRemitente', 'IDDestinatario'], {
-      unique: true,
-      name: 'solicitudes_amistad_remitente_destinatario_unique',
-    });
+    await queryInterface.addIndex(
+      'SolicitudesAmistad',
+      ['IDRemitente', 'IDDestinatario'],
+      {
+        unique: true,
+        name: 'solicitudes_amistad_remitente_destinatario_unique',
+      }
+    );
 
     await queryInterface.sequelize.query(
       'ALTER TABLE "SolicitudesAmistad" ADD CONSTRAINT "solicitudes_amistad_remitente_distinto_destinatario_check" CHECK ("IDRemitente" <> "IDDestinatario");'
@@ -101,10 +105,14 @@ export default {
       },
     });
 
-    await queryInterface.addIndex('Amistades', ['IDEscalador1', 'IDEscalador2'], {
-      unique: true,
-      name: 'amistades_escalador1_escalador2_unique',
-    });
+    await queryInterface.addIndex(
+      'Amistades',
+      ['IDEscalador1', 'IDEscalador2'],
+      {
+        unique: true,
+        name: 'amistades_escalador1_escalador2_unique',
+      }
+    );
 
     await queryInterface.sequelize.query(
       'ALTER TABLE "Amistades" ADD CONSTRAINT "amistades_escalador1_menor_que_escalador2_check" CHECK ("IDEscalador1" < "IDEscalador2");'
@@ -133,5 +141,5 @@ export default {
     await queryInterface.sequelize.query(
       'DROP TYPE IF EXISTS "enum_SolicitudesAmistad_Estado";'
     );
-  }
+  },
 };

@@ -105,7 +105,9 @@ const runFfmpegToWebp = async ({ inputPath, outputPath, quality }) => {
 
 const isLikelySvgFile = (filePath) => {
   const sampleSize = 4096;
-  const buffer = fs.readFileSync(filePath, { encoding: 'utf8' }).slice(0, sampleSize);
+  const buffer = fs
+    .readFileSync(filePath, { encoding: 'utf8' })
+    .slice(0, sampleSize);
   return /<svg\b[^>]*>/i.test(buffer);
 };
 
@@ -140,7 +142,9 @@ const resolveUploadDir = (uploadDir) => {
 };
 
 const buildFileName = (_req, file) => {
-  const ext = getExtensionByMimeType(file.mimetype) || path.extname(file.originalname).toLowerCase();
+  const ext =
+    getExtensionByMimeType(file.mimetype) ||
+    path.extname(file.originalname).toLowerCase();
   return randomFileName(ext);
 };
 
@@ -152,7 +156,10 @@ const removeFileIfExists = async (filePath) => {
   }
 };
 
-export const validateUploadedFileType = ({ allowedMimeTypes, allowSvg = false }) => {
+export const validateUploadedFileType = ({
+  allowedMimeTypes,
+  allowSvg = false,
+}) => {
   const allowedMimeTypesSet = normalizeAllowedMimeTypes(allowedMimeTypes);
 
   return async (req, _res, next) => {
@@ -163,7 +170,10 @@ export const validateUploadedFileType = ({ allowedMimeTypes, allowSvg = false })
     try {
       const detectedType = await fileTypeFromFile(req.file.path);
 
-      if (detectedType?.mime && allowedMimeTypesSet.has(detectedType.mime.toLowerCase())) {
+      if (
+        detectedType?.mime &&
+        allowedMimeTypesSet.has(detectedType.mime.toLowerCase())
+      ) {
         req.file.detectedMimeType = detectedType.mime;
         return next();
       }
@@ -220,7 +230,10 @@ export const processUploadedRasterToWebp = ({ quality = 82 } = {}) => {
       return next();
     }
 
-    const outputPath = path.join(path.dirname(req.file.path), randomFileName('.webp'));
+    const outputPath = path.join(
+      path.dirname(req.file.path),
+      randomFileName('.webp')
+    );
 
     try {
       await runFfmpegToWebp({

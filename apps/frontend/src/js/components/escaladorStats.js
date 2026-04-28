@@ -40,7 +40,10 @@ function resolveHeatmapToneClass(count) {
   return 'is-zero';
 }
 
-function buildMonthlyActivityViewModel(actividadMensual = [], now = new Date()) {
+function buildMonthlyActivityViewModel(
+  actividadMensual = [],
+  now = new Date()
+) {
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth();
   const monthLabel = now.toLocaleString('es-ES', {
@@ -49,7 +52,8 @@ function buildMonthlyActivityViewModel(actividadMensual = [], now = new Date()) 
   });
   const monthTitle = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  const firstDayIndex = (new Date(currentYear, currentMonth, 1).getDay() + 6) % 7;
+  const firstDayIndex =
+    (new Date(currentYear, currentMonth, 1).getDay() + 6) % 7;
   const totalHeatmapCells = Math.ceil((firstDayIndex + daysInMonth) / 7) * 7;
 
   const actividadPorDia = actividadMensual.reduce((acc, item) => {
@@ -79,13 +83,22 @@ function buildMonthlyActivityViewModel(actividadMensual = [], now = new Date()) 
   });
 
   const heatmapCounts = heatmapCells.map((cell) => (cell ? cell.count : 0));
-  const totalMonthlyRoutes = heatmapCounts.reduce((acc, count) => acc + count, 0);
-  const activeDays = heatmapCells.filter((cell) => cell && cell.count > 0).length;
-  const avgRoutesPerActiveDay = activeDays ? totalMonthlyRoutes / activeDays : 0;
+  const totalMonthlyRoutes = heatmapCounts.reduce(
+    (acc, count) => acc + count,
+    0
+  );
+  const activeDays = heatmapCells.filter(
+    (cell) => cell && cell.count > 0
+  ).length;
+  const avgRoutesPerActiveDay = activeDays
+    ? totalMonthlyRoutes / activeDays
+    : 0;
   const weeklyTotals = [];
 
   for (let i = 0; i < heatmapCounts.length; i += 7) {
-    weeklyTotals.push(heatmapCounts.slice(i, i + 7).reduce((acc, count) => acc + count, 0));
+    weeklyTotals.push(
+      heatmapCounts.slice(i, i + 7).reduce((acc, count) => acc + count, 0)
+    );
   }
 
   return {
@@ -100,7 +113,10 @@ function buildMonthlyActivityViewModel(actividadMensual = [], now = new Date()) 
   };
 }
 
-export function buildEscaladorStatsViewModel(estadisticas = {}, now = new Date()) {
+export function buildEscaladorStatsViewModel(
+  estadisticas = {},
+  now = new Date()
+) {
   const totalRutas = toSafeCount(estadisticas.totalRutas);
   const totalFlash = toSafeCount(estadisticas.totalFlash);
   const totalBloques = toSafeCount(estadisticas.totalBloques);
@@ -112,7 +128,8 @@ export function buildEscaladorStatsViewModel(estadisticas = {}, now = new Date()
   const bloquesPct = totalRutas > 0 ? (totalBloques / totalRutas) * 100 : 0;
   const viasPct = totalRutas > 0 ? (totalVias / totalRutas) * 100 : 0;
   const favoritaTextoRaw =
-    typeof estadisticas.favoritaTexto === 'string' && estadisticas.favoritaTexto.trim()
+    typeof estadisticas.favoritaTexto === 'string' &&
+    estadisticas.favoritaTexto.trim()
       ? estadisticas.favoritaTexto.trim()
       : totalBloques >= totalVias
         ? 'Bloque'
@@ -265,7 +282,9 @@ export function renderMaxDifficultyStatsCard(totals = {}) {
 }
 
 export function renderMonthlyActivityCards(monthly = {}) {
-  const weeklyTotals = Array.isArray(monthly.weeklyTotals) ? monthly.weeklyTotals : [];
+  const weeklyTotals = Array.isArray(monthly.weeklyTotals)
+    ? monthly.weeklyTotals
+    : [];
   const maxWeeklyTotal = Math.max(1, ...weeklyTotals);
   const weeklyBarsHtml = weeklyTotals
     .map((total, index) => {

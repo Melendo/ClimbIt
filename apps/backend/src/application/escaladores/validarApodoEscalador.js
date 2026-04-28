@@ -1,4 +1,7 @@
-import { AppError, InternalServerError } from '../../domain/sharedObjects/AppError.js';
+import {
+  AppError,
+  InternalServerError,
+} from '../../domain/sharedObjects/AppError.js';
 
 class ValidarApodoEscalador {
   constructor(escaladorRepository) {

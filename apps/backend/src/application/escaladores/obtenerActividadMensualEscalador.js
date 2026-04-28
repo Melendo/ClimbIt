@@ -16,19 +16,30 @@ class ObtenerActividadMensualEscalador {
       const escalador = await this.escaladorRepository.encontrarPorApodo(apodo);
 
       if (!escalador) {
-        throw new NotFoundError('Escalador no encontrado', 'ESCALADOR_NOT_FOUND');
+        throw new NotFoundError(
+          'Escalador no encontrado',
+          'ESCALADOR_NOT_FOUND'
+        );
       }
 
       const now = new Date();
       const resolvedYear = Number.isInteger(year) ? year : now.getFullYear();
-      const resolvedMonth = Number.isInteger(month) ? month : now.getMonth() + 1;
+      const resolvedMonth = Number.isInteger(month)
+        ? month
+        : now.getMonth() + 1;
 
       if (resolvedMonth < 1 || resolvedMonth > 12) {
-        throw new BadRequestError('month debe estar entre 1 y 12', 'STATS_MONTH_INVALID');
+        throw new BadRequestError(
+          'month debe estar entre 1 y 12',
+          'STATS_MONTH_INVALID'
+        );
       }
 
       if (resolvedYear < 2000 || resolvedYear > 2100) {
-        throw new BadRequestError('year fuera de rango permitido', 'STATS_YEAR_INVALID');
+        throw new BadRequestError(
+          'year fuera de rango permitido',
+          'STATS_YEAR_INVALID'
+        );
       }
 
       return this.pistaRepository.obtenerActividadMensualEscalador(

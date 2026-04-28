@@ -2,7 +2,7 @@
 
 /** @type {import('sequelize-cli').Migration} */
 export default {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     await queryInterface.removeColumn('Pistas', 'UbicacionMapa');
     await queryInterface.addColumn('Pistas', 'PosX', {
       type: Sequelize.INTEGER,
@@ -14,12 +14,12 @@ export default {
     });
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     await queryInterface.removeColumn('Pistas', 'PosY');
     await queryInterface.removeColumn('Pistas', 'PosX');
     await queryInterface.addColumn('Pistas', 'UbicacionMapa', {
       type: Sequelize.STRING,
       allowNull: true,
     });
-  }
+  },
 };

@@ -30,7 +30,8 @@ class ResponderSolicitudAmistad {
         );
       }
 
-      const destinatario = await this.escaladorRepository.encontrarPorApodo(apodoDestinatario);
+      const destinatario =
+        await this.escaladorRepository.encontrarPorApodo(apodoDestinatario);
       if (!destinatario) {
         throw new NotFoundError(
           `Escalador destinatario ${apodoDestinatario} no encontrado`,
@@ -38,7 +39,8 @@ class ResponderSolicitudAmistad {
         );
       }
 
-      const solicitud = await this.solicitudAmistadRepository.encontrarPorId(idSolicitud);
+      const solicitud =
+        await this.solicitudAmistadRepository.encontrarPorId(idSolicitud);
       if (!solicitud) {
         throw new NotFoundError(
           `Solicitud de amistad con ID ${idSolicitud} no encontrada`,
@@ -60,10 +62,11 @@ class ResponderSolicitudAmistad {
         );
       }
 
-      const yaSonAmigos = await this.amistadRepository.existeAmistadEntreEscaladores(
-        solicitud.idRemitente,
-        solicitud.idDestinatario
-      );
+      const yaSonAmigos =
+        await this.amistadRepository.existeAmistadEntreEscaladores(
+          solicitud.idRemitente,
+          solicitud.idDestinatario
+        );
 
       if (yaSonAmigos) {
         throw new ConflictError(

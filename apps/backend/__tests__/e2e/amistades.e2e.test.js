@@ -16,7 +16,11 @@ describe('E2E: Amistades', () => {
   let solicitudId;
 
   async function limpiarDatos() {
-    const apodos = ['amistad-origen-e2e', 'amistad-destino-e2e', 'amistad-tercero-e2e'];
+    const apodos = [
+      'amistad-origen-e2e',
+      'amistad-destino-e2e',
+      'amistad-tercero-e2e',
+    ];
     const escaladores = await db.Escalador.findAll({
       where: { apodo: apodos },
       attributes: ['id'],
@@ -99,7 +103,9 @@ describe('E2E: Amistades', () => {
         .expect(201);
 
       expect(response.body).toHaveProperty('mensaje');
-      expect(response.body.mensaje).toContain('Solicitud de amistad enviada correctamente');
+      expect(response.body.mensaje).toContain(
+        'Solicitud de amistad enviada correctamente'
+      );
       expect(response.body).toHaveProperty('solicitud');
       expect(response.body.solicitud).toHaveProperty('id');
       expect(response.body.solicitud.idRemitente).toBe(escaladorOrigen.id);
@@ -109,13 +115,12 @@ describe('E2E: Amistades', () => {
       solicitudId = response.body.solicitud.id;
     });
 
-     
     it('debería impedir enviar solicitud duplicada', async () => {
       const response = await request(app)
         .post('/amistades/enviar')
         .set('Authorization', `Bearer ${tokenOrigen}`)
-        .send({ apodoDestinatario: escaladorDestino.apodo })
-        
+        .send({ apodoDestinatario: escaladorDestino.apodo });
+
       expect(response.status).toBe(409);
     });
   });
@@ -130,9 +135,14 @@ describe('E2E: Amistades', () => {
 
       expect(response.body).toHaveProperty('mensaje');
       expect(response.body.mensaje).toContain('aceptada correctamente');
-      expect(response.body.solicitud).toEqual({ id: solicitudId, estado: 'aceptada' });
+      expect(response.body.solicitud).toEqual({
+        id: solicitudId,
+        estado: 'aceptada',
+      });
       expect(response.body).toHaveProperty('amistad');
-      expect(response.body.amistad.idEscalador1).toBeLessThan(response.body.amistad.idEscalador2);
+      expect(response.body.amistad.idEscalador1).toBeLessThan(
+        response.body.amistad.idEscalador2
+      );
 
       const amistadGuardada = await db.Amistad.findOne({
         where: {
@@ -156,7 +166,10 @@ describe('E2E: Amistades', () => {
         .send({ idSolicitud: nuevaSolicitud.id, respuesta: 'rechazada' })
         .expect(200);
 
-      expect(response.body.solicitud).toEqual({ id: nuevaSolicitud.id, estado: 'rechazada' });
+      expect(response.body.solicitud).toEqual({
+        id: nuevaSolicitud.id,
+        estado: 'rechazada',
+      });
       const amistadInexistente = await db.Amistad.findOne({
         where: {
           idEscalador1: Math.min(escaladorTercero.id, escaladorOrigen.id),
@@ -189,8 +202,8 @@ describe('E2E: Amistades', () => {
       await db.SolicitudAmistad.destroy({
         where: {
           idRemitente: escaladorTercero.id,
-          idDestinatario: escaladorOrigen.id
-        }
+          idDestinatario: escaladorOrigen.id,
+        },
       });
 
       // Creamos una solicitud pendiente para que haya resultados
@@ -207,8 +220,10 @@ describe('E2E: Amistades', () => {
 
       expect(response.body).toBeInstanceOf(Array);
       expect(response.body.length).toBeGreaterThanOrEqual(1);
-      
-      const solicitudDevuelta = response.body.find(s => s.idSolicitud === nuevaSolicitud.id);
+
+      const solicitudDevuelta = response.body.find(
+        (s) => s.idSolicitud === nuevaSolicitud.id
+      );
       expect(solicitudDevuelta).toBeDefined();
       expect(solicitudDevuelta.idRemitente).toBe(escaladorTercero.id);
       expect(solicitudDevuelta.apodo).toBe(escaladorTercero.apodo);
@@ -246,7 +261,10 @@ describe('E2E: Amistades', () => {
         .set('Authorization', `Bearer ${tokenOrigen}`)
         .expect(200);
 
-      expect(response.body).toHaveProperty('mensaje', 'Amigo eliminado correctamente');
+      expect(response.body).toHaveProperty(
+        'mensaje',
+        'Amigo eliminado correctamente'
+      );
 
       const amistadEliminada = await db.Amistad.findOne({
         where: {

@@ -23,7 +23,9 @@ function createResMock() {
 describe('Unit: AmistadController', () => {
   it('enviarSolicitud responde 201 con el resultado del caso de uso', async () => {
     const useCases = {
-      enviarSolicitud: { execute: jest.fn().mockResolvedValue({ mensaje: 'ok' }) },
+      enviarSolicitud: {
+        execute: jest.fn().mockResolvedValue({ mensaje: 'ok' }),
+      },
     };
     const controller = new AmistadController(useCases);
     const req = { user: { apodo: 'ivan' }, body: { apodoDestinatario: 'ana' } };
@@ -41,10 +43,15 @@ describe('Unit: AmistadController', () => {
 
   it('responderSolicitud responde 200', async () => {
     const useCases = {
-      responderSolicitud: { execute: jest.fn().mockResolvedValue({ mensaje: 'respondida' }) },
+      responderSolicitud: {
+        execute: jest.fn().mockResolvedValue({ mensaje: 'respondida' }),
+      },
     };
     const controller = new AmistadController(useCases);
-    const req = { user: { apodo: 'ana' }, body: { idSolicitud: 10, respuesta: 'aceptada' } };
+    const req = {
+      user: { apodo: 'ana' },
+      body: { idSolicitud: 10, respuesta: 'aceptada' },
+    };
     const res = createResMock();
 
     await controller.responderSolicitud(req, res, () => {});
@@ -59,7 +66,9 @@ describe('Unit: AmistadController', () => {
 
   it('listarAmigos responde 200 con la lista', async () => {
     const useCases = {
-      listarAmigos: { execute: jest.fn().mockResolvedValue([{ id: 2, apodo: 'ana' }]) },
+      listarAmigos: {
+        execute: jest.fn().mockResolvedValue([{ id: 2, apodo: 'ana' }]),
+      },
     };
     const controller = new AmistadController(useCases);
     const req = { user: { apodo: 'ivan' } };
@@ -67,14 +76,18 @@ describe('Unit: AmistadController', () => {
 
     await controller.listarAmigos(req, res, () => {});
 
-    expect(useCases.listarAmigos.execute).toHaveBeenCalledWith({ apodoEscalador: 'ivan' });
+    expect(useCases.listarAmigos.execute).toHaveBeenCalledWith({
+      apodoEscalador: 'ivan',
+    });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.body).toEqual([{ id: 2, apodo: 'ana' }]);
   });
 
   it('consultarPerfilAmigo responde 200 con el perfil', async () => {
     const useCases = {
-      consultarPerfilAmigo: { execute: jest.fn().mockResolvedValue({ id: 2, apodo: 'ana' }) },
+      consultarPerfilAmigo: {
+        execute: jest.fn().mockResolvedValue({ id: 2, apodo: 'ana' }),
+      },
     };
     const controller = new AmistadController(useCases);
     const req = { user: { apodo: 'ivan' }, params: { apodo: 'ana' } };
@@ -91,7 +104,11 @@ describe('Unit: AmistadController', () => {
 
   it('eliminarAmigo responde 200', async () => {
     const useCases = {
-      eliminarAmigo: { execute: jest.fn().mockResolvedValue({ mensaje: 'Amigo eliminado correctamente' }) },
+      eliminarAmigo: {
+        execute: jest
+          .fn()
+          .mockResolvedValue({ mensaje: 'Amigo eliminado correctamente' }),
+      },
     };
     const controller = new AmistadController(useCases);
     const req = { user: { apodo: 'ivan' }, params: { apodoAmigo: 'ana' } };
@@ -123,7 +140,11 @@ describe('Unit: AmistadController', () => {
 
   it('listarSolicitudesPendientes responde 200 con la lista', async () => {
     const useCases = {
-      listarSolicitudesPendientes: { execute: jest.fn().mockResolvedValue([{ id: 1, remitente: { apodo: 'ana' } }]) },
+      listarSolicitudesPendientes: {
+        execute: jest
+          .fn()
+          .mockResolvedValue([{ id: 1, remitente: { apodo: 'ana' } }]),
+      },
     };
     const controller = new AmistadController(useCases);
     const req = { user: { apodo: 'ivan' } };
@@ -131,7 +152,9 @@ describe('Unit: AmistadController', () => {
 
     await controller.listarSolicitudesPendientes(req, res, () => {});
 
-    expect(useCases.listarSolicitudesPendientes.execute).toHaveBeenCalledWith({ apodoEscalador: 'ivan' });
+    expect(useCases.listarSolicitudesPendientes.execute).toHaveBeenCalledWith({
+      apodoEscalador: 'ivan',
+    });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.body).toEqual([{ id: 1, remitente: { apodo: 'ana' } }]);
   });

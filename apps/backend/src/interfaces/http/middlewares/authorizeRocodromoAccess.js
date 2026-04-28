@@ -107,7 +107,10 @@ export const resolveRocodromoIdFromPistaParam = async (req, db) => {
   return { idRoco: zona.idRoco };
 };
 
-const authorizeRocodromoAccess = ({ resolveRocodromoId, requireAdmin = false }) => {
+const authorizeRocodromoAccess = ({
+  resolveRocodromoId,
+  requireAdmin = false,
+}) => {
   return async (req, res, next) => {
     try {
       const rol = req.user?.rol;
@@ -119,14 +122,20 @@ const authorizeRocodromoAccess = ({ resolveRocodromoId, requireAdmin = false }) 
       if (requireAdmin) {
         await cleanupUpload(req);
         return next(
-          new AuthorizationError(FORBIDDEN_MESSAGE, 'ROCODROMO_ACCESS_FORBIDDEN')
+          new AuthorizationError(
+            FORBIDDEN_MESSAGE,
+            'ROCODROMO_ACCESS_FORBIDDEN'
+          )
         );
       }
 
       if (rol !== 'Gestor') {
         await cleanupUpload(req);
         return next(
-          new AuthorizationError(FORBIDDEN_MESSAGE, 'ROCODROMO_ACCESS_FORBIDDEN')
+          new AuthorizationError(
+            FORBIDDEN_MESSAGE,
+            'ROCODROMO_ACCESS_FORBIDDEN'
+          )
         );
       }
 
@@ -151,7 +160,10 @@ const authorizeRocodromoAccess = ({ resolveRocodromoId, requireAdmin = false }) 
       if (!managedIds.includes(Number(idRoco))) {
         await cleanupUpload(req);
         return next(
-          new AuthorizationError(FORBIDDEN_MESSAGE, 'ROCODROMO_ACCESS_FORBIDDEN')
+          new AuthorizationError(
+            FORBIDDEN_MESSAGE,
+            'ROCODROMO_ACCESS_FORBIDDEN'
+          )
         );
       }
 

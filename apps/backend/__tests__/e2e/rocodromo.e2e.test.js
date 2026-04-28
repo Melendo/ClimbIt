@@ -21,8 +21,14 @@ describe('E2E: Rocodromos', () => {
       'Roco Sin Zonas Integration',
       'Roco Actualizar Integration',
     ];
-    const ubicacionesRoco = ['Test Location 1', 'Test Location 2', 'Test Location 3'];
-    const rocosHuerfanos = await db.Rocodromo.findAll({ where: { ubicacion: ubicacionesRoco } });
+    const ubicacionesRoco = [
+      'Test Location 1',
+      'Test Location 2',
+      'Test Location 3',
+    ];
+    const rocosHuerfanos = await db.Rocodromo.findAll({
+      where: { ubicacion: ubicacionesRoco },
+    });
     for (const roco of rocosHuerfanos) {
       await db.Zona.destroy({ where: { idRoco: roco.id } });
       await roco.destroy();
@@ -44,15 +50,19 @@ describe('E2E: Rocodromos', () => {
       ubicacion: 'Test Location 3',
     });
 
-    zonasCreadas.push(await db.Zona.create({
-      idRoco: rocodromoConZonas.id,
-      nombre: 'Zona Boulder',
-    }));
+    zonasCreadas.push(
+      await db.Zona.create({
+        idRoco: rocodromoConZonas.id,
+        nombre: 'Zona Boulder',
+      })
+    );
 
-    zonasCreadas.push(await db.Zona.create({
-      idRoco: rocodromoConZonas.id,
-      nombre: 'Zona Cuerda',
-    }));
+    zonasCreadas.push(
+      await db.Zona.create({
+        idRoco: rocodromoConZonas.id,
+        nombre: 'Zona Cuerda',
+      })
+    );
   });
 
   afterAll(async () => {
@@ -62,7 +72,7 @@ describe('E2E: Rocodromos', () => {
     if (rocodromoConZonas) await rocodromoConZonas.destroy();
     if (rocodromoSinZonas) await rocodromoSinZonas.destroy();
     if (rocodromoParaActualizar) await rocodromoParaActualizar.destroy();
-    
+
     await db.sequelize.close();
   });
 
@@ -75,8 +85,8 @@ describe('E2E: Rocodromos', () => {
 
       expect(response.body).toBeInstanceOf(Array);
       expect(response.body).toHaveLength(2);
-      
-      const nombres = response.body.map(z => z.nombre);
+
+      const nombres = response.body.map((z) => z.nombre);
       expect(nombres).toContain('Zona Boulder');
       expect(nombres).toContain('Zona Cuerda');
     });
@@ -124,9 +134,7 @@ describe('E2E: Rocodromos', () => {
 
   describe('GET /rocodromos/', () => {
     it('debería retornar 401 si no se envia token', async () => {
-      await request(app)
-        .get('/rocodromos/')
-        .expect(401);
+      await request(app).get('/rocodromos/').expect(401);
     });
 
     it('debería obtener todos los rocódromos con token valido', async () => {
@@ -137,8 +145,8 @@ describe('E2E: Rocodromos', () => {
 
       expect(response.body).toBeInstanceOf(Array);
       expect(response.body.length).toBeGreaterThanOrEqual(2);
-      
-      const nombres = response.body.map(r => r.nombre);
+
+      const nombres = response.body.map((r) => r.nombre);
       expect(nombres).toContain('Roco Con Zonas Integration');
       expect(nombres).toContain('Roco Sin Zonas Integration');
     });
@@ -244,8 +252,14 @@ describe('E2E: Rocodromos', () => {
 
       expect(response.body).toHaveProperty('id', rocodromoParaActualizar.id);
       expect(response.body).toHaveProperty('nombre', 'Roco Actualizado E2E');
-      expect(response.body).toHaveProperty('ubicacion', 'Ubicacion Actualizada E2E');
-      expect(response.body).toHaveProperty('descripcion', 'Descripcion actualizada');
+      expect(response.body).toHaveProperty(
+        'ubicacion',
+        'Ubicacion Actualizada E2E'
+      );
+      expect(response.body).toHaveProperty(
+        'descripcion',
+        'Descripcion actualizada'
+      );
       expect(response.body).toHaveProperty('horarios', 'L-V 10-22');
     });
   });

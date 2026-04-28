@@ -18,10 +18,12 @@ describe('ObtenerDificultadMaximaRocodromoEscalador', () => {
       }),
     };
     const mockPistaRepository = {
-      obtenerDificultadesEscaladasPorTipoEnRocodromo: jest.fn().mockResolvedValue({
-        boulder: ['V2', 'V6'],
-        via: ['6b'],
-      }),
+      obtenerDificultadesEscaladasPorTipoEnRocodromo: jest
+        .fn()
+        .mockResolvedValue({
+          boulder: ['V2', 'V6'],
+          via: ['6b'],
+        }),
     };
 
     const useCase = new ObtenerDificultadMaximaRocodromoEscalador(
@@ -32,12 +34,16 @@ describe('ObtenerDificultadMaximaRocodromoEscalador', () => {
 
     const resultado = await useCase.execute({ apodo: 'Ivan', idRocodromo: 9 });
 
-    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith('Ivan');
+    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(
+      'Ivan'
+    );
     expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(9);
     expect(
       mockPistaRepository.obtenerDificultadesEscaladasPorTipoEnRocodromo
     ).toHaveBeenCalledWith(4, 9);
-    expect(mockRocodromoRepository.obtenerEscalasDificultad).toHaveBeenCalledWith(9);
+    expect(
+      mockRocodromoRepository.obtenerEscalasDificultad
+    ).toHaveBeenCalledWith(9);
     expect(resultado).toEqual({
       maxDificultadBloque: 'V6',
       maxDificultadVia: '6b',

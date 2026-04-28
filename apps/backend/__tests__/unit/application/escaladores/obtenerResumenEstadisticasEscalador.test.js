@@ -1,6 +1,9 @@
 import { describe, it, expect, jest } from '@jest/globals';
 import ObtenerResumenEstadisticasEscalador from '../../../../src/application/escaladores/obtenerResumenEstadisticasEscalador.js';
-import { InternalServerError, NotFoundError } from '../../../../src/domain/sharedObjects/AppError.js';
+import {
+  InternalServerError,
+  NotFoundError,
+} from '../../../../src/domain/sharedObjects/AppError.js';
 
 describe('ObtenerResumenEstadisticasEscalador', () => {
   it('deberia obtener el resumen de estadisticas de un escalador existente', async () => {
@@ -24,8 +27,12 @@ describe('ObtenerResumenEstadisticasEscalador', () => {
 
     const resultado = await useCase.execute({ apodo: 'Ivan' });
 
-    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith('Ivan');
-    expect(mockPistaRepository.obtenerResumenEstadisticasEscalador).toHaveBeenCalledWith(4);
+    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(
+      'Ivan'
+    );
+    expect(
+      mockPistaRepository.obtenerResumenEstadisticasEscalador
+    ).toHaveBeenCalledWith(4);
     expect(resultado).toEqual({
       totalRutas: 12,
       totalFlash: 5,

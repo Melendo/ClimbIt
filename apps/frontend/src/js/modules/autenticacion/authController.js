@@ -1,126 +1,135 @@
-import { renderLogin, renderRegistroEmail, renderRegistroPassword, renderRegistroApodo } from './authView.js';
-import { fetchClient, saveToken, warmUpAppDataCache } from '../../core/client.js';
+import {
+  renderLogin,
+  renderRegistroEmail,
+  renderRegistroPassword,
+  renderRegistroApodo,
+} from './authView.js';
+import {
+  fetchClient,
+  saveToken,
+  warmUpAppDataCache,
+} from '../../core/client.js';
 
 // Controlador de login en una sola vista
 export function loginCmd(container) {
-    const callbacks = {
-        onLoginSubmit: async (email, password) => {
-            // Enviar petición de autenticación
-            const res = await fetchClient('escaladores/auth', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    correo: email,
-                    contrasena: password
-                })
-            });
+  const callbacks = {
+    onLoginSubmit: async (email, password) => {
+      // Enviar petición de autenticación
+      const res = await fetchClient('escaladores/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          correo: email,
+          contrasena: password,
+        }),
+      });
 
-            // Si la respuesta no es exitosa, mostrar error
-            if (!res.ok) {
-                throw new Error('El correo o la contraseña no son correctos');
-            }
+      // Si la respuesta no es exitosa, mostrar error
+      if (!res.ok) {
+        throw new Error('El correo o la contraseña no son correctos');
+      }
 
-            const data = await res.json();
+      const data = await res.json();
 
-            // Guardar el token
-            if (data.token) {
-                saveToken(data.token);
-                // Cebar cache dinámica antes de navegar para mejorar la disponibilidad offline.
-                await warmUpAppDataCache();
-                // Redirigir al listado de rocódromos
-                window.location.hash = '#misRocodromos';
-            } else {
-                throw new Error('El correo o la contraseña no son correctos');
-            }
-        }
-    };
+      // Guardar el token
+      if (data.token) {
+        saveToken(data.token);
+        // Cebar cache dinámica antes de navegar para mejorar la disponibilidad offline.
+        await warmUpAppDataCache();
+        // Redirigir al listado de rocódromos
+        window.location.hash = '#misRocodromos';
+      } else {
+        throw new Error('El correo o la contraseña no son correctos');
+      }
+    },
+  };
 
-    renderLogin(container, callbacks);
+  renderLogin(container, callbacks);
 }
 
 // ===================== REGISTRO =====================
 
 // Estado del registro (guardamos los datos entre pasos)
 let registroState = {
-    email: '',
-    contrasena: ''
+  email: '',
+  contrasena: '',
 };
 
 // Controlador principal de registro (paso 1: email)
 export function registroCmd(container) {
-    // Resetear estado al iniciar el flujo
-    registroState = { email: '', contrasena: '' };
+  // Resetear estado al iniciar el flujo
+  registroState = { email: '', contrasena: '' };
 
-    const callbacks = {
-        onEmailSubmit: (email) => {
-            registroState.email = email;
-            // Ir al paso 2
-            registroPasswordCmd(container);
-        }
-    };
+  const callbacks = {
+    onEmailSubmit: (email) => {
+      registroState.email = email;
+      // Ir al paso 2
+      registroPasswordCmd(container);
+    },
+  };
 
-    renderRegistroEmail(container, callbacks);
+  renderRegistroEmail(container, callbacks);
 }
 
 // Controlador para la contraseña (paso 2)
 function registroPasswordCmd(container) {
-    const callbacks = {
-        onBack: () => {
-            // Volver al paso 1
-            registroCmd(container);
-        },
-        onPasswordSubmit: (password) => {
-            registroState.contrasena = password;
-            // Ir al paso 3
-            registroApodoCmd(container);
-        }
-    };
+  const callbacks = {
+    onBack: () => {
+      // Volver al paso 1
+      registroCmd(container);
+    },
+    onPasswordSubmit: (password) => {
+      registroState.contrasena = password;
+      // Ir al paso 3
+      registroApodoCmd(container);
+    },
+  };
 
-    renderRegistroPassword(container, registroState.email, callbacks);
+  renderRegistroPassword(container, registroState.email, callbacks);
 }
 
 // Controlador para el apodo (paso 3 - final)
 function registroApodoCmd(container) {
-    const callbacks = {
-        onBack: () => {
-            // Volver al paso 2
-            registroPasswordCmd(container);
-        },
-        onApodoSubmit: async (apodo) => {
-            // Enviar petición de registro
-            const res = await fetchClient('escaladores/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    correo: registroState.email,
-                    contrasena: registroState.contrasena,
-                    apodo: apodo
-                })
-            });
+  const callbacks = {
+    onBack: () => {
+      // Volver al paso 2
+      registroPasswordCmd(container);
+    },
+    onApodoSubmit: async (apodo) => {
+      // Enviar petición de registro
+      const res = await fetchClient('escaladores/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          correo: registroState.email,
+          contrasena: registroState.contrasena,
+          apodo: apodo,
+        }),
+      });
 
-            if (!res.ok) {
-                const data = await res.json();
-                if (data.errors && Array.isArray(data.errors)) {
-                    const mensajes = data.errors.map(e => e.msg).join('. ');
-                    throw new Error(mensajes || 'Error de validación');
-                }
-                throw new Error(data.message || 'Error al crear la cuenta');
-            }
-
-            const data = await res.json();
-
-            // Guardar el token JWT
-            if (data.token) {
-                saveToken(data.token);
-                // Cebar cache dinámica antes de navegar para mejorar la disponibilidad offline.
-                await warmUpAppDataCache();
-                // Redirigir al tutorial tras completar el registro
-                window.location.hash = '#tutorial';
-            } else {
-                throw new Error('No se recibió el token de autenticación');
-            }
+      if (!res.ok) {
+        const data = await res.json();
+        if (data.errors && Array.isArray(data.errors)) {
+          const mensajes = data.errors.map((e) => e.msg).join('. ');
+          throw new Error(mensajes || 'Error de validación');
         }
-    };
+        throw new Error(data.message || 'Error al crear la cuenta');
+      }
 
-    renderRegistroApodo(container, registroState.email, callbacks);
+      const data = await res.json();
+
+      // Guardar el token JWT
+      if (data.token) {
+        saveToken(data.token);
+        // Cebar cache dinámica antes de navegar para mejorar la disponibilidad offline.
+        await warmUpAppDataCache();
+        // Redirigir al tutorial tras completar el registro
+        window.location.hash = '#tutorial';
+      } else {
+        throw new Error('No se recibió el token de autenticación');
+      }
+    },
+  };
+
+  renderRegistroApodo(container, registroState.email, callbacks);
 }

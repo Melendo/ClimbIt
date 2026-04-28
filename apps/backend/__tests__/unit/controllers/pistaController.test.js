@@ -2,7 +2,10 @@ import { jest } from '@jest/globals';
 import fs from 'fs/promises';
 import path from 'path';
 import PistaController from '../../../src/interfaces/http/controllers/pistaController.js';
-import { BadRequestError, NotFoundError } from '../../../src/domain/sharedObjects/AppError.js';
+import {
+  BadRequestError,
+  NotFoundError,
+} from '../../../src/domain/sharedObjects/AppError.js';
 
 function createResMock() {
   const res = {
@@ -37,7 +40,14 @@ afterEach(() => {
 describe('Unit: PistaController', () => {
   it('crear: responde 201 con la pista creada', async () => {
     const useCases = {
-      crear: { execute: jest.fn().mockResolvedValue({ id: 1, idZona: 2, nombre: 'Pista', dificultad: '6a' }) },
+      crear: {
+        execute: jest.fn().mockResolvedValue({
+          id: 1,
+          idZona: 2,
+          nombre: 'Pista',
+          dificultad: '6a',
+        }),
+      },
     };
     const controller = new PistaController(useCases);
     const req = { body: { idZona: 2, nombre: 'Pista', dificultad: '6a' } };
@@ -49,7 +59,12 @@ describe('Unit: PistaController', () => {
       expect.objectContaining({ idZona: 2, nombre: 'Pista', dificultad: '6a' })
     );
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.body).toEqual({ id: 1, idZona: 2, nombre: 'Pista', dificultad: '6a' });
+    expect(res.body).toEqual({
+      id: 1,
+      idZona: 2,
+      nombre: 'Pista',
+      dificultad: '6a',
+    });
   });
 
   it('crear: responde 500 ante errores', async () => {
@@ -71,11 +86,21 @@ describe('Unit: PistaController', () => {
   it('crear: sube imagen y actualiza la pista', async () => {
     const useCases = {
       crear: { execute: jest.fn().mockResolvedValue({ id: 1 }) },
-      actualizarImagen: { execute: jest.fn().mockResolvedValue({ id: 1, imagenUrl: '/uploads/imagenes_pistas/new.png' }) },
+      actualizarImagen: {
+        execute: jest.fn().mockResolvedValue({
+          id: 1,
+          imagenUrl: '/uploads/imagenes_pistas/new.png',
+        }),
+      },
     };
     const controller = new PistaController(useCases);
     const req = {
-      body: { idZona: 2, nombre: 'Pista', dificultad: '6a', imagenUrl: '/old.png' },
+      body: {
+        idZona: 2,
+        nombre: 'Pista',
+        dificultad: '6a',
+        imagenUrl: '/old.png',
+      },
       file: { path: '/tmp/new.png', filename: 'new.png' },
     };
     const res = createResMock();
@@ -89,7 +114,10 @@ describe('Unit: PistaController', () => {
     expect(useCases.crear.execute).toHaveBeenCalledWith(
       expect.objectContaining({ imagenUrl: null })
     );
-    expect(useCases.actualizarImagen.execute).toHaveBeenCalledWith(1, '/uploads/imagenes_pistas/new.png');
+    expect(useCases.actualizarImagen.execute).toHaveBeenCalledWith(
+      1,
+      '/uploads/imagenes_pistas/new.png'
+    );
     expect(res.status).toHaveBeenCalledWith(201);
   });
 
@@ -138,7 +166,15 @@ describe('Unit: PistaController', () => {
 
   it('obtenerPistaPorId: 200 cuando existe', async () => {
     const useCases = {
-      obtenerPistaPorId: { execute: jest.fn().mockResolvedValue({ id: 7, idZona: 2, nombre: 'Pista', dificultad: '6a', estado: 'Flash' }) },
+      obtenerPistaPorId: {
+        execute: jest.fn().mockResolvedValue({
+          id: 7,
+          idZona: 2,
+          nombre: 'Pista',
+          dificultad: '6a',
+          estado: 'Flash',
+        }),
+      },
     };
     const controller = new PistaController(useCases);
     const req = { params: { id: 7 }, user: { apodo: 'TestClimber' } };
@@ -146,14 +182,31 @@ describe('Unit: PistaController', () => {
 
     await controller.obtenerPistaPorId(req, res, () => {});
 
-    expect(useCases.obtenerPistaPorId.execute).toHaveBeenCalledWith(7, 'TestClimber');
+    expect(useCases.obtenerPistaPorId.execute).toHaveBeenCalledWith(
+      7,
+      'TestClimber'
+    );
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.body).toEqual({ id: 7, idZona: 2, nombre: 'Pista', dificultad: '6a', estado: 'Flash' });
+    expect(res.body).toEqual({
+      id: 7,
+      idZona: 2,
+      nombre: 'Pista',
+      dificultad: '6a',
+      estado: 'Flash',
+    });
   });
 
   it('obtenerPistaPorId: pasa null como apodo si no hay user', async () => {
     const useCases = {
-      obtenerPistaPorId: { execute: jest.fn().mockResolvedValue({ id: 7, idZona: 2, nombre: 'Pista', dificultad: '6a', estado: null }) },
+      obtenerPistaPorId: {
+        execute: jest.fn().mockResolvedValue({
+          id: 7,
+          idZona: 2,
+          nombre: 'Pista',
+          dificultad: '6a',
+          estado: null,
+        }),
+      },
     };
     const controller = new PistaController(useCases);
     const req = { params: { id: 7 } };
@@ -185,8 +238,18 @@ describe('Unit: PistaController', () => {
 
   it('actualizarImagen: actualiza la imagen y elimina la anterior', async () => {
     const useCases = {
-      obtenerPistaPorId: { execute: jest.fn().mockResolvedValue({ id: 7, imagenUrl: '/uploads/imagenes_pistas/old.png' }) },
-      actualizarImagen: { execute: jest.fn().mockResolvedValue({ id: 7, imagenUrl: '/uploads/imagenes_pistas/new.png' }) },
+      obtenerPistaPorId: {
+        execute: jest.fn().mockResolvedValue({
+          id: 7,
+          imagenUrl: '/uploads/imagenes_pistas/old.png',
+        }),
+      },
+      actualizarImagen: {
+        execute: jest.fn().mockResolvedValue({
+          id: 7,
+          imagenUrl: '/uploads/imagenes_pistas/new.png',
+        }),
+      },
       crear: { execute: jest.fn() },
     };
     const controller = new PistaController(useCases);
@@ -210,14 +273,25 @@ describe('Unit: PistaController', () => {
       '/tmp/new.png',
       path.resolve(process.cwd(), 'uploads', 'imagenes_pistas', 'new.png')
     );
-    expect(useCases.actualizarImagen.execute).toHaveBeenCalledWith(7, '/uploads/imagenes_pistas/new.png');
+    expect(useCases.actualizarImagen.execute).toHaveBeenCalledWith(
+      7,
+      '/uploads/imagenes_pistas/new.png'
+    );
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.body).toEqual({ id: 7, imagenUrl: '/uploads/imagenes_pistas/new.png' });
+    expect(res.body).toEqual({
+      id: 7,
+      imagenUrl: '/uploads/imagenes_pistas/new.png',
+    });
   });
 
   it('obtenerImagen: devuelve el archivo de la pista', async () => {
     const useCases = {
-      obtenerPistaPorId: { execute: jest.fn().mockResolvedValue({ id: 7, imagenUrl: '/uploads/imagenes_pistas/existing.png' }) },
+      obtenerPistaPorId: {
+        execute: jest.fn().mockResolvedValue({
+          id: 7,
+          imagenUrl: '/uploads/imagenes_pistas/existing.png',
+        }),
+      },
     };
     const controller = new PistaController(useCases);
     const req = { params: { id: 7 } };
@@ -228,12 +302,16 @@ describe('Unit: PistaController', () => {
     await controller.obtenerImagen(req, res, () => {});
 
     expect(useCases.obtenerPistaPorId.execute).toHaveBeenCalledWith(7, null);
-    expect(res.sentFile).toBe(path.resolve(process.cwd(), 'uploads', 'imagenes_pistas', 'existing.png'));
+    expect(res.sentFile).toBe(
+      path.resolve(process.cwd(), 'uploads', 'imagenes_pistas', 'existing.png')
+    );
   });
 
   it('obtenerImagen: responde 404 si la pista no tiene imagen', async () => {
     const useCases = {
-      obtenerPistaPorId: { execute: jest.fn().mockResolvedValue({ id: 7, imagenUrl: null }) },
+      obtenerPistaPorId: {
+        execute: jest.fn().mockResolvedValue({ id: 7, imagenUrl: null }),
+      },
     };
     const controller = new PistaController(useCases);
     const req = { params: { id: 7 } };
@@ -272,7 +350,10 @@ describe('Unit: PistaController', () => {
       actualizarImagen: { execute: jest.fn() },
     };
     const controller = new PistaController(useCases);
-    const req = { params: { id: 7 }, file: { path: '/tmp/new.png', filename: 'new.png' } };
+    const req = {
+      params: { id: 7 },
+      file: { path: '/tmp/new.png', filename: 'new.png' },
+    };
     const res = createResMock();
     const next = jest.fn();
 
@@ -287,7 +368,12 @@ describe('Unit: PistaController', () => {
 
   it('obtenerImagen: responde 404 si el archivo no existe', async () => {
     const useCases = {
-      obtenerPistaPorId: { execute: jest.fn().mockResolvedValue({ id: 7, imagenUrl: '/uploads/imagenes_pistas/existing.png' }) },
+      obtenerPistaPorId: {
+        execute: jest.fn().mockResolvedValue({
+          id: 7,
+          imagenUrl: '/uploads/imagenes_pistas/existing.png',
+        }),
+      },
     };
     const controller = new PistaController(useCases);
     const req = { params: { id: 7 } };
@@ -308,45 +394,48 @@ describe('Unit: PistaController', () => {
   describe('cambiarEstado', () => {
     it('responde 200 con mensaje de éxito cuando el cambio de estado es exitoso', async () => {
       const useCases = {
-        cambiarEstado: { 
-          execute: jest.fn().mockResolvedValue({ 
-            mensaje: 'Estado de la pista con ID 1 cambiado a completado exitosamente.' 
-          }) 
-        }
+        cambiarEstado: {
+          execute: jest.fn().mockResolvedValue({
+            mensaje:
+              'Estado de la pista con ID 1 cambiado a completado exitosamente.',
+          }),
+        },
       };
       const controller = new PistaController(useCases);
-      const req = { 
+      const req = {
         params: { id: '1' },
         body: { estado: 'completado' },
-        user: { apodo: 'TestClimber' }
+        user: { apodo: 'TestClimber' },
       };
       const res = createResMock();
 
       await controller.cambiarEstado(req, res, () => {});
 
-      expect(useCases.cambiarEstado.execute).toHaveBeenCalledWith({ 
-        idPista: '1', 
+      expect(useCases.cambiarEstado.execute).toHaveBeenCalledWith({
+        idPista: '1',
         nuevoEstado: 'completado',
-        escaladorApodo: 'TestClimber'
+        escaladorApodo: 'TestClimber',
       });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.body).toEqual({ 
-        mensaje: 'Estado de la pista con ID 1 cambiado a completado exitosamente.' 
+      expect(res.body).toEqual({
+        mensaje:
+          'Estado de la pista con ID 1 cambiado a completado exitosamente.',
       });
     });
 
     it('responde 500 si el caso de uso lanza un error', async () => {
-      const errorMessage = 'Error al cambiar el estado de la pista: Pista con ID 999 no encontrada';
+      const errorMessage =
+        'Error al cambiar el estado de la pista: Pista con ID 999 no encontrada';
       const useCases = {
-        cambiarEstado: { 
-          execute: jest.fn().mockRejectedValue(new Error(errorMessage)) 
-        }
+        cambiarEstado: {
+          execute: jest.fn().mockRejectedValue(new Error(errorMessage)),
+        },
       };
       const controller = new PistaController(useCases);
-      const req = { 
+      const req = {
         params: { id: '999' },
         body: { estado: 'completado' },
-        user: { apodo: 'TestClimber' }
+        user: { apodo: 'TestClimber' },
       };
       const res = createResMock();
 
@@ -384,7 +473,9 @@ describe('Unit: PistaController', () => {
     it('responde 500 si el caso de uso lanza un error', async () => {
       const useCases = {
         eliminar: {
-          execute: jest.fn().mockRejectedValue(new Error('Error al eliminar la pista')),
+          execute: jest
+            .fn()
+            .mockRejectedValue(new Error('Error al eliminar la pista')),
         },
       };
       const controller = new PistaController(useCases);
@@ -446,7 +537,9 @@ describe('Unit: PistaController', () => {
     it('responde 500 si el caso de uso lanza un error', async () => {
       const useCases = {
         actualizar: {
-          execute: jest.fn().mockRejectedValue(new Error('Error al actualizar la pista')),
+          execute: jest
+            .fn()
+            .mockRejectedValue(new Error('Error al actualizar la pista')),
         },
       };
       const controller = new PistaController(useCases);
@@ -458,7 +551,9 @@ describe('Unit: PistaController', () => {
       await controller.actualizar(req, res, next);
 
       expect(next).toHaveBeenCalledWith(expect.any(Error));
-      expect(next.mock.calls[0][0].message).toBe('Error al actualizar la pista');
+      expect(next.mock.calls[0][0].message).toBe(
+        'Error al actualizar la pista'
+      );
     });
   });
 
@@ -547,9 +642,9 @@ describe('Unit: PistaController', () => {
     it('responde 500 si el caso de uso lanza un error', async () => {
       const useCases = {
         actualizarValoracion: {
-          execute: jest.fn().mockRejectedValue(
-            new Error('Error al actualizar la valoración')
-          ),
+          execute: jest
+            .fn()
+            .mockRejectedValue(new Error('Error al actualizar la valoración')),
         },
       };
       const controller = new PistaController(useCases);
@@ -609,7 +704,9 @@ describe('Unit: PistaController', () => {
 
       await controller.obtenerValoracionTotal(req, res, () => {});
 
-      expect(useCases.obtenerValoracionTotal.execute).toHaveBeenCalledWith({ idPista: '1' });
+      expect(useCases.obtenerValoracionTotal.execute).toHaveBeenCalledWith({
+        idPista: '1',
+      });
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.body).toEqual({
         idPista: 1,
@@ -634,7 +731,9 @@ describe('Unit: PistaController', () => {
 
       await controller.obtenerValoracionTotal(req, res, () => {});
 
-      expect(useCases.obtenerValoracionTotal.execute).toHaveBeenCalledWith({ idPista: '1' });
+      expect(useCases.obtenerValoracionTotal.execute).toHaveBeenCalledWith({
+        idPista: '1',
+      });
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.body.valoracionTotal).toBe(0);
       expect(res.body.numValoraciones).toBe(0);
@@ -643,9 +742,9 @@ describe('Unit: PistaController', () => {
     it('responde 500 si el caso de uso lanza un error', async () => {
       const useCases = {
         obtenerValoracionTotal: {
-          execute: jest.fn().mockRejectedValue(
-            new Error('Error al obtener valoración total')
-          ),
+          execute: jest
+            .fn()
+            .mockRejectedValue(new Error('Error al obtener valoración total')),
         },
       };
       const controller = new PistaController(useCases);
@@ -678,9 +777,9 @@ describe('Unit: PistaController', () => {
 
       await controller.obtenerValoracionTotal(req, res, () => {});
 
-      expect(useCases.obtenerValoracionTotal.execute).toHaveBeenCalledWith(
-        { idPista: '123' }
-      );
+      expect(useCases.obtenerValoracionTotal.execute).toHaveBeenCalledWith({
+        idPista: '123',
+      });
       expect(res.status).toHaveBeenCalledWith(200);
     });
   });

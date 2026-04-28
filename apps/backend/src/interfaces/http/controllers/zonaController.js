@@ -1,6 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { BadRequestError, NotFoundError } from '../../../domain/sharedObjects/AppError.js';
+import {
+  BadRequestError,
+  NotFoundError,
+} from '../../../domain/sharedObjects/AppError.js';
 
 class ZonaController {
   constructor(zonaUseCases) {
@@ -11,7 +14,11 @@ class ZonaController {
     try {
       let { idRoco, nombre, mapa } = req.body;
       idRoco = parseInt(idRoco);
-      const nuevaZona = await this.useCases.crear.execute({ idRoco, nombre, mapa });
+      const nuevaZona = await this.useCases.crear.execute({
+        idRoco,
+        nombre,
+        mapa,
+      });
       res.status(201).json(nuevaZona);
     } catch (error) {
       return next(error);
@@ -40,7 +47,9 @@ class ZonaController {
       const { id } = req.params;
 
       if (!req.file) {
-        return next(new BadRequestError('El mapa es requerido', 'ZONA_MAPA_REQUERIDO'));
+        return next(
+          new BadRequestError('El mapa es requerido', 'ZONA_MAPA_REQUERIDO')
+        );
       }
 
       const zona = await this.useCases.obtenerZonaPorId.execute(id);
@@ -120,7 +129,9 @@ class ZonaController {
 
       res.sendFile(mapaPath, (err) => {
         if (err && !res.headersSent) {
-          next(new NotFoundError('Mapa no encontrado', 'ZONA_MAPA_NOT_FOUND', err));
+          next(
+            new NotFoundError('Mapa no encontrado', 'ZONA_MAPA_NOT_FOUND', err)
+          );
         }
       });
     } catch (error) {

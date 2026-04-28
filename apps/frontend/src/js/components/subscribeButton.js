@@ -9,11 +9,19 @@ import { showConfirmModal } from './modal.js';
  * @param {string} options.position - Posición del botón (absolute, inline). Default: 'absolute'
  * @returns {string} HTML del botón
  */
-export function renderSubscribeButton(idRocodromo, estaSuscrito = false, options = {}) {
+export function renderSubscribeButton(
+  idRocodromo,
+  estaSuscrito = false,
+  options = {}
+) {
   const { size = 'md', position = 'absolute' } = options;
-  
-  const actionClass = estaSuscrito ? 'btn-warning btn-desuscribirse' : 'btn-outline-secondary btn-suscribirse';
-  const actionText = estaSuscrito ? 'Quitar de favoritos' : 'Marcar como favorito';
+
+  const actionClass = estaSuscrito
+    ? 'btn-warning btn-desuscribirse'
+    : 'btn-outline-secondary btn-suscribirse';
+  const actionText = estaSuscrito
+    ? 'Quitar de favoritos'
+    : 'Marcar como favorito';
   const actionIcon = estaSuscrito ? 'star' : 'star_border';
 
   let buttonClasses = `btn ${actionClass} d-flex align-items-center justify-content-center`;
@@ -52,9 +60,11 @@ export function renderSubscribeButton(idRocodromo, estaSuscrito = false, options
  * @param {HTMLElement} container - Elemento contenedor donde buscar los botones
  */
 export function initSubscribeButtons(container) {
-  const buttons = container.querySelectorAll('.btn-suscribirse, .btn-desuscribirse');
+  const buttons = container.querySelectorAll(
+    '.btn-suscribirse, .btn-desuscribirse'
+  );
 
-  buttons.forEach(btn => {
+  buttons.forEach((btn) => {
     btn.addEventListener('click', async (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -63,10 +73,11 @@ export function initSubscribeButtons(container) {
       if (btn.classList.contains('btn-desuscribirse')) {
         const confirmed = await showConfirmModal({
           title: 'Desuscribirse del rocódromo',
-          message: '¿Estás seguro de que deseas desuscribirte de este rocódromo?',
+          message:
+            '¿Estás seguro de que deseas desuscribirte de este rocódromo?',
           confirmText: 'Desuscribirse',
           cancelText: 'Cancelar',
-          confirmClass: 'btn-danger'
+          confirmClass: 'btn-danger',
         });
         if (confirmed) {
           await window.desuscribirseRocodromo(idRocodromo, btn);

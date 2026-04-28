@@ -1,11 +1,20 @@
-import { renderRutaEstadoButtons, setupRutaEstadoButtons } from '../../components/rutaEstadoButtons.js';
+import {
+  renderRutaEstadoButtons,
+  setupRutaEstadoButtons,
+} from '../../components/rutaEstadoButtons.js';
 import {
   renderRutaRatingSection,
   setupRutaRatingSection,
 } from '../../components/rutaRating.js';
 import { escapeHtml } from '../../components/formHelpers.js';
-import { renderPresaColorIcon, renderMedallaColorIcon } from '../../components/rutaCardIndicators.js';
-import { renderRutaImageModal, setupRutaImageModal } from '../../components/rutaImageModal.js';
+import {
+  renderPresaColorIcon,
+  renderMedallaColorIcon,
+} from '../../components/rutaCardIndicators.js';
+import {
+  renderRutaImageModal,
+  setupRutaImageModal,
+} from '../../components/rutaImageModal.js';
 
 function toDateInputValue(value) {
   if (!value) return '';
@@ -30,15 +39,16 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
     initialValues = {},
     colorPresasOptions = [],
   } = viewData;
-  
+
   const isEditMode = mode === 'edit';
   const cardBadgeText = isEditMode ? 'Modificar ruta' : 'Nueva ruta';
   const submitText = isEditMode ? 'Guardar cambios' : 'Crear ruta';
-  
-  const backHref = (idRocodromo && idZona)
-  ? `#mapaZona?id=${idRocodromo}&zona=${idZona}`
-  : '#misRocodromos';
-  
+
+  const backHref =
+    idRocodromo && idZona
+      ? `#mapaZona?id=${idRocodromo}&zona=${idZona}`
+      : '#misRocodromos';
+
   container.innerHTML = `
   <div class="d-flex flex-column crear-ruta-card" style="height: 100dvh; overflow: hidden;">
     <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
@@ -156,7 +166,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
       </form>
     </div>
   </div>`;
-  
+
   const form = container.querySelector('#form-crear-ruta');
   const nombreInput = container.querySelector('#nombre');
   const dificultadSelect = container.querySelector('#dificultad');
@@ -175,10 +185,13 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
   const coordsBadge = container.querySelector('#coordenadasSeleccionadas');
   const submitButton = container.querySelector('#crear-ruta-submit');
   const alertBox = container.querySelector('#form-alert');
-  
-  const setDificultadOptions = (options = [], placeholder = 'Sin dificultad') => {
+
+  const setDificultadOptions = (
+    options = [],
+    placeholder = 'Sin dificultad'
+  ) => {
     const safeOptions = Array.isArray(options) ? options : [];
-    
+
     dificultadSelect.innerHTML = [
       `<option value="">${escapeHtml(placeholder)}</option>`,
       ...safeOptions.map((option) => {
@@ -189,7 +202,10 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
     ].join('');
   };
 
-  const setColorPresasOptions = (options = [], placeholder = 'Sin color de presas') => {
+  const setColorPresasOptions = (
+    options = [],
+    placeholder = 'Sin color de presas'
+  ) => {
     const safeOptions = Array.isArray(options) ? options : [];
 
     colorPresasSelect.innerHTML = [
@@ -201,7 +217,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
       }),
     ].join('');
   };
-  
+
   if (typeof initialValues.nombre === 'string') {
     nombreInput.value = initialValues.nombre;
   }
@@ -210,16 +226,16 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
   if (typeof initialValues.colorPresas === 'string') {
     colorPresasSelect.value = initialValues.colorPresas;
   }
-  
+
   if (initialValues.tipo === 'boulder') {
     tipoBoulderInput.checked = true;
   } else if (initialValues.tipo === 'via') {
     tipoViaInput.checked = true;
   }
-  
+
   fechaCreacionInput.value = toDateInputValue(initialValues.fechaCreacion);
   fechaRetiradaInput.value = toDateInputValue(initialValues.fechaRetirada);
-  
+
   if (!fechaCreacionInput.value) {
     // Establecer fecha de creación por defecto al día actual
     const now = new Date();
@@ -228,15 +244,17 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
     const day = String(now.getDate()).padStart(2, '0');
     fechaCreacionInput.value = `${year}-${month}-${day}`;
   }
-  
+
   dificultadSelect.disabled = true;
   setDificultadOptions([], 'Selecciona tipo de ruta');
-  
+
   let selectedImagenFile = null;
 
   const setSelectedImagen = (file) => {
     selectedImagenFile = file || null;
-    imagenSelectedName.textContent = selectedImagenFile ? `Imagen seleccionada: ${selectedImagenFile.name}` : 'Sin imagen seleccionada';
+    imagenSelectedName.textContent = selectedImagenFile
+      ? `Imagen seleccionada: ${selectedImagenFile.name}`
+      : 'Sin imagen seleccionada';
     callbacks.onFieldChange(imagenInput, alertBox);
   };
 
@@ -262,27 +280,41 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
     handleNativeInputChange(imagenGaleriaInput);
   });
 
-  [nombreInput, dificultadSelect, colorPresasSelect, tipoBoulderInput, tipoViaInput, fechaCreacionInput, fechaRetiradaInput, imagenInput].forEach((el) => {
+  [
+    nombreInput,
+    dificultadSelect,
+    colorPresasSelect,
+    tipoBoulderInput,
+    tipoViaInput,
+    fechaCreacionInput,
+    fechaRetiradaInput,
+    imagenInput,
+  ].forEach((el) => {
     el.addEventListener('input', () => callbacks.onFieldChange(el, alertBox));
     el.addEventListener('change', () => callbacks.onFieldChange(el, alertBox));
   });
-  
+
   const handleTipoChange = () => {
     if (typeof callbacks.onTipoChange !== 'function') return;
-    
-    const selectedTipo = tipoBoulderInput.checked ? 'boulder' : tipoViaInput.checked ? 'via' : '';
+
+    const selectedTipo = tipoBoulderInput.checked
+      ? 'boulder'
+      : tipoViaInput.checked
+        ? 'via'
+        : '';
     callbacks.onTipoChange(selectedTipo, {
       dificultadSelect,
       setDificultadOptions,
       alertBox,
     });
   };
-  
+
   tipoBoulderInput.addEventListener('change', handleTipoChange);
   tipoViaInput.addEventListener('change', handleTipoChange);
-  
+
   const setSubmitLoading = () => {
-    const originalText = submitButton.dataset.submitText || submitButton.textContent.trim();
+    const originalText =
+      submitButton.dataset.submitText || submitButton.textContent.trim();
     submitButton.dataset.submitText = originalText;
     submitButton.disabled = true;
     submitButton.innerHTML = `
@@ -292,26 +324,31 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
   };
 
   const clearSubmitLoading = () => {
-    const originalText = submitButton.dataset.submitText || submitButton.textContent.trim();
+    const originalText =
+      submitButton.dataset.submitText || submitButton.textContent.trim();
     submitButton.disabled = false;
     submitButton.textContent = originalText;
   };
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    
+
     const values = {
       idRocodromo,
       idZona,
       nombre: nombreInput.value,
       dificultad: dificultadSelect.value,
       colorPresas: colorPresasSelect.value,
-      tipo: tipoBoulderInput.checked ? 'boulder' : tipoViaInput.checked ? 'via' : '',
+      tipo: tipoBoulderInput.checked
+        ? 'boulder'
+        : tipoViaInput.checked
+          ? 'via'
+          : '',
       fechaCreacion: fechaCreacionInput.value,
       fechaRetirada: fechaRetiradaInput.value,
       imagen: selectedImagenFile,
     };
-    
+
     callbacks.onSubmit(values, {
       nombreInput,
       dificultadSelect,
@@ -328,7 +365,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
       clearSubmitLoading,
     });
   });
-  
+
   if (typeof callbacks.onViewReady === 'function') {
     callbacks.onViewReady({
       mapaViewport,
@@ -355,10 +392,11 @@ export function renderInfoRuta(container, ruta, callbacks) {
     fechaRetirada,
     activo,
   } = ruta || {};
-  
-  const hasDificultad = typeof dificultad === 'string'
-  ? dificultad.trim().length > 0
-  : Boolean(dificultad);
+
+  const hasDificultad =
+    typeof dificultad === 'string'
+      ? dificultad.trim().length > 0
+      : Boolean(dificultad);
   const tipoLabel = formatTipo(tipo);
   const dificultadLabel = dificultad || 'Sin dificultad';
   const colorPresasLabel = colorPresas || 'No definido';
@@ -384,7 +422,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
     numValoraciones: Number(ruta?.ratingSummary?.numValoraciones) || 0,
     canRate: Boolean(ruta?.canRateRating),
   };
-  
+
   container.innerHTML = `
 <div class="d-flex flex-column" style="min-height: 100dvh; background: #f8f9fa;">
   
@@ -403,7 +441,9 @@ export function renderInfoRuta(container, ruta, callbacks) {
       <span class="material-icons">arrow_back</span>
     </a>
   
-    ${canManage ? `
+    ${
+      canManage
+        ? `
     <div class="position-absolute top-0 end-0 m-3 d-flex gap-2" style="z-index: 3;">
       <button type="button" id="btn-modificar-ruta" class="btn btn-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(255,255,255,0.85);" aria-label="Modificar ruta" title="Modificar ruta">
         <span class="material-icons" style="font-size: 20px;">edit</span>
@@ -411,7 +451,9 @@ export function renderInfoRuta(container, ruta, callbacks) {
       <button type="button" id="eliminar-ruta-btn" class="btn btn-danger d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;" aria-label="Eliminar ruta" title="Eliminar ruta">
         <span class="material-icons" style="font-size: 20px;">delete</span>
       </button>
-    </div>` : ''}
+    </div>`
+        : ''
+    }
 
     <button
       type="button"
@@ -456,16 +498,20 @@ export function renderInfoRuta(container, ruta, callbacks) {
         <div class="col-6">
           <div class="d-flex align-items-center gap-3 rounded-4 border bg-light px-3 py-2 h-100">
             <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 48px; height: 48px; background: rgba(37, 99, 235, 0.1);">
-              ${hasDificultad && ruta?.difficultyIsColor ? `
+              ${
+                hasDificultad && ruta?.difficultyIsColor
+                  ? `
                 ${renderMedallaColorIcon({
                   color: ruta.difficultyColorRgb || 'rgb(158, 158, 158)',
                   size: 30,
                   title: `Dificultad: ${dificultadLabelSafe}`,
                   ariaLabel: `Dificultad ${dificultadLabelSafe}`,
                 })}
-              ` : `
+              `
+                  : `
                 <span class="badge bg-primary shadow-sm border border-light">${dificultadLabelSafe}</span>
-              `}
+              `
+              }
             </div>
             <div class="d-flex flex-column min-w-0">
               <span class="small text-muted text-uppercase" style="letter-spacing: 0.4px; font-size: 0.68rem;">Dificultad</span>
@@ -558,7 +604,7 @@ ${renderRutaImageModal({
   imageSrc: rutaImageSrc,
   imageAlt: `Imagen ampliada de la ruta ${rutaNombre}`,
 })}`;
-  
+
   setupRutaEstadoButtons(container, callbacks.onEstadoChange);
   const ratingSectionController = setupRutaRatingSection(container, {
     canRate: ratingSummary.canRate,
@@ -567,44 +613,45 @@ ${renderRutaImageModal({
     onError: callbacks.onRatingError,
   });
 
-  if (ratingSectionController && typeof callbacks.onRatingReady === 'function') {
+  if (
+    ratingSectionController &&
+    typeof callbacks.onRatingReady === 'function'
+  ) {
     callbacks.onRatingReady(ratingSectionController);
   }
-  
+
   const editButton = container.querySelector('#btn-modificar-ruta');
   if (editButton && typeof callbacks.onEdit === 'function') {
     editButton.addEventListener('click', callbacks.onEdit);
   }
-    const eliminarRutaBtn = container.querySelector('#eliminar-ruta-btn');
-    if (eliminarRutaBtn && typeof callbacks.onDeleteRoute === 'function') {
-      eliminarRutaBtn.addEventListener('click', () => {
-        callbacks.onDeleteRoute(ruta, eliminarRutaBtn);
-      });
-    }
-
-  setupRutaImageModal(container, { modalId: rutaImageModalId });
-  }
-
-  
-  // Función auxiliar para formatear una fecha a día, mes y año o mostrar un texto de fallback si no es válida
-  function formatDateOnly(value) {
-    if (!value) return 'No definida';
-
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) return 'No definida';
-
-    return parsed.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
+  const eliminarRutaBtn = container.querySelector('#eliminar-ruta-btn');
+  if (eliminarRutaBtn && typeof callbacks.onDeleteRoute === 'function') {
+    eliminarRutaBtn.addEventListener('click', () => {
+      callbacks.onDeleteRoute(ruta, eliminarRutaBtn);
     });
   }
-  
-  // Función auxiliar para formatear el tipo de ruta a un texto legible
-  function formatTipo(tipo) {
-    if (!tipo) return 'No definido';
-    if (tipo === 'via') return 'Vía';
-    if (tipo === 'boulder') return 'Bloque';
-    return tipo;
-  }
-  
+
+  setupRutaImageModal(container, { modalId: rutaImageModalId });
+}
+
+// Función auxiliar para formatear una fecha a día, mes y año o mostrar un texto de fallback si no es válida
+function formatDateOnly(value) {
+  if (!value) return 'No definida';
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return 'No definida';
+
+  return parsed.toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
+
+// Función auxiliar para formatear el tipo de ruta a un texto legible
+function formatTipo(tipo) {
+  if (!tipo) return 'No definido';
+  if (tipo === 'via') return 'Vía';
+  if (tipo === 'boulder') return 'Bloque';
+  return tipo;
+}

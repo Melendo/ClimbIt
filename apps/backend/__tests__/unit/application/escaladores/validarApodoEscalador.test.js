@@ -11,13 +11,17 @@ describe('validarApodoEscaladorUseCase', () => {
 
     const resultado = await useCase.execute('NuevoApodo');
 
-    expect(mockRepository.encontrarPorApodoInsensitive).toHaveBeenCalledWith('nuevoapodo');
+    expect(mockRepository.encontrarPorApodoInsensitive).toHaveBeenCalledWith(
+      'nuevoapodo'
+    );
     expect(resultado).toEqual({ disponible: true });
   });
 
   it('deberia devolver disponible false cuando el apodo ya existe', async () => {
     const mockRepository = {
-      encontrarPorApodoInsensitive: jest.fn().mockResolvedValue({ id: 1, apodo: 'Test' }),
+      encontrarPorApodoInsensitive: jest
+        .fn()
+        .mockResolvedValue({ id: 1, apodo: 'Test' }),
     };
     const useCase = new ValidarApodoEscalador(mockRepository);
 
@@ -28,10 +32,14 @@ describe('validarApodoEscaladorUseCase', () => {
 
   it('deberia lanzar InternalServerError si falla el repositorio', async () => {
     const mockRepository = {
-      encontrarPorApodoInsensitive: jest.fn().mockRejectedValue(new Error('db fail')),
+      encontrarPorApodoInsensitive: jest
+        .fn()
+        .mockRejectedValue(new Error('db fail')),
     };
     const useCase = new ValidarApodoEscalador(mockRepository);
 
-    await expect(useCase.execute('Test')).rejects.toBeInstanceOf(InternalServerError);
+    await expect(useCase.execute('Test')).rejects.toBeInstanceOf(
+      InternalServerError
+    );
   });
 });

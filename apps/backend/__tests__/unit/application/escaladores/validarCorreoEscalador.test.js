@@ -11,13 +11,17 @@ describe('validarCorreoEscaladorUseCase', () => {
 
     const resultado = await useCase.execute('nuevo@correo.com');
 
-    expect(mockRepository.encontrarPorCorreo).toHaveBeenCalledWith('nuevo@correo.com');
+    expect(mockRepository.encontrarPorCorreo).toHaveBeenCalledWith(
+      'nuevo@correo.com'
+    );
     expect(resultado).toEqual({ disponible: true });
   });
 
   it('deberia devolver disponible false cuando el correo ya existe', async () => {
     const mockRepository = {
-      encontrarPorCorreo: jest.fn().mockResolvedValue({ id: 1, correo: 'test@correo.com' }),
+      encontrarPorCorreo: jest
+        .fn()
+        .mockResolvedValue({ id: 1, correo: 'test@correo.com' }),
     };
     const useCase = new ValidarCorreoEscalador(mockRepository);
 
@@ -32,6 +36,8 @@ describe('validarCorreoEscaladorUseCase', () => {
     };
     const useCase = new ValidarCorreoEscalador(mockRepository);
 
-    await expect(useCase.execute('test@correo.com')).rejects.toBeInstanceOf(InternalServerError);
+    await expect(useCase.execute('test@correo.com')).rejects.toBeInstanceOf(
+      InternalServerError
+    );
   });
 });

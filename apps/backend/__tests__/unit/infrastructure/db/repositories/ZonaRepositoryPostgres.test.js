@@ -1,4 +1,11 @@
-import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
+import {
+  describe,
+  it,
+  expect,
+  jest,
+  beforeEach,
+  afterEach,
+} from '@jest/globals';
 import ZonaRepositoryPostgres from '../../../../../src/infrastructure/repositories/zonaRepositoryPostgres.js';
 import Zona from '../../../../../src/domain/zonas/Zona.js';
 
@@ -40,15 +47,15 @@ describe('ZonaRepositoryPostgres', () => {
       const resultado = repository._toDomain(null);
       expect(resultado).toBeNull();
     });
-    
+
     it('debería lanzar error si falla la creación del dominio', () => {
       // Simulamos un modelo inválido que hará fallar el constructor de Zona
-       const modeloInvalido = {
+      const modeloInvalido = {
         id: 1,
-        idRoco: 1, 
+        idRoco: 1,
         nombre: '', // Esto debería fallar en el constructor de Zona
       };
-      
+
       expect(() => repository._toDomain(modeloInvalido)).toThrow();
     });
   });

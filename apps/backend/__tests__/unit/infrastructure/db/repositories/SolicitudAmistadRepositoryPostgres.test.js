@@ -114,8 +114,13 @@ describe('SolicitudAmistadRepositoryPostgres', () => {
         idDestinatario: 5,
         estado: 'pendiente',
         createdAt: new Date('2026-04-25T00:00:00.000Z'),
-        remitente: { id: 2, apodo: 'juan', descripcion: 'test', idFotoPerfil: null }
-      }
+        remitente: {
+          id: 2,
+          apodo: 'juan',
+          descripcion: 'test',
+          idFotoPerfil: null,
+        },
+      },
     ];
     mockSolicitudModel.findAll.mockResolvedValue(mockDbData);
 
@@ -124,12 +129,17 @@ describe('SolicitudAmistadRepositoryPostgres', () => {
     expect(mockSolicitudModel.findAll).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { idDestinatario: 5, estado: 'pendiente' },
-        include: expect.any(Array)
+        include: expect.any(Array),
       })
     );
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(SolicitudAmistad);
     expect(result[0].id).toBe(10);
-    expect(result[0].remitente).toEqual({ id: 2, apodo: 'juan', descripcion: 'test', idFotoPerfil: null });
+    expect(result[0].remitente).toEqual({
+      id: 2,
+      apodo: 'juan',
+      descripcion: 'test',
+      idFotoPerfil: null,
+    });
   });
 });

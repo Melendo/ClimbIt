@@ -24,14 +24,18 @@ describe('ObtenerActividadMensualEscalador', () => {
       mockPistaRepository
     );
 
-    const resultado = await useCase.execute({ apodo: 'Tester', year: 2026, month: 4 });
+    const resultado = await useCase.execute({
+      apodo: 'Tester',
+      year: 2026,
+      month: 4,
+    });
 
-    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith('Tester');
-    expect(mockPistaRepository.obtenerActividadMensualEscalador).toHaveBeenCalledWith(
-      9,
-      2026,
-      4
+    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(
+      'Tester'
     );
+    expect(
+      mockPistaRepository.obtenerActividadMensualEscalador
+    ).toHaveBeenCalledWith(9, 2026, 4);
     expect(resultado).toEqual({
       year: 2026,
       month: 4,
@@ -45,9 +49,9 @@ describe('ObtenerActividadMensualEscalador', () => {
       { obtenerActividadMensualEscalador: jest.fn() }
     );
 
-    await expect(useCase.execute({ apodo: 'NoExiste', year: 2026, month: 4 })).rejects.toBeInstanceOf(
-      NotFoundError
-    );
+    await expect(
+      useCase.execute({ apodo: 'NoExiste', year: 2026, month: 4 })
+    ).rejects.toBeInstanceOf(NotFoundError);
   });
 
   it('deberia lanzar BadRequestError con month fuera de rango', async () => {
@@ -56,9 +60,9 @@ describe('ObtenerActividadMensualEscalador', () => {
       { obtenerActividadMensualEscalador: jest.fn() }
     );
 
-    await expect(useCase.execute({ apodo: 'Tester', year: 2026, month: 13 })).rejects.toBeInstanceOf(
-      BadRequestError
-    );
+    await expect(
+      useCase.execute({ apodo: 'Tester', year: 2026, month: 13 })
+    ).rejects.toBeInstanceOf(BadRequestError);
   });
 
   it('deberia lanzar InternalServerError ante fallo inesperado', async () => {
@@ -67,8 +71,8 @@ describe('ObtenerActividadMensualEscalador', () => {
       { obtenerActividadMensualEscalador: jest.fn() }
     );
 
-    await expect(useCase.execute({ apodo: 'Tester', year: 2026, month: 4 })).rejects.toBeInstanceOf(
-      InternalServerError
-    );
+    await expect(
+      useCase.execute({ apodo: 'Tester', year: 2026, month: 4 })
+    ).rejects.toBeInstanceOf(InternalServerError);
   });
 });

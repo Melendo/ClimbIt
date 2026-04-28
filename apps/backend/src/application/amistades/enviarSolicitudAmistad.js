@@ -7,7 +7,11 @@ import {
 import SolicitudAmistad from '../../domain/amistades/SolicitudAmistad.js';
 
 class EnviarSolicitudAmistad {
-  constructor(escaladorRepository, solicitudAmistadRepository, amistadRepository) {
+  constructor(
+    escaladorRepository,
+    solicitudAmistadRepository,
+    amistadRepository
+  ) {
     this.escaladorRepository = escaladorRepository;
     this.solicitudAmistadRepository = solicitudAmistadRepository;
     this.amistadRepository = amistadRepository;
@@ -15,7 +19,8 @@ class EnviarSolicitudAmistad {
 
   async execute({ apodoRemitente, apodoDestinatario }) {
     try {
-      const remitente = await this.escaladorRepository.encontrarPorApodo(apodoRemitente);
+      const remitente =
+        await this.escaladorRepository.encontrarPorApodo(apodoRemitente);
       if (!remitente) {
         throw new NotFoundError(
           `Escalador remitente ${apodoRemitente} no encontrado`,
@@ -23,7 +28,8 @@ class EnviarSolicitudAmistad {
         );
       }
 
-      const destinatario = await this.escaladorRepository.encontrarPorApodo(apodoDestinatario);
+      const destinatario =
+        await this.escaladorRepository.encontrarPorApodo(apodoDestinatario);
       if (!destinatario) {
         throw new NotFoundError(
           `Escalador destinatario ${apodoDestinatario} no encontrado`,
@@ -38,10 +44,11 @@ class EnviarSolicitudAmistad {
         );
       }
 
-      const yaSonAmigos = await this.amistadRepository.existeAmistadEntreEscaladores(
-        remitente.id,
-        destinatario.id
-      );
+      const yaSonAmigos =
+        await this.amistadRepository.existeAmistadEntreEscaladores(
+          remitente.id,
+          destinatario.id
+        );
       if (yaSonAmigos) {
         throw new ConflictError(
           'Ya existe una amistad entre ambos escaladores',
@@ -68,7 +75,8 @@ class EnviarSolicitudAmistad {
         'pendiente'
       );
 
-      const solicitudCreada = await this.solicitudAmistadRepository.crear(solicitud);
+      const solicitudCreada =
+        await this.solicitudAmistadRepository.crear(solicitud);
 
       return {
         mensaje: 'Solicitud de amistad enviada correctamente',

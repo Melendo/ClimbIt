@@ -81,7 +81,9 @@ describe('E2E: Escalador', () => {
     }
 
     await db.Escalador.destroy({ where: { correo: FIXTURE_CORREOS } });
-    await db.Rocodromo.destroy({ where: { nombre: FIXTURE_ROCODROMO_NOMBRES } });
+    await db.Rocodromo.destroy({
+      where: { nombre: FIXTURE_ROCODROMO_NOMBRES },
+    });
   }
 
   beforeAll(async () => {
@@ -111,12 +113,11 @@ describe('E2E: Escalador', () => {
     });
 
     // Generar token de autenticación
-    tokenSuscripcion = tokenService.crear({ 
-      correo: escaladorSuscripcion.correo, 
-      apodo: escaladorSuscripcion.apodo 
+    tokenSuscripcion = tokenService.crear({
+      correo: escaladorSuscripcion.correo,
+      apodo: escaladorSuscripcion.apodo,
     });
 
-     
     escaladorValidacion = await db.Escalador.create({
       correo: 'validacion@test.com',
       contrasena: 'hashedPassword123',
@@ -240,7 +241,9 @@ describe('E2E: Escalador', () => {
       expect(response.body).toHaveProperty('token'); // Esperamos un objeto con token
       expect(response.body.token).toEqual(expect.any(String)); // El token es un string JWT
 
-      const escaladorGuardado = await db.Escalador.findOne({ where: { correo: escaladorTest.correo } });
+      const escaladorGuardado = await db.Escalador.findOne({
+        where: { correo: escaladorTest.correo },
+      });
       expect(escaladorGuardado).not.toBeNull();
       expect(escaladorGuardado.correo).toBe(escaladorTest.correo);
       expect(escaladorGuardado.contrasena).not.toBe(escaladorTest.contrasena);
@@ -250,7 +253,11 @@ describe('E2E: Escalador', () => {
     it('debería manejar errores al crear un escalador con datos inválidos', async () => {
       const response = await request(app)
         .post('/escaladores/create')
-        .send({ correo: 'test@test.com', contrasena: '123', apodo: '!!!invalid!!!' })
+        .send({
+          correo: 'test@test.com',
+          contrasena: '123',
+          apodo: '!!!invalid!!!',
+        })
         .expect(422);
 
       expect(response.body).toHaveProperty('status', 'invalid_request');
@@ -274,9 +281,11 @@ describe('E2E: Escalador', () => {
       expect(response.body.mensaje).toContain(rocodromoTest.nombre);
 
       // Verificar que la suscripción se guardó en la base de datos
-      const escaladorActualizado = await db.Escalador.findByPk(escaladorSuscripcion.id);
+      const escaladorActualizado = await db.Escalador.findByPk(
+        escaladorSuscripcion.id
+      );
       const rocodromos = await escaladorActualizado.getRocodromos();
-      
+
       expect(rocodromos).toHaveLength(1);
       expect(rocodromos[0].id).toBe(rocodromoTest.id);
     });
@@ -294,7 +303,7 @@ describe('E2E: Escalador', () => {
 
     it('debería retornar 404 si el rocódromo no existe', async () => {
       const fakeIdRocodromo = 999999;
-      
+
       const response = await request(app)
         .post('/escaladores/suscribirse')
         .set('Authorization', `Bearer ${tokenSuscripcion}`)
@@ -342,9 +351,11 @@ describe('E2E: Escalador', () => {
       expect(response.body.mensaje).toContain(rocodromoTest.nombre);
 
       // Verificar que la desuscripción se eliminó de la base de datos
-      const escaladorActualizado = await db.Escalador.findByPk(escaladorSuscripcion.id);
+      const escaladorActualizado = await db.Escalador.findByPk(
+        escaladorSuscripcion.id
+      );
       const rocodromos = await escaladorActualizado.getRocodromos();
-      
+
       expect(rocodromos).toHaveLength(0);
     });
 
@@ -361,7 +372,7 @@ describe('E2E: Escalador', () => {
 
     it('debería retornar 404 si el rocódromo no existe', async () => {
       const fakeIdRocodromo = 999999;
-      
+
       const response = await request(app)
         .post('/escaladores/desuscribirse')
         .set('Authorization', `Bearer ${tokenSuscripcion}`)
@@ -452,7 +463,9 @@ describe('E2E: Escalador', () => {
 
     it('deberia obtener dificultad maxima por tipo incluyendo pistas inactivas', async () => {
       const response = await request(app)
-        .get(`/escaladores/stats/rocodromo/${rocodromoStats.id}/dificultad-maxima`)
+        .get(
+          `/escaladores/stats/rocodromo/${rocodromoStats.id}/dificultad-maxima`
+        )
         .set('Authorization', `Bearer ${tokenSuscripcion}`)
         .expect(200);
 
@@ -464,7 +477,9 @@ describe('E2E: Escalador', () => {
 
     it('deberia obtener actividad mensual filtrada por rocodromo', async () => {
       const response = await request(app)
-        .get(`/escaladores/stats/rocodromo/${rocodromoStats.id}/actividad-mensual?year=2026&month=4`)
+        .get(
+          `/escaladores/stats/rocodromo/${rocodromoStats.id}/actividad-mensual?year=2026&month=4`
+        )
         .set('Authorization', `Bearer ${tokenSuscripcion}`)
         .expect(200);
 
@@ -483,7 +498,9 @@ describe('E2E: Escalador', () => {
 
     it('deberia retornar ceros si el rocodromo no tiene datos del escalador', async () => {
       const response = await request(app)
-        .get(`/escaladores/stats/rocodromo/${rocodromoStatsSinDatos.id}/resumen`)
+        .get(
+          `/escaladores/stats/rocodromo/${rocodromoStatsSinDatos.id}/resumen`
+        )
         .set('Authorization', `Bearer ${tokenSuscripcion}`)
         .expect(200);
 
@@ -527,7 +544,9 @@ describe('E2E: Escalador', () => {
 
     it('deberia retornar 401 sin token en dificultad maxima', async () => {
       const response = await request(app)
-        .get(`/escaladores/stats/rocodromo/${rocodromoStats.id}/dificultad-maxima`)
+        .get(
+          `/escaladores/stats/rocodromo/${rocodromoStats.id}/dificultad-maxima`
+        )
         .expect(401);
 
       expect(response.body).toHaveProperty('code', 'AUTH_TOKEN_MISSING');
@@ -568,11 +587,13 @@ describe('E2E: Escalador', () => {
 
       expect(response.body).toBeInstanceOf(Array);
       expect(response.body.length).toBeGreaterThan(0);
-      
-      const rocodromoIds = response.body.map(r => r.id);
+
+      const rocodromoIds = response.body.map((r) => r.id);
       expect(rocodromoIds).toContain(rocodromoTest.id);
-      
-      const rocodromoEnRespuesta = response.body.find(r => r.id === rocodromoTest.id);
+
+      const rocodromoEnRespuesta = response.body.find(
+        (r) => r.id === rocodromoTest.id
+      );
       expect(rocodromoEnRespuesta).toHaveProperty('nombre');
       expect(rocodromoEnRespuesta).toHaveProperty('ubicacion');
     });
@@ -680,12 +701,22 @@ describe('E2E: Escalador', () => {
         .expect(200);
 
       expect(response.body).toHaveProperty('id');
-      expect(response.body).toHaveProperty('correo', escaladorDescripcion.correo);
+      expect(response.body).toHaveProperty(
+        'correo',
+        escaladorDescripcion.correo
+      );
       expect(response.body).toHaveProperty('apodo', escaladorDescripcion.apodo);
-      expect(response.body).toHaveProperty('descripcion', 'Nueva descripcion de perfil');
+      expect(response.body).toHaveProperty(
+        'descripcion',
+        'Nueva descripcion de perfil'
+      );
 
-      const escaladorActualizado = await db.Escalador.findByPk(escaladorDescripcion.id);
-      expect(escaladorActualizado.descripcion).toBe('Nueva descripcion de perfil');
+      const escaladorActualizado = await db.Escalador.findByPk(
+        escaladorDescripcion.id
+      );
+      expect(escaladorActualizado.descripcion).toBe(
+        'Nueva descripcion de perfil'
+      );
     });
 
     it('deberia retornar 401 si no se proporciona token', async () => {
@@ -720,7 +751,10 @@ describe('E2E: Escalador', () => {
         .expect(200);
 
       expect(response.body).toHaveProperty('apodo', 'ApodoActualizado');
-      expect(response.body).toHaveProperty('correo', escaladorCambioApodo.correo);
+      expect(response.body).toHaveProperty(
+        'correo',
+        escaladorCambioApodo.correo
+      );
       expect(response.body).toHaveProperty('token');
       expect(typeof response.body.token).toBe('string');
 
@@ -769,10 +803,19 @@ describe('E2E: Escalador', () => {
       // E2ETester -> test
       // ApodoOriginal ya cambió
       expect(response.body.length).toBeGreaterThan(0);
-      expect(response.body.some(e => e.apodo === 'E2ETester' || e.apodo === 'SuscripcionTester' || e.apodo === 'DescripcionTester')).toBe(true);
+      expect(
+        response.body.some(
+          (e) =>
+            e.apodo === 'E2ETester' ||
+            e.apodo === 'SuscripcionTester' ||
+            e.apodo === 'DescripcionTester'
+        )
+      ).toBe(true);
 
       // Verify that tokenSuscripcion (SuscripcionTester) is not in the list if the search matched him
-      const foundMe = response.body.find(e => e.apodo === 'SuscripcionTester');
+      const foundMe = response.body.find(
+        (e) => e.apodo === 'SuscripcionTester'
+      );
       expect(foundMe).toBeUndefined();
     });
 

@@ -6,9 +6,8 @@ class ActualizarFotoPerfilEscalador {
 
   async execute({ apodo, idFotoPerfil }) {
     try {
-      const fotoPerfil = await this.fotosPerfilRepository.encontrarPorId(
-        idFotoPerfil
-      );
+      const fotoPerfil =
+        await this.fotosPerfilRepository.encontrarPorId(idFotoPerfil);
 
       if (!fotoPerfil) {
         throw new Error('Foto de perfil no encontrada');

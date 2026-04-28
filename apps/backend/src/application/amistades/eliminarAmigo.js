@@ -20,14 +20,22 @@ class EliminarAmigo {
 
   async execute({ apodoSolicitante, apodoAmigo }) {
     try {
-      const solicitante = await this.escaladorRepository.encontrarPorApodo(apodoSolicitante);
+      const solicitante =
+        await this.escaladorRepository.encontrarPorApodo(apodoSolicitante);
       if (!solicitante) {
-        throw new NotFoundError('Escalador solicitante no encontrado', 'ESCALADOR_SOLICITANTE_NOT_FOUND');
+        throw new NotFoundError(
+          'Escalador solicitante no encontrado',
+          'ESCALADOR_SOLICITANTE_NOT_FOUND'
+        );
       }
 
-      const amigo = await this.escaladorRepository.encontrarPorApodo(apodoAmigo);
+      const amigo =
+        await this.escaladorRepository.encontrarPorApodo(apodoAmigo);
       if (!amigo) {
-        throw new NotFoundError('Escalador amigo no encontrado', 'ESCALADOR_AMIGO_NOT_FOUND');
+        throw new NotFoundError(
+          'Escalador amigo no encontrado',
+          'ESCALADOR_AMIGO_NOT_FOUND'
+        );
       }
 
       if (solicitante.id === amigo.id) {
@@ -37,10 +45,11 @@ class EliminarAmigo {
         );
       }
 
-      const existeAmistad = await this.amistadRepository.existeAmistadEntreEscaladores(
-        solicitante.id,
-        amigo.id
-      );
+      const existeAmistad =
+        await this.amistadRepository.existeAmistadEntreEscaladores(
+          solicitante.id,
+          amigo.id
+        );
 
       if (!existeAmistad) {
         throw new NotFoundError('La amistad no existe', 'AMISTAD_NOT_FOUND');

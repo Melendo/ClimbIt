@@ -10,17 +10,21 @@ describe('ActualizarLogoRocodromo', () => {
     };
 
     const mockRocodromoRepository = {
-      actualizarLogoRocodromo: jest.fn().mockResolvedValue(rocodromoActualizado),
+      actualizarLogoRocodromo: jest
+        .fn()
+        .mockResolvedValue(rocodromoActualizado),
     };
 
     const useCase = new ActualizarLogoRocodromo(mockRocodromoRepository);
 
-    const resultado = await useCase.execute(1, '/uploads/logos_rocodromos/logo-1.jpg');
-
-    expect(mockRocodromoRepository.actualizarLogoRocodromo).toHaveBeenCalledWith(
+    const resultado = await useCase.execute(
       1,
       '/uploads/logos_rocodromos/logo-1.jpg'
     );
+
+    expect(
+      mockRocodromoRepository.actualizarLogoRocodromo
+    ).toHaveBeenCalledWith(1, '/uploads/logos_rocodromos/logo-1.jpg');
     expect(resultado).toEqual(rocodromoActualizado);
   });
 

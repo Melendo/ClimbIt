@@ -1,21 +1,33 @@
 // Importamos los controladores de los diferentes modulos y las funciones de UI
 import { mainContainer, showLoading, showError } from './ui.js';
 import { isAuthenticated, canManageRocodromo } from './client.js';
-import { perfilCmd, editarPerfilCmd } from '../modules/escalador/escaladorController.js';
-import { crearRutaCmd, infoRutaCmd, modificarRutaCmd } from '../modules/ruta/rutaController.js';
 import {
-    misRocodromosCmd,
-    buscarRocodromosCmd,
-    crearRocodromoCmd,
-    infoRocoCmd,
-    modificarRocodromoCmd,
-    rocodromoEstadisticasCmd,
+  perfilCmd,
+  editarPerfilCmd,
+} from '../modules/escalador/escaladorController.js';
+import {
+  crearRutaCmd,
+  infoRutaCmd,
+  modificarRutaCmd,
+} from '../modules/ruta/rutaController.js';
+import {
+  misRocodromosCmd,
+  buscarRocodromosCmd,
+  infoRocoCmd,
+  modificarRocodromoCmd,
+  rocodromoEstadisticasCmd,
 } from '../modules/rocodromo/rocodromoController.js';
-import { mapaZonaCmd, crearZonaCmd } from '../modules/zona/zonaController.js';
+import { mapaZonaCmd } from '../modules/zona/zonaController.js';
 import { homeCmd } from '../modules/home/homeController.js';
 import { error404Cmd } from '../modules/error/errorController.js';
-import { loginCmd, registroCmd } from '../modules/autenticacion/authController.js';
-import { socialCmd, amigoPerfilCmd } from '../modules/social/socialController.js';
+import {
+  loginCmd,
+  registroCmd,
+} from '../modules/autenticacion/authController.js';
+import {
+  socialCmd,
+  amigoPerfilCmd,
+} from '../modules/social/socialController.js';
 import { tutorialCmd } from '../modules/tutorial/tutorialController.js';
 
 // Rutas públicas que no requieren autenticación
@@ -23,123 +35,100 @@ const PUBLIC_ROUTES = ['#home', '#login', '#registro', ''];
 
 // Funcion para obtener parametros desde el hash de la URL despues del '?'
 function obtenerParametroDesdeHash(nombre) {
-    const hash = window.location.hash;
-    const indexInterrogacion = hash.indexOf('?');
-    if (indexInterrogacion === -1) return null;
-    const stringParametros = hash.substring(indexInterrogacion + 1);
-    const urlParams = new URLSearchParams(stringParametros);
-    return urlParams.get(nombre);
+  const hash = window.location.hash;
+  const indexInterrogacion = hash.indexOf('?');
+  if (indexInterrogacion === -1) return null;
+  const stringParametros = hash.substring(indexInterrogacion + 1);
+  const urlParams = new URLSearchParams(stringParametros);
+  return urlParams.get(nombre);
 }
 
 // Obtener la ruta base sin parámetros
 function getBaseRoute(hash) {
-    const indexInterrogacion = hash.indexOf('?');
-    return indexInterrogacion === -1 ? hash : hash.substring(0, indexInterrogacion);
+  const indexInterrogacion = hash.indexOf('?');
+  return indexInterrogacion === -1
+    ? hash
+    : hash.substring(0, indexInterrogacion);
 }
 
 // Manejador de navegacion basado en el '#' de la URL
 export async function handleNavigation() {
-    const hash = window.location.hash || '#home';
-    const baseRoute = getBaseRoute(hash);
+  const hash = window.location.hash || '#home';
+  const baseRoute = getBaseRoute(hash);
 
-    // Verificar autenticación para rutas protegidas
-    if (!PUBLIC_ROUTES.includes(baseRoute) && !isAuthenticated()) {
-        window.location.hash = '#login';
+  // Verificar autenticación para rutas protegidas
+  if (!PUBLIC_ROUTES.includes(baseRoute) && !isAuthenticated()) {
+    window.location.hash = '#login';
+    return;
+  }
+
+  showLoading();
+
+  try {
+    if (hash === '#home' || hash === '') {
+      homeCmd(mainContainer);
+    } else if (hash === '#login') {
+      loginCmd(mainContainer);
+    } else if (hash === '#registro') {
+      registroCmd(mainContainer);
+    } else if (hash === '#tutorial') {
+      tutorialCmd(mainContainer);
+    } else if (baseRoute === '#crearRuta') {
+      const idRocodromo = obtenerParametroDesdeHash('idRocodromo');
+      const idZona = obtenerParametroDesdeHash('idZona');
+
+      if (!canManageRocodromo(idRocodromo)) {
+        showError('No tienes permisos para crear rutas en este rocódromo.');
         return;
+      }
+
+      await crearRutaCmd(mainContainer, { idRocodromo, idZona });
+    } else if (hash.startsWith('#infoRuta')) {
+      const id = obtenerParametroDesdeHash('id');
+      await infoRutaCmd(mainContainer, id);
+    } else if (hash.startsWith('#modificarRuta')) {
+      const id = obtenerParametroDesdeHash('id');
+      await modificarRutaCmd(mainContainer, id);
+    } else if (hash === '#misRocodromos') {
+      await misRocodromosCmd(mainContainer);
+    } else if (hash === '#buscarRocodromos') {
+      await buscarRocodromosCmd(mainContainer);
+    } else if (hash.startsWith('#infoRoco')) {
+      const id = obtenerParametroDesdeHash('id');
+      await infoRocoCmd(mainContainer, id);
+    } else if (hash.startsWith('#modificarRocodromo')) {
+      const id = obtenerParametroDesdeHash('id');
+      await modificarRocodromoCmd(mainContainer, id);
+    } else if (hash.startsWith('#rocodromoEstadisticas')) {
+      const id = obtenerParametroDesdeHash('id');
+      await rocodromoEstadisticasCmd(mainContainer, id);
+    } else if (hash.startsWith('#mapaZona')) {
+      const id = obtenerParametroDesdeHash('id');
+      const idZona = obtenerParametroDesdeHash('zona');
+      await mapaZonaCmd(mainContainer, id, idZona);
+    } else if (hash.startsWith('#mapaRocodromo')) {
+      // Redirección para compatibilidad hacia atras
+      const id = obtenerParametroDesdeHash('id');
+      window.location.hash = `#mapaZona?id=${id}`;
+    } else if (hash === '#perfil') {
+      await perfilCmd(mainContainer);
+    } else if (hash === '#editarPerfil') {
+      await editarPerfilCmd(mainContainer);
+    } else if (hash === '#social') {
+      await socialCmd(mainContainer);
+    } else if (hash.startsWith('#amigoPerfil')) {
+      const apodo = obtenerParametroDesdeHash('apodo');
+      await amigoPerfilCmd(mainContainer, apodo);
+    } else {
+      error404Cmd(mainContainer);
     }
-
-    showLoading();
-
-    try {
-        if (hash === '#home' || hash === '') {
-            homeCmd(mainContainer);
-        }
-        else if (hash === '#login') {
-            loginCmd(mainContainer);
-        }
-        else if (hash === '#registro') {
-            registroCmd(mainContainer);
-        }
-        else if (hash === '#tutorial') {
-            tutorialCmd(mainContainer);
-        }
-        else if (baseRoute === '#crearRuta') {
-            const idRocodromo = obtenerParametroDesdeHash('idRocodromo');
-            const idZona = obtenerParametroDesdeHash('idZona');
-
-            if (!canManageRocodromo(idRocodromo)) {
-                showError('No tienes permisos para crear rutas en este rocódromo.');
-                return;
-            }
-
-            await crearRutaCmd(mainContainer, { idRocodromo, idZona });
-        }
-        else if (hash.startsWith('#infoRuta')) {
-            const id = obtenerParametroDesdeHash('id');
-            await infoRutaCmd(mainContainer, id);
-        }
-        else if (hash.startsWith('#modificarRuta')) {
-            const id = obtenerParametroDesdeHash('id');
-            await modificarRutaCmd(mainContainer, id);
-        }
-        else if (hash === '#misRocodromos') {
-            await misRocodromosCmd(mainContainer);
-        }
-        else if (hash === '#buscarRocodromos') {
-            await buscarRocodromosCmd(mainContainer);
-        }
-        else if (hash.startsWith('#infoRoco')) {
-            const id = obtenerParametroDesdeHash('id');
-            await infoRocoCmd(mainContainer, id);
-        }
-        else if (hash.startsWith('#modificarRocodromo')) {
-            const id = obtenerParametroDesdeHash('id');
-            await modificarRocodromoCmd(mainContainer, id);
-        }
-        else if (hash.startsWith('#rocodromoEstadisticas')) {
-            const id = obtenerParametroDesdeHash('id');
-            await rocodromoEstadisticasCmd(mainContainer, id);
-        }
-        else if (hash === '#crearRocodromo') {
-            crearRocodromoCmd(mainContainer);
-        }
-        else if (hash.startsWith('#mapaZona')) {
-            const id = obtenerParametroDesdeHash('id');
-            const idZona = obtenerParametroDesdeHash('zona');
-            await mapaZonaCmd(mainContainer, id, idZona);
-        }
-        else if (hash === '#crearZona') {
-            crearZonaCmd(mainContainer);
-        }
-        else if (hash.startsWith('#mapaRocodromo')) {
-            // Redirección para compatibilidad hacia atras
-            const id = obtenerParametroDesdeHash('id');
-            window.location.hash = `#mapaZona?id=${id}`;
-        }
-        else if (hash === '#perfil') {
-            await perfilCmd(mainContainer);
-        }
-        else if (hash === '#editarPerfil') {
-            await editarPerfilCmd(mainContainer);
-        }
-        else if (hash === '#social') {
-            await socialCmd(mainContainer);
-        }
-        else if (hash.startsWith('#amigoPerfil')) {
-            const apodo = obtenerParametroDesdeHash('apodo');
-            await amigoPerfilCmd(mainContainer, apodo);
-        }
-        else {
-            error404Cmd(mainContainer);
-        }
-    }
-    catch (err) {
-        showError(err.message || 'Error desconocido');
-    }
+  } catch (err) {
+    showError(err.message || 'Error desconocido');
+  }
 }
 
 // Inicializa el router para escuchar cambios en el hash de la URL
 export function initRouter() {
-    window.addEventListener('hashchange', handleNavigation);
-    handleNavigation();
+  window.addEventListener('hashchange', handleNavigation);
+  handleNavigation();
 }

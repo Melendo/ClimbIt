@@ -25,7 +25,9 @@ export function error500View() {
 }
 
 // Vista de error genérico con mensaje personalizado
-export function errorGenericoView(mensaje = 'Ha ocurrido un error desconocido') {
+export function errorGenericoView(
+  mensaje = 'Ha ocurrido un error desconocido'
+) {
   return `
         <div class="card-body text-center py-5">
           <span class="material-icons text-warning mb-3" style="font-size: 64px;">warning</span>

@@ -2,7 +2,10 @@ import { col, fn, literal, Op, where } from 'sequelize';
 import escaladorRepository from '../../domain/escaladores/escaladorRepository.js';
 import Escalador from '../../domain/escaladores/Escalador.js';
 import Rocodromo from '../../domain/rocodromos/Rocodromo.js';
-import { NotFoundError, ValidationError } from '../../domain/sharedObjects/AppError.js';
+import {
+  NotFoundError,
+  ValidationError,
+} from '../../domain/sharedObjects/AppError.js';
 import mapRepositoryError from './dbErrorHandler.js';
 
 class EscaladorRepositoryPostgres extends escaladorRepository {
@@ -27,7 +30,11 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
       escalador.isAdmin = Boolean(escaladorModel.isAdmin);
       return escalador;
     } catch (error) {
-      throw new ValidationError(error.message, 'ESCALADOR_MODEL_MAPPING_FAILED', error);
+      throw new ValidationError(
+        error.message,
+        'ESCALADOR_MODEL_MAPPING_FAILED',
+        error
+      );
     }
   }
 
@@ -112,12 +119,17 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
         where: searchWhere,
         limit: limite,
         order: [
-          [literal(`CASE WHEN "Apodo" ILIKE '${cadena}%' THEN 0 ELSE 1 END`), 'ASC'],
-          [fn('LENGTH', col('Apodo')), 'ASC']
+          [
+            literal(`CASE WHEN "Apodo" ILIKE '${cadena}%' THEN 0 ELSE 1 END`),
+            'ASC',
+          ],
+          [fn('LENGTH', col('Apodo')), 'ASC'],
         ],
       });
 
-      return escaladoresModel.map((escaladorModel) => this._toDomain(escaladorModel));
+      return escaladoresModel.map((escaladorModel) =>
+        this._toDomain(escaladorModel)
+      );
     } catch (error) {
       throw mapRepositoryError(error, {
         fallbackMessage: 'Error al buscar escaladores por apodo',
@@ -152,7 +164,9 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
         },
       });
 
-      return escaladoresModel.map((escaladorModel) => this._toDomain(escaladorModel));
+      return escaladoresModel.map((escaladorModel) =>
+        this._toDomain(escaladorModel)
+      );
     } catch (error) {
       throw mapRepositoryError(error, {
         fallbackMessage: 'Error al buscar escaladores por IDs',
@@ -243,7 +257,7 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
       }
 
       const rocodromos = await escaladorModel.getRocodromos();
-      const rocodromosDomain = rocodromos.map(rocodromoModel => {
+      const rocodromosDomain = rocodromos.map((rocodromoModel) => {
         return new Rocodromo(
           rocodromoModel.id,
           rocodromoModel.nombre,

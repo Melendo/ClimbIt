@@ -24,7 +24,9 @@ class SolicitudAmistadRepository {
   }
 
   async obtenerPendientesPorDestinatario() {
-    throw new Error('Método "obtenerPendientesPorDestinatario" no implementado');
+    throw new Error(
+      'Método "obtenerPendientesPorDestinatario" no implementado'
+    );
   }
 }
 

@@ -21,7 +21,8 @@ class ActualizarInformacionRocodromo {
     dificultadVia,
   }) {
     try {
-      const existente = await this.rocodromoRepository.encontrarPorId(idRocodromo);
+      const existente =
+        await this.rocodromoRepository.encontrarPorId(idRocodromo);
 
       if (!existente) {
         throw new NotFoundError(
@@ -31,9 +32,8 @@ class ActualizarInformacionRocodromo {
       }
 
       if (dificultadBloque !== undefined && dificultadBloque !== null) {
-        const escalaBloque = await this.escalaDificultadModel.findByPk(
-          dificultadBloque
-        );
+        const escalaBloque =
+          await this.escalaDificultadModel.findByPk(dificultadBloque);
 
         if (!escalaBloque) {
           throw new NotFoundError(
@@ -44,7 +44,8 @@ class ActualizarInformacionRocodromo {
       }
 
       if (dificultadVia !== undefined && dificultadVia !== null) {
-        const escalaVia = await this.escalaDificultadModel.findByPk(dificultadVia);
+        const escalaVia =
+          await this.escalaDificultadModel.findByPk(dificultadVia);
 
         if (!escalaVia) {
           throw new NotFoundError(

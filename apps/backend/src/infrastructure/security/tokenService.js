@@ -9,7 +9,7 @@ const tokenService = {
   verificar: (token) => {
     const secret = process.env.JWT_SECRET || 'secreto_super_seguro_dev';
     return jwt.verify(token, secret);
-  }
+  },
 };
 
 export default tokenService;

@@ -17,7 +17,10 @@ describe('obtenerPistaPorIdUseCase', () => {
       encontrarPorApodo: jest.fn(async () => ({ id: 42, apodo: 'climber1' })),
     };
 
-    const obtenerPista = new ObtenerPistaPorId(mockPistaRepository, mockEscaladorRepository);
+    const obtenerPista = new ObtenerPistaPorId(
+      mockPistaRepository,
+      mockEscaladorRepository
+    );
 
     const resultado = await obtenerPista.execute(1, 'climber1');
 
@@ -28,7 +31,9 @@ describe('obtenerPistaPorIdUseCase', () => {
       dificultad: '3a',
       estado: 'Flash',
     });
-    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith('climber1');
+    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(
+      'climber1'
+    );
     expect(mockPistaRepository.obtenerEstado).toHaveBeenCalledWith(1, 42);
   });
 
@@ -47,7 +52,10 @@ describe('obtenerPistaPorIdUseCase', () => {
       encontrarPorApodo: jest.fn(),
     };
 
-    const obtenerPista = new ObtenerPistaPorId(mockPistaRepository, mockEscaladorRepository);
+    const obtenerPista = new ObtenerPistaPorId(
+      mockPistaRepository,
+      mockEscaladorRepository
+    );
 
     const resultado = await obtenerPista.execute(1);
 
@@ -75,12 +83,17 @@ describe('obtenerPistaPorIdUseCase', () => {
       encontrarPorApodo: jest.fn(async () => null),
     };
 
-    const obtenerPista = new ObtenerPistaPorId(mockPistaRepository, mockEscaladorRepository);
+    const obtenerPista = new ObtenerPistaPorId(
+      mockPistaRepository,
+      mockEscaladorRepository
+    );
 
     const resultado = await obtenerPista.execute(1, 'noexiste');
 
     expect(resultado.estado).toBeNull();
-    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith('noexiste');
+    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(
+      'noexiste'
+    );
     expect(mockPistaRepository.obtenerEstado).not.toHaveBeenCalled();
   });
 
@@ -92,7 +105,10 @@ describe('obtenerPistaPorIdUseCase', () => {
       encontrarPorApodo: jest.fn(),
     };
 
-    const obtenerPista = new ObtenerPistaPorId(mockPistaRepository, mockEscaladorRepository);
+    const obtenerPista = new ObtenerPistaPorId(
+      mockPistaRepository,
+      mockEscaladorRepository
+    );
 
     const resultado = await obtenerPista.execute(999, 'climber1');
     expect(resultado).toBeNull();

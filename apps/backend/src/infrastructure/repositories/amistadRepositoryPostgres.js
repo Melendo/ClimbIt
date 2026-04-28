@@ -85,13 +85,18 @@ class AmistadRepositoryPostgres extends AmistadRepository {
     try {
       const amistades = await this.AmistadModel.findAll({
         where: {
-          [Op.or]: [{ idEscalador1: idEscalador }, { idEscalador2: idEscalador }],
+          [Op.or]: [
+            { idEscalador1: idEscalador },
+            { idEscalador2: idEscalador },
+          ],
         },
         attributes: ['idEscalador1', 'idEscalador2'],
       });
 
       return amistades.flatMap((amistad) => [
-        amistad.idEscalador1 === idEscalador ? amistad.idEscalador2 : amistad.idEscalador1,
+        amistad.idEscalador1 === idEscalador
+          ? amistad.idEscalador2
+          : amistad.idEscalador1,
       ]);
     } catch (error) {
       throw mapRepositoryError(error, {

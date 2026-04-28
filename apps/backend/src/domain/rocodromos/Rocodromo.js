@@ -41,10 +41,14 @@ class Rocodromo {
       throw new Error(`ubicacion inválida: Debe ser una cadena no vacía.`);
     }
     if (dificultadBloque !== null && !Number.isInteger(dificultadBloque)) {
-      throw new Error('dificultadBloque inválida: Debe ser un número entero o null.');
+      throw new Error(
+        'dificultadBloque inválida: Debe ser un número entero o null.'
+      );
     }
     if (dificultadVia !== null && !Number.isInteger(dificultadVia)) {
-      throw new Error('dificultadVia inválida: Debe ser un número entero o null.');
+      throw new Error(
+        'dificultadVia inválida: Debe ser un número entero o null.'
+      );
     }
   }
 }

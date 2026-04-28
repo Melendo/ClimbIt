@@ -7,7 +7,7 @@ import {
   setupPasswordToggle,
   showAlert,
   validateRegistroApodo,
-  validateRegistroPasswords
+  validateRegistroPasswords,
 } from '../../components/formHelpers.js';
 
 // Helper para configurar validación de email en formularios
@@ -18,7 +18,8 @@ function setupEmailFormValidation(form, emailInput, alertBox, onValidEmail) {
 
     if (!isValidEmail(email)) {
       alertBox.className = 'alert alert-danger';
-      alertBox.textContent = 'El email debe tener el formato correcto (ej: usuario@dominio.com)';
+      alertBox.textContent =
+        'El email debe tener el formato correcto (ej: usuario@dominio.com)';
       return;
     }
 
@@ -91,12 +92,18 @@ export function renderLogin(container, callbacks) {
     const password = passwordInput.value;
 
     if (!isOnline()) {
-      showAlert(alertBox, 'Sin conexión. No puedes iniciar sesión hasta recuperar Internet.');
+      showAlert(
+        alertBox,
+        'Sin conexión. No puedes iniciar sesión hasta recuperar Internet.'
+      );
       return;
     }
 
     if (!isValidEmail(email)) {
-      showAlert(alertBox, 'El email debe tener el formato correcto (ej: usuario@dominio.com)');
+      showAlert(
+        alertBox,
+        'El email debe tener el formato correcto (ej: usuario@dominio.com)'
+      );
       return;
     }
 
@@ -109,12 +116,13 @@ export function renderLogin(container, callbacks) {
 
     try {
       await callbacks.onLoginSubmit(email, password);
-    }
-    catch (error) {
+    } catch (error) {
       if (error.code === OFFLINE_READ_ONLY_ERROR_CODE) {
-        showAlert(alertBox, 'Sin conexión. No puedes iniciar sesión hasta recuperar Internet.');
-      }
-      else {
+        showAlert(
+          alertBox,
+          'Sin conexión. No puedes iniciar sesión hasta recuperar Internet.'
+        );
+      } else {
         showAlert(alertBox, 'El usuario y la contraseña no coinciden');
       }
 
@@ -248,7 +256,10 @@ export function renderRegistroPassword(container, email, callbacks) {
     e.preventDefault();
     const password = passwordInput.value;
     const passwordConfirm = passwordConfirmInput.value;
-    const validationMessage = validateRegistroPasswords(password, passwordConfirm);
+    const validationMessage = validateRegistroPasswords(
+      password,
+      passwordConfirm
+    );
 
     if (validationMessage) {
       showAlert(alertBox, validationMessage);
@@ -314,7 +325,10 @@ export function renderRegistroApodo(container, email, callbacks) {
     const validationMessage = validateRegistroApodo(apodo);
 
     if (!isOnline()) {
-      showAlert(alertBox, 'Sin conexión. No puedes crear una cuenta hasta recuperar Internet.');
+      showAlert(
+        alertBox,
+        'Sin conexión. No puedes crear una cuenta hasta recuperar Internet.'
+      );
       return;
     }
 
@@ -335,9 +349,11 @@ export function renderRegistroApodo(container, email, callbacks) {
       await callbacks.onApodoSubmit(apodo);
     } catch (error) {
       if (error.code === OFFLINE_READ_ONLY_ERROR_CODE) {
-        showAlert(alertBox, 'Sin conexión. No puedes crear una cuenta hasta recuperar Internet.');
-      }
-      else {
+        showAlert(
+          alertBox,
+          'Sin conexión. No puedes crear una cuenta hasta recuperar Internet.'
+        );
+      } else {
         showAlert(alertBox, error.message || 'Error al crear la cuenta');
       }
 

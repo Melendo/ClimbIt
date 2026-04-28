@@ -42,10 +42,10 @@ body {
   color: #fff !important;
 }
 
-.btn-check:checked+.btn-outline-primary,
-.btn-check:checked+.btn-outline-primary:hover,
-.btn-check:checked+.btn-outline-primary:focus,
-.btn-check:checked+.btn-outline-primary:active {
+.btn-check:checked + .btn-outline-primary,
+.btn-check:checked + .btn-outline-primary:hover,
+.btn-check:checked + .btn-outline-primary:focus,
+.btn-check:checked + .btn-outline-primary:active {
   background-color: #e77f1e !important;
   border-color: #e77f1e !important;
   color: #fff !important;
@@ -155,12 +155,12 @@ body {
 }
 
 /* Contenido centrado con ancho máximo */
-#app-container.app-vertical-layout>.app-content {
+#app-container.app-vertical-layout > .app-content {
   width: 100%;
   max-width: var(--app-max-width);
 }
 
-#app-container.app-vertical-layout>.app-content.app-shell {
+#app-container.app-vertical-layout > .app-content.app-shell {
   height: 100dvh;
   height: var(--app-height);
   border-top: 0 !important;
@@ -173,12 +173,12 @@ body {
     padding-bottom: var(--safe-area-inset-bottom);
   }
 
-  #app-container.app-vertical-layout>.app-content {
+  #app-container.app-vertical-layout > .app-content {
     max-width: 100%;
   }
 
   /* Cards a pantalla completa en móvil (solo la card principal) */
-  #app-container.app-vertical-layout>.app-content.app-shell {
+  #app-container.app-vertical-layout > .app-content.app-shell {
     border-radius: 0 !important;
     border-left: none !important;
     border-right: none !important;
@@ -186,8 +186,8 @@ body {
     min-height: var(--app-height);
   }
 
-  #app-container.app-vertical-layout>.app-content.app-shell>.card-header,
-  #app-container.app-vertical-layout>.app-content.app-shell>.card-footer {
+  #app-container.app-vertical-layout > .app-content.app-shell > .card-header,
+  #app-container.app-vertical-layout > .app-content.app-shell > .card-footer {
     border-radius: 0 !important;
   }
 }
@@ -241,7 +241,7 @@ body {
   color: var(--bs-primary) !important;
 }
 
-.app-shell>.card-footer {
+.app-shell > .card-footer {
   padding-bottom: calc(0.5rem + var(--safe-area-inset-bottom)) !important;
 }
 
@@ -288,10 +288,12 @@ body {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg,
-      transparent,
-      rgba(255, 255, 255, 0.4),
-      transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
   animation: shimmer 2s infinite;
 }
 
@@ -396,7 +398,9 @@ body {
 .ruta-visual-content {
   transform-box: fill-box;
   transform-origin: center;
-  transition: opacity 220ms ease, transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    opacity 220ms ease,
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .ruta-visual-content-simple {
@@ -456,7 +460,7 @@ body {
 .card-box-shadow {
   box-shadow:
     0 8px 12px rgba(0, 0, 0, 0.25),
-    0 4px 6px rgba(0, 0, 0, 0.20);
+    0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .rocodromo-card-content {
@@ -604,7 +608,7 @@ body {
   background-color: #dee2e6;
 }
 
-.perfil-photo-modal-body>.perfil-photo-section-divider {
+.perfil-photo-modal-body > .perfil-photo-section-divider {
   margin-bottom: 0.5rem;
 }
 
@@ -861,7 +865,7 @@ body {
   padding: 14px;
   box-shadow:
     0 8px 12px rgba(0, 0, 0, 0.25),
-    0 4px 6px rgba(0, 0, 0, 0.20);
+    0 4px 6px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -1005,7 +1009,11 @@ body {
   position: relative;
   padding: 1.25rem 1.25rem calc(1.5rem + var(--safe-area-inset-bottom));
   background:
-    radial-gradient(circle at 12% 18%, rgba(231, 127, 30, 0.2), transparent 55%),
+    radial-gradient(
+      circle at 12% 18%,
+      rgba(231, 127, 30, 0.2),
+      transparent 55%
+    ),
     radial-gradient(circle at 86% 6%, rgba(47, 85, 186, 0.16), transparent 48%),
     linear-gradient(180deg, #fff7ec 0%, #ffffff 45%, #f3f6ff 100%);
   flex: 1 1 auto;
@@ -1386,7 +1394,6 @@ body {
 }
 
 @media (max-width: 480px) {
-
   .perfil-stats-badges,
   .perfil-stats-choices {
     justify-content: center;
@@ -1398,7 +1405,6 @@ body {
 }
 
 @media (max-width: 350px) {
-
   .perfil-stats-badges,
   .perfil-stats-choices {
     grid-template-columns: minmax(0, 1fr);
@@ -1616,7 +1622,9 @@ body {
   color: #6c757d;
   border-bottom: 2px solid transparent;
   letter-spacing: 0.02em;
-  transition: color 0.2s ease, border-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .social-tab-btn.is-active {
@@ -1964,7 +1972,9 @@ body {
   justify-content: center;
   border: none;
   color: white;
-  transition: transform 0.2s, background-color 0.2s;
+  transition:
+    transform 0.2s,
+    background-color 0.2s;
 }
 
 .btn-solicitud-action.btn-accept {

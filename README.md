@@ -84,7 +84,6 @@ Esto creará las tablas necesarias en la base de datos.
 
 > **Nota:** Para visualizar las tablas creadas, puedes usar pgAdmin siguiendo la Guía de conexión de PostgreSQL con pgAdmin en el punto 3.
 
-
 ### 2.3. Ejecutar el proyecto
 
 Vuelve a la carpeta raíz del proyecto:

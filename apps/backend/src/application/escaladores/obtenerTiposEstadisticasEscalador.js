@@ -15,10 +15,15 @@ class ObtenerTiposEstadisticasEscalador {
       const escalador = await this.escaladorRepository.encontrarPorApodo(apodo);
 
       if (!escalador) {
-        throw new NotFoundError('Escalador no encontrado', 'ESCALADOR_NOT_FOUND');
+        throw new NotFoundError(
+          'Escalador no encontrado',
+          'ESCALADOR_NOT_FOUND'
+        );
       }
 
-      return this.pistaRepository.obtenerTiposEstadisticasEscalador(escalador.id);
+      return this.pistaRepository.obtenerTiposEstadisticasEscalador(
+        escalador.id
+      );
     } catch (error) {
       if (error instanceof AppError) {
         throw error;

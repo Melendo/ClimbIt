@@ -48,7 +48,11 @@ class ActualizarPista {
       const resolveValue = (value, fallback) =>
         value !== undefined ? value : fallback;
 
-      if (dificultad !== undefined && dificultad !== null && dificultad !== '') {
+      if (
+        dificultad !== undefined &&
+        dificultad !== null &&
+        dificultad !== ''
+      ) {
         const zonaIdForValidation = resolveValue(idZona, pistaActual.idZona);
         if (!zonaExistente || zonaExistente.id !== zonaIdForValidation) {
           zonaExistente = await this.zonaModel.findByPk(zonaIdForValidation);
@@ -86,7 +90,9 @@ class ActualizarPista {
         }
 
         const dificultadNormalizada =
-          typeof dificultad === 'string' ? dificultad.trim() : String(dificultad);
+          typeof dificultad === 'string'
+            ? dificultad.trim()
+            : String(dificultad);
 
         if (!escalaPorTipo.dificultades.includes(dificultadNormalizada)) {
           throw new ValidationError(
@@ -102,12 +108,13 @@ class ActualizarPista {
         resolveValue(nombre, pistaActual.nombre),
         dificultad,
         resolveValue(tipo, pistaActual.tipo),
-        colorPresas, 
+        colorPresas,
         pistaActual.imagenUrl,
         resolveValue(posX, pistaActual.posX),
         resolveValue(posY, pistaActual.posY),
         resolveValue(fechaCreacion, pistaActual.fechaCreacion),
-        fechaRetirada, pistaActual.fechaRetirada,
+        fechaRetirada,
+        pistaActual.fechaRetirada,
         pistaActual.activo
       );
 

@@ -1,6 +1,9 @@
 import { jest } from '@jest/globals';
 import CambiarApodoEscalador from '../../../../src/application/escaladores/cambiarApodoEscalador.js';
-import { InternalServerError, NotFoundError } from '../../../../src/domain/sharedObjects/AppError.js';
+import {
+  InternalServerError,
+  NotFoundError,
+} from '../../../../src/domain/sharedObjects/AppError.js';
 
 describe('cambiarApodoEscaladorUseCase', () => {
   it('deberia devolver perfil actualizado y token', async () => {
@@ -21,7 +24,11 @@ describe('cambiarApodoEscaladorUseCase', () => {
     const resultado = await useCase.execute({
       apodoActual: 'ViejoApodo',
       nuevoApodo: 'NuevoApodo',
-      usuario: { correo: 'test@correo.com', apodo: 'ViejoApodo', rol: 'Escalador' },
+      usuario: {
+        correo: 'test@correo.com',
+        apodo: 'ViejoApodo',
+        rol: 'Escalador',
+      },
     });
 
     expect(mockRepository.actualizarApodo).toHaveBeenCalledWith(

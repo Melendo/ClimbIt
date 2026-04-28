@@ -5,8 +5,8 @@ name: ClimbIt-CI
 on:
   pull_request:
     branches:
-      - "main"
-      - "develop"
+      - 'main'
+      - 'develop'
 
 jobs:
   # Nombre del trabajo que aparecerá en los status checks de GitHub

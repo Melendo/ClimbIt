@@ -39,7 +39,9 @@ class AmistadController {
   async listarAmigos(req, res, next) {
     try {
       const apodoEscalador = req.user.apodo;
-      const resultado = await this.useCases.listarAmigos.execute({ apodoEscalador });
+      const resultado = await this.useCases.listarAmigos.execute({
+        apodoEscalador,
+      });
       res.status(200).json(resultado);
     } catch (error) {
       return next(error);
@@ -65,13 +67,14 @@ class AmistadController {
   async listarSolicitudesPendientes(req, res, next) {
     try {
       const apodoEscalador = req.user.apodo;
-      const resultado = await this.useCases.listarSolicitudesPendientes.execute({ apodoEscalador });
+      const resultado = await this.useCases.listarSolicitudesPendientes.execute(
+        { apodoEscalador }
+      );
       res.status(200).json(resultado);
     } catch (error) {
       return next(error);
     }
   }
-
 
   async eliminarAmigo(req, res, next) {
     try {

@@ -90,7 +90,9 @@ async function inicializarContainer() {
   const pistaRepository = new PistaRepositoryPostgres(db.Pista);
   const zonaRepository = new ZonaRepositoryPostgres(db.Zona);
   const rocodromoRepository = new RocodromoRepositoryPostgres(db.Rocodromo);
-  const fotosPerfilRepository = new FotosPerfilRepositoryPostgres(db.FotosPerfil);
+  const fotosPerfilRepository = new FotosPerfilRepositoryPostgres(
+    db.FotosPerfil
+  );
   const solicitudAmistadRepository = new SolicitudAmistadRepositoryPostgres(
     db.SolicitudAmistad
   );
@@ -120,7 +122,9 @@ async function inicializarContainer() {
     escaladorRepository
   );
   const crearFotoPerfilUseCase = new CrearFotoPerfil(fotosPerfilRepository);
-  const obtenerFotosPerfilUseCase = new ObtenerFotosPerfil(fotosPerfilRepository);
+  const obtenerFotosPerfilUseCase = new ObtenerFotosPerfil(
+    fotosPerfilRepository
+  );
   const obtenerFotoPerfilUseCase = new ObtenerFotoPerfil(fotosPerfilRepository);
   const actualizarFotoPerfilUseCase = new ActualizarFotoPerfilEscalador(
     escaladorRepository,
@@ -140,10 +144,14 @@ async function inicializarContainer() {
       escaladorRepository,
       pistaRepository
     );
-  const obtenerTiposEstadisticasUseCase =
-    new ObtenerTiposEstadisticasEscalador(escaladorRepository, pistaRepository);
-  const obtenerActividadMensualUseCase =
-    new ObtenerActividadMensualEscalador(escaladorRepository, pistaRepository);
+  const obtenerTiposEstadisticasUseCase = new ObtenerTiposEstadisticasEscalador(
+    escaladorRepository,
+    pistaRepository
+  );
+  const obtenerActividadMensualUseCase = new ObtenerActividadMensualEscalador(
+    escaladorRepository,
+    pistaRepository
+  );
   const obtenerResumenEstadisticasRocodromoUseCase =
     new ObtenerResumenEstadisticasRocodromoEscalador(
       escaladorRepository,
@@ -168,7 +176,9 @@ async function inicializarContainer() {
       rocodromoRepository,
       pistaRepository
     );
-  const buscarEscaladoresPorNombreUseCase = new BuscarEscaladoresPorNombre(escaladorRepository);
+  const buscarEscaladoresPorNombreUseCase = new BuscarEscaladoresPorNombre(
+    escaladorRepository
+  );
 
   const crearPistaUseCase = new CrearPista(
     pistaRepository,
@@ -180,8 +190,13 @@ async function inicializarContainer() {
     db.Zona,
     rocodromoRepository
   );
-  const actualizarImagenPistaUseCase = new ActualizarImagenPista(pistaRepository);
-  const obtenerPistaPorIdUseCase = new ObtenerPistaPorId(pistaRepository, escaladorRepository);
+  const actualizarImagenPistaUseCase = new ActualizarImagenPista(
+    pistaRepository
+  );
+  const obtenerPistaPorIdUseCase = new ObtenerPistaPorId(
+    pistaRepository,
+    escaladorRepository
+  );
   const cambiarEstadoPistaUseCase = new CambiarEstadoPista(
     pistaRepository,
     escaladorRepository
@@ -190,19 +205,25 @@ async function inicializarContainer() {
     pistaRepository,
     escaladorRepository
   );
-  const obtenerValoracionTotalUseCase = new ObtenerValoracionTotal(pistaRepository);
+  const obtenerValoracionTotalUseCase = new ObtenerValoracionTotal(
+    pistaRepository
+  );
   const eliminarPistaUseCase = new EliminarPista(pistaRepository);
 
   const crearZonaUseCase = new CrearZona(zonaRepository, db.Rocodromo);
-  const obtenerPistasDeZonaUseCase = new ObtenerPistasDeZona(zonaRepository, escaladorRepository);
+  const obtenerPistasDeZonaUseCase = new ObtenerPistasDeZona(
+    zonaRepository,
+    escaladorRepository
+  );
   const actualizarMapaZonaUseCase = new ActualizarMapaZona(zonaRepository);
   const obtenerZonaPorIdUseCase = new ObtenerZonaPorId(zonaRepository);
 
   const crearRocodromoUseCase = new CrearRocodromo(rocodromoRepository);
-  const actualizarInformacionRocodromoUseCase = new ActualizarInformacionRocodromo(
-    rocodromoRepository,
-    db.EscalaDificultad
-  );
+  const actualizarInformacionRocodromoUseCase =
+    new ActualizarInformacionRocodromo(
+      rocodromoRepository,
+      db.EscalaDificultad
+    );
   const actualizarLogoRocodromoUseCase = new ActualizarLogoRocodromo(
     rocodromoRepository
   );
@@ -268,10 +289,8 @@ async function inicializarContainer() {
     obtenerResumenEstadisticasRocodromo:
       obtenerResumenEstadisticasRocodromoUseCase,
     obtenerTiposEstadisticasRocodromo: obtenerTiposEstadisticasRocodromoUseCase,
-    obtenerActividadMensualRocodromo:
-      obtenerActividadMensualRocodromoUseCase,
-    obtenerDificultadMaximaRocodromo:
-      obtenerDificultadMaximaRocodromoUseCase,
+    obtenerActividadMensualRocodromo: obtenerActividadMensualRocodromoUseCase,
+    obtenerDificultadMaximaRocodromo: obtenerDificultadMaximaRocodromoUseCase,
     buscarEscaladoresPorNombre: buscarEscaladoresPorNombreUseCase,
   };
   const pistaUseCases = {

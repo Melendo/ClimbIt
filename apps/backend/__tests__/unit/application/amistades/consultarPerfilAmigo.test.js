@@ -1,6 +1,9 @@
 import { jest } from '@jest/globals';
 import ConsultarPerfilAmigo from '../../../../src/application/amistades/consultarPerfilAmigo.js';
-import { AuthorizationError, NotFoundError } from '../../../../src/domain/sharedObjects/AppError.js';
+import {
+  AuthorizationError,
+  NotFoundError,
+} from '../../../../src/domain/sharedObjects/AppError.js';
 
 describe('ConsultarPerfilAmigo', () => {
   let mockEscaladorRepository;
@@ -70,7 +73,9 @@ describe('ConsultarPerfilAmigo', () => {
     mockEscaladorRepository.encontrarPorApodo
       .mockResolvedValueOnce({ id: 1, apodo: 'ivan' })
       .mockResolvedValueOnce({ id: 2, apodo: 'ana' });
-    mockAmistadRepository.existeAmistadEntreEscaladores.mockResolvedValue(false);
+    mockAmistadRepository.existeAmistadEntreEscaladores.mockResolvedValue(
+      false
+    );
 
     await expect(
       useCase.execute({ apodoSolicitante: 'ivan', apodoPerfil: 'ana' })

@@ -1,5 +1,8 @@
 import { renderNavbar } from '../../components/navbar.js';
-import { renderSubscribeButton, initSubscribeButtons } from '../../components/subscribeButton.js';
+import {
+  renderSubscribeButton,
+  initSubscribeButtons,
+} from '../../components/subscribeButton.js';
 import { renderRocodromoCard } from '../../components/rocodromoCard.js';
 import { renderSectionDivider } from '../../components/sectionDivider.js';
 import {
@@ -12,7 +15,10 @@ import {
   renderTotalRoutesStatsCard,
 } from '../../components/escaladorStats.js';
 import { escapeHtml } from '../../components/formHelpers.js';
-import { renderEditableField, initEditableField } from '../../components/editableField.js';
+import {
+  renderEditableField,
+  initEditableField,
+} from '../../components/editableField.js';
 // Función auxiliar para mostrar un valor o un texto de fallback si el valor es nulo
 function renderValueOrFallback(value, fallback = 'Sin descripcion...') {
   if (value === null || value === undefined) return fallback;
@@ -21,12 +27,29 @@ function renderValueOrFallback(value, fallback = 'Sin descripcion...') {
 }
 
 // Vista para mostrar la información completa de un rocódromo
-export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false, canManage = false) {
+export function renderInfoRocodromo(
+  container,
+  rocodromo,
+  estaSuscrito = false,
+  canManage = false
+) {
   const id = rocodromo?.id;
-  const nombre = renderValueOrFallback(rocodromo?.nombre, 'Rocódromo sin nombre');
-  const ubicacion = renderValueOrFallback(rocodromo?.ubicacion, 'Ubicación no disponible');
-  const descripcion = renderValueOrFallback(rocodromo?.descripcion, 'Sin descripción...');
-  const horarios = renderValueOrFallback(rocodromo?.horarios, 'Horarios no disponibles');
+  const nombre = renderValueOrFallback(
+    rocodromo?.nombre,
+    'Rocódromo sin nombre'
+  );
+  const ubicacion = renderValueOrFallback(
+    rocodromo?.ubicacion,
+    'Ubicación no disponible'
+  );
+  const descripcion = renderValueOrFallback(
+    rocodromo?.descripcion,
+    'Sin descripción...'
+  );
+  const horarios = renderValueOrFallback(
+    rocodromo?.horarios,
+    'Horarios no disponibles'
+  );
   const ubicacionRaw =
     typeof rocodromo?.ubicacion === 'string' ? rocodromo.ubicacion.trim() : '';
   const mapsUrl = ubicacionRaw
@@ -48,11 +71,15 @@ export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false, 
         <span class="fw-medium">Información del rocódromo</span>
       </div>
       <div class="d-flex align-items-center gap-2">
-        ${canManage ? `
+        ${
+          canManage
+            ? `
           <a href="#modificarRocodromo?id=${id}" class="btn btn-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;" aria-label="Modificar rocódromo" title="Modificar rocódromo">
             <span class="material-icons" style="font-size: 20px;">edit</span>
           </a>
-        ` : ''}
+        `
+            : ''
+        }
         <div class="d-flex align-items-center justify-content-center">
           ${renderSubscribeButton(id, estaSuscrito, { size: 'md', position: 'inline' })}
         </div>
@@ -67,12 +94,16 @@ export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false, 
             alt="Logo de ${nombreSafe}"
             class="rounded-4 border rocodromo-info-logo"
           >
-          ${canManage ? `
+          ${
+            canManage
+              ? `
             <button type="button" id="btn-actualizar-logo-roco" class="btn btn-dark btn-sm position-absolute bottom-0 end-0 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; border-radius: 999px;" aria-label="Actualizar logo" title="Actualizar logo">
               <span class="material-icons" style="font-size: 18px; line-height: 1;">photo_camera</span>
             </button>
             <input type="file" id="input-logo-roco" class="d-none" accept="image/*" />
-          ` : ''}
+          `
+              : ''
+          }
         </div>
         <h4 class="mt-3 mb-1 text-center rocodromo-info-title">${nombreSafe}</h4>
       </section>
@@ -82,8 +113,9 @@ export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false, 
         <div class="rocodromo-info-section-card">
           <div class="rocodromo-info-location-section-row" aria-label="Ubicación del rocódromo">
             <p class="mb-0 rocodromo-info-section-text rocodromo-info-location-section-text">${ubicacionSafe}</p>
-            ${mapsUrl
-    ? `
+            ${
+              mapsUrl
+                ? `
             <a
               href="${mapsUrl}"
               target="_blank"
@@ -95,7 +127,8 @@ export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false, 
               <span class="material-icons" style="font-size: 18px; line-height: 1;">map</span>
             </a>
             `
-    : ''}
+                : ''
+            }
           </div>
         </div>
 
@@ -123,7 +156,11 @@ export function renderInfoRocodromo(container, rocodromo, estaSuscrito = false, 
   initSubscribeButtons(container);
 }
 
-export function renderModificarRocodromo(container, callbacks, initialValues = {}) {
+export function renderModificarRocodromo(
+  container,
+  callbacks,
+  initialValues = {}
+) {
   const renderRocodromoField = ({
     prefix,
     label,
@@ -132,34 +169,35 @@ export function renderModificarRocodromo(container, callbacks, initialValues = {
     maxLength,
     inputTag = 'input',
     rows,
-  }) => renderEditableField({
-    prefix,
-    wrapperClass: 'w-100',
-    titleHtml: `<label for="roco-${prefix}-input" class="form-label">${label}</label>`,
-    viewContent: '',
-    inputValue: String(value || ''),
-    inputTag,
-    inputClasses: 'form-control',
-    inputAttributes: {
-      name: prefix,
-      autocomplete: 'off',
-      autocapitalize: 'off',
-      autocorrect: 'off',
-      spellcheck: 'false',
-    },
-    placeholder,
-    ariaLabel: label,
-    maxLength,
-    rows,
-    domPrefix: 'roco',
-    dataAttrPrefix: 'data-roco',
-    showView: false,
-    showEditButton: false,
-    showFieldActions: false,
-    startInEditMode: true,
-    feedbackHtml: '<div class="invalid-feedback"></div>',
-    feedbackInInputWrap: true,
-  });
+  }) =>
+    renderEditableField({
+      prefix,
+      wrapperClass: 'w-100',
+      titleHtml: `<label for="roco-${prefix}-input" class="form-label">${label}</label>`,
+      viewContent: '',
+      inputValue: String(value || ''),
+      inputTag,
+      inputClasses: 'form-control',
+      inputAttributes: {
+        name: prefix,
+        autocomplete: 'off',
+        autocapitalize: 'off',
+        autocorrect: 'off',
+        spellcheck: 'false',
+      },
+      placeholder,
+      ariaLabel: label,
+      maxLength,
+      rows,
+      domPrefix: 'roco',
+      dataAttrPrefix: 'data-roco',
+      showView: false,
+      showEditButton: false,
+      showFieldActions: false,
+      startInEditMode: true,
+      feedbackHtml: '<div class="invalid-feedback"></div>',
+      feedbackInInputWrap: true,
+    });
 
   container.innerHTML = `
     <div class="d-flex flex-column" style="height: 100dvh; overflow: hidden;">
@@ -260,27 +298,34 @@ export function renderModificarRocodromo(container, callbacks, initialValues = {
     dataAttrPrefix: 'data-roco',
   });
 
-  [nombreInput, ubicacionInput, descripcionInput, horariosInput].forEach((el) => {
-    el.addEventListener('input', () => callbacks.onFieldChange(el, alertBox));
-    el.addEventListener('change', () => callbacks.onFieldChange(el, alertBox));
-  });
+  [nombreInput, ubicacionInput, descripcionInput, horariosInput].forEach(
+    (el) => {
+      el.addEventListener('input', () => callbacks.onFieldChange(el, alertBox));
+      el.addEventListener('change', () =>
+        callbacks.onFieldChange(el, alertBox)
+      );
+    }
+  );
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    callbacks.onSubmit({
-      nombre: nombreInput.value,
-      ubicacion: ubicacionInput.value,
-      descripcion: descripcionInput.value,
-      horarios: horariosInput.value,
-    }, {
-      nombreInput,
-      ubicacionInput,
-      descripcionInput,
-      horariosInput,
-      alertBox,
-      submitButton,
-    });
+    callbacks.onSubmit(
+      {
+        nombre: nombreInput.value,
+        ubicacion: ubicacionInput.value,
+        descripcion: descripcionInput.value,
+        horarios: horariosInput.value,
+      },
+      {
+        nombreInput,
+        ubicacionInput,
+        descripcionInput,
+        horariosInput,
+        alertBox,
+        submitButton,
+      }
+    );
   });
 }
 
@@ -302,7 +347,9 @@ export function renderMisRocodromos(container, rocodromos) {
           </div>`;
   } else {
     rocodromosHTML = rocodromos
-      .map((rocodromo) => renderRocodromoCard(rocodromo, { estaSuscrito: true }))
+      .map((rocodromo) =>
+        renderRocodromoCard(rocodromo, { estaSuscrito: true })
+      )
       .join('');
 
     // Añadir botón de buscar rocódromos al final.
@@ -339,7 +386,11 @@ export function renderMisRocodromos(container, rocodromos) {
 }
 
 // Vista para buscar rocódromos (todos los disponibles, sin navbar)
-export function renderBuscarRocodromos(container, rocodromos, suscritosIds = []) {
+export function renderBuscarRocodromos(
+  container,
+  rocodromos,
+  suscritosIds = []
+) {
   let rocodromosHTML = '';
 
   if (!Array.isArray(rocodromos) || rocodromos.length === 0) {
@@ -348,10 +399,12 @@ export function renderBuscarRocodromos(container, rocodromos, suscritosIds = [])
             <div class="alert alert-info">No hay rocódromos disponibles.</div>
           </div>`;
   } else {
-    rocodromosHTML = rocodromos.map((rocodromo) => {
-      const estaSuscrito = suscritosIds.includes(rocodromo.id);
-      return renderRocodromoCard(rocodromo, { estaSuscrito });
-    }).join('');
+    rocodromosHTML = rocodromos
+      .map((rocodromo) => {
+        const estaSuscrito = suscritosIds.includes(rocodromo.id);
+        return renderRocodromoCard(rocodromo, { estaSuscrito });
+      })
+      .join('');
   }
 
   container.innerHTML = `
@@ -391,73 +444,6 @@ export function renderBuscarRocodromos(container, rocodromos, suscritosIds = [])
 `;
 
   initSubscribeButtons(container);
-}
-
-// Vista para crear un nuevo rocódromo
-export function renderCrearRocodromo(container, callbacks) {
-  container.innerHTML = `
-    <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
-      <a href="#" onclick="history.back(); return false;" class="text-dark">
-        <span class="material-icons align-middle">arrow_back</span>
-      </a>
-      <span class="fw-medium">Nuevo Rocódromo</span>
-    </div>
-    <div class="card-body">
-      <form id="form-crear-rocodromo" novalidate>
-        <div class="mb-3">
-          <label for="nombre" class="form-label">Nombre</label>
-          <input
-            type="text"
-            class="form-control"
-            name="nombre"
-            id="nombre"
-            required
-            placeholder="Ej: ClimbIt Center"
-          />
-          <div class="invalid-feedback"></div>
-        </div>
-        <div class="mb-3">
-          <label for="ubicacion" class="form-label">Ubicación</label>
-          <input
-            type="text"
-            class="form-control"
-            name="ubicacion"
-            id="ubicacion"
-            required
-            placeholder="Ej: Calle Principal 123, Madrid"
-          />
-          <div class="invalid-feedback"></div>
-        </div>
-        <div id="form-alert" class="alert d-none" role="alert"></div>
-        <button type="submit" class="btn btn-primary w-100">Crear Rocódromo</button>
-      </form>
-    </div>`;
-
-  const form = container.querySelector('#form-crear-rocodromo');
-  const nombreInput = container.querySelector('#nombre');
-  const ubicacionInput = container.querySelector('#ubicacion');
-  const alertBox = container.querySelector('#form-alert');
-
-  // Limpiar errores al escribir
-  [nombreInput, ubicacionInput].forEach((el) => {
-    el.addEventListener('input', () => {
-      el.classList.remove('is-invalid');
-      alertBox.classList.add('d-none');
-    });
-  });
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const values = {
-      nombre: nombreInput.value.trim(),
-      ubicacion: ubicacionInput.value.trim(),
-    };
-    callbacks.onSubmit(values, {
-      nombreInput,
-      ubicacionInput,
-      alertBox
-    });
-  });
 }
 
 export function renderRocodromoEstadisticas(container, data) {
@@ -498,7 +484,9 @@ export function renderRocodromoEstadisticas(container, data) {
           <div class="perfil-estadisticas-view mt-3 px-0">
             ${renderStatsSection({
               title: 'Total de Rutas Escaladas',
-              content: renderRocodromoRoutesOverviewStatsCard(statsViewModel.totals),
+              content: renderRocodromoRoutesOverviewStatsCard(
+                statsViewModel.totals
+              ),
             })}
             ${renderStatsSection({
               title: 'Ratio de Flash',

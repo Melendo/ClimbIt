@@ -146,7 +146,10 @@ export function tutorialCmd(container) {
     const deltaY = Math.abs(touchCurrentY - touchStartY);
     isTouchTracking = false;
 
-    if (deltaY > SWIPE_MAX_VERTICAL_DELTA_PX || Math.abs(deltaX) < SWIPE_THRESHOLD_PX) {
+    if (
+      deltaY > SWIPE_MAX_VERTICAL_DELTA_PX ||
+      Math.abs(deltaX) < SWIPE_THRESHOLD_PX
+    ) {
       return;
     }
 

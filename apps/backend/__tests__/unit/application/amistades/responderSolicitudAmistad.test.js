@@ -1,6 +1,10 @@
 import { jest } from '@jest/globals';
 import ResponderSolicitudAmistad from '../../../../src/application/amistades/responderSolicitudAmistad.js';
-import { ConflictError, NotFoundError, ValidationError } from '../../../../src/domain/sharedObjects/AppError.js';
+import {
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+} from '../../../../src/domain/sharedObjects/AppError.js';
 
 describe('ResponderSolicitudAmistad', () => {
   let mockEscaladorRepository;
@@ -47,8 +51,13 @@ describe('ResponderSolicitudAmistad', () => {
       idDestinatario: 7,
       estado: 'pendiente',
     });
-    mockAmistadRepository.existeAmistadEntreEscaladores.mockResolvedValue(false);
-    mockSolicitudAmistadRepository.actualizarEstado.mockResolvedValue({ id: 11, estado: 'aceptada' });
+    mockAmistadRepository.existeAmistadEntreEscaladores.mockResolvedValue(
+      false
+    );
+    mockSolicitudAmistadRepository.actualizarEstado.mockResolvedValue({
+      id: 11,
+      estado: 'aceptada',
+    });
     mockAmistadRepository.crear.mockResolvedValue({
       id: 22,
       idEscalador1: 7,
@@ -63,11 +72,9 @@ describe('ResponderSolicitudAmistad', () => {
     });
 
     expect(mockSequelize.transaction).toHaveBeenCalledTimes(1);
-    expect(mockSolicitudAmistadRepository.actualizarEstado).toHaveBeenCalledWith(
-      11,
-      'aceptada',
-      { id: 'trx-1' }
-    );
+    expect(
+      mockSolicitudAmistadRepository.actualizarEstado
+    ).toHaveBeenCalledWith(11, 'aceptada', { id: 'trx-1' });
     expect(mockAmistadRepository.crear).toHaveBeenCalledTimes(1);
     expect(resultado.solicitud).toEqual({ id: 11, estado: 'aceptada' });
     expect(resultado.amistad).toBeTruthy();
@@ -84,8 +91,13 @@ describe('ResponderSolicitudAmistad', () => {
       idDestinatario: 5,
       estado: 'pendiente',
     });
-    mockAmistadRepository.existeAmistadEntreEscaladores.mockResolvedValue(false);
-    mockSolicitudAmistadRepository.actualizarEstado.mockResolvedValue({ id: 33, estado: 'rechazada' });
+    mockAmistadRepository.existeAmistadEntreEscaladores.mockResolvedValue(
+      false
+    );
+    mockSolicitudAmistadRepository.actualizarEstado.mockResolvedValue({
+      id: 33,
+      estado: 'rechazada',
+    });
 
     const resultado = await useCase.execute({
       apodoDestinatario: 'destino',
@@ -93,11 +105,9 @@ describe('ResponderSolicitudAmistad', () => {
       respuesta: 'rechazada',
     });
 
-    expect(mockSolicitudAmistadRepository.actualizarEstado).toHaveBeenCalledWith(
-      33,
-      'rechazada',
-      { id: 'trx-1' }
-    );
+    expect(
+      mockSolicitudAmistadRepository.actualizarEstado
+    ).toHaveBeenCalledWith(33, 'rechazada', { id: 'trx-1' });
     expect(mockAmistadRepository.crear).not.toHaveBeenCalled();
     expect(resultado.solicitud).toEqual({ id: 33, estado: 'rechazada' });
     expect(resultado.amistad).toBeNull();
@@ -114,7 +124,10 @@ describe('ResponderSolicitudAmistad', () => {
   });
 
   it('falla si la solicitud no existe', async () => {
-    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue({ id: 5, apodo: 'destino' });
+    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue({
+      id: 5,
+      apodo: 'destino',
+    });
     mockSolicitudAmistadRepository.encontrarPorId.mockResolvedValue(null);
 
     await expect(
@@ -127,7 +140,10 @@ describe('ResponderSolicitudAmistad', () => {
   });
 
   it('falla si la solicitud ya fue respondida', async () => {
-    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue({ id: 7, apodo: 'destino' });
+    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue({
+      id: 7,
+      apodo: 'destino',
+    });
     mockSolicitudAmistadRepository.encontrarPorId.mockResolvedValue({
       id: 1,
       idRemitente: 2,
@@ -145,7 +161,10 @@ describe('ResponderSolicitudAmistad', () => {
   });
 
   it('falla si ya existe amistad', async () => {
-    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue({ id: 7, apodo: 'destino' });
+    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue({
+      id: 7,
+      apodo: 'destino',
+    });
     mockSolicitudAmistadRepository.encontrarPorId.mockResolvedValue({
       id: 55,
       idRemitente: 3,

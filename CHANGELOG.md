@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Arreglado
 
 #### Funcionalidades Usuario
+
 - **Rutas**:
   - Impedida la creación de rutas activas en coordenadas ya ocupadas dentro de una misma zona.
   - Corregida la navegación tras eliminar una ruta para volver al mapa de su zona.
@@ -22,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Modificado
 
 #### Funcionalidades Usuario
+
 - **Rutas**:
   - Añadidos controles para seleccionar foto desde Cámara o Galería en crear y modificar ruta.
 - **Perfil**:
@@ -37,12 +39,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Arreglado
 
 #### Funcionalidades Usuario
+
 - **Rutas**:
   - Arreglado el hitbox de las rutas en los mapas de zona
 
 ### Modificado
 
 #### Funcionalidades Usuario
+
 - **Rocódromos**:
   - Modificada la vista de la información de rocódromo
 - **Rutas**:
@@ -59,6 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Añadido
 
 #### Funcionalidades Usuario
+
 - **Autenticación**:
   - Registro e inicio de sesión mas fluido
 - **Perfil**:
@@ -98,11 +103,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Añadido
 
 #### Funcionalidades Usuario
-- **Autenticación**: 
+
+- **Autenticación**:
   - Inicio de sesión (correo/contraseña)
   - Registro de nuevos usuarios
   - Cierre de sesión
-- **Perfil**: 
+- **Perfil**:
   - Visualización de información básica (nombre y correo).
 - **Rocódromos**:
   - Buscador global de rocódromos.
@@ -115,10 +121,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Actualización de estado (flash, completado y proyecto).
 
 #### Infraestructura y DevOps
+
 - **Despliegue Continuo (CD)**: Pipeline automatizado con GitHub Actions.
 - **Integración Continua (CI)**: Workflow de testing automatizado con Jest y PostgreSQL en Pull Requests (`ClimbIt-CI`).
 - **Entornos Aislados**: Configuración Multi-entorno (Desarrollo: `dev.climbit.es` / Producción: `app.climbit.es`).
 - **Contenedores**: Orquestación completa con Docker y Docker Compose (PostgreSQL, Node.js Backend, Frontend).
 - **Proxy**: Cloudflare Tunnel para gestión de DNS segura y acceso remoto.
-
-

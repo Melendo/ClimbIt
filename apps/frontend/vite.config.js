@@ -30,7 +30,8 @@ export default defineConfig({
       manifest: {
         name: 'ClimbIt',
         short_name: 'ClimbIt',
-        description: 'Aplicacion para gestionar escaladores, rocodromos, zonas y rutas',
+        description:
+          'Aplicacion para gestionar escaladores, rocodromos, zonas y rutas',
         theme_color: '#f8f9fa',
         background_color: '#f8f9fa',
         orientation: 'portrait',
@@ -43,26 +44,28 @@ export default defineConfig({
           {
             src: 'icons/pwa-192x192.png',
             sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'icons/pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
           },
           {
             src: 'icons/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'maskable'
-          }
-        ]
+          },
+          {
+            src: 'icons/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+        ],
       },
       workbox: {
         skipWaiting: true,
         clientsClaim: true,
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/(escaladores|pistas|rocodromos|zonas|amistades)\b/],
+        navigateFallbackDenylist: [
+          /^\/(escaladores|pistas|rocodromos|zonas|amistades)\b/,
+        ],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/.*/i,
@@ -102,7 +105,8 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /\/escaladores\/fotos-perfil\/\d+$|\/rocodromos\/\d+\/logo$/i,
+            urlPattern:
+              /\/escaladores\/fotos-perfil\/\d+$|\/rocodromos\/\d+\/logo$/i,
             method: 'GET',
             handler: 'StaleWhileRevalidate',
             options: {
@@ -136,7 +140,8 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /\/zonas\b.*|\/pistas\b(?!\/\d+\/imagen$).*|\/rocodromos\/zonas\/\d+\b.*|\/rocodromos\/\d+\/escalasDificultad\b.*/i,
+            urlPattern:
+              /\/zonas\b.*|\/pistas\b(?!\/\d+\/imagen$).*|\/rocodromos\/zonas\/\d+\b.*|\/rocodromos\/\d+\/escalasDificultad\b.*/i,
             method: 'GET',
             handler: 'NetworkFirst',
             options: {
@@ -211,5 +216,5 @@ export default defineConfig({
   // Configuración para la construcción del proyecto
   build: {
     outDir: 'dist',
-  }
+  },
 });

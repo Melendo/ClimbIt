@@ -46,10 +46,12 @@ describe('AutenticarEscaladorUseCase', () => {
 
     const resultado = await autenticarEscalador.execute(datosEntrada);
 
-    expect(mockRepository.encontrarPorCorreo).toHaveBeenCalledWith(datosEntrada.correo);
+    expect(mockRepository.encontrarPorCorreo).toHaveBeenCalledWith(
+      datosEntrada.correo
+    );
     expect(mockPasswordService.compare).toHaveBeenCalledWith(
-        datosEntrada.contrasena,
-        escaladorEncontrado.contrasena
+      datosEntrada.contrasena,
+      escaladorEncontrado.contrasena
     );
     expect(mockTokenService.crear).toHaveBeenCalledWith({
       correo: escaladorEncontrado.correo,
@@ -123,7 +125,10 @@ describe('AutenticarEscaladorUseCase', () => {
     mockRepository.encontrarPorCorreo.mockResolvedValue(null);
 
     await expect(
-      autenticarEscalador.execute({ correo: 'noexiste@example.com', contrasena: '123' })
+      autenticarEscalador.execute({
+        correo: 'noexiste@example.com',
+        contrasena: '123',
+      })
     ).rejects.toThrow('Escalador no registrado');
   });
 
@@ -138,7 +143,10 @@ describe('AutenticarEscaladorUseCase', () => {
     mockPasswordService.compare.mockResolvedValue(false);
 
     await expect(
-      autenticarEscalador.execute({ correo: 'test@example.com', contrasena: 'wrong' })
+      autenticarEscalador.execute({
+        correo: 'test@example.com',
+        contrasena: 'wrong',
+      })
     ).rejects.toThrow('Contraseña incorrecta');
   });
 
@@ -162,7 +170,9 @@ describe('AutenticarEscaladorUseCase', () => {
 
     const resultado = await autenticarEscalador.execute(datosEntrada);
 
-    expect(mockRepository.obtenerIdsRocodromosGestionados).not.toHaveBeenCalled();
+    expect(
+      mockRepository.obtenerIdsRocodromosGestionados
+    ).not.toHaveBeenCalled();
     expect(mockTokenService.crear).toHaveBeenCalledWith({
       correo: escaladorEncontrado.correo,
       apodo: escaladorEncontrado.apodo,

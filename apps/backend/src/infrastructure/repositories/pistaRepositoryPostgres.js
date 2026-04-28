@@ -88,7 +88,7 @@ class PistaRepositoryPostgres extends pistaRepository {
         fallbackMessage: 'Error al obtener pista por posición',
         internalCode: 'PISTA_FIND_BY_POSITION_DB_FAILED',
       });
-    } 
+    }
   }
 
   async cambiarEstado(idPista, idEscalador, nuevoEstado) {
@@ -521,7 +521,10 @@ class PistaRepositoryPostgres extends pistaRepository {
     }
   }
 
-  async obtenerResumenEstadisticasEscaladorPorRocodromo(idEscalador, idRocodromo) {
+  async obtenerResumenEstadisticasEscaladorPorRocodromo(
+    idEscalador,
+    idRocodromo
+  ) {
     try {
       const filas = await this.PistaModel.sequelize.query(
         `
@@ -609,7 +612,10 @@ class PistaRepositoryPostgres extends pistaRepository {
     }
   }
 
-  async obtenerTiposEstadisticasEscaladorPorRocodromo(idEscalador, idRocodromo) {
+  async obtenerTiposEstadisticasEscaladorPorRocodromo(
+    idEscalador,
+    idRocodromo
+  ) {
     try {
       const filas = await this.PistaModel.sequelize.query(
         `
@@ -673,7 +679,10 @@ class PistaRepositoryPostgres extends pistaRepository {
     }
   }
 
-  async obtenerDificultadesEscaladasPorTipoEnRocodromo(idEscalador, idRocodromo) {
+  async obtenerDificultadesEscaladasPorTipoEnRocodromo(
+    idEscalador,
+    idRocodromo
+  ) {
     try {
       const rows = await this.PistaModel.sequelize.query(
         `

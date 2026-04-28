@@ -34,7 +34,11 @@ function mapRepositoryError(
   }
 
   if (error?.name === VALIDATION_ERROR) {
-    return new ValidationError(rawMessage || 'Datos inválidos', validationCode, error);
+    return new ValidationError(
+      rawMessage || 'Datos inválidos',
+      validationCode,
+      error
+    );
   }
 
   const message = rawMessage

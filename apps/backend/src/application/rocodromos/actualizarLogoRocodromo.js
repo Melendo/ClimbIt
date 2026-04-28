@@ -11,9 +11,11 @@ class ActualizarLogoRocodromo {
 
   async execute(idRocodromo, logoUrl) {
     try {
-      const rocodromo =
-        await this.rocodromosRepository.actualizarLogoRocodromo(idRocodromo, logoUrl);
-      
+      const rocodromo = await this.rocodromosRepository.actualizarLogoRocodromo(
+        idRocodromo,
+        logoUrl
+      );
+
       if (!rocodromo) {
         throw new NotFoundError(
           `Rocódromo con ID ${idRocodromo} no encontrado`,

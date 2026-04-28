@@ -8,9 +8,8 @@ class ListarSolicitudesPendientes {
 
   async execute({ apodoEscalador }) {
     // 1. Validar que el escalador existe
-    const escaladorDestinatario = await this.escaladorRepository.encontrarPorApodo(
-      apodoEscalador
-    );
+    const escaladorDestinatario =
+      await this.escaladorRepository.encontrarPorApodo(apodoEscalador);
     if (!escaladorDestinatario) {
       throw new NotFoundError(
         'El escalador destinatario no existe',
@@ -19,9 +18,10 @@ class ListarSolicitudesPendientes {
     }
 
     // 2. Obtener las solicitudes pendientes
-    const solicitudes = await this.solicitudAmistadRepository.obtenerPendientesPorDestinatario(
-      escaladorDestinatario.id
-    );
+    const solicitudes =
+      await this.solicitudAmistadRepository.obtenerPendientesPorDestinatario(
+        escaladorDestinatario.id
+      );
 
     return solicitudes.map((solicitud) => ({
       idSolicitud: solicitud.id,

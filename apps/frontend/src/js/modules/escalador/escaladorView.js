@@ -1,7 +1,10 @@
 import { renderNavbar } from '../../components/navbar.js';
 import { showConfirmModal } from '../../components/modal.js';
 import { escapeHtml } from '../../components/formHelpers.js';
-import { renderEditableField, initEditableField } from '../../components/editableField.js';
+import {
+  renderEditableField,
+  initEditableField,
+} from '../../components/editableField.js';
 import { renderSectionDivider } from '../../components/sectionDivider.js';
 import {
   bindHeatmapInteractions,
@@ -124,9 +127,11 @@ export function renderPerfil(container, escalador, callbacks) {
             ${renderSectionDivider({ label: 'Descripcion' })}
             <div class="perfil-descripcion-view w-100">
               <div class="perfil-descripcion-view-content text-center">
-                ${descripcionVisible
-                  ? `<p class="text-muted mb-0">${descripcionVisible}</p>`
-                  : '<p class="text-muted mb-0 small fst-italic">Sin descripcion...</p>'}
+                ${
+                  descripcionVisible
+                    ? `<p class="text-muted mb-0">${descripcionVisible}</p>`
+                    : '<p class="text-muted mb-0 small fst-italic">Sin descripcion...</p>'
+                }
               </div>
             </div>
           </div>
@@ -263,9 +268,11 @@ export function renderEditarPerfil(container, escalador, callbacks) {
             wrapperClass: 'perfil-descripcion-wrap perfil-field-block',
             titleHtml: renderPerfilFieldTitle('Descripcion'),
             viewContent: `
-              <div class="text-center">${descripcionVisible
-                ? `<p class="text-muted mb-0 text-center">${descripcionVisible}</p>`
-                : '<p class="text-muted mb-0 small fst-italic text-center">Sin descripcion...</p>'}</div>
+              <div class="text-center">${
+                descripcionVisible
+                  ? `<p class="text-muted mb-0 text-center">${descripcionVisible}</p>`
+                  : '<p class="text-muted mb-0 small fst-italic text-center">Sin descripcion...</p>'
+              }</div>
             `,
             inputValue: escapeHtml(descripcionLimpia),
             inputTag: 'textarea',

@@ -1,6 +1,9 @@
 import { jest } from '@jest/globals';
 import EnviarSolicitudAmistad from '../../../../src/application/amistades/enviarSolicitudAmistad.js';
-import { ConflictError, NotFoundError } from '../../../../src/domain/sharedObjects/AppError.js';
+import {
+  ConflictError,
+  NotFoundError,
+} from '../../../../src/domain/sharedObjects/AppError.js';
 
 describe('EnviarSolicitudAmistad', () => {
   let mockEscaladorRepository;
@@ -33,8 +36,12 @@ describe('EnviarSolicitudAmistad', () => {
     mockEscaladorRepository.encontrarPorApodo
       .mockResolvedValueOnce({ id: 1, apodo: 'ivan' })
       .mockResolvedValueOnce({ id: 2, apodo: 'ana' });
-    mockAmistadRepository.existeAmistadEntreEscaladores.mockResolvedValue(false);
-    mockSolicitudAmistadRepository.existePendienteEntreEscaladores.mockResolvedValue(false);
+    mockAmistadRepository.existeAmistadEntreEscaladores.mockResolvedValue(
+      false
+    );
+    mockSolicitudAmistadRepository.existePendienteEntreEscaladores.mockResolvedValue(
+      false
+    );
     mockSolicitudAmistadRepository.crear.mockResolvedValue({
       id: 10,
       idRemitente: 1,
@@ -47,7 +54,9 @@ describe('EnviarSolicitudAmistad', () => {
       apodoDestinatario: 'ana',
     });
 
-    expect(resultado.mensaje).toBe('Solicitud de amistad enviada correctamente');
+    expect(resultado.mensaje).toBe(
+      'Solicitud de amistad enviada correctamente'
+    );
     expect(resultado.solicitud).toEqual({
       id: 10,
       idRemitente: 1,

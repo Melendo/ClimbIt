@@ -30,7 +30,9 @@ describe('Escalador (Entidad de dominio)', () => {
     });
 
     it('no debería crear un escalador con correo en formato inválido', () => {
-      expect(() => new Escalador(null, 'correo-invalido', 'pass', 'apodo')).toThrow(
+      expect(
+        () => new Escalador(null, 'correo-invalido', 'pass', 'apodo')
+      ).toThrow(
         `correo inválido: Debe tener un formato de correo electrónico válido.`
       );
     });
@@ -42,15 +44,15 @@ describe('Escalador (Entidad de dominio)', () => {
     });
 
     it('no debería crear un escalador con contraseña vacía', () => {
-      expect(() => new Escalador(null, 'email@example.com', '', 'apodo')).toThrow(
-        `contraseña inválida: Debe ser una cadena no vacía.`
-      );
+      expect(
+        () => new Escalador(null, 'email@example.com', '', 'apodo')
+      ).toThrow(`contraseña inválida: Debe ser una cadena no vacía.`);
     });
 
     it('no debería crear un escalador con apodo vacío', () => {
-      expect(() => new Escalador(null, 'email@example.com', 'pass', '')).toThrow(
-        `apodo inválido: Debe ser una cadena no vacía.`
-      );
+      expect(
+        () => new Escalador(null, 'email@example.com', 'pass', '')
+      ).toThrow(`apodo inválido: Debe ser una cadena no vacía.`);
     });
   });
 });

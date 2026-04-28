@@ -3,7 +3,13 @@ import Pista from '../../../../src/domain/pistas/Pista.js';
 describe('Pista (Entidad de dominio)', () => {
   describe('Creación exitosa', () => {
     it('debería crear una pista con los datos correctos', () => {
-      const datos = { id: null, idZona: 1, nombre: 'Ex1', dificultad: '3a', tipo: 'boulder' };
+      const datos = {
+        id: null,
+        idZona: 1,
+        nombre: 'Ex1',
+        dificultad: '3a',
+        tipo: 'boulder',
+      };
       const pista = new Pista(
         datos.id,
         datos.idZona,

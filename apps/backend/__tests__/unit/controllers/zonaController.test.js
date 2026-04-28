@@ -1,6 +1,9 @@
 import { jest } from '@jest/globals';
 import ZonaController from '../../../src/interfaces/http/controllers/zonaController.js';
-import { BadRequestError, NotFoundError } from '../../../src/domain/sharedObjects/AppError.js';
+import {
+  BadRequestError,
+  NotFoundError,
+} from '../../../src/domain/sharedObjects/AppError.js';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -23,7 +26,9 @@ function createResMock() {
 describe('Unit: ZonaController', () => {
   it('obtenerPistasDeZona: 200 cuando existe', async () => {
     const useCases = {
-      obtenerPistasDeZona: { execute: jest.fn().mockResolvedValue([{ id: 1, nombre: 'Pista 1' }]) },
+      obtenerPistasDeZona: {
+        execute: jest.fn().mockResolvedValue([{ id: 1, nombre: 'Pista 1' }]),
+      },
     };
     const controller = new ZonaController(useCases);
     const req = { params: { id: 3 }, user: null };
@@ -55,7 +60,9 @@ describe('Unit: ZonaController', () => {
 
   it('obtenerPistasDeZona: 500 ante errores', async () => {
     const useCases = {
-      obtenerPistasDeZona: { execute: jest.fn().mockRejectedValue(new Error('falló')) },
+      obtenerPistasDeZona: {
+        execute: jest.fn().mockRejectedValue(new Error('falló')),
+      },
     };
     const controller = new ZonaController(useCases);
     const req = { params: { id: 3 } };
@@ -106,8 +113,16 @@ describe('Unit: ZonaController', () => {
 
   it('subirMapa: elimina mapa anterior y actualiza', async () => {
     const useCases = {
-      obtenerZonaPorId: { execute: jest.fn().mockResolvedValue({ id: 1, mapa: '/uploads/mapas_zonas/old.png' }) },
-      actualizarMapa: { execute: jest.fn().mockResolvedValue({ id: 1, mapa: '/uploads/mapas_zonas/new.png' }) },
+      obtenerZonaPorId: {
+        execute: jest
+          .fn()
+          .mockResolvedValue({ id: 1, mapa: '/uploads/mapas_zonas/old.png' }),
+      },
+      actualizarMapa: {
+        execute: jest
+          .fn()
+          .mockResolvedValue({ id: 1, mapa: '/uploads/mapas_zonas/new.png' }),
+      },
     };
     const controller = new ZonaController(useCases);
     const req = { params: { id: 1 }, file: { filename: 'new.png' } };
@@ -120,13 +135,18 @@ describe('Unit: ZonaController', () => {
     expect(fs.unlink).toHaveBeenCalledWith(
       path.resolve(process.cwd(), 'uploads', 'mapas_zonas', 'old.png')
     );
-    expect(useCases.actualizarMapa.execute).toHaveBeenCalledWith(1, '/uploads/mapas_zonas/new.png');
+    expect(useCases.actualizarMapa.execute).toHaveBeenCalledWith(
+      1,
+      '/uploads/mapas_zonas/new.png'
+    );
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
   it('obtenerMapa: responde 404 si no hay mapa', async () => {
     const useCases = {
-      obtenerZonaPorId: { execute: jest.fn().mockResolvedValue({ id: 1, mapa: null }) },
+      obtenerZonaPorId: {
+        execute: jest.fn().mockResolvedValue({ id: 1, mapa: null }),
+      },
     };
     const controller = new ZonaController(useCases);
     const req = { params: { id: 1 } };
@@ -142,7 +162,11 @@ describe('Unit: ZonaController', () => {
 
   it('obtenerMapa: responde 404 si el archivo no existe', async () => {
     const useCases = {
-      obtenerZonaPorId: { execute: jest.fn().mockResolvedValue({ id: 1, mapa: '/uploads/mapas_zonas/mapa.png' }) },
+      obtenerZonaPorId: {
+        execute: jest
+          .fn()
+          .mockResolvedValue({ id: 1, mapa: '/uploads/mapas_zonas/mapa.png' }),
+      },
     };
     const controller = new ZonaController(useCases);
     const req = { params: { id: 1 } };

@@ -18,7 +18,10 @@ class CambiarApodoEscalador {
       );
 
       if (!escalador) {
-        throw new NotFoundError('Escalador no encontrado', 'ESCALADOR_NOT_FOUND');
+        throw new NotFoundError(
+          'Escalador no encontrado',
+          'ESCALADOR_NOT_FOUND'
+        );
       }
 
       usuario.apodo = escalador.apodo; // Actualiza el apodo en el payload del token
@@ -26,7 +29,9 @@ class CambiarApodoEscalador {
         apodo: usuario.apodo,
         correo: usuario.correo,
         rol: usuario.rol,
-        ...(usuario.rol === 'Gestor' ? { rocodromosGestionados: usuario.rocodromosGestionados } : {})
+        ...(usuario.rol === 'Gestor'
+          ? { rocodromosGestionados: usuario.rocodromosGestionados }
+          : {}),
       };
       const token = this.tokenService.crear(payload);
 

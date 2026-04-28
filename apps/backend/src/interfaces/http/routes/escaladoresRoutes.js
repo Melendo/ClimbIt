@@ -13,7 +13,12 @@ const router = express.Router();
 const container = await containerPromise;
 const { escaladorController } = container;
 
-const RASTER_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const RASTER_IMAGE_MIME_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+];
 const FOTO_PERFIL_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
 /**

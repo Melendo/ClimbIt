@@ -41,7 +41,7 @@
     "**/*.{js,mjs}": "eslint --fix"
   },
   "lavamoat": {
-    "allowScripts": {      
+    "allowScripts": {
       "lerna>nx#22.6.5": true,
       "eslint-plugin-jest>jest>@jest/core>jest-resolve>unrs-resolver#1.11.1": true
     }

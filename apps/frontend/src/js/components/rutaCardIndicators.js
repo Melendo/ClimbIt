@@ -11,7 +11,9 @@ const MEDALLA_SVG_URL = '/assets/medalla.svg';
  */
 function isWhiteColor(rgbColor) {
   // Extraer valores RGB usando regex
-  const match = String(rgbColor || '').match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i);
+  const match = String(rgbColor || '').match(
+    /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i
+  );
   if (!match) return false;
 
   const r = Number(match[1]);
@@ -31,7 +33,7 @@ export function renderMedallaColorIcon({
   const safeSize = Number.isFinite(Number(size)) ? Number(size) : 40;
   const safeTitle = escapeHtml(title || '');
   const safeAriaLabel = escapeHtml(ariaLabel || '');
-  
+
   // Determinar el color de fondo basado en el color de la medalla
   const backgroundColor = isWhiteColor(color) ? '#000000' : '#ffffff';
 
@@ -72,24 +74,32 @@ export function renderRutaColorStateIndicator(ruta) {
   };
   const holdColor = ruta?.colorPresasRgb || FALLBACK_COLOR;
   const holdColorLabel = escapeHtml(ruta?.colorPresas || 'no definido');
-  const dificultad = typeof ruta?.dificultad === 'string' ? ruta.dificultad.trim() : '';
-  const hasDificultad = dificultad.length > 0 && dificultad.toLowerCase() !== 'sin dificultad';
+  const dificultad =
+    typeof ruta?.dificultad === 'string' ? ruta.dificultad.trim() : '';
+  const hasDificultad =
+    dificultad.length > 0 && dificultad.toLowerCase() !== 'sin dificultad';
   const dificultadLabel = escapeHtml(dificultad);
-  
+
   // Usar medalla coloreada si difficultyIsColor es true y tenemos color
   const difficultyIsColor = Boolean(ruta?.difficultyIsColor);
   const difficultyColorRgb = ruta?.difficultyColorRgb || FALLBACK_COLOR;
 
   return `
     <div class="position-absolute d-flex align-items-center gap-2" style="bottom: 10px; left: 10px; z-index: 3;">
-      ${hasDificultad && difficultyIsColor ? `
+      ${
+        hasDificultad && difficultyIsColor
+          ? `
         ${renderMedallaColorIcon({
           color: difficultyColorRgb,
           size: 32,
           title: `Dificultad: ${dificultadLabel}`,
           ariaLabel: `Dificultad ${dificultadLabel}`,
         })}
-      ` : hasDificultad ? `<span class="badge bg-primary shadow-sm text-truncate" style="font-size: 13px; max-width: 96px;">${dificultadLabel}</span>` : ''}
+      `
+          : hasDificultad
+            ? `<span class="badge bg-primary shadow-sm text-truncate" style="font-size: 13px; max-width: 96px;">${dificultadLabel}</span>`
+            : ''
+      }
 
       ${renderPresaColorIcon({
         color: holdColor,

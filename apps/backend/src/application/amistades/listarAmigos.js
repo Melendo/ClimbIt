@@ -12,7 +12,8 @@ class ListarAmigos {
 
   async execute({ apodoEscalador }) {
     try {
-      const escalador = await this.escaladorRepository.encontrarPorApodo(apodoEscalador);
+      const escalador =
+        await this.escaladorRepository.encontrarPorApodo(apodoEscalador);
       if (!escalador) {
         throw new NotFoundError(
           `Escalador ${apodoEscalador} no encontrado`,
@@ -20,7 +21,9 @@ class ListarAmigos {
         );
       }
 
-      const idsAmigos = await this.amistadRepository.listarIdsAmigosDeEscalador(escalador.id);
+      const idsAmigos = await this.amistadRepository.listarIdsAmigosDeEscalador(
+        escalador.id
+      );
       if (!idsAmigos.length) {
         return [];
       }

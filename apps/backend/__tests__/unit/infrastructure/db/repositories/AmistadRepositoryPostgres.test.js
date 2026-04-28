@@ -36,7 +36,12 @@ describe('AmistadRepositoryPostgres', () => {
   });
 
   it('crear persiste y retorna entidad de dominio', async () => {
-    const amistad = new Amistad(null, 1, 2, new Date('2026-04-25T00:00:00.000Z'));
+    const amistad = new Amistad(
+      null,
+      1,
+      2,
+      new Date('2026-04-25T00:00:00.000Z')
+    );
     mockAmistadModel.create.mockResolvedValue({
       id: 10,
       idEscalador1: 1,

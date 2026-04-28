@@ -16,7 +16,10 @@ describe('ActualizarMapaZona', () => {
 
     const useCase = new ActualizarMapaZona(mockZonaRepository);
 
-    const resultado = await useCase.execute(1, '/uploads/mapas_zonas/mapa-1.svg');
+    const resultado = await useCase.execute(
+      1,
+      '/uploads/mapas_zonas/mapa-1.svg'
+    );
 
     expect(mockZonaRepository.actualizarMapaZona).toHaveBeenCalledWith(
       1,

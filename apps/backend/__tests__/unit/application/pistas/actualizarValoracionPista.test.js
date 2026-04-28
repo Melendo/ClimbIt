@@ -54,13 +54,21 @@ describe('ActualizarValoracionPistaUseCase', () => {
     };
 
     mockPistaRepository.obtenerPorId.mockResolvedValue(pistaEncontrada);
-    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue(escaladorEncontrado);
-    mockPistaRepository.actualizarValoracion.mockResolvedValue(resultadoActualizacion);
+    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue(
+      escaladorEncontrado
+    );
+    mockPistaRepository.actualizarValoracion.mockResolvedValue(
+      resultadoActualizacion
+    );
 
     const resultado = await actualizarValoracionUseCase.execute(datosEntrada);
 
-    expect(mockPistaRepository.obtenerPorId).toHaveBeenCalledWith(datosEntrada.idPista);
-    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(datosEntrada.escaladorApodo);
+    expect(mockPistaRepository.obtenerPorId).toHaveBeenCalledWith(
+      datosEntrada.idPista
+    );
+    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(
+      datosEntrada.escaladorApodo
+    );
     expect(mockPistaRepository.actualizarValoracion).toHaveBeenCalledWith(
       pistaEncontrada.id,
       escaladorEncontrado.id,
@@ -109,7 +117,9 @@ describe('ActualizarValoracionPistaUseCase', () => {
     ).rejects.toThrow(NotFoundError);
 
     expect(mockPistaRepository.obtenerPorId).toHaveBeenCalledWith(1);
-    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith('UltimoApodo');
+    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(
+      'UltimoApodo'
+    );
     expect(mockPistaRepository.actualizarValoracion).not.toHaveBeenCalled();
   });
 
@@ -134,7 +144,9 @@ describe('ActualizarValoracionPistaUseCase', () => {
     };
 
     mockPistaRepository.obtenerPorId.mockResolvedValue(pistaEncontrada);
-    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue(escaladorEncontrado);
+    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue(
+      escaladorEncontrado
+    );
     mockPistaRepository.actualizarValoracion.mockRejectedValue(
       new Error('Error al actualizar en BD')
     );
@@ -144,7 +156,9 @@ describe('ActualizarValoracionPistaUseCase', () => {
     ).rejects.toThrow(InternalServerError);
 
     expect(mockPistaRepository.obtenerPorId).toHaveBeenCalledWith(1);
-    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith('TestClimber');
+    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(
+      'TestClimber'
+    );
     expect(mockPistaRepository.actualizarValoracion).toHaveBeenCalledWith(
       1,
       1,
@@ -167,7 +181,9 @@ describe('ActualizarValoracionPistaUseCase', () => {
     };
 
     mockPistaRepository.obtenerPorId.mockResolvedValue(pistaEncontrada);
-    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue(escaladorEncontrado);
+    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue(
+      escaladorEncontrado
+    );
     mockPistaRepository.actualizarValoracion.mockResolvedValue({
       EscalaPista: {
         idPista: 1,
@@ -222,7 +238,9 @@ describe('ActualizarValoracionPistaUseCase', () => {
     );
 
     mockPistaRepository.obtenerPorId.mockResolvedValue(pistaEncontrada);
-    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue(escaladorEncontrado);
+    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue(
+      escaladorEncontrado
+    );
     mockPistaRepository.actualizarValoracion.mockRejectedValue(appError);
 
     await expect(

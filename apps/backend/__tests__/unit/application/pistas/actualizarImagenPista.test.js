@@ -16,7 +16,10 @@ describe('ActualizarImagenPista', () => {
 
     const useCase = new ActualizarImagenPista(mockPistaRepository);
 
-    const resultado = await useCase.execute(1, '/uploads/imagenes_pistas/pista-1.jpg');
+    const resultado = await useCase.execute(
+      1,
+      '/uploads/imagenes_pistas/pista-1.jpg'
+    );
 
     expect(mockPistaRepository.actualizarImagenUrl).toHaveBeenCalledWith(
       1,

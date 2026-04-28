@@ -13,7 +13,8 @@ class ConsultarPerfilAmigo {
 
   async execute({ apodoSolicitante, apodoPerfil }) {
     try {
-      const solicitante = await this.escaladorRepository.encontrarPorApodo(apodoSolicitante);
+      const solicitante =
+        await this.escaladorRepository.encontrarPorApodo(apodoSolicitante);
       if (!solicitante) {
         throw new NotFoundError(
           'Escalador solicitante no encontrado',
@@ -21,15 +22,20 @@ class ConsultarPerfilAmigo {
         );
       }
 
-      const amigo = await this.escaladorRepository.encontrarPorApodo(apodoPerfil);
+      const amigo =
+        await this.escaladorRepository.encontrarPorApodo(apodoPerfil);
       if (!amigo) {
-        throw new NotFoundError('Escalador no encontrado', 'ESCALADOR_PERFIL_NOT_FOUND');
+        throw new NotFoundError(
+          'Escalador no encontrado',
+          'ESCALADOR_PERFIL_NOT_FOUND'
+        );
       }
 
-      const existeAmistad = await this.amistadRepository.existeAmistadEntreEscaladores(
-        solicitante.id,
-        amigo.id
-      );
+      const existeAmistad =
+        await this.amistadRepository.existeAmistadEntreEscaladores(
+          solicitante.id,
+          amigo.id
+        );
 
       if (!existeAmistad) {
         throw new AuthorizationError(

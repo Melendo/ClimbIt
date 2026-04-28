@@ -1,6 +1,9 @@
 import { jest } from '@jest/globals';
 import ObtenerValoracionTotalUseCase from '../../../../src/application/pistas/obtenerValoracionTotal.js';
-import { NotFoundError, InternalServerError } from '../../../../src/domain/sharedObjects/AppError.js';
+import {
+  NotFoundError,
+  InternalServerError,
+} from '../../../../src/domain/sharedObjects/AppError.js';
 
 describe('ObtenerValoracionTotalPistaUseCase', () => {
   let mockPistaRepository;

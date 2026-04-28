@@ -29,34 +29,41 @@ describe('ListarSolicitudesPendientes', () => {
       useCase.execute({ apodoEscalador: 'desconocido' })
     ).rejects.toBeInstanceOf(NotFoundError);
 
-    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith('desconocido');
+    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(
+      'desconocido'
+    );
   });
 
   it('retorna la lista de solicitudes formateada', async () => {
-    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue({ id: 5, apodo: 'destinatario' });
-    
-    mockSolicitudAmistadRepository.obtenerPendientesPorDestinatario.mockResolvedValue([
-      {
-        id: 1,
-        remitente: {
-          id: 10,
-          apodo: 'remitente1',
-          descripcion: 'Desc 1',
-          idFotoPerfil: null,
+    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue({
+      id: 5,
+      apodo: 'destinatario',
+    });
+
+    mockSolicitudAmistadRepository.obtenerPendientesPorDestinatario.mockResolvedValue(
+      [
+        {
+          id: 1,
+          remitente: {
+            id: 10,
+            apodo: 'remitente1',
+            descripcion: 'Desc 1',
+            idFotoPerfil: null,
+          },
+          createdAt: '2026-04-26T00:00:00Z',
         },
-        createdAt: '2026-04-26T00:00:00Z'
-      },
-      {
-        id: 2,
-        remitente: {
-          id: 11,
-          apodo: 'remitente2',
-          descripcion: 'Desc 2',
-          idFotoPerfil: 3,
+        {
+          id: 2,
+          remitente: {
+            id: 11,
+            apodo: 'remitente2',
+            descripcion: 'Desc 2',
+            idFotoPerfil: 3,
+          },
+          createdAt: '2026-04-26T01:00:00Z',
         },
-        createdAt: '2026-04-26T01:00:00Z'
-      }
-    ]);
+      ]
+    );
 
     const resultado = await useCase.execute({ apodoEscalador: 'destinatario' });
 
@@ -76,16 +83,25 @@ describe('ListarSolicitudesPendientes', () => {
         descripcion: 'Desc 2',
         idFotoPerfil: 3,
         createdAt: '2026-04-26T01:00:00Z',
-      }
+      },
     ]);
 
-    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith('destinatario');
-    expect(mockSolicitudAmistadRepository.obtenerPendientesPorDestinatario).toHaveBeenCalledWith(5);
+    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(
+      'destinatario'
+    );
+    expect(
+      mockSolicitudAmistadRepository.obtenerPendientesPorDestinatario
+    ).toHaveBeenCalledWith(5);
   });
 
   it('retorna lista vacia si no hay solicitudes pendientes', async () => {
-    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue({ id: 5, apodo: 'destinatario' });
-    mockSolicitudAmistadRepository.obtenerPendientesPorDestinatario.mockResolvedValue([]);
+    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue({
+      id: 5,
+      apodo: 'destinatario',
+    });
+    mockSolicitudAmistadRepository.obtenerPendientesPorDestinatario.mockResolvedValue(
+      []
+    );
 
     const resultado = await useCase.execute({ apodoEscalador: 'destinatario' });
 

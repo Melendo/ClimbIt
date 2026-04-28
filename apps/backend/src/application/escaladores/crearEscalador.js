@@ -52,7 +52,10 @@ class CrearEscalador {
         );
       }
 
-      if (originalMessage.includes('inválido') || originalMessage.includes('invalido')) {
+      if (
+        originalMessage.includes('inválido') ||
+        originalMessage.includes('invalido')
+      ) {
         throw new ValidationError(error.message, 'ESCALADOR_INVALIDO', error);
       }
 

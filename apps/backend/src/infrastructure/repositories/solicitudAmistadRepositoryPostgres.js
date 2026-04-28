@@ -111,7 +111,11 @@ class SolicitudAmistadRepositoryPostgres extends SolicitudAmistadRepository {
     }
   }
 
-  async eliminarEntreEscaladores(idEscalador1, idEscalador2, transaction = null) {
+  async eliminarEntreEscaladores(
+    idEscalador1,
+    idEscalador2,
+    transaction = null
+  ) {
     try {
       return await this.SolicitudAmistadModel.destroy({
         where: {

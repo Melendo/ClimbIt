@@ -1,6 +1,9 @@
 import { jest } from '@jest/globals';
 import EliminarAmigo from '../../../../src/application/amistades/eliminarAmigo.js';
-import { ConflictError, NotFoundError } from '../../../../src/domain/sharedObjects/AppError.js';
+import {
+  ConflictError,
+  NotFoundError,
+} from '../../../../src/domain/sharedObjects/AppError.js';
 
 describe('EliminarAmigo', () => {
   let mockEscaladorRepository;
@@ -52,11 +55,9 @@ describe('EliminarAmigo', () => {
       2,
       { id: 'trx-del' }
     );
-    expect(mockSolicitudAmistadRepository.eliminarEntreEscaladores).toHaveBeenCalledWith(
-      1,
-      2,
-      { id: 'trx-del' }
-    );
+    expect(
+      mockSolicitudAmistadRepository.eliminarEntreEscaladores
+    ).toHaveBeenCalledWith(1, 2, { id: 'trx-del' });
     expect(resultado).toEqual({ mensaje: 'Amigo eliminado correctamente' });
   });
 
@@ -77,7 +78,9 @@ describe('EliminarAmigo', () => {
     mockEscaladorRepository.encontrarPorApodo
       .mockResolvedValueOnce({ id: 1, apodo: 'ivan' })
       .mockResolvedValueOnce({ id: 2, apodo: 'ana' });
-    mockAmistadRepository.existeAmistadEntreEscaladores.mockResolvedValue(false);
+    mockAmistadRepository.existeAmistadEntreEscaladores.mockResolvedValue(
+      false
+    );
 
     await expect(
       useCase.execute({

@@ -2,7 +2,10 @@ import { jest } from '@jest/globals';
 import fs from 'fs/promises';
 import path from 'path';
 import RocodromoController from '../../../src/interfaces/http/controllers/rocodromoController.js';
-import { BadRequestError, NotFoundError } from '../../../src/domain/sharedObjects/AppError.js';
+import {
+  BadRequestError,
+  NotFoundError,
+} from '../../../src/domain/sharedObjects/AppError.js';
 
 function createResMock() {
   const res = {
@@ -34,7 +37,9 @@ afterEach(() => {
 describe('Unit: RocodromoController', () => {
   it('obtenerZonasDeRocodromo: 200 cuando existe', async () => {
     const useCases = {
-      obtenerZonasRocodromo: { execute: jest.fn().mockResolvedValue([{ id: 1, tipo: 'Boulder' }]) },
+      obtenerZonasRocodromo: {
+        execute: jest.fn().mockResolvedValue([{ id: 1, tipo: 'Boulder' }]),
+      },
     };
     const controller = new RocodromoController(useCases);
     const req = { params: { id: 5 } };
@@ -67,7 +72,9 @@ describe('Unit: RocodromoController', () => {
 
   it('obtenerZonasDeRocodromo: 500 ante errores', async () => {
     const useCases = {
-      obtenerZonasRocodromo: { execute: jest.fn().mockRejectedValue(new Error('falló')) },
+      obtenerZonasRocodromo: {
+        execute: jest.fn().mockRejectedValue(new Error('falló')),
+      },
     };
     const controller = new RocodromoController(useCases);
     const req = { params: { id: 5 } };
@@ -84,7 +91,9 @@ describe('Unit: RocodromoController', () => {
   it('obtenerRocodromos: 200 devuelve lista', async () => {
     const mockRocodromos = [{ id: 1, nombre: 'Roco1' }];
     const useCases = {
-      obtenerRocodromos: { execute: jest.fn().mockResolvedValue(mockRocodromos) },
+      obtenerRocodromos: {
+        execute: jest.fn().mockResolvedValue(mockRocodromos),
+      },
     };
     const controller = new RocodromoController(useCases);
     const req = {};
@@ -99,7 +108,9 @@ describe('Unit: RocodromoController', () => {
 
   it('obtenerRocodromos: 500 ante errores', async () => {
     const useCases = {
-      obtenerRocodromos: { execute: jest.fn().mockRejectedValue(new Error('falló')) },
+      obtenerRocodromos: {
+        execute: jest.fn().mockRejectedValue(new Error('falló')),
+      },
     };
     const controller = new RocodromoController(useCases);
     const req = {};
@@ -115,8 +126,18 @@ describe('Unit: RocodromoController', () => {
 
   it('subirLogo: actualiza el logo y elimina el anterior', async () => {
     const useCases = {
-      obtenerInformacion: { execute: jest.fn().mockResolvedValue({ id: 1, logoUrl: '/uploads/logos_rocodromos/old.png' }) },
-      actualizarLogo: { execute: jest.fn().mockResolvedValue({ id: 1, logoUrl: '/uploads/logos_rocodromos/new.png' }) },
+      obtenerInformacion: {
+        execute: jest.fn().mockResolvedValue({
+          id: 1,
+          logoUrl: '/uploads/logos_rocodromos/old.png',
+        }),
+      },
+      actualizarLogo: {
+        execute: jest.fn().mockResolvedValue({
+          id: 1,
+          logoUrl: '/uploads/logos_rocodromos/new.png',
+        }),
+      },
     };
     const controller = new RocodromoController(useCases);
     const req = {
@@ -133,7 +154,10 @@ describe('Unit: RocodromoController', () => {
     expect(fs.unlink).toHaveBeenCalledWith(
       path.resolve(process.cwd(), 'uploads', 'logos_rocodromos', 'old.png')
     );
-    expect(useCases.actualizarLogo.execute).toHaveBeenCalledWith(1, '/uploads/logos_rocodromos/new.png');
+    expect(useCases.actualizarLogo.execute).toHaveBeenCalledWith(
+      1,
+      '/uploads/logos_rocodromos/new.png'
+    );
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.body).toEqual({ logoUrl: '/uploads/logos_rocodromos/new.png' });
   });
@@ -176,7 +200,12 @@ describe('Unit: RocodromoController', () => {
 
   it('obtenerLogo: devuelve el archivo del rocódromo', async () => {
     const useCases = {
-      obtenerInformacion: { execute: jest.fn().mockResolvedValue({ id: 1, logoUrl: '/uploads/logos_rocodromos/logo.png' }) },
+      obtenerInformacion: {
+        execute: jest.fn().mockResolvedValue({
+          id: 1,
+          logoUrl: '/uploads/logos_rocodromos/logo.png',
+        }),
+      },
     };
     const controller = new RocodromoController(useCases);
     const req = { params: { id: 1 } };
@@ -185,12 +214,16 @@ describe('Unit: RocodromoController', () => {
     await controller.obtenerLogo(req, res, () => {});
 
     expect(useCases.obtenerInformacion.execute).toHaveBeenCalledWith(1);
-    expect(res.sentFile).toBe(path.resolve(process.cwd(), 'uploads', 'logos_rocodromos', 'logo.png'));
+    expect(res.sentFile).toBe(
+      path.resolve(process.cwd(), 'uploads', 'logos_rocodromos', 'logo.png')
+    );
   });
 
   it('obtenerLogo: responde 404 si no hay logo', async () => {
     const useCases = {
-      obtenerInformacion: { execute: jest.fn().mockResolvedValue({ id: 1, logoUrl: null }) },
+      obtenerInformacion: {
+        execute: jest.fn().mockResolvedValue({ id: 1, logoUrl: null }),
+      },
     };
     const controller = new RocodromoController(useCases);
     const req = { params: { id: 1 } };
@@ -206,7 +239,12 @@ describe('Unit: RocodromoController', () => {
 
   it('obtenerLogo: responde 404 si el archivo no existe', async () => {
     const useCases = {
-      obtenerInformacion: { execute: jest.fn().mockResolvedValue({ id: 1, logoUrl: '/uploads/logos_rocodromos/logo.png' }) },
+      obtenerInformacion: {
+        execute: jest.fn().mockResolvedValue({
+          id: 1,
+          logoUrl: '/uploads/logos_rocodromos/logo.png',
+        }),
+      },
     };
     const controller = new RocodromoController(useCases);
     const req = { params: { id: 1 } };
@@ -244,7 +282,9 @@ describe('Unit: RocodromoController', () => {
 
   it('obtenerEscalasDificultad: responde 500 ante errores', async () => {
     const useCases = {
-      obtenerEscalasDificultad: { execute: jest.fn().mockRejectedValue(new Error('falló')) },
+      obtenerEscalasDificultad: {
+        execute: jest.fn().mockRejectedValue(new Error('falló')),
+      },
     };
     const controller = new RocodromoController(useCases);
     const req = { params: { id: 1 } };
@@ -259,7 +299,9 @@ describe('Unit: RocodromoController', () => {
   it('actualizarInformacion: 200 cuando actualiza correctamente', async () => {
     const actualizado = { id: 1, nombre: 'Roco Actualizado' };
     const useCases = {
-      actualizarInformacion: { execute: jest.fn().mockResolvedValue(actualizado) },
+      actualizarInformacion: {
+        execute: jest.fn().mockResolvedValue(actualizado),
+      },
     };
     const controller = new RocodromoController(useCases);
     const req = {
@@ -288,7 +330,9 @@ describe('Unit: RocodromoController', () => {
 
   it('actualizarInformacion: 500 ante errores', async () => {
     const useCases = {
-      actualizarInformacion: { execute: jest.fn().mockRejectedValue(new Error('falló')) },
+      actualizarInformacion: {
+        execute: jest.fn().mockRejectedValue(new Error('falló')),
+      },
     };
     const controller = new RocodromoController(useCases);
     const req = { params: { id: 1 }, body: {} };

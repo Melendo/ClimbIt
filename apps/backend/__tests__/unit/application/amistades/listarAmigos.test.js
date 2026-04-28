@@ -21,7 +21,10 @@ describe('ListarAmigos', () => {
   });
 
   it('retorna lista vacia si no tiene amigos', async () => {
-    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue({ id: 7, apodo: 'ivan' });
+    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue({
+      id: 7,
+      apodo: 'ivan',
+    });
     mockAmistadRepository.listarIdsAmigosDeEscalador.mockResolvedValue([]);
 
     const resultado = await useCase.execute({ apodoEscalador: 'ivan' });
@@ -31,7 +34,10 @@ describe('ListarAmigos', () => {
   });
 
   it('retorna perfiles basicos de amigos', async () => {
-    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue({ id: 9, apodo: 'ivan' });
+    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue({
+      id: 9,
+      apodo: 'ivan',
+    });
     mockAmistadRepository.listarIdsAmigosDeEscalador.mockResolvedValue([1, 2]);
     mockEscaladorRepository.encontrarPorIds.mockResolvedValue([
       {
