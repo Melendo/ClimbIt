@@ -1,5 +1,6 @@
 import {
   AppError,
+  ConflictError,
   InternalServerError,
   NotFoundError,
 } from '../../domain/sharedObjects/AppError.js';
@@ -12,6 +13,21 @@ class CambiarApodoEscalador {
 
   async execute({ apodoActual, nuevoApodo, usuario }) {
     try {
+      const escaladorExistente =
+        await this.escaladorRepository.encontrarPorApodoInsensitive(
+          nuevoApodo
+        );
+
+      if (
+        escaladorExistente &&
+        escaladorExistente.apodo.toLowerCase() !== apodoActual.toLowerCase()
+      ) {
+        throw new ConflictError(
+          'El apodo ya está registrado',
+          'ESCALADOR_APODO_DUPLICADO'
+        );
+      }
+
       const escalador = await this.escaladorRepository.actualizarApodo(
         apodoActual,
         nuevoApodo

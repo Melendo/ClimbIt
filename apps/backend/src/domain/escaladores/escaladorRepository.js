@@ -8,6 +8,10 @@ class EscaladorRepository {
     throw new Error('Método "encontrarPorCorreo" no implementado');
   }
 
+  async encontrarPorCorreoInsensitive(correo) {
+    throw new Error('Método "encontrarPorCorreoInsensitive" no implementado');
+  }
+
   async encontrarPorApodo(apodo) {
     throw new Error('Método "encontrarPorApodo" no implementado');
   }

@@ -5,13 +5,13 @@ import { InternalServerError } from '../../../../src/domain/sharedObjects/AppErr
 describe('validarCorreoEscaladorUseCase', () => {
   it('deberia devolver disponible true cuando no existe el correo', async () => {
     const mockRepository = {
-      encontrarPorCorreo: jest.fn().mockResolvedValue(null),
+      encontrarPorCorreoInsensitive: jest.fn().mockResolvedValue(null),
     };
     const useCase = new ValidarCorreoEscalador(mockRepository);
 
     const resultado = await useCase.execute('nuevo@correo.com');
 
-    expect(mockRepository.encontrarPorCorreo).toHaveBeenCalledWith(
+    expect(mockRepository.encontrarPorCorreoInsensitive).toHaveBeenCalledWith(
       'nuevo@correo.com'
     );
     expect(resultado).toEqual({ disponible: true });
@@ -19,7 +19,7 @@ describe('validarCorreoEscaladorUseCase', () => {
 
   it('deberia devolver disponible false cuando el correo ya existe', async () => {
     const mockRepository = {
-      encontrarPorCorreo: jest
+      encontrarPorCorreoInsensitive: jest
         .fn()
         .mockResolvedValue({ id: 1, correo: 'test@correo.com' }),
     };
@@ -32,7 +32,9 @@ describe('validarCorreoEscaladorUseCase', () => {
 
   it('deberia lanzar InternalServerError si falla el repositorio', async () => {
     const mockRepository = {
-      encontrarPorCorreo: jest.fn().mockRejectedValue(new Error('db fail')),
+      encontrarPorCorreoInsensitive: jest
+        .fn()
+        .mockRejectedValue(new Error('db fail')),
     };
     const useCase = new ValidarCorreoEscalador(mockRepository);
 

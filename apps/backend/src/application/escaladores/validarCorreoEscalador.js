@@ -11,7 +11,7 @@ class ValidarCorreoEscalador {
   async execute(correo) {
     try {
       const escalador =
-        await this.escaladorRepository.encontrarPorCorreo(correo);
+        await this.escaladorRepository.encontrarPorCorreoInsensitive(correo);
 
       return { disponible: !escalador };
     } catch (error) {

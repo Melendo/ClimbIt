@@ -8,6 +8,7 @@ import {
 describe('cambiarApodoEscaladorUseCase', () => {
   it('deberia devolver perfil actualizado y token', async () => {
     const mockRepository = {
+      encontrarPorApodoInsensitive: jest.fn().mockResolvedValue(null),
       actualizarApodo: jest.fn().mockResolvedValue({
         id: 3,
         correo: 'test@correo.com',
@@ -52,7 +53,9 @@ describe('cambiarApodoEscaladorUseCase', () => {
 
   it('deberia lanzar NotFoundError si no existe el escalador', async () => {
     const mockRepository = {
+      encontrarPorApodoInsensitive: jest.fn().mockResolvedValue(null),
       actualizarApodo: jest.fn().mockResolvedValue(null),
+      
     };
     const mockTokenService = {
       crear: jest.fn(),
@@ -70,6 +73,7 @@ describe('cambiarApodoEscaladorUseCase', () => {
 
   it('deberia lanzar InternalServerError si falla el repositorio', async () => {
     const mockRepository = {
+      encontrarPorApodoInsensitive: jest.fn().mockResolvedValue(null),
       actualizarApodo: jest.fn().mockRejectedValue(new Error('db fail')),
     };
     const mockTokenService = {
