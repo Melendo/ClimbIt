@@ -58,14 +58,18 @@ export function renderRutaRatingSection(ratingData = {}) {
 
   return `
     <div id="ruta-rating-section" class="bg-white mt-2 px-4 py-4">
-      <div class="row g-4 align-items-end">
+      <div class="row g-4 align-items-start">
         <div class="col-12 col-md-6">
           <p class="text-muted small mb-2 text-uppercase" style="letter-spacing: 0.5px;">Valoraciones</p>
-          <p id="ruta-rating-average" class="fw-semibold mb-2" style="font-size: clamp(3rem, 8vw, 4.5rem); line-height: 1; color: #111827;">${formatAverageRating(averageRating)}</p>
-          <div id="ruta-rating-average-stars" class="d-flex align-items-center gap-1 mb-2" aria-label="Valoracion media de la ruta">
-            ${renderReadonlyStars(averageRating)}
+          <div class="d-flex align-items-start flex-wrap gap-3">
+            <p id="ruta-rating-average" class="fw-semibold mb-0" style="font-size: clamp(3rem, 8vw, 4.5rem); line-height: 0.9; color: #111827;">${formatAverageRating(averageRating)}</p>
+            <div class="d-flex flex-column align-items-start gap-1 pt-1">
+              <div id="ruta-rating-average-stars" class="d-flex align-items-center gap-1" aria-label="Valoracion media de la ruta">
+                ${renderReadonlyStars(averageRating)}
+              </div>
+              <p id="ruta-rating-count" class="mb-0 text-muted" style="font-size: 0.95rem; line-height: 1.15;">${formatNumValoraciones(numValoraciones)}</p>
+            </div>
           </div>
-          <p id="ruta-rating-count" class="mb-0 text-muted" style="font-size: 1.35rem; max-width: 100%; line-height: 1.2;">${formatNumValoraciones(numValoraciones)}</p>
         </div>
 
         <div class="col-12 col-md-6 d-flex flex-column">

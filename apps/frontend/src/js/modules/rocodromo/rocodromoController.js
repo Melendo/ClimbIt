@@ -8,6 +8,7 @@ import {
 } from './rocodromoView.js';
 import { fetchClient, fetchImageObjectUrl, canManageRocodromo } from '../../core/client.js';
 import { showLoading, showError, showFormAlert, clearFormAlert, setFieldError, clearFieldError } from '../../core/ui.js';
+import { showToast } from '../../components/toast.js';
 
 const ROCODROMO_LOGO_PLACEHOLDER = '/assets/rocodromoDefecto.webp';
 const PERFIL_PLACEHOLDER = '/assets/johnDoe.png';
@@ -477,7 +478,7 @@ export function crearRocodromoCmd(container) {
 }
 
 // Función para suscribirse a un rocódromo
-export async function suscribirseRocodromo(idRocodromo) {
+export async function suscribirseRocodromo(idRocodromo, button = null) {
     try {
         await fetchClient('/escaladores/suscribirse', {
             method: 'POST',
@@ -487,16 +488,20 @@ export async function suscribirseRocodromo(idRocodromo) {
             body: JSON.stringify({ idRocodromo })
         });
         
-        // Recargar la vista actual
-        window.location.reload();
+        // Actualizar el botón localmente si se proporcionó
+        if (button) {
+            updateSubscribeButton(button, true);
+        }
+        
+        showToast('Rocódromo añadido a favoritos', { duration: 2000, variant: 'success' });
     } catch (err) {
         console.error('Error al suscribirse:', err.message);
-        showError('Error al suscribirse al rocódromo');
+        showToast('Error al suscribirse al rocódromo', { duration: 3000, variant: 'danger' });
     }
 }
 
 // Función para desuscribirse de un rocódromo
-export async function desuscribirseRocodromo(idRocodromo) {
+export async function desuscribirseRocodromo(idRocodromo, button = null) {
     try {
         await fetchClient('/escaladores/desuscribirse', {
             method: 'POST',
@@ -506,11 +511,36 @@ export async function desuscribirseRocodromo(idRocodromo) {
             body: JSON.stringify({ idRocodromo })
         });
         
-        // Recargar la vista actual
-        window.location.reload();
+        // Actualizar el botón localmente si se proporcionó
+        if (button) {
+            updateSubscribeButton(button, false);
+        }
+        
+        showToast('Rocódromo removido de favoritos', { duration: 2000, variant: 'success' });
     } catch (err) {
         console.error('Error al desuscribirse:', err.message);
-        showError('Error al desuscribirse del rocódromo');
+        showToast('Error al desuscribirse del rocódromo', { duration: 3000, variant: 'danger' });
+    }
+}
+
+// Función auxiliar para actualizar el estado visual del botón
+function updateSubscribeButton(button, estaSuscrito) {
+    const icon = button.querySelector('.material-icons');
+    
+    if (estaSuscrito) {
+        // Cambiar a estado suscrito (estrella llena)
+        button.classList.remove('btn-outline-secondary', 'btn-suscribirse');
+        button.classList.add('btn-warning', 'btn-desuscribirse');
+        button.setAttribute('title', 'Quitar de favoritos');
+        button.setAttribute('aria-label', 'Quitar de favoritos');
+        if (icon) icon.textContent = 'star';
+    } else {
+        // Cambiar a estado no suscrito (estrella vacía)
+        button.classList.remove('btn-warning', 'btn-desuscribirse');
+        button.classList.add('btn-outline-secondary', 'btn-suscribirse');
+        button.setAttribute('title', 'Marcar como favorito');
+        button.setAttribute('aria-label', 'Marcar como favorito');
+        if (icon) icon.textContent = 'star_border';
     }
 }
 

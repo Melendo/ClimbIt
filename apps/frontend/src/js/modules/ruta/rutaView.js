@@ -362,10 +362,16 @@ export function renderInfoRuta(container, ruta, callbacks) {
   const tipoLabel = formatTipo(tipo);
   const dificultadLabel = dificultad || 'Sin dificultad';
   const colorPresasLabel = colorPresas || 'No definido';
+  const tipoLabelSafe = escapeHtml(tipoLabel);
+  const dificultadLabelSafe = escapeHtml(dificultadLabel);
+  const colorPresasLabelSafe = escapeHtml(colorPresasLabel);
   const colorPresasRgb = ruta?.colorPresasRgb || 'rgb(158, 158, 158)';
   const fechaCreacionLabel = formatDateOnly(fechaCreacion);
   const fechaRetiradaLabel = formatDateOnly(fechaRetirada);
+  const fechaCreacionLabelSafe = escapeHtml(fechaCreacionLabel);
+  const fechaRetiradaLabelSafe = escapeHtml(fechaRetiradaLabel);
   const activoLabel = activo ? 'Activa' : 'Inactiva';
+  const activoLabelSafe = escapeHtml(activoLabel);
   const activoBadgeClass = activo ? 'text-bg-success' : 'text-bg-secondary';
   const canManage = Boolean(ruta?.canManage);
   const backHref = ruta?.backHref || '#misRocodromos';
@@ -419,18 +425,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
       <span class="material-icons" style="font-size: 20px;">zoom_in</span>
     </button>
     
-    <!-- Info sobre la imagen -->
     <div class="position-absolute bottom-0 start-0 end-0 p-4 text-white">
-      ${hasDificultad && ruta?.difficultyIsColor ? `
-        <div class="mb-2">
-          ${renderMedallaColorIcon({
-            color: ruta.difficultyColorRgb || 'rgb(158, 158, 158)',
-            size: 40,
-            title: `Dificultad: ${dificultad}`,
-            ariaLabel: `Dificultad ${dificultad}`,
-          })}
-        </div>
-      ` : hasDificultad ? `<span class="badge mb-2" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); font-size: 0.9rem; padding: 6px 12px;">${dificultad}</span>` : ''}
       <h1 class="fs-4 fw-semibold mb-0">${rutaNombreSafe}</h1>
     </div>
   </div>
@@ -440,79 +435,119 @@ export function renderInfoRuta(container, ruta, callbacks) {
     
     <!-- Tu progreso y acciones -->
     <div class="bg-white px-4 py-4">
-      <div class="d-flex align-items-center justify-content-between mb-3">
-        <div>
-          <p class="text-muted small mb-1 text-uppercase" style="letter-spacing: 0.5px;">Tu progreso</p>
-          <p class="mb-0 fw-medium" id="estado-texto">Sin registrar</p>
-        </div>
-        <div id="estado-actual" class="d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: #e5e7eb;">
+      <p class="text-muted small mb-3 text-uppercase" style="letter-spacing: 0.5px;">Tu progreso</p>
+      <div class="d-flex align-items-center gap-3 rounded-4 border bg-light px-3 py-2 mb-3">
+        <div id="estado-actual" class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 48px; height: 48px; background: #e5e7eb;">
           <span class="material-icons" style="color: #6b7280; font-size: 28px;">remove</span>
         </div>
+        <div class="d-flex flex-column min-w-0">
+          <span class="small text-muted text-uppercase" style="letter-spacing: 0.4px;">Estado</span>
+          <span class="mb-0 fw-medium text-truncate" id="estado-texto">Sin registrar</span>
+        </div>
       </div>
-  
-      <p class="text-muted small mb-3 text-uppercase" style="letter-spacing: 0.5px;">Marcar como</p>
+
       <div class="row g-2">
         ${renderRutaEstadoButtons()}
+      </div>
+
+      <p class="text-muted small mt-4 mb-3 text-uppercase" style="letter-spacing: 0.5px;">Información</p>
+
+      <div class="row g-2 mb-3 flex-nowrap" style="overflow-x: auto;">
+        <div class="col-6">
+          <div class="d-flex align-items-center gap-3 rounded-4 border bg-light px-3 py-2 h-100">
+            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 48px; height: 48px; background: rgba(37, 99, 235, 0.1);">
+              ${hasDificultad && ruta?.difficultyIsColor ? `
+                ${renderMedallaColorIcon({
+                  color: ruta.difficultyColorRgb || 'rgb(158, 158, 158)',
+                  size: 30,
+                  title: `Dificultad: ${dificultadLabelSafe}`,
+                  ariaLabel: `Dificultad ${dificultadLabelSafe}`,
+                })}
+              ` : `
+                <span class="badge bg-primary shadow-sm border border-light">${dificultadLabelSafe}</span>
+              `}
+            </div>
+            <div class="d-flex flex-column min-w-0">
+              <span class="small text-muted text-uppercase" style="letter-spacing: 0.4px; font-size: 0.68rem;">Dificultad</span>
+              <span class="mb-0 fw-medium text-truncate" style="font-size: 0.9rem; line-height: 1.15;">${dificultadLabelSafe}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6">
+          <div class="d-flex align-items-center gap-3 rounded-4 border bg-light px-3 py-2 h-100">
+            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 48px; height: 48px; background: rgba(16, 185, 129, 0.1);">
+              ${renderPresaColorIcon({
+                color: colorPresasRgb,
+                size: 30,
+                inset: 2,
+                withOutline: true,
+                title: `Color de presas: ${colorPresasLabelSafe}`,
+                ariaLabel: `Color de presas ${colorPresasLabelSafe}`,
+              })}
+            </div>
+            <div class="d-flex flex-column min-w-0">
+              <span class="small text-muted text-uppercase" style="letter-spacing: 0.4px; font-size: 0.68rem;">Color de presas</span>
+              <span class="mb-0 fw-medium text-truncate" style="font-size: 0.9rem; line-height: 1.15;">${colorPresasLabelSafe}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-2 mb-3 flex-nowrap" style="overflow-x: auto;">
+        <div class="col-6">
+          <div class="d-flex align-items-center gap-3 rounded-4 border bg-light px-3 py-2 h-100">
+            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 48px; height: 48px; background: rgba(37, 99, 235, 0.1);">
+              <span class="material-icons" style="font-size: 24px; color: #1d4ed8;">alt_route</span>
+            </div>
+            <div class="d-flex flex-column min-w-0">
+              <span class="small text-muted text-uppercase" style="letter-spacing: 0.4px; font-size: 0.68rem;">Tipo de ruta</span>
+              <span class="mb-0 fw-medium text-truncate" style="font-size: 0.9rem; line-height: 1.15;">${tipoLabelSafe}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6">
+          <div class="d-flex align-items-center gap-3 rounded-4 border bg-light px-3 py-2 h-100">
+            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 48px; height: 48px; background: rgba(34, 197, 94, 0.12);">
+              <span class="material-icons" style="font-size: 24px; color: #15803d;">flag</span>
+            </div>
+            <div class="d-flex flex-column min-w-0">
+              <span class="small text-muted text-uppercase" style="letter-spacing: 0.4px; font-size: 0.68rem;">Estado de ruta</span>
+              <span class="badge ${activoBadgeClass} mt-1" style="width: fit-content;">${activoLabelSafe}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-2 mb-3 flex-nowrap" style="overflow-x: auto;">
+        <div class="col-6">
+          <div class="d-flex align-items-center gap-3 rounded-4 border bg-light px-3 py-2 h-100">
+            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 48px; height: 48px; background: rgba(59, 130, 246, 0.12);">
+              <span class="material-icons" style="font-size: 24px; color: #1d4ed8;">event_available</span>
+            </div>
+            <div class="d-flex flex-column min-w-0">
+              <span class="small text-muted text-uppercase" style="letter-spacing: 0.4px; font-size: 0.68rem;">Fecha de creación</span>
+              <span class="mb-0 fw-medium text-truncate" style="font-size: 0.9rem; line-height: 1.15;">${fechaCreacionLabelSafe}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6">
+          <div class="d-flex align-items-center gap-3 rounded-4 border bg-light px-3 py-2 h-100">
+            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 48px; height: 48px; background: rgba(248, 113, 113, 0.12);">
+              <span class="material-icons" style="font-size: 24px; color: #b91c1c;">event_busy</span>
+            </div>
+            <div class="d-flex flex-column min-w-0">
+              <span class="small text-muted text-uppercase" style="letter-spacing: 0.4px; font-size: 0.68rem;">Fecha de retirada</span>
+              <span class="mb-0 fw-medium text-truncate" style="font-size: 0.9rem; line-height: 1.15;">${fechaRetiradaLabelSafe}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
     ${renderRutaRatingSection(ratingSummary)}
-  
-    <!-- Detalles de la ruta -->
-    <div class="bg-white mt-2 px-4 py-4">
-      <p class="text-muted small mb-3 text-uppercase" style="letter-spacing: 0.5px;">Detalles de la ruta</p>
-  
-      <div class="row g-3">
-        <div class="col-6">
-          <div class="small text-muted text-uppercase">Tipo de ruta</div>
-          <div class="mt-1">
-            <span class="badge bg-primary">${tipoLabel}</span>
-          </div>
-        </div>
-        <div class="col-6">
-          <div class="small text-muted text-uppercase">Estado de ruta</div>
-          <div class="mt-1">
-            <span class="badge ${activoBadgeClass}">${activoLabel}</span>
-          </div>
-        </div>
-        <div class="col-6">
-          <div class="small text-muted text-uppercase">Color de presas</div>
-          <div class="d-inline-flex align-items-center justify-content-center rounded-3 mt-1" style="width: 38px; height: 38px; background: #f3f4f6;">
-            ${renderPresaColorIcon({
-              color: colorPresasRgb,
-              size: 28,
-              inset: 2,
-              withOutline: true,
-              title: `Color de presas: ${colorPresasLabel}`,
-              ariaLabel: `Color de presas ${colorPresasLabel}`,
-            })}
-          </div>
-        </div>
-        <div class="col-6">
-          <div class="small text-muted text-uppercase">Dificultad</div>
-          <div class="mt-1">
-            ${hasDificultad ? (ruta?.difficultyIsColor ? `
-              <div style="display: inline-flex; align-items: center;">
-                ${renderMedallaColorIcon({
-                  color: ruta.difficultyColorRgb || 'rgb(158, 158, 158)',
-                  size: 32,
-                  title: `Dificultad: ${dificultadLabel}`,
-                  ariaLabel: `Dificultad ${dificultadLabel}`,
-                })}
-              </div>
-            ` : `<span class="badge bg-primary shadow-sm border border-light">${escapeHtml(dificultadLabel)}</span>`) : '<span class="text-muted">Sin dificultad</span>'}
-          </div>
-        </div>
-        <div class="col-6">
-          <div class="small text-muted text-uppercase">Fecha de creación</div>
-          <div class="fw-medium">${fechaCreacionLabel}</div>
-        </div>
-        <div class="col-6">
-          <div class="small text-muted text-uppercase">Fecha de retirada</div>
-          <div class="fw-medium">${fechaRetiradaLabel}</div>
-        </div>
-      </div>
-    </div>
   
   </div>
 </div>

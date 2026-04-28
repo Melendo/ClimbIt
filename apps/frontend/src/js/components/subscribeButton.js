@@ -69,10 +69,10 @@ export function initSubscribeButtons(container) {
           confirmClass: 'btn-danger'
         });
         if (confirmed) {
-          await window.desuscribirseRocodromo(idRocodromo);
+          await window.desuscribirseRocodromo(idRocodromo, btn);
         }
       } else {
-        await window.suscribirseRocodromo(idRocodromo);
+        await window.suscribirseRocodromo(idRocodromo, btn);
       }
     });
   });
