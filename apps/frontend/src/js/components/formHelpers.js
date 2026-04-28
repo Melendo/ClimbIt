@@ -42,8 +42,20 @@ export function setupBackButton(backBtn, onBack) {
 }
 
 export function validateRegistroPasswords(password, passwordConfirm) {
-  if (password.length < 4) {
-    return 'La contraseña debe tener al menos 4 caracteres';
+  if (password.length < 8) {
+    return 'La contraseña debe tener mínimo 8 caracteres';
+  }
+
+  if (!/[a-z]/.test(password)) {
+    return 'La contraseña debe contener al menos una letra minúscula';
+  }
+
+  if (!/[A-Z]/.test(password)) {
+    return 'La contraseña debe contener al menos una letra mayúscula';
+  }
+
+  if (!/\d/.test(password)) {
+    return 'La contraseña debe contener al menos un número';
   }
 
   if (password !== passwordConfirm) {
@@ -58,12 +70,12 @@ export function validateRegistroApodo(apodo) {
     return 'El apodo es obligatorio';
   }
 
-  if (apodo.length > 15) {
-    return 'El apodo no puede superar los 15 caracteres';
+  if (apodo.length < 1 || apodo.length > 20) {
+    return 'El apodo debe tener entre 1 y 20 caracteres';
   }
 
-  if (apodo.length < 2) {
-    return 'El apodo debe tener al menos 2 caracteres';
+  if (!/^[a-zA-Z0-9_-]+$/.test(apodo)) {
+    return 'El apodo solo puede contener letras, números, guiones y guiones bajos';
   }
 
   return null;
