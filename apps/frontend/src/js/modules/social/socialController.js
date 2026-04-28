@@ -1,5 +1,5 @@
 import { renderSocialView, renderAmigoPerfil } from './socialView.js';
-import { fetchClient, fetchImageObjectUrl } from '../../core/client.js';
+import { fetchClient, fetchImageObjectUrl, isOnline } from '../../core/client.js';
 import { showLoading, showError } from '../../core/ui.js';
 
 const PERFIL_PLACEHOLDER = '/assets/johnDoe.png';
@@ -118,6 +118,15 @@ async function responderSolicitud(idSolicitud, respuesta) {
   return await res.json();
 }
 
+function showOfflineToast() {
+  import('../../components/toast.js').then(({ showToast }) => {
+    showToast('Esta acción requiere conexión a internet', {
+      duration: 3000,
+      variant: 'warning',
+    });
+  });
+}
+
 function buildSocialCallbacks(amigosConFoto) {
   return {
     onSearch: (query) => {
@@ -171,10 +180,18 @@ function buildSocialCallbacks(amigosConFoto) {
         throw err;
       }
     },
-    onAcceptRequest: async (idSolicitud) =>
-      await responderSolicitud(idSolicitud, 'aceptada'),
-    onRejectRequest: async (idSolicitud) =>
-      await responderSolicitud(idSolicitud, 'rechazada'),
+    onAcceptRequest: async (idSolicitud) => {
+      if (!isOnline()) {
+        throw new Error('Sin conexión');
+      }
+      return await responderSolicitud(idSolicitud, 'aceptada');
+    },
+    onRejectRequest: async (idSolicitud) => {
+      if (!isOnline()) {
+        throw new Error('Sin conexión');
+      }
+      return await responderSolicitud(idSolicitud, 'rechazada');
+    },
     onRefreshFriends: async () => {
       const nuevosAmigos = await safeGetArray(
         '/amistades/mis-amigos',
@@ -246,6 +263,12 @@ export async function socialCmd(container) {
 export async function amigoPerfilCmd(container, apodo) {
   if (!apodo) {
     showError('No se especificó un amigo.');
+    return;
+  }
+
+  if (!isOnline()) {
+    showOfflineToast();
+    window.location.hash = '#social';
     return;
   }
 

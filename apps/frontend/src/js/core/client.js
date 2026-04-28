@@ -263,6 +263,74 @@ async function warmUpRocodromoDataCache(misRocodromos, headers) {
   }
 }
 
+// Ceba cache de datos de amigos para la vista social (fotos, ranking).
+async function warmUpSocialDataCache(amigos, solicitudes, headers) {
+  if (!Array.isArray(amigos) && !Array.isArray(solicitudes)) {
+    return;
+  }
+
+  const now = new Date();
+  const actividadParams = new URLSearchParams({
+    year: String(now.getFullYear()),
+    month: String(now.getMonth() + 1),
+  });
+
+  // Endpoints para fotos de perfil de amigos y sus datos de actividad para el ranking.
+  const socialEndpoints = [];
+
+  // Procesar amigos: cachear fotos y actividad mensual (para ranking y listado).
+  if (Array.isArray(amigos)) {
+    for (const amigo of amigos) {
+      const idFotoPerfil = Number(amigo?.idFotoPerfil);
+      if (Number.isInteger(idFotoPerfil) && idFotoPerfil > 0) {
+        socialEndpoints.push(`/escaladores/fotos-perfil/${idFotoPerfil}`);
+      }
+
+      const apodo = typeof amigo?.apodo === 'string' ? amigo.apodo.trim() : '';
+      if (apodo) {
+        // Cachear actividad mensual de cada amigo (para ranking).
+        socialEndpoints.push(
+          `/escaladores/public/${encodeURIComponent(apodo)}/stats/actividad-mensual?${actividadParams.toString()}`
+        );
+      }
+    }
+  }
+
+  // Procesar solicitudes pendientes: cachear fotos de remitentes.
+  if (Array.isArray(solicitudes)) {
+    for (const solicitud of solicitudes) {
+      const remitente = solicitud?.remitente || solicitud;
+
+      const idFotoPerfil = Number(remitente?.idFotoPerfil);
+      if (Number.isInteger(idFotoPerfil) && idFotoPerfil > 0) {
+        socialEndpoints.push(`/escaladores/fotos-perfil/${idFotoPerfil}`);
+      }
+    }
+  }
+
+  if (socialEndpoints.length === 0) {
+    return;
+  }
+
+  // Eliminar duplicados manteniendo el orden para optimizar requests.
+  const uniqueSocialEndpoints = [...new Set(socialEndpoints)];
+
+  const socialResults = await Promise.allSettled(
+    uniqueSocialEndpoints.map((endpoint) =>
+      fetchAuthenticatedGet(endpoint, headers)
+    )
+  );
+
+  const failedSocial = socialResults.filter(
+    (r) => r.status === 'rejected'
+  ).length;
+  if (failedSocial > 0) {
+    console.warn(
+      `Warm-up de datos sociales completado con ${failedSocial} fallo(s).`
+    );
+  }
+}
+
 // Ceba cache de datos e imagenes clave inmediatamente despues de iniciar sesion.
 // Las peticiones son interceptadas por el SW de Workbox que las cachea automaticamente.
 export async function warmUpAppDataCache() {
@@ -359,6 +427,38 @@ export async function warmUpAppDataCache() {
   // Cachear datos de rocodromos suscritos (zonas, mapas SVG, rutas) para offline.
   await warmUpRocodromoDataCache(misRocodromos, headers).catch((err) => {
     console.warn('Warm-up de datos de rocodromos incompleto:', err.message);
+  });
+
+  // Extraer amigos y solicitudes para cachear datos de la vista social.
+  const misAmigosResult = userResults[5];
+  let misAmigos = [];
+  if (misAmigosResult?.status === 'fulfilled') {
+    try {
+      misAmigos = await misAmigosResult.value.clone().json();
+      if (!Array.isArray(misAmigos)) {
+        misAmigos = [];
+      }
+    } catch {
+      misAmigos = [];
+    }
+  }
+
+  const solicitudesResult = userResults[6];
+  let solicitudes = [];
+  if (solicitudesResult?.status === 'fulfilled') {
+    try {
+      solicitudes = await solicitudesResult.value.clone().json();
+      if (!Array.isArray(solicitudes)) {
+        solicitudes = [];
+      }
+    } catch {
+      solicitudes = [];
+    }
+  }
+
+  // Cachear datos de social (amigos, solicitudes y sus asociados).
+  await warmUpSocialDataCache(misAmigos, solicitudes, headers).catch((err) => {
+    console.warn('Warm-up de datos sociales incompleto:', err.message);
   });
 }
 

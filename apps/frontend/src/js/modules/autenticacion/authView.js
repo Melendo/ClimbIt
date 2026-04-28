@@ -249,29 +249,6 @@ export function renderRegistroPassword(container, email, callbacks) {
                       style="cursor: pointer;" id="toggle-password">visibility</span>
               </div>
             </div>
-
-            <ul class="list-unstyled small mb-3" id="password-criteria">
-              <li class="text-danger d-flex align-items-center gap-2" data-check="length">
-                <span class="material-icons" data-icon>close</span>
-                Minimo 8 caracteres
-              </li>
-              <li class="text-danger d-flex align-items-center gap-2" data-check="lower">
-                <span class="material-icons" data-icon>close</span>
-                Al menos una letra minuscula
-              </li>
-              <li class="text-danger d-flex align-items-center gap-2" data-check="upper">
-                <span class="material-icons" data-icon>close</span>
-                Al menos una letra mayuscula
-              </li>
-              <li class="text-danger d-flex align-items-center gap-2" data-check="number">
-                <span class="material-icons" data-icon>close</span>
-                Al menos un numero
-              </li>
-              <li class="text-danger d-flex align-items-center gap-2" data-check="match">
-                <span class="material-icons" data-icon>close</span>
-                Las contrasenas coinciden
-              </li>
-            </ul>
             
             <div class="mb-3">
               <div class="position-relative">
@@ -284,6 +261,29 @@ export function renderRegistroPassword(container, email, callbacks) {
                       style="cursor: pointer;" id="toggle-password-confirm">visibility</span>
               </div>
             </div>
+
+            <ul class="list-unstyled small mb-3" id="password-criteria">
+              <li class="text-secondary d-flex align-items-center gap-2" data-check="length">
+                <span class="material-icons" data-icon>radio_button_unchecked</span>
+                Minimo 8 caracteres
+              </li>
+              <li class="text-secondary d-flex align-items-center gap-2" data-check="lower">
+                <span class="material-icons" data-icon>radio_button_unchecked</span>
+                Al menos una letra minuscula
+              </li>
+              <li class="text-secondary d-flex align-items-center gap-2" data-check="upper">
+                <span class="material-icons" data-icon>radio_button_unchecked</span>
+                Al menos una letra mayuscula
+              </li>
+              <li class="text-secondary d-flex align-items-center gap-2" data-check="number">
+                <span class="material-icons" data-icon>radio_button_unchecked</span>
+                Al menos un numero
+              </li>
+              <li class="text-secondary d-flex align-items-center gap-2" data-check="match">
+                <span class="material-icons" data-icon>radio_button_unchecked</span>
+                Las contrasenas coinciden
+              </li>
+            </ul>
             
             <div class="alert d-none" role="alert" id="alert-box"></div>
             
@@ -325,9 +325,9 @@ export function renderRegistroPassword(container, email, callbacks) {
   const setCriteriaStatus = (element, isOk) => {
     const icon = element.querySelector('[data-icon]');
     element.classList.toggle('text-success', isOk);
-    element.classList.toggle('text-danger', !isOk);
+    element.classList.toggle('text-secondary', !isOk);
     if (icon) {
-      icon.textContent = isOk ? 'check_circle' : 'cancel';
+      icon.textContent = isOk ? 'check_circle' : 'radio_button_unchecked';
     }
   };
 
