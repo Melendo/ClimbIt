@@ -134,6 +134,8 @@ async function actualizarFotoPerfil(idFotoPerfil) {
 
 async function abrirCambioFotoPerfil(container, escalador, onAfterUpdate) {
   let fotoOptions = [];
+  let selectedId = null;
+  let selectedPhoto = null;
 
   try {
     fotoOptions = await cargarFotosPerfilDisponibles();
@@ -141,7 +143,7 @@ async function abrirCambioFotoPerfil(container, escalador, onAfterUpdate) {
       throw new Error('No hay fotos de perfil disponibles ahora mismo.');
     }
 
-    const selectedId = await showProfilePhotoModal({
+    selectedId = await showProfilePhotoModal({
       photos: fotoOptions,
       currentPhotoId: Number(escalador?.idFotoPerfil),
     });
@@ -150,16 +152,42 @@ async function abrirCambioFotoPerfil(container, escalador, onAfterUpdate) {
       return;
     }
 
+    selectedPhoto =
+      fotoOptions.find((photo) => Number(photo.id) === selectedId) || null;
+
     await actualizarFotoPerfil(selectedId);
+    if (selectedPhoto?.src) {
+      if (perfilPhotoObjectUrl) {
+        revokeObjectUrl(perfilPhotoObjectUrl);
+      }
+
+      perfilPhotoObjectUrl = selectedPhoto.src;
+      escalador.idFotoPerfil = selectedId;
+      escalador.fotoSrc = selectedPhoto.src;
+
+      const avatarImg = container.querySelector(
+        '.perfil-foto-wrap .perfil-avatar'
+      );
+      if (avatarImg) {
+        avatarImg.src = selectedPhoto.src;
+      }
+    }
+
     if (typeof onAfterUpdate === 'function') {
-      await onAfterUpdate();
+      await onAfterUpdate(selectedPhoto);
     } else {
       await perfilCmd(container);
     }
   } catch (err) {
     showError(`Error al cambiar la foto de perfil: ${err.message}`);
   } finally {
-    fotoOptions.forEach((photo) => revokeObjectUrl(photo?.src));
+    fotoOptions.forEach((photo) => {
+      if (Number(photo?.id) === selectedId) {
+        return;
+      }
+
+      revokeObjectUrl(photo?.src);
+    });
   }
 }
 
@@ -340,9 +368,7 @@ async function renderPerfilConDatos(container, renderFn) {
 
     if (renderFn === renderEditarPerfil) {
       callbacks.onOpenChangePhoto = async () => {
-        await abrirCambioFotoPerfil(container, escalador, async () => {
-          await renderPerfilConDatos(container, renderFn);
-        });
+        await abrirCambioFotoPerfil(container, escalador, () => undefined);
       };
     }
 
