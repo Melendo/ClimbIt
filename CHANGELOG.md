@@ -40,7 +40,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Arreglado
 
 #### Funcionalidades Usuario
-
 - **Rutas**:
   - Impedida la creación de rutas activas en coordenadas ya ocupadas dentro de una misma zona.
   - Corregida la navegación tras eliminar una ruta para volver al mapa de su zona.
@@ -51,7 +50,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Modificado
 
 #### Funcionalidades Usuario
-
 - **Rutas**:
   - Añadidos controles para seleccionar foto desde Cámara o Galería en crear y modificar ruta.
 - **Perfil**:
@@ -67,14 +65,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Arreglado
 
 #### Funcionalidades Usuario
-
 - **Rutas**:
   - Arreglado el hitbox de las rutas en los mapas de zona
 
 ### Modificado
 
 #### Funcionalidades Usuario
-
 - **Rocódromos**:
   - Modificada la vista de la información de rocódromo
 - **Rutas**:

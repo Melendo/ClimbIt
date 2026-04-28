@@ -473,6 +473,16 @@ body {
   white-space: nowrap;
 }
 
+.rocodromo-card-content {
+  min-width: 0;
+}
+
+.rocodromo-card-text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ========================================
    Vista crear ruta
    ======================================== */
