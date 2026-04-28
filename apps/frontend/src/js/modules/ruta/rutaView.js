@@ -398,8 +398,8 @@ export function renderInfoRuta(container, ruta, callbacks) {
       ? dificultad.trim().length > 0
       : Boolean(dificultad);
   const tipoLabel = formatTipo(tipo);
-  const dificultadLabel = dificultad || 'Sin dificultad';
-  const colorPresasLabel = colorPresas || 'No definido';
+  const dificultadLabel = dificultad || 'N/A';
+  const colorPresasLabel = colorPresas || 'N/A';
   const tipoLabelSafe = escapeHtml(tipoLabel);
   const dificultadLabelSafe = escapeHtml(dificultadLabel);
   const colorPresasLabelSafe = escapeHtml(colorPresasLabel);
@@ -496,14 +496,14 @@ export function renderInfoRuta(container, ruta, callbacks) {
 
       <div class="row g-2 mb-3 flex-nowrap" style="overflow-x: auto;">
         <div class="col-6">
-          <div class="d-flex align-items-center gap-3 rounded-4 border bg-light px-3 py-2 h-100">
-            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 48px; height: 48px; background: rgba(37, 99, 235, 0.1);">
+          <div class="d-flex align-items-center gap-2 rounded-4 border bg-light px-2 py-2 h-100">
+            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 40px; height: 40px; background: rgba(37, 99, 235, 0.1);">
               ${
                 hasDificultad && ruta?.difficultyIsColor
                   ? `
                 ${renderMedallaColorIcon({
                   color: ruta.difficultyColorRgb || 'rgb(158, 158, 158)',
-                  size: 30,
+                  size: 24,
                   title: `Dificultad: ${dificultadLabelSafe}`,
                   ariaLabel: `Dificultad ${dificultadLabelSafe}`,
                 })}
@@ -521,11 +521,11 @@ export function renderInfoRuta(container, ruta, callbacks) {
         </div>
 
         <div class="col-6">
-          <div class="d-flex align-items-center gap-3 rounded-4 border bg-light px-3 py-2 h-100">
-            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 48px; height: 48px; background: rgba(16, 185, 129, 0.1);">
+          <div class="d-flex align-items-center gap-2 rounded-4 border bg-light px-2 py-2 h-100">
+            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 40px; height: 40px; background: rgba(16, 185, 129, 0.1);">
               ${renderPresaColorIcon({
                 color: colorPresasRgb,
-                size: 30,
+                size: 24,
                 inset: 2,
                 withOutline: true,
                 title: `Color de presas: ${colorPresasLabelSafe}`,
@@ -542,9 +542,9 @@ export function renderInfoRuta(container, ruta, callbacks) {
 
       <div class="row g-2 mb-3 flex-nowrap" style="overflow-x: auto;">
         <div class="col-6">
-          <div class="d-flex align-items-center gap-3 rounded-4 border bg-light px-3 py-2 h-100">
-            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 48px; height: 48px; background: rgba(37, 99, 235, 0.1);">
-              <span class="material-icons" style="font-size: 24px; color: #1d4ed8;">alt_route</span>
+          <div class="d-flex align-items-center gap-2 rounded-4 border bg-light px-2 py-2 h-100">
+            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 40px; height: 40px; background: rgba(37, 99, 235, 0.1);">
+              <span class="material-icons" style="font-size: 20px; color: #1d4ed8;">alt_route</span>
             </div>
             <div class="d-flex flex-column min-w-0">
               <span class="small text-muted text-uppercase" style="letter-spacing: 0.4px; font-size: 0.68rem;">Tipo de ruta</span>
@@ -554,9 +554,9 @@ export function renderInfoRuta(container, ruta, callbacks) {
         </div>
 
         <div class="col-6">
-          <div class="d-flex align-items-center gap-3 rounded-4 border bg-light px-3 py-2 h-100">
-            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 48px; height: 48px; background: rgba(34, 197, 94, 0.12);">
-              <span class="material-icons" style="font-size: 24px; color: #15803d;">flag</span>
+          <div class="d-flex align-items-center gap-2 rounded-4 border bg-light px-2 py-2 h-100">
+            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 40px; height: 40px; background: rgba(34, 197, 94, 0.12);">
+              <span class="material-icons" style="font-size: 20px; color: #15803d;">flag</span>
             </div>
             <div class="d-flex flex-column min-w-0">
               <span class="small text-muted text-uppercase" style="letter-spacing: 0.4px; font-size: 0.68rem;">Estado de ruta</span>
@@ -568,25 +568,25 @@ export function renderInfoRuta(container, ruta, callbacks) {
 
       <div class="row g-2 mb-3 flex-nowrap" style="overflow-x: auto;">
         <div class="col-6">
-          <div class="d-flex align-items-center gap-3 rounded-4 border bg-light px-3 py-2 h-100">
-            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 48px; height: 48px; background: rgba(59, 130, 246, 0.12);">
-              <span class="material-icons" style="font-size: 24px; color: #1d4ed8;">event_available</span>
+          <div class="d-flex align-items-center gap-2 rounded-4 border bg-light px-2 py-2 h-100">
+            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 40px; height: 40px; background: rgba(59, 130, 246, 0.12);">
+              <span class="material-icons" style="font-size: 20px; color: #1d4ed8;">event_available</span>
             </div>
             <div class="d-flex flex-column min-w-0">
               <span class="small text-muted text-uppercase" style="letter-spacing: 0.4px; font-size: 0.68rem;">Fecha de creación</span>
-              <span class="mb-0 fw-medium text-truncate" style="font-size: 0.9rem; line-height: 1.15;">${fechaCreacionLabelSafe}</span>
+              <span class="mb-0 fw-medium text-truncate" style="font-size: 0.82rem; line-height: 1.1;">${fechaCreacionLabelSafe}</span>
             </div>
           </div>
         </div>
 
         <div class="col-6">
-          <div class="d-flex align-items-center gap-3 rounded-4 border bg-light px-3 py-2 h-100">
-            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 48px; height: 48px; background: rgba(248, 113, 113, 0.12);">
-              <span class="material-icons" style="font-size: 24px; color: #b91c1c;">event_busy</span>
+          <div class="d-flex align-items-center gap-2 rounded-4 border bg-light px-2 py-2 h-100">
+            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 40px; height: 40px; background: rgba(248, 113, 113, 0.12);">
+              <span class="material-icons" style="font-size: 20px; color: #b91c1c;">event_busy</span>
             </div>
             <div class="d-flex flex-column min-w-0">
               <span class="small text-muted text-uppercase" style="letter-spacing: 0.4px; font-size: 0.68rem;">Fecha de retirada</span>
-              <span class="mb-0 fw-medium text-truncate" style="font-size: 0.9rem; line-height: 1.15;">${fechaRetiradaLabelSafe}</span>
+              <span class="mb-0 fw-medium text-truncate" style="font-size: 0.82rem; line-height: 1.1;">${fechaRetiradaLabelSafe}</span>
             </div>
           </div>
         </div>
@@ -636,10 +636,10 @@ ${renderRutaImageModal({
 
 // Función auxiliar para formatear una fecha a día, mes y año o mostrar un texto de fallback si no es válida
 function formatDateOnly(value) {
-  if (!value) return 'No definida';
+  if (!value) return 'N/A';
 
   const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return 'No definida';
+  if (Number.isNaN(parsed.getTime())) return 'N/A';
 
   return parsed.toLocaleDateString('es-ES', {
     day: '2-digit',
