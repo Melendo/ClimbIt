@@ -61,7 +61,12 @@ export function registroCmd(container) {
   registroState = { email: '', contrasena: '' };
 
   const callbacks = {
-    onEmailSubmit: (email) => {
+    onEmailSubmit: async (email) => {
+      const validation = await validarCorreoDisponibilidad(email);
+      if (!validation.ok) {
+        throw new Error(validation.message || 'El correo no esta disponible');
+      }
+
       registroState.email = email;
       // Ir al paso 2
       registroPasswordCmd(container);
@@ -96,6 +101,11 @@ function registroApodoCmd(container) {
       registroPasswordCmd(container);
     },
     onApodoSubmit: async (apodo) => {
+      const validation = await validarApodoDisponibilidad(apodo);
+      if (!validation.ok) {
+        throw new Error(validation.message || 'El apodo no esta disponible');
+      }
+
       // Enviar petición de registro
       const res = await fetchClient('escaladores/create', {
         method: 'POST',
@@ -132,4 +142,59 @@ function registroApodoCmd(container) {
   };
 
   renderRegistroApodo(container, registroState.email, callbacks);
+}
+
+async function validarCorreoDisponibilidad(correo) {
+  try {
+    const response = await fetchClient(
+      `/escaladores/validarCorreo/${encodeURIComponent(correo)}`
+    );
+    const data = await response.json();
+    if (data?.disponible === false) {
+      return { ok: false, message: 'El correo ya esta registrado.' };
+    }
+    return { ok: true };
+  } catch (err) {
+    const errorMsg = await extractValidatorMessage(err);
+    return {
+      ok: false,
+      message: errorMsg || err.message || 'No se pudo validar el correo.',
+    };
+  }
+}
+
+async function validarApodoDisponibilidad(apodo) {
+  try {
+    const response = await fetchClient(
+      `/escaladores/validarApodo/${encodeURIComponent(apodo)}`
+    );
+    const data = await response.json();
+    if (data?.disponible === false) {
+      return { ok: false, message: 'El apodo no esta disponible.' };
+    }
+    return { ok: true };
+  } catch (err) {
+    const errorMsg = await extractValidatorMessage(err);
+    return {
+      ok: false,
+      message: errorMsg || err.message || 'No se pudo validar el apodo.',
+    };
+  }
+}
+
+async function extractValidatorMessage(err) {
+  if (!err?.response) {
+    return null;
+  }
+
+  try {
+    const payload = await err.response.json();
+    const errorMsg = payload?.errors?.[0]?.msg;
+    if (errorMsg) {
+      return errorMsg;
+    }
+    return payload?.message || payload?.error || null;
+  } catch {
+    return null;
+  }
 }

@@ -72,6 +72,20 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
     }
   }
 
+  async encontrarPorCorreoInsensitive(correo) {
+    try {
+      const escaladorModel = await this.EscaladorModel.findOne({
+        where: where(fn('lower', col('Correo')), correo.toLowerCase()),
+      });
+      return this._toDomain(escaladorModel);
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al buscar escalador por correo (insensible)',
+        internalCode: 'ESCALADOR_FIND_BY_EMAIL_INSENSITIVE_FAILED',
+      });
+    }
+  }
+
   async encontrarPorApodo(apodo) {
     try {
       const escaladorModel = await this.EscaladorModel.findOne({

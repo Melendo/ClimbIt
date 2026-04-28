@@ -15,6 +15,18 @@ class CrearEscalador {
 
   async execute(data) {
     try {
+      const [correoExistente, apodoExistente] = await Promise.all([
+        this.escaladorRepository.encontrarPorCorreoInsensitive(data.correo),
+        this.escaladorRepository.encontrarPorApodoInsensitive(data.apodo),
+      ]);
+
+      if (correoExistente || apodoExistente) {
+        throw new ConflictError(
+          'El correo o apodo ya está registrado',
+          'ESCALADOR_DUPLICADO'
+        );
+      }
+
       const hashedPassword = await this.passwordService.hash(data.contrasena);
       const nuevoEscalador = new Escalador(
         null,

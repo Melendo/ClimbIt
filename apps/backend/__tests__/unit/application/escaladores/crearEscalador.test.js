@@ -14,6 +14,8 @@ describe('crearEscaladorUseCase', () => {
     };
 
     const mockRepository = {
+      encontrarPorCorreoInsensitive: jest.fn().mockResolvedValue(null),
+      encontrarPorApodoInsensitive: jest.fn().mockResolvedValue(null),
       crear: jest.fn(async (escalador) => ({
         ...escalador,
         id: 1,
@@ -53,6 +55,8 @@ describe('crearEscaladorUseCase', () => {
     };
 
     const mockRepository = {
+      encontrarPorCorreoInsensitive: jest.fn().mockResolvedValue(null),
+      encontrarPorApodoInsensitive: jest.fn().mockResolvedValue(null),
       crear: jest.fn(async (escalador) => ({
         ...escalador,
         id: 1,

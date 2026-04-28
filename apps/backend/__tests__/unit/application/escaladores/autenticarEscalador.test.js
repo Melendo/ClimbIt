@@ -9,7 +9,7 @@ describe('AutenticarEscaladorUseCase', () => {
 
   beforeEach(() => {
     mockRepository = {
-      encontrarPorCorreo: jest.fn(),
+      encontrarPorCorreoInsensitive: jest.fn(),
       obtenerIdsRocodromosGestionados: jest.fn(),
     };
     mockPasswordService = {
@@ -39,14 +39,16 @@ describe('AutenticarEscaladorUseCase', () => {
       isAdmin: false,
     };
 
-    mockRepository.encontrarPorCorreo.mockResolvedValue(escaladorEncontrado);
+    mockRepository.encontrarPorCorreoInsensitive.mockResolvedValue(
+      escaladorEncontrado
+    );
     mockRepository.obtenerIdsRocodromosGestionados.mockResolvedValue([]);
     mockPasswordService.compare.mockResolvedValue(true);
     mockTokenService.crear.mockReturnValue('fake_jwt_token');
 
     const resultado = await autenticarEscalador.execute(datosEntrada);
 
-    expect(mockRepository.encontrarPorCorreo).toHaveBeenCalledWith(
+    expect(mockRepository.encontrarPorCorreoInsensitive).toHaveBeenCalledWith(
       datosEntrada.correo
     );
     expect(mockPasswordService.compare).toHaveBeenCalledWith(
@@ -75,7 +77,9 @@ describe('AutenticarEscaladorUseCase', () => {
       isAdmin: false,
     };
 
-    mockRepository.encontrarPorCorreo.mockResolvedValue(escaladorEncontrado);
+    mockRepository.encontrarPorCorreoInsensitive.mockResolvedValue(
+      escaladorEncontrado
+    );
     mockRepository.obtenerIdsRocodromosGestionados.mockResolvedValue([7]);
     mockPasswordService.compare.mockResolvedValue(true);
     mockTokenService.crear.mockReturnValue('fake_jwt_token');
@@ -105,7 +109,9 @@ describe('AutenticarEscaladorUseCase', () => {
       isAdmin: false,
     };
 
-    mockRepository.encontrarPorCorreo.mockResolvedValue(escaladorEncontrado);
+    mockRepository.encontrarPorCorreoInsensitive.mockResolvedValue(
+      escaladorEncontrado
+    );
     mockRepository.obtenerIdsRocodromosGestionados.mockResolvedValue([3, 5, 9]);
     mockPasswordService.compare.mockResolvedValue(true);
     mockTokenService.crear.mockReturnValue('fake_jwt_token');
@@ -122,7 +128,7 @@ describe('AutenticarEscaladorUseCase', () => {
   });
 
   it('debería lanzar un error si el escalador no existe', async () => {
-    mockRepository.encontrarPorCorreo.mockResolvedValue(null);
+    mockRepository.encontrarPorCorreoInsensitive.mockResolvedValue(null);
 
     await expect(
       autenticarEscalador.execute({
@@ -139,7 +145,9 @@ describe('AutenticarEscaladorUseCase', () => {
       isAdmin: false,
     };
 
-    mockRepository.encontrarPorCorreo.mockResolvedValue(escaladorEncontrado);
+    mockRepository.encontrarPorCorreoInsensitive.mockResolvedValue(
+      escaladorEncontrado
+    );
     mockPasswordService.compare.mockResolvedValue(false);
 
     await expect(
@@ -164,7 +172,9 @@ describe('AutenticarEscaladorUseCase', () => {
       isAdmin: true,
     };
 
-    mockRepository.encontrarPorCorreo.mockResolvedValue(escaladorEncontrado);
+    mockRepository.encontrarPorCorreoInsensitive.mockResolvedValue(
+      escaladorEncontrado
+    );
     mockPasswordService.compare.mockResolvedValue(true);
     mockTokenService.crear.mockReturnValue('fake_jwt_token');
 

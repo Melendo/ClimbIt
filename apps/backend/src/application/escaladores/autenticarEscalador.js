@@ -15,7 +15,9 @@ class AutenticarEscalador {
   async execute(data) {
     try {
       const escaladorExistente =
-        await this.escaladorRepository.encontrarPorCorreo(data.correo);
+        await this.escaladorRepository.encontrarPorCorreoInsensitive(
+          data.correo
+        );
       if (!escaladorExistente) {
         throw new NotFoundError(
           'Escalador no registrado',
