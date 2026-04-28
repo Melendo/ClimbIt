@@ -1,6 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { BadRequestError, NotFoundError } from '../../../domain/sharedObjects/AppError.js';
+import {
+  BadRequestError,
+  NotFoundError,
+} from '../../../domain/sharedObjects/AppError.js';
 
 class EscaladorController {
   constructor(escaladorUseCases) {
@@ -92,10 +95,11 @@ class EscaladorController {
     try {
       const apodo = req.user.apodo;
       const idRocodromo = Number(req.params.id);
-      const resumen = await this.useCases.obtenerResumenEstadisticasRocodromo.execute({
-        apodo,
-        idRocodromo,
-      });
+      const resumen =
+        await this.useCases.obtenerResumenEstadisticasRocodromo.execute({
+          apodo,
+          idRocodromo,
+        });
       res.status(200).json(resumen);
     } catch (error) {
       return next(error);
@@ -106,10 +110,11 @@ class EscaladorController {
     try {
       const apodo = req.user.apodo;
       const idRocodromo = Number(req.params.id);
-      const tipos = await this.useCases.obtenerTiposEstadisticasRocodromo.execute({
-        apodo,
-        idRocodromo,
-      });
+      const tipos =
+        await this.useCases.obtenerTiposEstadisticasRocodromo.execute({
+          apodo,
+          idRocodromo,
+        });
       res.status(200).json(tipos);
     } catch (error) {
       return next(error);
@@ -306,7 +311,11 @@ class EscaladorController {
     } catch (error) {
       if (error.code === 'ENOENT') {
         return next(
-          new NotFoundError('Imagen no encontrada', 'FOTO_PERFIL_NOT_FOUND', error)
+          new NotFoundError(
+            'Imagen no encontrada',
+            'FOTO_PERFIL_NOT_FOUND',
+            error
+          )
         );
       }
 
@@ -380,6 +389,21 @@ class EscaladorController {
       });
 
       res.status(200).json(resultado);
+    } catch (error) {
+      return next(error);
+    }
+  }
+  async buscarEscaladores(req, res, next) {
+    try {
+      const q = req.query.q;
+      const excludeApodo = req.user.apodo;
+
+      const resultados = await this.useCases.buscarEscaladoresPorNombre.execute(
+        q,
+        excludeApodo
+      );
+
+      res.status(200).json(resultados);
     } catch (error) {
       return next(error);
     }

@@ -2,7 +2,9 @@ import express from 'express';
 import { body, param } from 'express-validator';
 import validate from '../middlewares/validate.js';
 import verifyTokenMiddleware from '../middlewares/verifyToken.js';
-import uploadImages, { validateUploadedFileType } from '../middlewares/uploadImages.js';
+import uploadImages, {
+  validateUploadedFileType,
+} from '../middlewares/uploadImages.js';
 import authorizeRocodromoAccess, {
   resolveRocodromoIdFromRocodromoBody,
   resolveRocodromoIdFromZonaParam,
@@ -62,15 +64,15 @@ router.post(
 /**
  * GET /zonas/pistas/:id
  * Obtiene todas las pistas que pertenecen a una zona específica
- * 
+ *
  * Parámetros esperados (URL Path):
  * - id (@number , requerido): ID de la zona (entero positivo)
- * 
+ *
  * Respuesta esperada: Array de pistas con sus detalles:
  *   - id: identificador único
  *   - nombre: nombre de la pista
  *   - dificultad: grado de dificultad en escala francesa
- * 
+ *
  * Requiere: Token JWT válido en header Authorization
  */
 const obtenerPistasZonaValidators = [
@@ -80,9 +82,15 @@ const obtenerPistasZonaValidators = [
     .withMessage('El id de la zona debe ser un entero positivo'),
 ];
 
-router.get('/pistas/:id', verifyTokenMiddleware, obtenerPistasZonaValidators, validate, (req, res, next) => {
-  zonaController.obtenerPistasDeZona(req, res, next);
-});
+router.get(
+  '/pistas/:id',
+  verifyTokenMiddleware,
+  obtenerPistasZonaValidators,
+  validate,
+  (req, res, next) => {
+    zonaController.obtenerPistasDeZona(req, res, next);
+  }
+);
 
 /**
  * POST /zonas/:id/mapa
@@ -124,7 +132,9 @@ router.post(
   verifyTokenMiddleware,
   subirMapaZonaValidators,
   validate,
-  authorizeRocodromoAccess({ resolveRocodromoId: resolveRocodromoIdFromZonaParam }),
+  authorizeRocodromoAccess({
+    resolveRocodromoId: resolveRocodromoIdFromZonaParam,
+  }),
   uploadMapaZona.single('mapa'),
   validateMapaZonaUpload,
   (req, res, next) => {

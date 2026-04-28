@@ -16,13 +16,20 @@ class ObtenerResumenEstadisticasRocodromoEscalador {
       const escalador = await this.escaladorRepository.encontrarPorApodo(apodo);
 
       if (!escalador) {
-        throw new NotFoundError('Escalador no encontrado', 'ESCALADOR_NOT_FOUND');
+        throw new NotFoundError(
+          'Escalador no encontrado',
+          'ESCALADOR_NOT_FOUND'
+        );
       }
 
-      const rocodromo = await this.rocodromoRepository.encontrarPorId(idRocodromo);
+      const rocodromo =
+        await this.rocodromoRepository.encontrarPorId(idRocodromo);
 
       if (!rocodromo) {
-        throw new NotFoundError('Rocodromo no encontrado', 'ROCODROMO_NOT_FOUND');
+        throw new NotFoundError(
+          'Rocodromo no encontrado',
+          'ROCODROMO_NOT_FOUND'
+        );
       }
 
       const resumenEscalador =

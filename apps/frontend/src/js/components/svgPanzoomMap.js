@@ -21,469 +21,524 @@ const svgCache = new Map();
  * @returns {{renderMarkers: Function, reset: Function, dispose: Function}}
  */
 export function createSvgPanzoomMap(options) {
-    const {
-        viewport,
-        svgAssetUrl = '/assets/Roco.svg',
-        backgroundImageUrl = null,
-        svgContent = null,
-        svgSize = DEFAULT_SVG_SIZE,
-        clickThreshold = DEFAULT_CLICK_THRESHOLD,
-        detailZoomThreshold = DEFAULT_DETAIL_ZOOM_THRESHOLD,
-        allowMarkerPointSelection = false,
-        enablePointSelection = false,
-        getMarkerData = (item) => ({
-            x: toNumberOrNull(item?.posX),
-            y: toNumberOrNull(item?.posY),
-            color: item?.statusConfig?.color || '#6b7280',
-            holdColor: item?.colorPresasRgb || null,
-            payload: item,
-        }),
-        onMarkerClick = null,
-        onMapPointSelect = null,
-    } = options || {};
+  const {
+    viewport,
+    svgAssetUrl = '/assets/Roco.svg',
+    backgroundImageUrl = null,
+    svgContent = null,
+    svgSize = DEFAULT_SVG_SIZE,
+    clickThreshold = DEFAULT_CLICK_THRESHOLD,
+    detailZoomThreshold = DEFAULT_DETAIL_ZOOM_THRESHOLD,
+    allowMarkerPointSelection = false,
+    enablePointSelection = false,
+    getMarkerData = (item) => {
+      // Detectar si es Flash: usar verde en lugar del amarillo
+      const isFlash = item?.statusConfig?.icon === 'bolt';
+      const displayColor = isFlash
+        ? '#16a34a'
+        : item?.statusConfig?.color || '#6b7280';
+      return {
+        x: toNumberOrNull(item?.posX),
+        y: toNumberOrNull(item?.posY),
+        color: displayColor,
+        holdColor: item?.colorPresasRgb || null,
+        stateIcon: isFlash ? 'bolt' : null,
+        payload: item,
+      };
+    },
+    onMarkerClick = null,
+    onMapPointSelect = null,
+  } = options || {};
 
-    if (!viewport) {
-        throw new Error('createSvgPanzoomMap requiere un viewport valido');
+  if (!viewport) {
+    throw new Error('createSvgPanzoomMap requiere un viewport valido');
+  }
+
+  let panzoomInstance = null;
+  let selectionLayer = null;
+  let selectedPoint = null;
+  let markersDetailedMode = null;
+
+  const normalizePoint = (point) => {
+    const x = toNumberOrNull(point?.x);
+    const y = toNumberOrNull(point?.y);
+
+    if (x === null || y === null) {
+      return null;
     }
 
-    let panzoomInstance = null;
-    let selectionLayer = null;
-    let selectedPoint = null;
-    let markersDetailedMode = null;
+    return {
+      x: Math.round(clamp(x, 0, svgSize)),
+      y: Math.round(clamp(y, 0, svgSize)),
+    };
+  };
 
-    const normalizePoint = (point) => {
-        const x = toNumberOrNull(point?.x);
-        const y = toNumberOrNull(point?.y);
+  const renderSelectedPoint = () => {
+    if (!selectionLayer) return;
 
-        if (x === null || y === null) {
-            return null;
+    selectionLayer.replaceChildren();
+
+    if (!selectedPoint) return;
+
+    const pointGroup = document.createElementNS(SVG_NS, 'g');
+    pointGroup.setAttribute('class', 'selected-point-marker');
+    pointGroup.setAttribute(
+      'transform',
+      `translate(${selectedPoint.x}, ${selectedPoint.y})`
+    );
+
+    const visualGroup = document.createElementNS(SVG_NS, 'g');
+    visualGroup.setAttribute('class', 'selected-point-visual');
+
+    const outerCircle = document.createElementNS(SVG_NS, 'circle');
+    outerCircle.setAttribute('cx', '0');
+    outerCircle.setAttribute('cy', '0');
+    outerCircle.setAttribute('r', '34');
+    outerCircle.setAttribute('class', 'selected-point-ring');
+
+    const innerCircle = document.createElementNS(SVG_NS, 'circle');
+    innerCircle.setAttribute('cx', '0');
+    innerCircle.setAttribute('cy', '0');
+    innerCircle.setAttribute('r', '12');
+    innerCircle.setAttribute('class', 'selected-point-dot');
+
+    visualGroup.appendChild(outerCircle);
+    visualGroup.appendChild(innerCircle);
+    pointGroup.appendChild(visualGroup);
+    selectionLayer.appendChild(pointGroup);
+  };
+
+  const setSelectedPoint = (point) => {
+    selectedPoint = normalizePoint(point);
+    renderSelectedPoint();
+    return selectedPoint;
+  };
+
+  const clearSelectedPoint = () => {
+    selectedPoint = null;
+    renderSelectedPoint();
+  };
+
+  const getSelectedPoint = () => selectedPoint;
+
+  const reset = () => {
+    if (!panzoomInstance) return;
+
+    panzoomInstance.moveTo(0, 0);
+    panzoomInstance.zoomAbs(0, 0, 1);
+  };
+
+  const dispose = () => {
+    if (!panzoomInstance) return;
+
+    panzoomInstance.dispose();
+    panzoomInstance = null;
+  };
+
+  const renderMarkers = async (items = []) => {
+    try {
+      const rawSvg = svgContent
+        ? svgContent
+        : backgroundImageUrl
+          ? buildSvgWithBackground(backgroundImageUrl, svgSize)
+          : await loadSvg(svgAssetUrl);
+      const svgDoc = new DOMParser().parseFromString(rawSvg, 'image/svg+xml');
+      const svgElement = svgDoc.documentElement;
+
+      if (!svgElement || svgElement.nodeName.toLowerCase() !== 'svg') {
+        throw new Error('El archivo SVG base no tiene un nodo SVG valido');
+      }
+
+      svgElement.removeAttribute('width');
+      svgElement.removeAttribute('height');
+      svgElement.classList.add('roco-svg');
+
+      const markerLayer = document.createElementNS(SVG_NS, 'g');
+      markerLayer.setAttribute('id', 'rutas-layer');
+
+      selectionLayer = document.createElementNS(SVG_NS, 'g');
+      selectionLayer.setAttribute('id', 'point-selection-layer');
+
+      let mapStartX = 0;
+      let mapStartY = 0;
+
+      const getMapPointFromEvent = (event) => {
+        const ctm = svgElement.getScreenCTM();
+        if (!ctm) return null;
+
+        const point = svgElement.createSVGPoint();
+        point.x = event.clientX;
+        point.y = event.clientY;
+
+        const transformedPoint = point.matrixTransform(ctm.inverse());
+        return normalizePoint(transformedPoint);
+      };
+
+      const updateMarkerScale = (currentScale = 1) => {
+        const safeScale = currentScale > 0 ? currentScale : 1;
+        const hybridScale = 1 / Math.pow(safeScale, 0.5);
+
+        markerLayer.querySelectorAll('.ruta-visual').forEach((visualGroup) => {
+          visualGroup.setAttribute('transform', `scale(${hybridScale})`);
+        });
+
+        selectionLayer
+          .querySelectorAll('.selected-point-visual')
+          .forEach((visualGroup) => {
+            visualGroup.setAttribute('transform', `scale(${hybridScale})`);
+          });
+      };
+
+      const getMarkerDetailMode = (currentScale = 1) => {
+        const safeScale = currentScale > 0 ? currentScale : 1;
+
+        if (markersDetailedMode === true) {
+          return (
+            safeScale >= detailZoomThreshold - DEFAULT_DETAIL_ZOOM_HYSTERESIS
+          );
         }
 
-        return {
-            x: Math.round(clamp(x, 0, svgSize)),
-            y: Math.round(clamp(y, 0, svgSize)),
+        if (markersDetailedMode === false) {
+          return (
+            safeScale >= detailZoomThreshold + DEFAULT_DETAIL_ZOOM_HYSTERESIS
+          );
+        }
+
+        return safeScale >= detailZoomThreshold;
+      };
+
+      const updateMarkerDetailMode = (currentScale = 1) => {
+        const nextDetailedMode = getMarkerDetailMode(currentScale);
+
+        if (markersDetailedMode === nextDetailedMode) {
+          return;
+        }
+
+        markersDetailedMode = nextDetailedMode;
+        markerLayer.querySelectorAll('.ruta-marker').forEach((markerGroup) => {
+          markerGroup.classList.toggle('is-detailed', markersDetailedMode);
+        });
+      };
+
+      markersDetailedMode = null;
+
+      items.forEach((item) => {
+        const marker = getMarkerData(item) || {};
+        const x = toNumberOrNull(marker.x);
+        const y = toNumberOrNull(marker.y);
+
+        if (x === null || y === null) {
+          return;
+        }
+
+        const markerGroup = document.createElementNS(SVG_NS, 'g');
+        markerGroup.setAttribute('class', 'ruta-marker');
+        markerGroup.setAttribute(
+          'transform',
+          `translate(${clamp(x, 0, svgSize)}, ${clamp(y, 0, svgSize)})`
+        );
+
+        const markerVisual = document.createElementNS(SVG_NS, 'g');
+        markerVisual.setAttribute('class', 'ruta-visual');
+
+        const markerVisualContent = document.createElementNS(SVG_NS, 'g');
+        markerVisualContent.setAttribute(
+          'class',
+          'ruta-visual-content ruta-visual-content-detailed'
+        );
+
+        const markerSimpleVisual = document.createElementNS(SVG_NS, 'g');
+        markerSimpleVisual.setAttribute(
+          'class',
+          'ruta-visual ruta-visual-simple'
+        );
+
+        const markerSimpleContent = document.createElementNS(SVG_NS, 'g');
+        markerSimpleContent.setAttribute(
+          'class',
+          'ruta-visual-content ruta-visual-content-simple'
+        );
+
+        const touchHitbox = document.createElementNS(SVG_NS, 'circle');
+        touchHitbox.setAttribute('cx', '0');
+        touchHitbox.setAttribute('cy', '0');
+        touchHitbox.setAttribute('r', String(DEFAULT_MARKER_HITBOX_RADIUS));
+        touchHitbox.setAttribute('class', 'ruta-hitbox');
+
+        const holdColor =
+          typeof marker.holdColor === 'string' ? marker.holdColor.trim() : '';
+
+        if (holdColor.length > 0) {
+          const holdRingRadius = 33;
+          const holdRingAxisGap = 8;
+          const holdRingQuarterLength = (2 * Math.PI * holdRingRadius) / 4;
+          const holdRingDashLength = Math.max(
+            1,
+            holdRingQuarterLength - holdRingAxisGap
+          );
+
+          const holdColorRing = document.createElementNS(SVG_NS, 'circle');
+          holdColorRing.setAttribute('cx', '0');
+          holdColorRing.setAttribute('cy', '0');
+          holdColorRing.setAttribute('r', String(holdRingRadius));
+          holdColorRing.setAttribute('fill', 'none');
+          holdColorRing.setAttribute('stroke', holdColor);
+          holdColorRing.setAttribute('stroke-width', '6');
+          holdColorRing.setAttribute('stroke-linecap', 'butt');
+          holdColorRing.setAttribute(
+            'stroke-dasharray',
+            `${holdRingDashLength} ${holdRingAxisGap}`
+          );
+          markerVisualContent.appendChild(holdColorRing);
+        }
+
+        const simpleColorCircle = document.createElementNS(SVG_NS, 'circle');
+        simpleColorCircle.setAttribute('cx', '0');
+        simpleColorCircle.setAttribute('cy', '0');
+        simpleColorCircle.setAttribute('r', '14');
+        simpleColorCircle.setAttribute('class', 'ruta-color-dot');
+        simpleColorCircle.setAttribute('fill', holdColor || '#9ca3af');
+
+        const markerCircle = document.createElementNS(SVG_NS, 'circle');
+        markerCircle.setAttribute('cx', '0');
+        markerCircle.setAttribute('cy', '0');
+        markerCircle.setAttribute('r', '24');
+        markerCircle.setAttribute('class', 'ruta-dot');
+        markerCircle.setAttribute('fill', marker.color || '#6b7280');
+
+        let detailedFlashBolt = null;
+        if (marker.stateIcon === 'bolt') {
+          detailedFlashBolt = document.createElementNS(SVG_NS, 'polygon');
+          detailedFlashBolt.setAttribute('class', 'flash-bolt-icon');
+          // Solo se muestra en modo detallado: se dibuja en la capa detailed.
+          detailedFlashBolt.setAttribute(
+            'points',
+            '-3,-14 5,-14 1,-2 10,-2 -5,15 -1,3 -10,3'
+          );
+          detailedFlashBolt.setAttribute('fill', '#faca2a');
+          detailedFlashBolt.setAttribute('stroke', '#333333');
+          detailedFlashBolt.setAttribute('stroke-width', '1.2');
+          detailedFlashBolt.setAttribute('stroke-linejoin', 'round');
+          detailedFlashBolt.setAttribute('pointer-events', 'none');
+        }
+
+        let startX = 0;
+        let startY = 0;
+        let lastMarkerActivationAt = 0;
+
+        const triggerMarkerClick = () => {
+          if (typeof onMarkerClick !== 'function') {
+            return;
+          }
+
+          const now = Date.now();
+          if (now - lastMarkerActivationAt < 320) {
+            return;
+          }
+
+          lastMarkerActivationAt = now;
+          onMarkerClick(marker.payload, marker);
         };
-    };
 
-    const renderSelectedPoint = () => {
-        if (!selectionLayer) return;
+        markerGroup.addEventListener('pointerdown', (event) => {
+          startX = event.clientX;
+          startY = event.clientY;
 
-        selectionLayer.replaceChildren();
-
-        if (!selectedPoint) return;
-
-        const pointGroup = document.createElementNS(SVG_NS, 'g');
-        pointGroup.setAttribute('class', 'selected-point-marker');
-        pointGroup.setAttribute('transform', `translate(${selectedPoint.x}, ${selectedPoint.y})`);
-
-        const visualGroup = document.createElementNS(SVG_NS, 'g');
-        visualGroup.setAttribute('class', 'selected-point-visual');
-
-        const outerCircle = document.createElementNS(SVG_NS, 'circle');
-        outerCircle.setAttribute('cx', '0');
-        outerCircle.setAttribute('cy', '0');
-        outerCircle.setAttribute('r', '34');
-        outerCircle.setAttribute('class', 'selected-point-ring');
-
-        const innerCircle = document.createElementNS(SVG_NS, 'circle');
-        innerCircle.setAttribute('cx', '0');
-        innerCircle.setAttribute('cy', '0');
-        innerCircle.setAttribute('r', '12');
-        innerCircle.setAttribute('class', 'selected-point-dot');
-
-        visualGroup.appendChild(outerCircle);
-        visualGroup.appendChild(innerCircle);
-        pointGroup.appendChild(visualGroup);
-        selectionLayer.appendChild(pointGroup);
-    };
-
-    const setSelectedPoint = (point) => {
-        selectedPoint = normalizePoint(point);
-        renderSelectedPoint();
-        return selectedPoint;
-    };
-
-    const clearSelectedPoint = () => {
-        selectedPoint = null;
-        renderSelectedPoint();
-    };
-
-    const getSelectedPoint = () => selectedPoint;
-
-    const reset = () => {
-        if (!panzoomInstance) return;
-
-        panzoomInstance.moveTo(0, 0);
-        panzoomInstance.zoomAbs(0, 0, 1);
-    };
-
-    const dispose = () => {
-        if (!panzoomInstance) return;
-
-        panzoomInstance.dispose();
-        panzoomInstance = null;
-    };
-
-    const renderMarkers = async (items = []) => {
-        try {
-            const rawSvg = svgContent
-                ? svgContent
-                : backgroundImageUrl
-                    ? buildSvgWithBackground(backgroundImageUrl, svgSize)
-                    : await loadSvg(svgAssetUrl);
-            const svgDoc = new DOMParser().parseFromString(rawSvg, 'image/svg+xml');
-            const svgElement = svgDoc.documentElement;
-
-            if (!svgElement || svgElement.nodeName.toLowerCase() !== 'svg') {
-                throw new Error('El archivo SVG base no tiene un nodo SVG valido');
+          if (typeof markerGroup.setPointerCapture === 'function') {
+            try {
+              markerGroup.setPointerCapture(event.pointerId);
+            } catch {
+              // Algunos navegadores pueden no permitir captura en SVG.
             }
+          }
+        });
 
-            svgElement.removeAttribute('width');
-            svgElement.removeAttribute('height');
-            svgElement.classList.add('roco-svg');
+        markerGroup.addEventListener('pointerup', (event) => {
+          const deltaX = Math.abs(event.clientX - startX);
+          const deltaY = Math.abs(event.clientY - startY);
+          const isClick = deltaX <= clickThreshold && deltaY <= clickThreshold;
 
-            const markerLayer = document.createElementNS(SVG_NS, 'g');
-            markerLayer.setAttribute('id', 'rutas-layer');
-
-            selectionLayer = document.createElementNS(SVG_NS, 'g');
-            selectionLayer.setAttribute('id', 'point-selection-layer');
-
-            let mapStartX = 0;
-            let mapStartY = 0;
-
-            const getMapPointFromEvent = (event) => {
-                const ctm = svgElement.getScreenCTM();
-                if (!ctm) return null;
-
-                const point = svgElement.createSVGPoint();
-                point.x = event.clientX;
-                point.y = event.clientY;
-
-                const transformedPoint = point.matrixTransform(ctm.inverse());
-                return normalizePoint(transformedPoint);
-            };
-
-            const updateMarkerScale = (currentScale = 1) => {
-                const safeScale = currentScale > 0 ? currentScale : 1;
-                const hybridScale = 1 / Math.pow(safeScale, 0.5);
-
-                markerLayer.querySelectorAll('.ruta-visual').forEach((visualGroup) => {
-                    visualGroup.setAttribute('transform', `scale(${hybridScale})`);
-                });
-
-                selectionLayer.querySelectorAll('.selected-point-visual').forEach((visualGroup) => {
-                    visualGroup.setAttribute('transform', `scale(${hybridScale})`);
-                });
-            };
-
-            const getMarkerDetailMode = (currentScale = 1) => {
-                const safeScale = currentScale > 0 ? currentScale : 1;
-
-                if (markersDetailedMode === true) {
-                    return safeScale >= detailZoomThreshold - DEFAULT_DETAIL_ZOOM_HYSTERESIS;
-                }
-
-                if (markersDetailedMode === false) {
-                    return safeScale >= detailZoomThreshold + DEFAULT_DETAIL_ZOOM_HYSTERESIS;
-                }
-
-                return safeScale >= detailZoomThreshold;
-            };
-
-            const updateMarkerDetailMode = (currentScale = 1) => {
-                const nextDetailedMode = getMarkerDetailMode(currentScale);
-
-                if (markersDetailedMode === nextDetailedMode) {
-                    return;
-                }
-
-                markersDetailedMode = nextDetailedMode;
-                markerLayer.querySelectorAll('.ruta-marker').forEach((markerGroup) => {
-                    markerGroup.classList.toggle('is-detailed', markersDetailedMode);
-                });
-            };
-
-            markersDetailedMode = null;
-
-            items.forEach((item) => {
-                const marker = getMarkerData(item) || {};
-                const x = toNumberOrNull(marker.x);
-                const y = toNumberOrNull(marker.y);
-
-                if (x === null || y === null) {
-                    return;
-                }
-
-                const markerGroup = document.createElementNS(SVG_NS, 'g');
-                markerGroup.setAttribute('class', 'ruta-marker');
-                markerGroup.setAttribute(
-                    'transform',
-                    `translate(${clamp(x, 0, svgSize)}, ${clamp(y, 0, svgSize)})`
-                );
-
-                const markerVisual = document.createElementNS(SVG_NS, 'g');
-                markerVisual.setAttribute('class', 'ruta-visual');
-
-                const markerVisualContent = document.createElementNS(SVG_NS, 'g');
-                markerVisualContent.setAttribute('class', 'ruta-visual-content ruta-visual-content-detailed');
-
-                const markerSimpleVisual = document.createElementNS(SVG_NS, 'g');
-                markerSimpleVisual.setAttribute('class', 'ruta-visual ruta-visual-simple');
-
-                const markerSimpleContent = document.createElementNS(SVG_NS, 'g');
-                markerSimpleContent.setAttribute('class', 'ruta-visual-content ruta-visual-content-simple');
-
-                const touchHitbox = document.createElementNS(SVG_NS, 'circle');
-                touchHitbox.setAttribute('cx', '0');
-                touchHitbox.setAttribute('cy', '0');
-                touchHitbox.setAttribute('r', String(DEFAULT_MARKER_HITBOX_RADIUS));
-                touchHitbox.setAttribute('class', 'ruta-hitbox');
-
-                const holdColor = typeof marker.holdColor === 'string'
-                    ? marker.holdColor.trim()
-                    : '';
-
-                if (holdColor.length > 0) {
-                    const holdRingRadius = 33;
-                    const holdRingAxisGap = 8;
-                    const holdRingQuarterLength = (2 * Math.PI * holdRingRadius) / 4;
-                    const holdRingDashLength = Math.max(1, holdRingQuarterLength - holdRingAxisGap);
-
-                    const holdColorRing = document.createElementNS(SVG_NS, 'circle');
-                    holdColorRing.setAttribute('cx', '0');
-                    holdColorRing.setAttribute('cy', '0');
-                    holdColorRing.setAttribute('r', String(holdRingRadius));
-                    holdColorRing.setAttribute('fill', 'none');
-                    holdColorRing.setAttribute('stroke', holdColor);
-                    holdColorRing.setAttribute('stroke-width', '6');
-                    holdColorRing.setAttribute('stroke-linecap', 'butt');
-                    holdColorRing.setAttribute('stroke-dasharray', `${holdRingDashLength} ${holdRingAxisGap}`);
-                    markerVisualContent.appendChild(holdColorRing);
-                }
-
-                const simpleColorCircle = document.createElementNS(SVG_NS, 'circle');
-                simpleColorCircle.setAttribute('cx', '0');
-                simpleColorCircle.setAttribute('cy', '0');
-                simpleColorCircle.setAttribute('r', '14');
-                simpleColorCircle.setAttribute('class', 'ruta-color-dot');
-                simpleColorCircle.setAttribute('fill', holdColor || '#9ca3af');
-
-                const markerCircle = document.createElementNS(SVG_NS, 'circle');
-                markerCircle.setAttribute('cx', '0');
-                markerCircle.setAttribute('cy', '0');
-                markerCircle.setAttribute('r', '24');
-                markerCircle.setAttribute('class', 'ruta-dot');
-                markerCircle.setAttribute('fill', marker.color || '#6b7280');
-
-                let startX = 0;
-                let startY = 0;
-                let lastMarkerActivationAt = 0;
-
-                const triggerMarkerClick = () => {
-                    if (typeof onMarkerClick !== 'function') {
-                        return;
-                    }
-
-                    const now = Date.now();
-                    if (now - lastMarkerActivationAt < 320) {
-                        return;
-                    }
-
-                    lastMarkerActivationAt = now;
-                    onMarkerClick(marker.payload, marker);
-                };
-
-                markerGroup.addEventListener('pointerdown', (event) => {
-                    startX = event.clientX;
-                    startY = event.clientY;
-
-                    if (typeof markerGroup.setPointerCapture === 'function') {
-                        try {
-                            markerGroup.setPointerCapture(event.pointerId);
-                        } catch {
-                            // Algunos navegadores pueden no permitir captura en SVG.
-                        }
-                    }
-                });
-
-                markerGroup.addEventListener('pointerup', (event) => {
-                    const deltaX = Math.abs(event.clientX - startX);
-                    const deltaY = Math.abs(event.clientY - startY);
-                    const isClick = deltaX <= clickThreshold && deltaY <= clickThreshold;
-
-                    if (isClick) {
-                        if (typeof onMarkerClick === 'function') {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            triggerMarkerClick();
-                        }
-                    }
-                });
-
-                markerGroup.addEventListener('click', (event) => {
-                    if (typeof onMarkerClick !== 'function') {
-                        return;
-                    }
-
-                    event.preventDefault();
-                    event.stopPropagation();
-                    triggerMarkerClick();
-                });
-
-                markerSimpleContent.appendChild(simpleColorCircle);
-                markerSimpleVisual.appendChild(markerSimpleContent);
-
-                markerVisualContent.appendChild(markerCircle);
-                markerVisual.appendChild(markerVisualContent);
-
-                markerGroup.appendChild(markerVisual);
-                markerGroup.appendChild(markerSimpleVisual);
-                markerGroup.appendChild(touchHitbox);
-                markerLayer.appendChild(markerGroup);
-            });
-
-            svgElement.appendChild(markerLayer);
-            svgElement.appendChild(selectionLayer);
-            renderSelectedPoint();
-
-            if (enablePointSelection) {
-                svgElement.addEventListener('pointerdown', (event) => {
-                    const isMarkerTarget = typeof event.target.closest === 'function' && event.target.closest('.ruta-marker');
-                    if (isMarkerTarget && !allowMarkerPointSelection) return;
-
-                    mapStartX = event.clientX;
-                    mapStartY = event.clientY;
-                });
-
-                svgElement.addEventListener('pointerup', (event) => {
-                    const isMarkerTarget = typeof event.target.closest === 'function' && event.target.closest('.ruta-marker');
-                    if (isMarkerTarget && !allowMarkerPointSelection) return;
-
-                    const deltaX = Math.abs(event.clientX - mapStartX);
-                    const deltaY = Math.abs(event.clientY - mapStartY);
-                    const isClick = deltaX <= clickThreshold && deltaY <= clickThreshold;
-
-                    if (!isClick) {
-                        return;
-                    }
-
-                    const nextPoint = getMapPointFromEvent(event);
-                    if (!nextPoint) {
-                        return;
-                    }
-
-                    selectedPoint = nextPoint;
-                    renderSelectedPoint();
-
-                    if (typeof onMapPointSelect === 'function') {
-                        onMapPointSelect(selectedPoint);
-                    }
-                });
+          if (isClick) {
+            if (typeof onMarkerClick === 'function') {
+              event.preventDefault();
+              event.stopPropagation();
+              triggerMarkerClick();
             }
+          }
+        });
 
-            dispose();
+        markerGroup.addEventListener('click', (event) => {
+          if (typeof onMarkerClick !== 'function') {
+            return;
+          }
 
-            viewport.replaceChildren(svgElement);
+          event.preventDefault();
+          event.stopPropagation();
+          triggerMarkerClick();
+        });
 
-            panzoomInstance = panzoom(svgElement, {
-                maxZoom: 6,
-                minZoom: 0.8,
-                zoomSpeed: 0.08,
-                smoothScroll: false,
-                bounds: true,
-                boundsPadding: 0.1,
-            });
+        markerSimpleContent.appendChild(simpleColorCircle);
 
-            const clampPanToViewport = () => {
-                const transform = panzoomInstance.getTransform();
-                const viewportRect = viewport.getBoundingClientRect();
+        markerSimpleVisual.appendChild(markerSimpleContent);
 
-                const scaledWidth = viewportRect.width * transform.scale;
-                const scaledHeight = viewportRect.height * transform.scale;
+        markerVisualContent.appendChild(markerCircle);
+        if (detailedFlashBolt) {
+          markerVisualContent.appendChild(detailedFlashBolt);
+        }
+        markerVisual.appendChild(markerVisualContent);
 
-                let minX = viewportRect.width - scaledWidth;
-                let maxX = 0;
-                let minY = viewportRect.height - scaledHeight;
-                let maxY = 0;
+        markerGroup.appendChild(markerVisual);
+        markerGroup.appendChild(markerSimpleVisual);
+        markerGroup.appendChild(touchHitbox);
+        markerLayer.appendChild(markerGroup);
+      });
 
-                if (scaledWidth <= viewportRect.width) {
-                    minX = maxX = (viewportRect.width - scaledWidth) / 2;
-                }
+      svgElement.appendChild(markerLayer);
+      svgElement.appendChild(selectionLayer);
+      renderSelectedPoint();
 
-                if (scaledHeight <= viewportRect.height) {
-                    minY = maxY = (viewportRect.height - scaledHeight) / 2;
-                }
+      if (enablePointSelection) {
+        svgElement.addEventListener('pointerdown', (event) => {
+          const isMarkerTarget =
+            typeof event.target.closest === 'function' &&
+            event.target.closest('.ruta-marker');
+          if (isMarkerTarget && !allowMarkerPointSelection) return;
 
-                const nextX = clamp(transform.x, minX, maxX);
-                const nextY = clamp(transform.y, minY, maxY);
+          mapStartX = event.clientX;
+          mapStartY = event.clientY;
+        });
 
-                if (nextX !== transform.x || nextY !== transform.y) {
-                    panzoomInstance.moveTo(nextX, nextY);
-                }
-            };
+        svgElement.addEventListener('pointerup', (event) => {
+          const isMarkerTarget =
+            typeof event.target.closest === 'function' &&
+            event.target.closest('.ruta-marker');
+          if (isMarkerTarget && !allowMarkerPointSelection) return;
 
-            updateMarkerScale(panzoomInstance.getTransform().scale);
-            updateMarkerDetailMode(panzoomInstance.getTransform().scale);
-            clampPanToViewport();
+          const deltaX = Math.abs(event.clientX - mapStartX);
+          const deltaY = Math.abs(event.clientY - mapStartY);
+          const isClick = deltaX <= clickThreshold && deltaY <= clickThreshold;
 
-            panzoomInstance.on('pan', () => {
-                clampPanToViewport();
-            });
+          if (!isClick) {
+            return;
+          }
 
-            panzoomInstance.on('zoom', () => {
-                const { scale } = panzoomInstance.getTransform();
-                updateMarkerScale(scale);
-                updateMarkerDetailMode(scale);
-                clampPanToViewport();
-            });
-        } catch (err) {
-            console.error('Error al renderizar mapa interactivo:', err);
-            viewport.innerHTML = `
+          const nextPoint = getMapPointFromEvent(event);
+          if (!nextPoint) {
+            return;
+          }
+
+          selectedPoint = nextPoint;
+          renderSelectedPoint();
+
+          if (typeof onMapPointSelect === 'function') {
+            onMapPointSelect(selectedPoint);
+          }
+        });
+      }
+
+      dispose();
+
+      viewport.replaceChildren(svgElement);
+
+      panzoomInstance = panzoom(svgElement, {
+        maxZoom: 6,
+        minZoom: 0.8,
+        zoomSpeed: 0.08,
+        smoothScroll: false,
+        bounds: true,
+        boundsPadding: 0.1,
+      });
+
+      const clampPanToViewport = () => {
+        const transform = panzoomInstance.getTransform();
+        const viewportRect = viewport.getBoundingClientRect();
+
+        const scaledWidth = viewportRect.width * transform.scale;
+        const scaledHeight = viewportRect.height * transform.scale;
+
+        let minX = viewportRect.width - scaledWidth;
+        let maxX = 0;
+        let minY = viewportRect.height - scaledHeight;
+        let maxY = 0;
+
+        if (scaledWidth <= viewportRect.width) {
+          minX = maxX = (viewportRect.width - scaledWidth) / 2;
+        }
+
+        if (scaledHeight <= viewportRect.height) {
+          minY = maxY = (viewportRect.height - scaledHeight) / 2;
+        }
+
+        const nextX = clamp(transform.x, minX, maxX);
+        const nextY = clamp(transform.y, minY, maxY);
+
+        if (nextX !== transform.x || nextY !== transform.y) {
+          panzoomInstance.moveTo(nextX, nextY);
+        }
+      };
+
+      updateMarkerScale(panzoomInstance.getTransform().scale);
+      updateMarkerDetailMode(panzoomInstance.getTransform().scale);
+      clampPanToViewport();
+
+      panzoomInstance.on('pan', () => {
+        clampPanToViewport();
+      });
+
+      panzoomInstance.on('zoom', () => {
+        const { scale } = panzoomInstance.getTransform();
+        updateMarkerScale(scale);
+        updateMarkerDetailMode(scale);
+        clampPanToViewport();
+      });
+    } catch (err) {
+      console.error('Error al renderizar mapa interactivo:', err);
+      viewport.innerHTML = `
                 <div class="d-flex justify-content-center align-items-center h-100 text-white-50 px-3 text-center">
                     No se pudo cargar el mapa del rocódromo.
                 </div>
             `;
-        }
-    };
+    }
+  };
 
-    return {
-        renderMarkers,
-        reset,
-        dispose,
-        setSelectedPoint,
-        getSelectedPoint,
-        clearSelectedPoint,
-    };
+  return {
+    renderMarkers,
+    reset,
+    dispose,
+    setSelectedPoint,
+    getSelectedPoint,
+    clearSelectedPoint,
+  };
 }
 
 // Función auxiliar para limitar un valor dentro de un rango mínimo y máximo
 function clamp(value, min, max) {
-    return Math.min(Math.max(value, min), max);
+  return Math.min(Math.max(value, min), max);
 }
 
 // Función auxiliar para convertir un valor a número o devolver null si no es válido
 function toNumberOrNull(value) {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
 }
 // Función auxiliar para cargar un SVG desde una URL con caching
 async function loadSvg(svgAssetUrl) {
-    if (!svgCache.has(svgAssetUrl)) {
-        const response = await fetch(svgAssetUrl);
-        if (!response.ok) {
-            throw new Error('No se pudo cargar el mapa SVG del rocódromo');
-        }
-
-        const rawSvg = await response.text();
-        svgCache.set(svgAssetUrl, rawSvg);
+  if (!svgCache.has(svgAssetUrl)) {
+    const response = await fetch(svgAssetUrl);
+    if (!response.ok) {
+      throw new Error('No se pudo cargar el mapa SVG del rocódromo');
     }
 
-    return svgCache.get(svgAssetUrl);
+    const rawSvg = await response.text();
+    svgCache.set(svgAssetUrl, rawSvg);
+  }
+
+  return svgCache.get(svgAssetUrl);
 }
 
 // Función auxiliar para construir un SVG con una imagen de fondo
 function buildSvgWithBackground(backgroundImageUrl, svgSize) {
-    return `
+  return `
         <svg xmlns="${SVG_NS}" viewBox="0 0 ${svgSize} ${svgSize}" preserveAspectRatio="xMidYMid slice">
             <image href="${backgroundImageUrl}" x="0" y="0" width="${svgSize}" height="${svgSize}" preserveAspectRatio="xMidYMid slice" />
         </svg>

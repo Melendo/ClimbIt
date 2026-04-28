@@ -2,7 +2,7 @@
 
 /** @type {import('sequelize-cli').Migration} */
 export default {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     await queryInterface.addColumn('EscalaPista', 'FechaCompletado', {
       type: Sequelize.DATE,
       allowNull: true,
@@ -17,9 +17,10 @@ export default {
         AND column_name IN ('createdAt', 'FechaCreacion')
     `);
 
-    const sourceColumn = Array.isArray(columns) && columns.length > 0
-      ? columns[0].column_name
-      : null;
+    const sourceColumn =
+      Array.isArray(columns) && columns.length > 0
+        ? columns[0].column_name
+        : null;
 
     const sourceExpr = sourceColumn ? `"${sourceColumn}"` : 'NOW()';
 
@@ -31,7 +32,7 @@ export default {
     `);
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     await queryInterface.removeColumn('EscalaPista', 'FechaCompletado');
-  }
+  },
 };

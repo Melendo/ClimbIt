@@ -1,6 +1,6 @@
 import { describe, jest } from '@jest/globals';
-import PistaRepositoryPostgres from '../../../src/infrastructure/repositories/pistaRepositoryPostgres.js';
-import Pista from '../../../src/domain/pistas/Pista.js';
+import PistaRepositoryPostgres from '../../../../../src/infrastructure/repositories/pistaRepositoryPostgres.js';
+import Pista from '../../../../../src/domain/pistas/Pista.js';
 
 describe('PistaRepositoryPostgres', () => {
   let repository;
@@ -166,18 +166,23 @@ describe('PistaRepositoryPostgres', () => {
 
       // Assert
       expect(mockPistaModel.findByPk).toHaveBeenCalledWith(idPista, {
-        include: [{
-          association: 'escaladores',
-          where: { id: idEscalador },
-          required: false,
-        }],
+        include: [
+          {
+            association: 'escaladores',
+            where: { id: idEscalador },
+            required: false,
+          },
+        ],
       });
-      expect(mockPistaInstance.addEscaladores).toHaveBeenCalledWith(idEscalador, { 
-        through: {
-          estado: nuevoEstado,
-          fechaCompletado: expect.any(Date),
+      expect(mockPistaInstance.addEscaladores).toHaveBeenCalledWith(
+        idEscalador,
+        {
+          through: {
+            estado: nuevoEstado,
+            fechaCompletado: expect.any(Date),
+          },
         }
-      });
+      );
     });
 
     it('debería actualizar el estado si la relación ya existe', async () => {
@@ -209,11 +214,13 @@ describe('PistaRepositoryPostgres', () => {
 
       // Assert
       expect(mockPistaModel.findByPk).toHaveBeenCalledWith(idPista, {
-        include: [{
-          association: 'escaladores',
-          where: { id: idEscalador },
-          required: false,
-        }],
+        include: [
+          {
+            association: 'escaladores',
+            where: { id: idEscalador },
+            required: false,
+          },
+        ],
       });
       expect(mockEscalaPistaData.update).toHaveBeenCalledWith({
         estado: nuevoEstado,
@@ -232,10 +239,12 @@ describe('PistaRepositoryPostgres', () => {
 
       const mockPistaInstance = {
         id: idPista,
-        escaladores: [{
-          id: idEscalador,
-          EscalaPista: mockEscalaPistaData,
-        }],
+        escaladores: [
+          {
+            id: idEscalador,
+            EscalaPista: mockEscalaPistaData,
+          },
+        ],
       };
 
       mockPistaModel.findByPk.mockResolvedValue(mockPistaInstance);
@@ -262,11 +271,13 @@ describe('PistaRepositoryPostgres', () => {
       ).rejects.toThrow('Pista con ID 999 no encontrada');
 
       expect(mockPistaModel.findByPk).toHaveBeenCalledWith(idPista, {
-        include: [{
-          association: 'escaladores',
-          where: { id: idEscalador },
-          required: false,
-        }],
+        include: [
+          {
+            association: 'escaladores',
+            where: { id: idEscalador },
+            required: false,
+          },
+        ],
       });
     });
 
@@ -279,7 +290,9 @@ describe('PistaRepositoryPostgres', () => {
       const mockPistaInstance = {
         id: idPista,
         escaladores: [],
-        addEscaladores: jest.fn().mockRejectedValue(new Error('Error de base de datos')),
+        addEscaladores: jest
+          .fn()
+          .mockRejectedValue(new Error('Error de base de datos')),
       };
 
       mockPistaModel.findByPk.mockResolvedValue(mockPistaInstance);
@@ -296,10 +309,12 @@ describe('PistaRepositoryPostgres', () => {
       // Arrange
       const mockPistaInstance = {
         id: 1,
-        escaladores: [{
-          id: 5,
-          EscalaPista: { estado: 'Flash' },
-        }],
+        escaladores: [
+          {
+            id: 5,
+            EscalaPista: { estado: 'Flash' },
+          },
+        ],
       };
 
       mockPistaModel.findByPk.mockResolvedValue(mockPistaInstance);
@@ -310,11 +325,13 @@ describe('PistaRepositoryPostgres', () => {
       // Assert
       expect(resultado).toBe('Flash');
       expect(mockPistaModel.findByPk).toHaveBeenCalledWith(1, {
-        include: [{
-          association: 'escaladores',
-          where: { id: 5 },
-          required: false,
-        }],
+        include: [
+          {
+            association: 'escaladores',
+            where: { id: 5 },
+            required: false,
+          },
+        ],
       });
     });
 
@@ -423,7 +440,11 @@ describe('PistaRepositoryPostgres', () => {
         { fechaCompletado: '2026-04-07', dia: 7, rutas: 1 },
       ]);
 
-      const resultado = await repository.obtenerActividadMensualEscalador(5, 2026, 4);
+      const resultado = await repository.obtenerActividadMensualEscalador(
+        5,
+        2026,
+        4
+      );
 
       expect(mockPistaModel.sequelize.query).toHaveBeenCalledWith(
         expect.stringContaining('FROM "EscalaPista" ep'),
@@ -446,7 +467,11 @@ describe('PistaRepositoryPostgres', () => {
     it('deberia retornar actividad vacia cuando no hay datos', async () => {
       mockPistaModel.sequelize.query.mockResolvedValue([]);
 
-      const resultado = await repository.obtenerActividadMensualEscalador(5, 2026, 4);
+      const resultado = await repository.obtenerActividadMensualEscalador(
+        5,
+        2026,
+        4
+      );
 
       expect(resultado).toEqual({
         year: 2026,
@@ -464,10 +489,8 @@ describe('PistaRepositoryPostgres', () => {
         { estado: 'proyecto', total: 4 },
       ]);
 
-      const resultado = await repository.obtenerResumenEstadisticasEscaladorPorRocodromo(
-        8,
-        10
-      );
+      const resultado =
+        await repository.obtenerResumenEstadisticasEscaladorPorRocodromo(8, 10);
 
       expect(mockPistaModel.sequelize.query).toHaveBeenCalledWith(
         expect.stringContaining('FROM "EscalaPista" ep'),
@@ -491,10 +514,8 @@ describe('PistaRepositoryPostgres', () => {
     it('deberia retornar ceros cuando no hay datos para el rocodromo', async () => {
       mockPistaModel.sequelize.query.mockResolvedValue([]);
 
-      const resultado = await repository.obtenerResumenEstadisticasEscaladorPorRocodromo(
-        8,
-        99
-      );
+      const resultado =
+        await repository.obtenerResumenEstadisticasEscaladorPorRocodromo(8, 99);
 
       expect(resultado).toEqual({
         totalRutas: 0,
@@ -510,7 +531,8 @@ describe('PistaRepositoryPostgres', () => {
     it('deberia retornar total de pistas activas del rocodromo', async () => {
       mockPistaModel.sequelize.query.mockResolvedValue([{ totalActivas: 9 }]);
 
-      const resultado = await repository.obtenerTotalPistasActivasPorRocodromo(10);
+      const resultado =
+        await repository.obtenerTotalPistasActivasPorRocodromo(10);
 
       expect(mockPistaModel.sequelize.query).toHaveBeenCalledWith(
         expect.stringContaining('AND p."Activo" = true'),
@@ -526,7 +548,8 @@ describe('PistaRepositoryPostgres', () => {
     it('deberia retornar 0 cuando no hay pistas activas', async () => {
       mockPistaModel.sequelize.query.mockResolvedValue([]);
 
-      const resultado = await repository.obtenerTotalPistasActivasPorRocodromo(10);
+      const resultado =
+        await repository.obtenerTotalPistasActivasPorRocodromo(10);
 
       expect(resultado).toBe(0);
     });
@@ -539,10 +562,8 @@ describe('PistaRepositoryPostgres', () => {
         { tipo: 'via', total: 3 },
       ]);
 
-      const resultado = await repository.obtenerTiposEstadisticasEscaladorPorRocodromo(
-        8,
-        10
-      );
+      const resultado =
+        await repository.obtenerTiposEstadisticasEscaladorPorRocodromo(8, 10);
 
       expect(mockPistaModel.sequelize.query).toHaveBeenCalledWith(
         expect.stringContaining('GROUP BY p."Tipo"'),
@@ -565,10 +586,8 @@ describe('PistaRepositoryPostgres', () => {
     it('deberia retornar distribucion vacia cuando no hay rutas escaladas', async () => {
       mockPistaModel.sequelize.query.mockResolvedValue([]);
 
-      const resultado = await repository.obtenerTiposEstadisticasEscaladorPorRocodromo(
-        8,
-        10
-      );
+      const resultado =
+        await repository.obtenerTiposEstadisticasEscaladorPorRocodromo(8, 10);
 
       expect(resultado).toEqual({
         totalBloques: 0,
@@ -587,12 +606,13 @@ describe('PistaRepositoryPostgres', () => {
         { fechaCompletado: '2026-04-18', dia: 18, rutas: 2 },
       ]);
 
-      const resultado = await repository.obtenerActividadMensualEscaladorPorRocodromo(
-        8,
-        10,
-        2026,
-        4
-      );
+      const resultado =
+        await repository.obtenerActividadMensualEscaladorPorRocodromo(
+          8,
+          10,
+          2026,
+          4
+        );
 
       expect(mockPistaModel.sequelize.query).toHaveBeenCalledWith(
         expect.stringContaining('AND z."IDRoco" = :idRocodromo'),
@@ -616,12 +636,13 @@ describe('PistaRepositoryPostgres', () => {
     it('deberia retornar actividad vacia cuando no hay registros', async () => {
       mockPistaModel.sequelize.query.mockResolvedValue([]);
 
-      const resultado = await repository.obtenerActividadMensualEscaladorPorRocodromo(
-        8,
-        10,
-        2026,
-        4
-      );
+      const resultado =
+        await repository.obtenerActividadMensualEscaladorPorRocodromo(
+          8,
+          10,
+          2026,
+          4
+        );
 
       expect(resultado).toEqual({
         year: 2026,

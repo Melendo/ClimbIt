@@ -1,7 +1,10 @@
 import { renderNavbar } from '../../components/navbar.js';
 import { showConfirmModal } from '../../components/modal.js';
 import { escapeHtml } from '../../components/formHelpers.js';
-import { renderEditableField, initEditableField } from '../../components/editableField.js';
+import {
+  renderEditableField,
+  initEditableField,
+} from '../../components/editableField.js';
 import { renderSectionDivider } from '../../components/sectionDivider.js';
 import {
   bindHeatmapInteractions,
@@ -84,9 +87,9 @@ export function renderPerfil(container, escalador, callbacks) {
               </a>
             </li>
             <li>
-              <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-menu-placeholder="cambiar-contrasena">
-                <span class="material-icons" style="font-size: 18px;">lock</span>
-                <span>Cambiar contraseña</span>
+              <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-menu-placeholder="tutorial" id="header-tutorial-btn">
+                <span class="material-icons" style="font-size: 18px;">school</span>
+                <span>Tutorial</span>
               </a>
             </li>
             <li><hr class="dropdown-divider"></li>
@@ -124,9 +127,11 @@ export function renderPerfil(container, escalador, callbacks) {
             ${renderSectionDivider({ label: 'Descripcion' })}
             <div class="perfil-descripcion-view w-100">
               <div class="perfil-descripcion-view-content text-center">
-                ${descripcionVisible
-                  ? `<p class="text-muted mb-0">${descripcionVisible}</p>`
-                  : '<p class="text-muted mb-0 small fst-italic">Sin descripcion...</p>'}
+                ${
+                  descripcionVisible
+                    ? `<p class="text-muted mb-0">${descripcionVisible}</p>`
+                    : '<p class="text-muted mb-0 small fst-italic">Sin descripcion...</p>'
+                }
               </div>
             </div>
           </div>
@@ -149,6 +154,14 @@ export function renderPerfil(container, escalador, callbacks) {
       e.preventDefault();
     });
   });
+
+  const headerTutorialBtn = container.querySelector('#header-tutorial-btn');
+  if (headerTutorialBtn && typeof callbacks.onOpenTutorial === 'function') {
+    headerTutorialBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      callbacks.onOpenTutorial();
+    });
+  }
 
   const headerLogoutBtn = container.querySelector('#header-logout-btn');
   headerLogoutBtn.addEventListener('click', async (e) => {
@@ -255,9 +268,11 @@ export function renderEditarPerfil(container, escalador, callbacks) {
             wrapperClass: 'perfil-descripcion-wrap perfil-field-block',
             titleHtml: renderPerfilFieldTitle('Descripcion'),
             viewContent: `
-              <div class="text-center">${descripcionVisible
-                ? `<p class="text-muted mb-0 text-center">${descripcionVisible}</p>`
-                : '<p class="text-muted mb-0 small fst-italic text-center">Sin descripcion...</p>'}</div>
+              <div class="text-center">${
+                descripcionVisible
+                  ? `<p class="text-muted mb-0 text-center">${descripcionVisible}</p>`
+                  : '<p class="text-muted mb-0 small fst-italic text-center">Sin descripcion...</p>'
+              }</div>
             `,
             inputValue: escapeHtml(descripcionLimpia),
             inputTag: 'textarea',

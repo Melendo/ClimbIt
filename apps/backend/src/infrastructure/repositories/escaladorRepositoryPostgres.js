@@ -1,8 +1,11 @@
-import { col, fn, where } from 'sequelize';
+import { col, fn, literal, Op, where } from 'sequelize';
 import escaladorRepository from '../../domain/escaladores/escaladorRepository.js';
 import Escalador from '../../domain/escaladores/Escalador.js';
 import Rocodromo from '../../domain/rocodromos/Rocodromo.js';
-import { NotFoundError, ValidationError } from '../../domain/sharedObjects/AppError.js';
+import {
+  NotFoundError,
+  ValidationError,
+} from '../../domain/sharedObjects/AppError.js';
 import mapRepositoryError from './dbErrorHandler.js';
 
 class EscaladorRepositoryPostgres extends escaladorRepository {
@@ -27,7 +30,11 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
       escalador.isAdmin = Boolean(escaladorModel.isAdmin);
       return escalador;
     } catch (error) {
-      throw new ValidationError(error.message, 'ESCALADOR_MODEL_MAPPING_FAILED', error);
+      throw new ValidationError(
+        error.message,
+        'ESCALADOR_MODEL_MAPPING_FAILED',
+        error
+      );
     }
   }
 
@@ -65,6 +72,20 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
     }
   }
 
+  async encontrarPorCorreoInsensitive(correo) {
+    try {
+      const escaladorModel = await this.EscaladorModel.findOne({
+        where: where(fn('lower', col('Correo')), correo.toLowerCase()),
+      });
+      return this._toDomain(escaladorModel);
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al buscar escalador por correo (insensible)',
+        internalCode: 'ESCALADOR_FIND_BY_EMAIL_INSENSITIVE_FAILED',
+      });
+    }
+  }
+
   async encontrarPorApodo(apodo) {
     try {
       const escaladorModel = await this.EscaladorModel.findOne({
@@ -89,6 +110,81 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
       throw mapRepositoryError(error, {
         fallbackMessage: 'Error al buscar escalador por apodo (insensible)',
         internalCode: 'ESCALADOR_FIND_BY_NICKNAME_INSENSITIVE_FAILED',
+      });
+    }
+  }
+
+  async buscarPorApodoSimilitud(cadena, limite = 10, excludeApodo = null) {
+    try {
+      const searchWhere = {
+        apodo: {
+          [Op.iLike]: `%${cadena}%`,
+        },
+      };
+
+      if (excludeApodo) {
+        searchWhere.apodo = {
+          ...searchWhere.apodo,
+          [Op.ne]: excludeApodo,
+        };
+      }
+
+      const escaladoresModel = await this.EscaladorModel.findAll({
+        where: searchWhere,
+        limit: limite,
+        order: [
+          [
+            literal(`CASE WHEN "Apodo" ILIKE '${cadena}%' THEN 0 ELSE 1 END`),
+            'ASC',
+          ],
+          [fn('LENGTH', col('Apodo')), 'ASC'],
+        ],
+      });
+
+      return escaladoresModel.map((escaladorModel) =>
+        this._toDomain(escaladorModel)
+      );
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al buscar escaladores por apodo',
+        internalCode: 'ESCALADOR_SEARCH_BY_NICKNAME_FAILED',
+      });
+    }
+  }
+
+  async encontrarPorId(id) {
+    try {
+      const escaladorModel = await this.EscaladorModel.findByPk(id);
+      return this._toDomain(escaladorModel);
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al buscar escalador por ID',
+        internalCode: 'ESCALADOR_FIND_BY_ID_FAILED',
+      });
+    }
+  }
+
+  async encontrarPorIds(ids) {
+    try {
+      if (!Array.isArray(ids) || ids.length === 0) {
+        return [];
+      }
+
+      const escaladoresModel = await this.EscaladorModel.findAll({
+        where: {
+          id: {
+            [Op.in]: ids,
+          },
+        },
+      });
+
+      return escaladoresModel.map((escaladorModel) =>
+        this._toDomain(escaladorModel)
+      );
+    } catch (error) {
+      throw mapRepositoryError(error, {
+        fallbackMessage: 'Error al buscar escaladores por IDs',
+        internalCode: 'ESCALADOR_FIND_BY_IDS_FAILED',
       });
     }
   }
@@ -175,7 +271,7 @@ class EscaladorRepositoryPostgres extends escaladorRepository {
       }
 
       const rocodromos = await escaladorModel.getRocodromos();
-      const rocodromosDomain = rocodromos.map(rocodromoModel => {
+      const rocodromosDomain = rocodromos.map((rocodromoModel) => {
         return new Rocodromo(
           rocodromoModel.id,
           rocodromoModel.nombre,

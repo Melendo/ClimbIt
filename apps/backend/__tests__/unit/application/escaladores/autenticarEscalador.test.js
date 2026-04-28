@@ -9,7 +9,7 @@ describe('AutenticarEscaladorUseCase', () => {
 
   beforeEach(() => {
     mockRepository = {
-      encontrarPorCorreo: jest.fn(),
+      encontrarPorCorreoInsensitive: jest.fn(),
       obtenerIdsRocodromosGestionados: jest.fn(),
     };
     mockPasswordService = {
@@ -39,17 +39,21 @@ describe('AutenticarEscaladorUseCase', () => {
       isAdmin: false,
     };
 
-    mockRepository.encontrarPorCorreo.mockResolvedValue(escaladorEncontrado);
+    mockRepository.encontrarPorCorreoInsensitive.mockResolvedValue(
+      escaladorEncontrado
+    );
     mockRepository.obtenerIdsRocodromosGestionados.mockResolvedValue([]);
     mockPasswordService.compare.mockResolvedValue(true);
     mockTokenService.crear.mockReturnValue('fake_jwt_token');
 
     const resultado = await autenticarEscalador.execute(datosEntrada);
 
-    expect(mockRepository.encontrarPorCorreo).toHaveBeenCalledWith(datosEntrada.correo);
+    expect(mockRepository.encontrarPorCorreoInsensitive).toHaveBeenCalledWith(
+      datosEntrada.correo
+    );
     expect(mockPasswordService.compare).toHaveBeenCalledWith(
-        datosEntrada.contrasena,
-        escaladorEncontrado.contrasena
+      datosEntrada.contrasena,
+      escaladorEncontrado.contrasena
     );
     expect(mockTokenService.crear).toHaveBeenCalledWith({
       correo: escaladorEncontrado.correo,
@@ -73,7 +77,9 @@ describe('AutenticarEscaladorUseCase', () => {
       isAdmin: false,
     };
 
-    mockRepository.encontrarPorCorreo.mockResolvedValue(escaladorEncontrado);
+    mockRepository.encontrarPorCorreoInsensitive.mockResolvedValue(
+      escaladorEncontrado
+    );
     mockRepository.obtenerIdsRocodromosGestionados.mockResolvedValue([7]);
     mockPasswordService.compare.mockResolvedValue(true);
     mockTokenService.crear.mockReturnValue('fake_jwt_token');
@@ -103,7 +109,9 @@ describe('AutenticarEscaladorUseCase', () => {
       isAdmin: false,
     };
 
-    mockRepository.encontrarPorCorreo.mockResolvedValue(escaladorEncontrado);
+    mockRepository.encontrarPorCorreoInsensitive.mockResolvedValue(
+      escaladorEncontrado
+    );
     mockRepository.obtenerIdsRocodromosGestionados.mockResolvedValue([3, 5, 9]);
     mockPasswordService.compare.mockResolvedValue(true);
     mockTokenService.crear.mockReturnValue('fake_jwt_token');
@@ -120,10 +128,13 @@ describe('AutenticarEscaladorUseCase', () => {
   });
 
   it('debería lanzar un error si el escalador no existe', async () => {
-    mockRepository.encontrarPorCorreo.mockResolvedValue(null);
+    mockRepository.encontrarPorCorreoInsensitive.mockResolvedValue(null);
 
     await expect(
-      autenticarEscalador.execute({ correo: 'noexiste@example.com', contrasena: '123' })
+      autenticarEscalador.execute({
+        correo: 'noexiste@example.com',
+        contrasena: '123',
+      })
     ).rejects.toThrow('Escalador no registrado');
   });
 
@@ -134,11 +145,16 @@ describe('AutenticarEscaladorUseCase', () => {
       isAdmin: false,
     };
 
-    mockRepository.encontrarPorCorreo.mockResolvedValue(escaladorEncontrado);
+    mockRepository.encontrarPorCorreoInsensitive.mockResolvedValue(
+      escaladorEncontrado
+    );
     mockPasswordService.compare.mockResolvedValue(false);
 
     await expect(
-      autenticarEscalador.execute({ correo: 'test@example.com', contrasena: 'wrong' })
+      autenticarEscalador.execute({
+        correo: 'test@example.com',
+        contrasena: 'wrong',
+      })
     ).rejects.toThrow('Contraseña incorrecta');
   });
 
@@ -156,13 +172,17 @@ describe('AutenticarEscaladorUseCase', () => {
       isAdmin: true,
     };
 
-    mockRepository.encontrarPorCorreo.mockResolvedValue(escaladorEncontrado);
+    mockRepository.encontrarPorCorreoInsensitive.mockResolvedValue(
+      escaladorEncontrado
+    );
     mockPasswordService.compare.mockResolvedValue(true);
     mockTokenService.crear.mockReturnValue('fake_jwt_token');
 
     const resultado = await autenticarEscalador.execute(datosEntrada);
 
-    expect(mockRepository.obtenerIdsRocodromosGestionados).not.toHaveBeenCalled();
+    expect(
+      mockRepository.obtenerIdsRocodromosGestionados
+    ).not.toHaveBeenCalled();
     expect(mockTokenService.crear).toHaveBeenCalledWith({
       correo: escaladorEncontrado.correo,
       apodo: escaladorEncontrado.apodo,

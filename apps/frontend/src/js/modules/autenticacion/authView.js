@@ -1,5 +1,9 @@
 import { isValidEmail } from '../../core/ui.js';
-import { isOnline, OFFLINE_READ_ONLY_ERROR_CODE } from '../../core/client.js';
+import {
+  isOnline,
+  OFFLINE_READ_ONLY_ERROR_CODE,
+  OFFLINE_UNAVAILABLE_ERROR_CODE,
+} from '../../core/client.js';
 import {
   hideAlert,
   setupAlertClearOnInput,
@@ -7,29 +11,8 @@ import {
   setupPasswordToggle,
   showAlert,
   validateRegistroApodo,
-  validateRegistroPasswords
+  validateRegistroPasswords,
 } from '../../components/formHelpers.js';
-
-// Helper para configurar validación de email en formularios
-function setupEmailFormValidation(form, emailInput, alertBox, onValidEmail) {
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const email = emailInput.value.trim();
-
-    if (!isValidEmail(email)) {
-      alertBox.className = 'alert alert-danger';
-      alertBox.textContent = 'El email debe tener el formato correcto (ej: usuario@dominio.com)';
-      return;
-    }
-
-    alertBox.className = 'alert d-none';
-    onValidEmail(email);
-  });
-
-  emailInput.addEventListener('input', () => {
-    alertBox.className = 'alert d-none';
-  });
-}
 
 // Vista de inicio de sesión (email + contraseña)
 export function renderLogin(container, callbacks) {
@@ -91,12 +74,18 @@ export function renderLogin(container, callbacks) {
     const password = passwordInput.value;
 
     if (!isOnline()) {
-      showAlert(alertBox, 'Sin conexión. No puedes iniciar sesión hasta recuperar Internet.');
+      showAlert(
+        alertBox,
+        'Sin conexión. No puedes iniciar sesión hasta recuperar Internet.'
+      );
       return;
     }
 
     if (!isValidEmail(email)) {
-      showAlert(alertBox, 'El email debe tener el formato correcto (ej: usuario@dominio.com)');
+      showAlert(
+        alertBox,
+        'El email debe tener el formato correcto (ej: usuario@dominio.com)'
+      );
       return;
     }
 
@@ -109,12 +98,13 @@ export function renderLogin(container, callbacks) {
 
     try {
       await callbacks.onLoginSubmit(email, password);
-    }
-    catch (error) {
+    } catch (error) {
       if (error.code === OFFLINE_READ_ONLY_ERROR_CODE) {
-        showAlert(alertBox, 'Sin conexión. No puedes iniciar sesión hasta recuperar Internet.');
-      }
-      else {
+        showAlert(
+          alertBox,
+          'Sin conexión. No puedes iniciar sesión hasta recuperar Internet.'
+        );
+      } else {
         showAlert(alertBox, 'El usuario y la contraseña no coinciden');
       }
 
@@ -172,8 +162,63 @@ export function renderRegistroEmail(container, callbacks) {
   const form = container.querySelector('#registro-email-form');
   const emailInput = container.querySelector('#email');
   const alertBox = container.querySelector('#alert-box');
+  const submitBtn = container.querySelector('button[type="submit"]');
 
-  setupEmailFormValidation(form, emailInput, alertBox, callbacks.onEmailSubmit);
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = emailInput.value.trim();
+
+    if (!isOnline()) {
+      showAlert(
+        alertBox,
+        'Sin conexión. No puedes validar el email hasta recuperar Internet.'
+      );
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      showAlert(
+        alertBox,
+        'El email debe tener el formato correcto (ej: usuario@dominio.com)'
+      );
+      return;
+    }
+
+    if (email.length < 5 || email.length > 255) {
+      showAlert(alertBox, 'El email debe tener entre 5 y 255 caracteres');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            Validando...
+        `;
+
+    try {
+      await callbacks.onEmailSubmit(email);
+    } catch (error) {
+      if (
+        error.code === OFFLINE_READ_ONLY_ERROR_CODE ||
+        error.code === OFFLINE_UNAVAILABLE_ERROR_CODE
+      ) {
+        showAlert(
+          alertBox,
+          'Sin conexión. No puedes validar el email hasta recuperar Internet.'
+        );
+      } else {
+        showAlert(alertBox, error.message || 'No se pudo validar el email');
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `
+                Continuar
+                <span class="material-icons align-middle ms-1">arrow_forward</span>
+            `;
+    }
+  });
+
+  setupAlertClearOnInput(alertBox, emailInput);
 }
 
 // Vista registro paso 2: Pedir contraseña
@@ -216,11 +261,34 @@ export function renderRegistroPassword(container, email, callbacks) {
                       style="cursor: pointer;" id="toggle-password-confirm">visibility</span>
               </div>
             </div>
+
+            <ul class="list-unstyled small mb-3" id="password-criteria">
+              <li class="text-secondary d-flex align-items-center gap-2" data-check="length">
+                <span class="material-icons" data-icon>radio_button_unchecked</span>
+                Minimo 8 caracteres
+              </li>
+              <li class="text-secondary d-flex align-items-center gap-2" data-check="lower">
+                <span class="material-icons" data-icon>radio_button_unchecked</span>
+                Al menos una letra minuscula
+              </li>
+              <li class="text-secondary d-flex align-items-center gap-2" data-check="upper">
+                <span class="material-icons" data-icon>radio_button_unchecked</span>
+                Al menos una letra mayuscula
+              </li>
+              <li class="text-secondary d-flex align-items-center gap-2" data-check="number">
+                <span class="material-icons" data-icon>radio_button_unchecked</span>
+                Al menos un numero
+              </li>
+              <li class="text-secondary d-flex align-items-center gap-2" data-check="match">
+                <span class="material-icons" data-icon>radio_button_unchecked</span>
+                Las contrasenas coinciden
+              </li>
+            </ul>
             
             <div class="alert d-none" role="alert" id="alert-box"></div>
             
             <div class="d-grid">
-              <button type="submit" class="btn btn-primary btn-lg">
+              <button type="submit" class="btn btn-primary btn-lg" disabled>
                 Continuar
                 <span class="material-icons align-middle ms-1">arrow_forward</span>
               </button>
@@ -243,12 +311,55 @@ export function renderRegistroPassword(container, email, callbacks) {
   // Enviar formulario
   const form = container.querySelector('#registro-password-form');
   const alertBox = container.querySelector('#alert-box');
+  const submitBtn = container.querySelector('button[type="submit"]');
+  const criteriaList = container.querySelector('#password-criteria');
+
+  const criteriaItems = {
+    length: criteriaList.querySelector('[data-check="length"]'),
+    lower: criteriaList.querySelector('[data-check="lower"]'),
+    upper: criteriaList.querySelector('[data-check="upper"]'),
+    number: criteriaList.querySelector('[data-check="number"]'),
+    match: criteriaList.querySelector('[data-check="match"]'),
+  };
+
+  const setCriteriaStatus = (element, isOk) => {
+    const icon = element.querySelector('[data-icon]');
+    element.classList.toggle('text-success', isOk);
+    element.classList.toggle('text-secondary', !isOk);
+    if (icon) {
+      icon.textContent = isOk ? 'check_circle' : 'radio_button_unchecked';
+    }
+  };
+
+  const updatePasswordCriteria = () => {
+    const password = passwordInput.value;
+    const passwordConfirm = passwordConfirmInput.value;
+
+    const checks = {
+      length: password.length >= 8,
+      lower: /[a-z]/.test(password),
+      upper: /[A-Z]/.test(password),
+      number: /\d/.test(password),
+      match: password.length > 0 && password === passwordConfirm,
+    };
+
+    setCriteriaStatus(criteriaItems.length, checks.length);
+    setCriteriaStatus(criteriaItems.lower, checks.lower);
+    setCriteriaStatus(criteriaItems.upper, checks.upper);
+    setCriteriaStatus(criteriaItems.number, checks.number);
+    setCriteriaStatus(criteriaItems.match, checks.match);
+
+    submitBtn.disabled = !Object.values(checks).every(Boolean);
+  };
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const password = passwordInput.value;
     const passwordConfirm = passwordConfirmInput.value;
-    const validationMessage = validateRegistroPasswords(password, passwordConfirm);
+    const validationMessage = validateRegistroPasswords(
+      password,
+      passwordConfirm
+    );
 
     if (validationMessage) {
       showAlert(alertBox, validationMessage);
@@ -259,6 +370,10 @@ export function renderRegistroPassword(container, email, callbacks) {
 
     callbacks.onPasswordSubmit(password);
   });
+
+  passwordInput.addEventListener('input', updatePasswordCriteria);
+  passwordConfirmInput.addEventListener('input', updatePasswordCriteria);
+  updatePasswordCriteria();
 
   setupAlertClearOnInput(alertBox, passwordInput, passwordConfirmInput);
 }
@@ -314,7 +429,10 @@ export function renderRegistroApodo(container, email, callbacks) {
     const validationMessage = validateRegistroApodo(apodo);
 
     if (!isOnline()) {
-      showAlert(alertBox, 'Sin conexión. No puedes crear una cuenta hasta recuperar Internet.');
+      showAlert(
+        alertBox,
+        'Sin conexión. No puedes crear una cuenta hasta recuperar Internet.'
+      );
       return;
     }
 
@@ -335,9 +453,11 @@ export function renderRegistroApodo(container, email, callbacks) {
       await callbacks.onApodoSubmit(apodo);
     } catch (error) {
       if (error.code === OFFLINE_READ_ONLY_ERROR_CODE) {
-        showAlert(alertBox, 'Sin conexión. No puedes crear una cuenta hasta recuperar Internet.');
-      }
-      else {
+        showAlert(
+          alertBox,
+          'Sin conexión. No puedes crear una cuenta hasta recuperar Internet.'
+        );
+      } else {
         showAlert(alertBox, error.message || 'Error al crear la cuenta');
       }
 

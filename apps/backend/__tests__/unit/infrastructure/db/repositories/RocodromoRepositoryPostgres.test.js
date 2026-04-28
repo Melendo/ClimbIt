@@ -6,8 +6,8 @@ import {
   beforeEach,
   afterEach,
 } from '@jest/globals';
-import RocodromoRepositoryPostgres from '../../../src/infrastructure/repositories/rocodromoRepositoryPostgres.js';
-import Rocodromo from '../../../src/domain/rocodromos/Rocodromo.js';
+import RocodromoRepositoryPostgres from '../../../../../src/infrastructure/repositories/rocodromoRepositoryPostgres.js';
+import Rocodromo from '../../../../../src/domain/rocodromos/Rocodromo.js';
 
 describe('RocodromoRepositoryPostgres', () => {
   let repository;
@@ -80,11 +80,13 @@ describe('RocodromoRepositoryPostgres', () => {
 
       // Assert
       expect(mockRocodromoModel.findByPk).toHaveBeenCalledWith(idRocodromo, {
-        include: [{
-          association: 'zonas',
-          separate: true,
-          order: [['id', 'ASC']],
-        }],
+        include: [
+          {
+            association: 'zonas',
+            separate: true,
+            order: [['id', 'ASC']],
+          },
+        ],
       });
       expect(resultado).toHaveLength(2);
       expect(resultado[0]).toEqual({

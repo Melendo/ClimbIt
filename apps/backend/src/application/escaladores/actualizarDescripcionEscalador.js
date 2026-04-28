@@ -17,7 +17,10 @@ class ActualizarDescripcionEscalador {
       );
 
       if (!escalador) {
-        throw new NotFoundError('Escalador no encontrado', 'ESCALADOR_NOT_FOUND');
+        throw new NotFoundError(
+          'Escalador no encontrado',
+          'ESCALADOR_NOT_FOUND'
+        );
       }
 
       return {

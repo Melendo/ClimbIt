@@ -33,13 +33,17 @@ describe('SuscribirseRocodromoUseCase', () => {
       direccion: 'Calle Test 123',
     };
 
-    mockRocodromoRepository.encontrarPorId.mockResolvedValue(rocodromoEncontrado);
+    mockRocodromoRepository.encontrarPorId.mockResolvedValue(
+      rocodromoEncontrado
+    );
     mockEscaladorRepository.estaSuscrito.mockResolvedValue(false);
     mockEscaladorRepository.suscribirse.mockResolvedValue();
 
     const resultado = await suscribirseRocodromo.execute(datosEntrada);
 
-    expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(datosEntrada.idRocodromo);
+    expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(
+      datosEntrada.idRocodromo
+    );
     expect(mockEscaladorRepository.estaSuscrito).toHaveBeenCalledWith(
       datosEntrada.escaladorApodo,
       datosEntrada.idRocodromo
@@ -49,7 +53,7 @@ describe('SuscribirseRocodromoUseCase', () => {
       rocodromoEncontrado
     );
     expect(resultado).toEqual({
-      mensaje: `Escalador ${datosEntrada.escaladorApodo} suscrito al rocódromo ${rocodromoEncontrado.nombre} exitosamente.`
+      mensaje: `Escalador ${datosEntrada.escaladorApodo} suscrito al rocódromo ${rocodromoEncontrado.nombre} exitosamente.`,
     });
   });
 
@@ -61,11 +65,13 @@ describe('SuscribirseRocodromoUseCase', () => {
 
     mockRocodromoRepository.encontrarPorId.mockResolvedValue(null);
 
-    await expect(
-      suscribirseRocodromo.execute(datosEntrada)
-    ).rejects.toThrow('Rocódromo con ID 999 no encontrado');
+    await expect(suscribirseRocodromo.execute(datosEntrada)).rejects.toThrow(
+      'Rocódromo con ID 999 no encontrado'
+    );
 
-    expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(datosEntrada.idRocodromo);
+    expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(
+      datosEntrada.idRocodromo
+    );
     expect(mockEscaladorRepository.estaSuscrito).not.toHaveBeenCalled();
     expect(mockEscaladorRepository.suscribirse).not.toHaveBeenCalled();
   });
@@ -83,14 +89,18 @@ describe('SuscribirseRocodromoUseCase', () => {
       direccion: 'Calle Test 123',
     };
 
-    mockRocodromoRepository.encontrarPorId.mockResolvedValue(rocodromoEncontrado);
+    mockRocodromoRepository.encontrarPorId.mockResolvedValue(
+      rocodromoEncontrado
+    );
     mockEscaladorRepository.estaSuscrito.mockResolvedValue(true);
 
-    await expect(
-      suscribirseRocodromo.execute(datosEntrada)
-    ).rejects.toThrow('El escalador TestClimber ya está suscrito al rocódromo Boulder Central');
+    await expect(suscribirseRocodromo.execute(datosEntrada)).rejects.toThrow(
+      'El escalador TestClimber ya está suscrito al rocódromo Boulder Central'
+    );
 
-    expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(datosEntrada.idRocodromo);
+    expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(
+      datosEntrada.idRocodromo
+    );
     expect(mockEscaladorRepository.estaSuscrito).toHaveBeenCalledWith(
       datosEntrada.escaladorApodo,
       datosEntrada.idRocodromo
@@ -111,17 +121,21 @@ describe('SuscribirseRocodromoUseCase', () => {
       direccion: 'Calle Test 123',
     };
 
-    mockRocodromoRepository.encontrarPorId.mockResolvedValue(rocodromoEncontrado);
+    mockRocodromoRepository.encontrarPorId.mockResolvedValue(
+      rocodromoEncontrado
+    );
     mockEscaladorRepository.estaSuscrito.mockResolvedValue(false);
     mockEscaladorRepository.suscribirse.mockRejectedValue(
       new Error('Error al guardar la suscripción')
     );
 
-    await expect(
-      suscribirseRocodromo.execute(datosEntrada)
-    ).rejects.toThrow('Error al suscribirse al rocódromo');
+    await expect(suscribirseRocodromo.execute(datosEntrada)).rejects.toThrow(
+      'Error al suscribirse al rocódromo'
+    );
 
-    expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(datosEntrada.idRocodromo);
+    expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(
+      datosEntrada.idRocodromo
+    );
     expect(mockEscaladorRepository.estaSuscrito).toHaveBeenCalledWith(
       datosEntrada.escaladorApodo,
       datosEntrada.idRocodromo

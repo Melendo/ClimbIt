@@ -12,6 +12,17 @@ describe('E2E: Pistas', () => {
   let escalaVia;
 
   beforeAll(async () => {
+    // Limpiar posibles restos de ejecuciones anteriores fallidas
+    await db.Zona.destroy({ where: { nombre: 'Zona Bloque Test' } });
+    const rocoHuerfano = await db.Rocodromo.findOne({
+      where: { ubicacion: 'Test Location' },
+    });
+    if (rocoHuerfano) await rocoHuerfano.destroy();
+    const escalaHuerfana = await db.EscalaDificultad.findOne({
+      where: { nombre: 'Escala Via Test' },
+    });
+    if (escalaHuerfana) await escalaHuerfana.destroy();
+
     rocodromo = await db.Rocodromo.create({
       nombre: 'Roco Test',
       ubicacion: 'Test Location',
@@ -48,7 +59,11 @@ describe('E2E: Pistas', () => {
         posX: 11,
         posY: 22,
       };
-      token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'Admin' });
+      token = tokenService.crear({
+        id: 1,
+        correo: 'test@e2e.com',
+        rol: 'Admin',
+      });
     });
 
     afterAll(async () => {
@@ -116,7 +131,10 @@ describe('E2E: Pistas', () => {
         .expect(400);
 
       expect(response.body).toHaveProperty('error');
-      expect(response.body).toHaveProperty('code', 'AUTH_HEADER_INVALID_FORMAT');
+      expect(response.body).toHaveProperty(
+        'code',
+        'AUTH_HEADER_INVALID_FORMAT'
+      );
       expect(response.body.error).toMatch(/Formato inválido/);
     });
 
@@ -129,8 +147,12 @@ describe('E2E: Pistas', () => {
 
       expect(response.body).toHaveProperty('error');
       expect(response.body).toHaveProperty('code');
-      expect(['AUTH_HEADER_INVALID_FORMAT', 'AUTH_TOKEN_EMPTY']).toContain(response.body.code);
-      expect(response.body.error).toMatch(/Formato inválido|Token no encontrado/);
+      expect(['AUTH_HEADER_INVALID_FORMAT', 'AUTH_TOKEN_EMPTY']).toContain(
+        response.body.code
+      );
+      expect(response.body.error).toMatch(
+        /Formato inválido|Token no encontrado/
+      );
     });
 
     it('debería fallar con token expirado', async () => {
@@ -175,7 +197,9 @@ describe('E2E: Pistas', () => {
         .expect(422);
 
       expect(response.body).toHaveProperty('code', 'PISTA_POSICION_OCUPADA');
-      expect(response.body.error).toContain('Ya existe una pista activa en la posición (31, 41)');
+      expect(response.body.error).toContain(
+        'Ya existe una pista activa en la posición (31, 41)'
+      );
 
       await db.Pista.destroy({ where: { id: pistaActiva.id } });
     });
@@ -231,7 +255,11 @@ describe('E2E: Pistas', () => {
         fechaCreacion: new Date(),
       });
       pistaCreadaId = pistaCreada.id;
-      token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'Admin' });
+      token = tokenService.crear({
+        id: 1,
+        correo: 'test@e2e.com',
+        rol: 'Admin',
+      });
     });
 
     afterAll(async () => {
@@ -289,9 +317,9 @@ describe('E2E: Pistas', () => {
       });
 
       // Generar token de autenticación
-      token = tokenService.crear({ 
-        correo: escaladorTest.correo, 
-        apodo: escaladorTest.apodo 
+      token = tokenService.crear({
+        correo: escaladorTest.correo,
+        apodo: escaladorTest.apodo,
       });
     });
 
@@ -302,7 +330,7 @@ describe('E2E: Pistas', () => {
           await escaladorTest.removePista(pistaTest.id);
         } catch (error) {
           // Ignorar si ya fue eliminado
-          error
+          error;
         }
       }
       if (pistaTest) await pistaTest.destroy();
@@ -322,10 +350,10 @@ describe('E2E: Pistas', () => {
 
       // Verificar que el estado se guardó en la base de datos
       const pistaActualizada = await db.Pista.findByPk(pistaTest.id);
-      const escaladores = await pistaActualizada.getEscaladores({ 
-        where: { id: escaladorTest.id } 
+      const escaladores = await pistaActualizada.getEscaladores({
+        where: { id: escaladorTest.id },
       });
-      
+
       expect(escaladores).toHaveLength(1);
       expect(escaladores[0].EscalaPista.estado).toBe('completado');
     });
@@ -343,10 +371,10 @@ describe('E2E: Pistas', () => {
 
       // Verificar que el estado se actualizó
       const pistaActualizada = await db.Pista.findByPk(pistaTest.id);
-      const escaladores = await pistaActualizada.getEscaladores({ 
-        where: { id: escaladorTest.id } 
+      const escaladores = await pistaActualizada.getEscaladores({
+        where: { id: escaladorTest.id },
       });
-      
+
       expect(escaladores).toHaveLength(1);
       expect(escaladores[0].EscalaPista.estado).toBe('flash');
     });
@@ -364,7 +392,7 @@ describe('E2E: Pistas', () => {
 
     it('debería retornar 500 si la pista no existe', async () => {
       const fakeIdPista = 999999;
-      
+
       const response = await request(app)
         .post(`/pistas/cambiar-estado/${fakeIdPista}`)
         .set('Authorization', `Bearer ${token}`)
@@ -390,7 +418,11 @@ describe('E2E: Pistas', () => {
         fechaCreacion: new Date(),
         activo: true,
       });
-      token = tokenService.crear({ id: 1, correo: 'admin@e2e.com', rol: 'Admin' });
+      token = tokenService.crear({
+        id: 1,
+        correo: 'admin@e2e.com',
+        rol: 'Admin',
+      });
     });
 
     afterAll(async () => {
@@ -437,7 +469,11 @@ describe('E2E: Pistas', () => {
         fechaCreacion: new Date(),
         activo: true,
       });
-      token = tokenService.crear({ id: 1, correo: 'admin@e2e.com', rol: 'Admin' });
+      token = tokenService.crear({
+        id: 1,
+        correo: 'admin@e2e.com',
+        rol: 'Admin',
+      });
     });
 
     afterAll(async () => {

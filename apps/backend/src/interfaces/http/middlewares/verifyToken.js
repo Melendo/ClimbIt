@@ -48,7 +48,9 @@ function verifyTokenMiddleware(req, res, next) {
     }
 
     if (error.name === 'JsonWebTokenError') {
-      return next(new AuthenticationError('Token inválido', 'AUTH_TOKEN_INVALID'));
+      return next(
+        new AuthenticationError('Token inválido', 'AUTH_TOKEN_INVALID')
+      );
     }
 
     return next(

@@ -28,7 +28,9 @@ describe('ObtenerResumenEstadisticasRocodromoEscalador', () => {
 
     const resultado = await useCase.execute({ apodo: 'Ivan', idRocodromo: 9 });
 
-    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith('Ivan');
+    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(
+      'Ivan'
+    );
     expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(9);
     expect(
       mockPistaRepository.obtenerResumenEstadisticasEscaladorPorRocodromo

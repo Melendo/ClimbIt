@@ -1,6 +1,9 @@
 import { jest } from '@jest/globals';
 import ActualizarDescripcionEscalador from '../../../../src/application/escaladores/actualizarDescripcionEscalador.js';
-import { InternalServerError, NotFoundError } from '../../../../src/domain/sharedObjects/AppError.js';
+import {
+  InternalServerError,
+  NotFoundError,
+} from '../../../../src/domain/sharedObjects/AppError.js';
 
 describe('actualizarDescripcionEscaladorUseCase', () => {
   it('deberia devolver el perfil actualizado', async () => {

@@ -11,8 +11,11 @@ class ActualizarMapaZona {
 
   async execute(idZona, mapaUrl) {
     try {
-      const zona = await this.zonaRepository.actualizarMapaZona(idZona, mapaUrl);
-      
+      const zona = await this.zonaRepository.actualizarMapaZona(
+        idZona,
+        mapaUrl
+      );
+
       if (!zona) {
         throw new NotFoundError(
           `Zona con ID ${idZona} no encontrada`,

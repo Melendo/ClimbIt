@@ -1,5 +1,13 @@
 class AppError extends Error {
-  constructor(message, { statusCode = 500, code = 'INTERNAL_ERROR', isOperational = true, cause = null } = {}) {
+  constructor(
+    message,
+    {
+      statusCode = 500,
+      code = 'INTERNAL_ERROR',
+      isOperational = true,
+      cause = null,
+    } = {}
+  ) {
     super(message, cause ? { cause } : undefined);
     this.name = this.constructor.name;
     this.statusCode = statusCode;
@@ -45,7 +53,11 @@ class ConflictError extends AppError {
 }
 
 class InternalServerError extends AppError {
-  constructor(message = 'Error interno del servidor', code = 'INTERNAL_ERROR', cause = null) {
+  constructor(
+    message = 'Error interno del servidor',
+    code = 'INTERNAL_ERROR',
+    cause = null
+  ) {
     super(message, { statusCode: 500, code, isOperational: false, cause });
   }
 }

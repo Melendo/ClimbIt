@@ -36,7 +36,9 @@ describe('ObtenerRocodromosSuscritos', () => {
 
     // Assert
     expect(mockRepository.encontrarPorApodo).toHaveBeenCalledWith(apodo);
-    expect(mockRepository.obtenerRocodromosSuscritos).toHaveBeenCalledWith(escaladorId);
+    expect(mockRepository.obtenerRocodromosSuscritos).toHaveBeenCalledWith(
+      escaladorId
+    );
     expect(resultado).toEqual(rocodromos);
   });
 
@@ -61,7 +63,9 @@ describe('ObtenerRocodromosSuscritos', () => {
 
     // Assert
     expect(mockRepository.encontrarPorApodo).toHaveBeenCalledWith(apodo);
-    expect(mockRepository.obtenerRocodromosSuscritos).toHaveBeenCalledWith(escaladorId);
+    expect(mockRepository.obtenerRocodromosSuscritos).toHaveBeenCalledWith(
+      escaladorId
+    );
     expect(resultado).toEqual([]);
   });
 
@@ -95,6 +99,8 @@ describe('ObtenerRocodromosSuscritos', () => {
     const obtenerSuscritos = new ObtenerRocodromosSuscritos(mockRepository);
 
     // Act & Assert
-    await expect(obtenerSuscritos.execute(apodo)).rejects.toThrow('Error al obtener rocódromos suscritos');
+    await expect(obtenerSuscritos.execute(apodo)).rejects.toThrow(
+      'Error al obtener rocódromos suscritos'
+    );
   });
 });

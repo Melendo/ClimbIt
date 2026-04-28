@@ -5,10 +5,10 @@ describe('ObtenerRocodromos', () => {
   it('debería obtener todos los rocódromos correctamente', async () => {
     // Arrange
     const mockRocodromos = [
-        { id: 1, nombre: 'Roco 1', ubicacion: 'Loc 1' },
+      { id: 1, nombre: 'Roco 1', ubicacion: 'Loc 1' },
       { id: 2, nombre: 'Roco 2', ubicacion: 'Loc 2' },
     ];
-    
+
     const mockRepository = {
       obtenerRocodromos: jest.fn(async () => mockRocodromos),
     };

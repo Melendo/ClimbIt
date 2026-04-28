@@ -4,7 +4,11 @@ import Rocodromo from '../../../../src/domain/rocodromos/Rocodromo.js';
 describe('Rocodromo (Entidad de dominio)', () => {
   describe('Creación exitosa', () => {
     it('debería crear un rocódromo con los datos correctos', () => {
-      const datos = { id: null, nombre: 'Rocódromo Central', ubicacion: 'Madrid' };
+      const datos = {
+        id: null,
+        nombre: 'Rocódromo Central',
+        ubicacion: 'Madrid',
+      };
       const rocodromo = new Rocodromo(datos.id, datos.nombre, datos.ubicacion);
 
       expect(rocodromo.id).toBeNull();
@@ -38,7 +42,7 @@ describe('Rocodromo (Entidad de dominio)', () => {
         'nombre inválido: Debe ser una cadena no vacía.'
       );
     });
-    
+
     it('debería lanzar error si nombre son solo espacios', () => {
       expect(() => new Rocodromo(1, '   ', 'Ubicación')).toThrow(
         'nombre inválido: Debe ser una cadena no vacía.'

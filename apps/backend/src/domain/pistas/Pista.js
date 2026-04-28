@@ -4,7 +4,7 @@ class Pista {
    * @param {number} idZona
    * @param {string|null} nombre
    * @param {string|null} dificultad
-  * @param {string} tipo
+   * @param {string} tipo
    * @param {string|null} colorPresas
    * @param {string|null} imagenUrl
    * @param {number|null} posX
@@ -45,7 +45,9 @@ class Pista {
       throw new Error(`idZona inválido: Debe ser un número entero.`);
     }
     if (typeof nombre !== 'string' || nombre.trim() === '' || nombre === null) {
-      this.nombre = (this.dificultad ? this.tipo + '-' + this.dificultad : this.tipo);
+      this.nombre = this.dificultad
+        ? this.tipo + '-' + this.dificultad
+        : this.tipo;
     }
     if (typeof this.tipo !== 'string' || this.tipo.trim() === '') {
       throw new Error('tipo inválido: Debe ser una cadena no vacía.');

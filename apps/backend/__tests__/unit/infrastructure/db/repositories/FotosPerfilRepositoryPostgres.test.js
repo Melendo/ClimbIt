@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
-import FotosPerfilRepositoryPostgres from '../../../src/infrastructure/repositories/fotosPerfilRepositoryPostgres.js';
-import FotosPerfil from '../../../src/domain/fotosPerfil/FotosPerfil.js';
+import FotosPerfilRepositoryPostgres from '../../../../../src/infrastructure/repositories/fotosPerfilRepositoryPostgres.js';
+import FotosPerfil from '../../../../../src/domain/fotosPerfil/FotosPerfil.js';
 
 describe('FotosPerfilRepositoryPostgres', () => {
   let repository;
@@ -21,7 +21,11 @@ describe('FotosPerfilRepositoryPostgres', () => {
   });
 
   it('crea una foto de perfil y la devuelve como entidad de dominio', async () => {
-    const fotoPerfil = new FotosPerfil(null, '/uploads/fotos_perfil/foto-1.png', true);
+    const fotoPerfil = new FotosPerfil(
+      null,
+      '/uploads/fotos_perfil/foto-1.png',
+      true
+    );
     mockModel.create.mockResolvedValue({
       id: 1,
       urlFoto: fotoPerfil.urlFoto,

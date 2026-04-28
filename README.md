@@ -37,10 +37,9 @@ cd ClimbIt
 Este proyecto usa **Lerna** para gestionar el monorepo. Ejecuta:
 
 ```bash
-npm install
+npm run setup
 ```
-
-Esto instalará las dependencias tanto del proyecto raíz como de todos los workspaces (backend y frontend).
+Este comando instalará Lerna globalmente (si no lo tienes) y luego instalará las dependencias de todos los paquetes (backend y frontend). Después de instalar las dependencias, ejecuta los ``post install`` de cada paquete listado en la white list de ``lavamoat`` de cada workspace.
 
 #### Paso 3: Configurar variables de entorno
 
@@ -83,7 +82,6 @@ npm run db:migrate
 Esto creará las tablas necesarias en la base de datos.
 
 > **Nota:** Para visualizar las tablas creadas, puedes usar pgAdmin siguiendo la Guía de conexión de PostgreSQL con pgAdmin en el punto 3.
-
 
 ### 2.3. Ejecutar el proyecto
 

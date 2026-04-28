@@ -1,6 +1,9 @@
 import RocodromoRepository from '../../domain/rocodromos/rocodromoRepository.js';
 import Rocodromo from '../../domain/rocodromos/Rocodromo.js';
-import { NotFoundError, ValidationError } from '../../domain/sharedObjects/AppError.js';
+import {
+  NotFoundError,
+  ValidationError,
+} from '../../domain/sharedObjects/AppError.js';
 import mapRepositoryError from './dbErrorHandler.js';
 
 class RocodromoRepositoryPostgres extends RocodromoRepository {
@@ -25,7 +28,11 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
         rocodromoModel.activo
       );
     } catch (error) {
-      throw new ValidationError(error.message, 'ROCODROMO_MODEL_MAPPING_FAILED', error);
+      throw new ValidationError(
+        error.message,
+        'ROCODROMO_MODEL_MAPPING_FAILED',
+        error
+      );
     }
   }
 
@@ -54,11 +61,13 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
   async obtenerZonasDeRocodromo(idRocodromo) {
     try {
       const rocodromoData = await this.RocodromoModel.findByPk(idRocodromo, {
-        include: [{
-          association: 'zonas',
-          separate: true,
-          order: [['id', 'ASC']]
-        }],
+        include: [
+          {
+            association: 'zonas',
+            separate: true,
+            order: [['id', 'ASC']],
+          },
+        ],
       });
 
       if (!rocodromoData) {
@@ -69,7 +78,7 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
         id: zona.id,
         idRoco: zona.idRoco,
         nombre: zona.nombre,
-        mapa: zona.mapa
+        mapa: zona.mapa,
       }));
 
       return zonas;
@@ -142,7 +151,7 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
         nombre: rocodromo.nombre,
         ubicacion: rocodromo.ubicacion,
         descripcion: rocodromo.descripcion,
-        horarios: rocodromo.horarios
+        horarios: rocodromo.horarios,
       };
 
       await rocodromoModel.update(data);
@@ -176,12 +185,15 @@ class RocodromoRepositoryPostgres extends RocodromoRepository {
         };
       };
       return {
-        escalaDificultadBloque: toEscalaDTO(rocodromoData.escalaDificultadBloque),
+        escalaDificultadBloque: toEscalaDTO(
+          rocodromoData.escalaDificultadBloque
+        ),
         escalaDificultadVia: toEscalaDTO(rocodromoData.escalaDificultadVia),
       };
     } catch (error) {
       throw mapRepositoryError(error, {
-        fallbackMessage: 'Error al obtener las escalas de dificultad del rocódromo',
+        fallbackMessage:
+          'Error al obtener las escalas de dificultad del rocódromo',
         internalCode: 'ROCODROMO_GET_DIFFICULTY_SCALES_DB_FAILED',
       });
     }

@@ -41,20 +41,26 @@ describe('CambiarEstadoPistaUseCase', () => {
     };
 
     mockPistaRepository.obtenerPorId.mockResolvedValue(pistaEncontrada);
-    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue(escaladorEncontrado);
+    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue(
+      escaladorEncontrado
+    );
     mockPistaRepository.cambiarEstado.mockResolvedValue();
 
     const resultado = await cambiarEstadoPista.execute(datosEntrada);
 
-    expect(mockPistaRepository.obtenerPorId).toHaveBeenCalledWith(datosEntrada.idPista);
-    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(datosEntrada.escaladorApodo);
+    expect(mockPistaRepository.obtenerPorId).toHaveBeenCalledWith(
+      datosEntrada.idPista
+    );
+    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(
+      datosEntrada.escaladorApodo
+    );
     expect(mockPistaRepository.cambiarEstado).toHaveBeenCalledWith(
       datosEntrada.idPista,
       escaladorEncontrado.id,
       datosEntrada.nuevoEstado
     );
     expect(resultado).toEqual({
-      mensaje: `Estado de la pista con ID ${datosEntrada.idPista} cambiado a ${datosEntrada.nuevoEstado} exitosamente.`
+      mensaje: `Estado de la pista con ID ${datosEntrada.idPista} cambiado a ${datosEntrada.nuevoEstado} exitosamente.`,
     });
   });
 
@@ -67,11 +73,13 @@ describe('CambiarEstadoPistaUseCase', () => {
 
     mockPistaRepository.obtenerPorId.mockResolvedValue(null);
 
-    await expect(
-      cambiarEstadoPista.execute(datosEntrada)
-    ).rejects.toThrow('Pista con ID 999 no encontrada');
+    await expect(cambiarEstadoPista.execute(datosEntrada)).rejects.toThrow(
+      'Pista con ID 999 no encontrada'
+    );
 
-    expect(mockPistaRepository.obtenerPorId).toHaveBeenCalledWith(datosEntrada.idPista);
+    expect(mockPistaRepository.obtenerPorId).toHaveBeenCalledWith(
+      datosEntrada.idPista
+    );
     expect(mockEscaladorRepository.encontrarPorApodo).not.toHaveBeenCalled();
     expect(mockPistaRepository.cambiarEstado).not.toHaveBeenCalled();
   });
@@ -93,12 +101,16 @@ describe('CambiarEstadoPistaUseCase', () => {
     mockPistaRepository.obtenerPorId.mockResolvedValue(pistaEncontrada);
     mockEscaladorRepository.encontrarPorApodo.mockResolvedValue(null);
 
-    await expect(
-      cambiarEstadoPista.execute(datosEntrada)
-    ).rejects.toThrow('Escalador con apodo NoExiste no encontrado');
+    await expect(cambiarEstadoPista.execute(datosEntrada)).rejects.toThrow(
+      'Escalador con apodo NoExiste no encontrado'
+    );
 
-    expect(mockPistaRepository.obtenerPorId).toHaveBeenCalledWith(datosEntrada.idPista);
-    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(datosEntrada.escaladorApodo);
+    expect(mockPistaRepository.obtenerPorId).toHaveBeenCalledWith(
+      datosEntrada.idPista
+    );
+    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(
+      datosEntrada.escaladorApodo
+    );
     expect(mockPistaRepository.cambiarEstado).not.toHaveBeenCalled();
   });
 
@@ -123,17 +135,23 @@ describe('CambiarEstadoPistaUseCase', () => {
     };
 
     mockPistaRepository.obtenerPorId.mockResolvedValue(pistaEncontrada);
-    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue(escaladorEncontrado);
+    mockEscaladorRepository.encontrarPorApodo.mockResolvedValue(
+      escaladorEncontrado
+    );
     mockPistaRepository.cambiarEstado.mockRejectedValue(
       new Error('Error al actualizar el estado')
     );
 
-    await expect(
-      cambiarEstadoPista.execute(datosEntrada)
-    ).rejects.toThrow('Error al cambiar el estado de la pista');
+    await expect(cambiarEstadoPista.execute(datosEntrada)).rejects.toThrow(
+      'Error al cambiar el estado de la pista'
+    );
 
-    expect(mockPistaRepository.obtenerPorId).toHaveBeenCalledWith(datosEntrada.idPista);
-    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(datosEntrada.escaladorApodo);
+    expect(mockPistaRepository.obtenerPorId).toHaveBeenCalledWith(
+      datosEntrada.idPista
+    );
+    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(
+      datosEntrada.escaladorApodo
+    );
     expect(mockPistaRepository.cambiarEstado).toHaveBeenCalledWith(
       datosEntrada.idPista,
       escaladorEncontrado.id,

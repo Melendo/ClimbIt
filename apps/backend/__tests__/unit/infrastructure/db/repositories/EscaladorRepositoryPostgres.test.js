@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
-import EscaladorRepositoryPostgres from '../../../src/infrastructure/repositories/escaladorRepositoryPostgres.js';
-import Escalador from '../../../src/domain/escaladores/Escalador.js';
+import EscaladorRepositoryPostgres from '../../../../../src/infrastructure/repositories/escaladorRepositoryPostgres.js';
+import Escalador from '../../../../../src/domain/escaladores/Escalador.js';
 
 describe('EscaladorRepositoryPostgres', () => {
   let repository;
@@ -81,7 +81,7 @@ describe('EscaladorRepositoryPostgres', () => {
       expect(mockEscaladorModel.create).toHaveBeenCalledWith({
         correo: 'test@test.com',
         contrasena: 'hashedpassword',
-        apodo: 'Tester'
+        apodo: 'Tester',
       });
       expect(resultado).toBeInstanceOf(Escalador);
       expect(resultado.id).toBe(1);
@@ -143,7 +143,9 @@ describe('EscaladorRepositoryPostgres', () => {
       expect(mockEscaladorModel.findOne).toHaveBeenCalledWith({
         where: { apodo: escaladorApodo },
       });
-      expect(mockEscaladorInstance.addRocodromo).toHaveBeenCalledWith(rocodromo.id);
+      expect(mockEscaladorInstance.addRocodromo).toHaveBeenCalledWith(
+        rocodromo.id
+      );
     });
 
     it('debería lanzar un error si el escalador no existe', async () => {
@@ -159,7 +161,9 @@ describe('EscaladorRepositoryPostgres', () => {
       // Act & Assert
       await expect(
         repository.suscribirse(escaladorApodo, rocodromo)
-      ).rejects.toThrow('Error al suscribirse al rocódromo: Escalador con apodo NoExiste no encontrado');
+      ).rejects.toThrow(
+        'Error al suscribirse al rocódromo: Escalador con apodo NoExiste no encontrado'
+      );
 
       expect(mockEscaladorModel.findOne).toHaveBeenCalledWith({
         where: { apodo: escaladorApodo },
@@ -177,7 +181,9 @@ describe('EscaladorRepositoryPostgres', () => {
       const mockEscaladorInstance = {
         id: 1,
         apodo: escaladorApodo,
-        addRocodromo: jest.fn().mockRejectedValue(new Error('Error de base de datos')),
+        addRocodromo: jest
+          .fn()
+          .mockRejectedValue(new Error('Error de base de datos')),
       };
 
       mockEscaladorModel.findOne.mockResolvedValue(mockEscaladorInstance);
@@ -185,7 +191,9 @@ describe('EscaladorRepositoryPostgres', () => {
       // Act & Assert
       await expect(
         repository.suscribirse(escaladorApodo, rocodromo)
-      ).rejects.toThrow('Error al suscribirse al rocódromo: Error de base de datos');
+      ).rejects.toThrow(
+        'Error al suscribirse al rocódromo: Error de base de datos'
+      );
     });
   });
 
@@ -198,13 +206,18 @@ describe('EscaladorRepositoryPostgres', () => {
       const mockEscaladorInstance = {
         id: 1,
         apodo: escaladorApodo,
-        getRocodromos: jest.fn().mockResolvedValue([{ id: 1, nombre: 'Boulder Central' }]),
+        getRocodromos: jest
+          .fn()
+          .mockResolvedValue([{ id: 1, nombre: 'Boulder Central' }]),
       };
 
       mockEscaladorModel.findOne.mockResolvedValue(mockEscaladorInstance);
 
       // Act
-      const resultado = await repository.estaSuscrito(escaladorApodo, idRocodromo);
+      const resultado = await repository.estaSuscrito(
+        escaladorApodo,
+        idRocodromo
+      );
 
       // Assert
       expect(mockEscaladorModel.findOne).toHaveBeenCalledWith({
@@ -230,7 +243,10 @@ describe('EscaladorRepositoryPostgres', () => {
       mockEscaladorModel.findOne.mockResolvedValue(mockEscaladorInstance);
 
       // Act
-      const resultado = await repository.estaSuscrito(escaladorApodo, idRocodromo);
+      const resultado = await repository.estaSuscrito(
+        escaladorApodo,
+        idRocodromo
+      );
 
       // Assert
       expect(mockEscaladorModel.findOne).toHaveBeenCalledWith({
@@ -252,7 +268,9 @@ describe('EscaladorRepositoryPostgres', () => {
       // Act & Assert
       await expect(
         repository.estaSuscrito(escaladorApodo, idRocodromo)
-      ).rejects.toThrow('Error al verificar suscripción: Escalador con apodo NoExiste no encontrado');
+      ).rejects.toThrow(
+        'Error al verificar suscripción: Escalador con apodo NoExiste no encontrado'
+      );
 
       expect(mockEscaladorModel.findOne).toHaveBeenCalledWith({
         where: { apodo: escaladorApodo },
@@ -281,7 +299,9 @@ describe('EscaladorRepositoryPostgres', () => {
       expect(mockEscaladorModel.findOne).toHaveBeenCalledWith({
         where: { apodo: escaladorApodo },
       });
-      expect(mockEscaladorInstance.removeRocodromo).toHaveBeenCalledWith(idRocodromo);
+      expect(mockEscaladorInstance.removeRocodromo).toHaveBeenCalledWith(
+        idRocodromo
+      );
     });
 
     it('debería lanzar un error si el escalador no existe', async () => {
@@ -294,7 +314,9 @@ describe('EscaladorRepositoryPostgres', () => {
       // Act & Assert
       await expect(
         repository.desuscribirse(escaladorApodo, idRocodromo)
-      ).rejects.toThrow('Error al desuscribirse del rocódromo: Escalador con apodo NoExiste no encontrado');
+      ).rejects.toThrow(
+        'Error al desuscribirse del rocódromo: Escalador con apodo NoExiste no encontrado'
+      );
 
       expect(mockEscaladorModel.findOne).toHaveBeenCalledWith({
         where: { apodo: escaladorApodo },
@@ -309,7 +331,9 @@ describe('EscaladorRepositoryPostgres', () => {
       const mockEscaladorInstance = {
         id: 1,
         apodo: escaladorApodo,
-        removeRocodromo: jest.fn().mockRejectedValue(new Error('Error de base de datos')),
+        removeRocodromo: jest
+          .fn()
+          .mockRejectedValue(new Error('Error de base de datos')),
       };
 
       mockEscaladorModel.findOne.mockResolvedValue(mockEscaladorInstance);
@@ -317,7 +341,31 @@ describe('EscaladorRepositoryPostgres', () => {
       // Act & Assert
       await expect(
         repository.desuscribirse(escaladorApodo, idRocodromo)
-      ).rejects.toThrow('Error al desuscribirse del rocódromo: Error de base de datos');
+      ).rejects.toThrow(
+        'Error al desuscribirse del rocódromo: Error de base de datos'
+      );
+    });
+  });
+
+  describe('buscarPorApodoSimilitud', () => {
+    it('debería buscar escaladores por apodo, limitar resultados y mapearlos', async () => {
+      mockEscaladorModel.findAll = jest.fn().mockResolvedValue([
+        { id: 2, apodo: 'alex', correo: 'a@a.com', contrasena: '1' },
+        { id: 3, apodo: 'alexander', correo: 'b@b.com', contrasena: '1' },
+      ]);
+
+      const resultado = await repository.buscarPorApodoSimilitud('alex', 10, 1);
+
+      expect(mockEscaladorModel.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          limit: 10,
+          where: expect.any(Object),
+          order: expect.any(Array),
+        })
+      );
+      expect(resultado).toHaveLength(2);
+      expect(resultado[0]).toBeInstanceOf(Escalador);
+      expect(resultado[0].apodo).toBe('alex');
     });
   });
 });

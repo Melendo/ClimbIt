@@ -14,6 +14,8 @@ describe('crearEscaladorUseCase', () => {
     };
 
     const mockRepository = {
+      encontrarPorCorreoInsensitive: jest.fn().mockResolvedValue(null),
+      encontrarPorApodoInsensitive: jest.fn().mockResolvedValue(null),
       crear: jest.fn(async (escalador) => ({
         ...escalador,
         id: 1,
@@ -45,14 +47,16 @@ describe('crearEscaladorUseCase', () => {
 
   it('no debería crear y ni guardar un escalador por datos invalidos', async () => {
     const mockPasswordService = {
-        hash: jest.fn().mockResolvedValue('hashed_123'),
+      hash: jest.fn().mockResolvedValue('hashed_123'),
     };
 
     const mockTokenService = {
       crear: jest.fn(),
     };
-    
+
     const mockRepository = {
+      encontrarPorCorreoInsensitive: jest.fn().mockResolvedValue(null),
+      encontrarPorApodoInsensitive: jest.fn().mockResolvedValue(null),
       crear: jest.fn(async (escalador) => ({
         ...escalador,
         id: 1,
@@ -60,9 +64,9 @@ describe('crearEscaladorUseCase', () => {
     };
 
     const crearEscalador = new CrearEscaladorUseCase(
-        mockRepository,
-        mockPasswordService,
-        mockTokenService
+      mockRepository,
+      mockPasswordService,
+      mockTokenService
     );
 
     const datos = { correo: '', contrasena: '123', apodo: 'Juan' };

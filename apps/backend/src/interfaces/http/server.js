@@ -25,10 +25,14 @@ async function setupRoutes() {
 
     if (err instanceof multer.MulterError) {
       if (err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(413).json({ error: 'El archivo excede el tamaño máximo permitido' });
+        return res
+          .status(413)
+          .json({ error: 'El archivo excede el tamaño máximo permitido' });
       }
 
-      return res.status(400).json({ error: err.message || 'Error al procesar archivo subido' });
+      return res
+        .status(400)
+        .json({ error: err.message || 'Error al procesar archivo subido' });
     }
 
     if (

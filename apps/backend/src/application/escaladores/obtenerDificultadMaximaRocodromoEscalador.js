@@ -7,8 +7,8 @@ import {
 function resolveMaxDificultad(dificultades, escala = []) {
   const values = Array.isArray(dificultades)
     ? dificultades
-      .map((value) => (typeof value === 'string' ? value.trim() : ''))
-      .filter(Boolean)
+        .map((value) => (typeof value === 'string' ? value.trim() : ''))
+        .filter(Boolean)
     : [];
 
   if (values.length === 0) {
@@ -17,8 +17,8 @@ function resolveMaxDificultad(dificultades, escala = []) {
 
   const escalaValues = Array.isArray(escala)
     ? escala
-      .map((value) => (typeof value === 'string' ? value.trim() : ''))
-      .filter(Boolean)
+        .map((value) => (typeof value === 'string' ? value.trim() : ''))
+        .filter(Boolean)
     : [];
 
   if (escalaValues.length > 0) {
@@ -54,13 +54,20 @@ class ObtenerDificultadMaximaRocodromoEscalador {
       const escalador = await this.escaladorRepository.encontrarPorApodo(apodo);
 
       if (!escalador) {
-        throw new NotFoundError('Escalador no encontrado', 'ESCALADOR_NOT_FOUND');
+        throw new NotFoundError(
+          'Escalador no encontrado',
+          'ESCALADOR_NOT_FOUND'
+        );
       }
 
-      const rocodromo = await this.rocodromoRepository.encontrarPorId(idRocodromo);
+      const rocodromo =
+        await this.rocodromoRepository.encontrarPorId(idRocodromo);
 
       if (!rocodromo) {
-        throw new NotFoundError('Rocodromo no encontrado', 'ROCODROMO_NOT_FOUND');
+        throw new NotFoundError(
+          'Rocodromo no encontrado',
+          'ROCODROMO_NOT_FOUND'
+        );
       }
 
       const [dificultadesPorTipo, escalas] = await Promise.all([

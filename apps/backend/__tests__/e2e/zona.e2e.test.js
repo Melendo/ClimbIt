@@ -14,7 +14,16 @@ describe('E2E: Zonas', () => {
 
   beforeAll(async () => {
     token = tokenService.crear({ id: 1, correo: 'test@e2e.com', rol: 'Admin' });
-    
+
+    // Limpiar posibles restos de ejecuciones anteriores fallidas
+    const rocoHuerfano = await db.Rocodromo.findOne({
+      where: { ubicacion: 'Test Location Zonas' },
+    });
+    if (rocoHuerfano) {
+      await db.Zona.destroy({ where: { idRoco: rocoHuerfano.id } });
+      await rocoHuerfano.destroy();
+    }
+
     rocodromo = await db.Rocodromo.create({
       nombre: 'Roco Zonas Integration',
       ubicacion: 'Test Location Zonas',
@@ -30,19 +39,23 @@ describe('E2E: Zonas', () => {
       nombre: 'Zona Vacia Test',
     });
 
-    pistasCreadas.push(await db.Pista.create({
-      idZona: zonaConPistas.id,
-      nombre: 'Pista Test 1',
-      dificultad: '5a',
-      tipo: 'via',
-    }));
+    pistasCreadas.push(
+      await db.Pista.create({
+        idZona: zonaConPistas.id,
+        nombre: 'Pista Test 1',
+        dificultad: '5a',
+        tipo: 'via',
+      })
+    );
 
-    pistasCreadas.push(await db.Pista.create({
-      idZona: zonaConPistas.id,
-      nombre: 'Pista Test 2',
-      dificultad: '7b',
-      tipo: 'via',
-    }));
+    pistasCreadas.push(
+      await db.Pista.create({
+        idZona: zonaConPistas.id,
+        nombre: 'Pista Test 2',
+        dificultad: '7b',
+        tipo: 'via',
+      })
+    );
   });
 
   afterAll(async () => {
@@ -52,7 +65,7 @@ describe('E2E: Zonas', () => {
     if (zonaConPistas) await zonaConPistas.destroy();
     if (zonaSinPistas) await zonaSinPistas.destroy();
     if (rocodromo) await rocodromo.destroy();
-    
+
     await db.sequelize.close();
   });
 
@@ -65,8 +78,8 @@ describe('E2E: Zonas', () => {
 
       expect(response.body).toBeInstanceOf(Array);
       expect(response.body).toHaveLength(2);
-      
-      const nombres = response.body.map(p => p.nombre);
+
+      const nombres = response.body.map((p) => p.nombre);
       expect(nombres).toContain('Pista Test 1');
       expect(nombres).toContain('Pista Test 2');
     });

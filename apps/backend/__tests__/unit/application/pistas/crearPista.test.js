@@ -28,11 +28,18 @@ describe('crearPistaUseCase', () => {
       mockRocodromoRepository
     );
 
-    const datos = { idZona: 1, nombre: 'Ex1', dificultad: '3a', tipo: 'boulder' };
+    const datos = {
+      idZona: 1,
+      nombre: 'Ex1',
+      dificultad: '3a',
+      tipo: 'boulder',
+    };
     const resultado = await crearPista.execute(datos);
 
     expect(mockZonaModel.findByPk).toHaveBeenCalledWith(1);
-    expect(mockRocodromoRepository.obtenerEscalasDificultad).toHaveBeenCalledWith(1);
+    expect(
+      mockRocodromoRepository.obtenerEscalasDificultad
+    ).toHaveBeenCalledWith(1);
     expect(mockRepository.obtenerPorPosicion).toHaveBeenCalledWith(
       undefined,
       undefined,
@@ -46,7 +53,7 @@ describe('crearPistaUseCase', () => {
       id: 1,
     });
   });
-  
+
   it('no debería crear una pista si la zona no existe', async () => {
     const mockRepository = {
       obtenerPorPosicion: jest.fn(async () => null),
@@ -70,12 +77,17 @@ describe('crearPistaUseCase', () => {
       mockRocodromoRepository
     );
 
-    const datos = { idZona: 999, nombre: 'Ex1', dificultad: '3a', tipo: 'boulder' };
+    const datos = {
+      idZona: 999,
+      nombre: 'Ex1',
+      dificultad: '3a',
+      tipo: 'boulder',
+    };
     await expect(() => crearPista.execute(datos)).rejects.toThrow(
       `La zona con ID 999 no existe`
     );
   });
-  
+
   it('no debería crear y ni guardar una pista por datos invalidos', async () => {
     const mockRepository = {
       obtenerPorPosicion: jest.fn(async () => null),

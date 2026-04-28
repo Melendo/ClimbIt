@@ -8,7 +8,7 @@ describe('ObtenerZonasRocodromo', () => {
       { id: 1, idRoco: 1, tipo: 'Boulder' },
       { id: 2, idRoco: 1, tipo: 'Cuerda' },
     ];
-    
+
     const mockRepository = {
       obtenerZonasDeRocodromo: jest.fn(async (id) => mockZonas),
     };
@@ -20,7 +20,9 @@ describe('ObtenerZonasRocodromo', () => {
     const resultado = await obtenerZonasRocodromo.execute(rocodromoId);
 
     // Assert
-    expect(mockRepository.obtenerZonasDeRocodromo).toHaveBeenCalledWith(rocodromoId);
+    expect(mockRepository.obtenerZonasDeRocodromo).toHaveBeenCalledWith(
+      rocodromoId
+    );
     expect(resultado).toEqual(mockZonas);
   });
 
@@ -37,7 +39,9 @@ describe('ObtenerZonasRocodromo', () => {
     const resultado = await obtenerZonasRocodromo.execute(rocodromoId);
 
     // Assert
-    expect(mockRepository.obtenerZonasDeRocodromo).toHaveBeenCalledWith(rocodromoId);
+    expect(mockRepository.obtenerZonasDeRocodromo).toHaveBeenCalledWith(
+      rocodromoId
+    );
     expect(resultado).toBeNull();
   });
 

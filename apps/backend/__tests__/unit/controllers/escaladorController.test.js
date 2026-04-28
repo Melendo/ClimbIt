@@ -2,7 +2,10 @@ import { jest } from '@jest/globals';
 import fs from 'fs/promises';
 import path from 'path';
 import EscaladorController from '../../../src/interfaces/http/controllers/escaladorController.js';
-import { BadRequestError, NotFoundError } from '../../../src/domain/sharedObjects/AppError.js';
+import {
+  BadRequestError,
+  NotFoundError,
+} from '../../../src/domain/sharedObjects/AppError.js';
 
 function createResMock() {
   const res = {
@@ -35,12 +38,18 @@ describe('Unit: EscaladorController', () => {
       crear: { execute: jest.fn().mockResolvedValue('fake_jwt_token') },
     };
     const controller = new EscaladorController(useCases);
-    const req = { body: { correo: 'a@b.com', contrasena: '123', apodo: 'Tester' } };
+    const req = {
+      body: { correo: 'a@b.com', contrasena: '123', apodo: 'Tester' },
+    };
     const res = createResMock();
 
     await controller.crear(req, res, () => {});
 
-    expect(useCases.crear.execute).toHaveBeenCalledWith({ correo: 'a@b.com', contrasena: '123', apodo: 'Tester' });
+    expect(useCases.crear.execute).toHaveBeenCalledWith({
+      correo: 'a@b.com',
+      contrasena: '123',
+      apodo: 'Tester',
+    });
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.body).toEqual('fake_jwt_token');
   });
@@ -51,7 +60,9 @@ describe('Unit: EscaladorController', () => {
       crear: { execute: jest.fn().mockRejectedValue(expectedError) },
     };
     const controller = new EscaladorController(useCases);
-    const req = { body: { correo: 'a@b.com', contrasena: '123', apodo: 'Tester' } };
+    const req = {
+      body: { correo: 'a@b.com', contrasena: '123', apodo: 'Tester' },
+    };
     const res = createResMock();
     const next = jest.fn();
 
@@ -62,80 +73,87 @@ describe('Unit: EscaladorController', () => {
 
   describe('autenticar', () => {
     it('responde 200 con el token si las credenciales son correctas', async () => {
-        const useCases = {
-            autenticar: { execute: jest.fn().mockResolvedValue({ token: 'fake_token_jwt' }) }
-        };
-        const controller = new EscaladorController(useCases);
-        const req = { body: { correo: 'test@example.com', contrasena: '123456' } };
-        const res = createResMock();
+      const useCases = {
+        autenticar: {
+          execute: jest.fn().mockResolvedValue({ token: 'fake_token_jwt' }),
+        },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = {
+        body: { correo: 'test@example.com', contrasena: '123456' },
+      };
+      const res = createResMock();
 
-        await controller.autenticar(req, res, () => {});
+      await controller.autenticar(req, res, () => {});
 
-        expect(useCases.autenticar.execute).toHaveBeenCalledWith({ 
-            correo: 'test@example.com', 
-            contrasena: '123456' 
-        });
-        expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.body).toEqual({ token: 'fake_token_jwt' });
+      expect(useCases.autenticar.execute).toHaveBeenCalledWith({
+        correo: 'test@example.com',
+        contrasena: '123456',
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.body).toEqual({ token: 'fake_token_jwt' });
     });
 
     it('responde 401 si el caso de uso lanza un error (credenciales inválidas)', async () => {
-        const errorMessage = 'Credenciales inválidas';
+      const errorMessage = 'Credenciales inválidas';
       const expectedError = new Error(errorMessage);
-        const useCases = {
-            autenticar: { execute: jest.fn().mockRejectedValue(expectedError) }
-        };
-        const controller = new EscaladorController(useCases);
-        const req = { body: { correo: 'test@example.com', contrasena: 'wrong' } };
-        const res = createResMock();
-        const next = jest.fn();
+      const useCases = {
+        autenticar: { execute: jest.fn().mockRejectedValue(expectedError) },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = { body: { correo: 'test@example.com', contrasena: 'wrong' } };
+      const res = createResMock();
+      const next = jest.fn();
 
-        await controller.autenticar(req, res, next);
+      await controller.autenticar(req, res, next);
 
-        expect(next).toHaveBeenCalledWith(expectedError);
+      expect(next).toHaveBeenCalledWith(expectedError);
     });
   });
 
   describe('suscribirse', () => {
     it('responde 200 con mensaje de éxito cuando la suscripción es exitosa', async () => {
       const useCases = {
-        suscribirseRocodromo: { 
-          execute: jest.fn().mockResolvedValue({ 
-            mensaje: 'Escalador TestClimber suscrito al rocódromo Boulder Central exitosamente.' 
-          }) 
-        }
+        suscribirseRocodromo: {
+          execute: jest.fn().mockResolvedValue({
+            mensaje:
+              'Escalador TestClimber suscrito al rocódromo Boulder Central exitosamente.',
+          }),
+        },
       };
       const controller = new EscaladorController(useCases);
-      const req = { 
+      const req = {
         user: { apodo: 'TestClimber' },
-        body: { idRocodromo: 1 } 
+        body: { idRocodromo: 1 },
       };
       const res = createResMock();
 
       await controller.suscribirse(req, res, () => {});
 
-      expect(useCases.suscribirseRocodromo.execute).toHaveBeenCalledWith({ 
-        escaladorApodo: 'TestClimber', 
-        idRocodromo: 1 
+      expect(useCases.suscribirseRocodromo.execute).toHaveBeenCalledWith({
+        escaladorApodo: 'TestClimber',
+        idRocodromo: 1,
       });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.body).toEqual({ 
-        mensaje: 'Escalador TestClimber suscrito al rocódromo Boulder Central exitosamente.' 
+      expect(res.body).toEqual({
+        mensaje:
+          'Escalador TestClimber suscrito al rocódromo Boulder Central exitosamente.',
       });
     });
 
     it('responde 500 si el caso de uso lanza un error', async () => {
-      const errorMessage = 'Error al suscribirse al rocódromo: Rocódromo con ID 999 no encontrado';
+      const errorMessage =
+        'Error al suscribirse al rocódromo: Rocódromo con ID 999 no encontrado';
       const expectedError = new Error(errorMessage);
       const useCases = {
-        suscribirseRocodromo: { 
-          execute: jest.fn().mockRejectedValue(expectedError) 
-        }
+        suscribirseRocodromo: {
+          execute: jest.fn().mockRejectedValue(expectedError),
+        },
       };
       const controller = new EscaladorController(useCases);
-      const req = { 
+      const req = {
         user: { apodo: 'TestClimber' },
-        body: { idRocodromo: 999 } 
+        body: { idRocodromo: 999 },
       };
       const res = createResMock();
       const next = jest.fn();
@@ -149,43 +167,46 @@ describe('Unit: EscaladorController', () => {
   describe('desuscribirse', () => {
     it('responde 200 con mensaje de éxito cuando la desuscripción es exitosa', async () => {
       const useCases = {
-        desuscribirseRocodromo: { 
-          execute: jest.fn().mockResolvedValue({ 
-            mensaje: 'Escalador TestClimber desuscrito del rocódromo Boulder Central exitosamente.' 
-          }) 
-        }
+        desuscribirseRocodromo: {
+          execute: jest.fn().mockResolvedValue({
+            mensaje:
+              'Escalador TestClimber desuscrito del rocódromo Boulder Central exitosamente.',
+          }),
+        },
       };
       const controller = new EscaladorController(useCases);
-      const req = { 
+      const req = {
         user: { apodo: 'TestClimber' },
-        body: { idRocodromo: 1 } 
+        body: { idRocodromo: 1 },
       };
       const res = createResMock();
 
       await controller.desuscribirse(req, res, () => {});
 
-      expect(useCases.desuscribirseRocodromo.execute).toHaveBeenCalledWith({ 
-        escaladorApodo: 'TestClimber', 
-        idRocodromo: 1 
+      expect(useCases.desuscribirseRocodromo.execute).toHaveBeenCalledWith({
+        escaladorApodo: 'TestClimber',
+        idRocodromo: 1,
       });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.body).toEqual({ 
-        mensaje: 'Escalador TestClimber desuscrito del rocódromo Boulder Central exitosamente.' 
+      expect(res.body).toEqual({
+        mensaje:
+          'Escalador TestClimber desuscrito del rocódromo Boulder Central exitosamente.',
       });
     });
 
     it('responde 500 si el caso de uso lanza un error', async () => {
-      const errorMessage = 'Error al desuscribirse del rocódromo: El escalador TestClimber no está suscrito al rocódromo con ID 1';
+      const errorMessage =
+        'Error al desuscribirse del rocódromo: El escalador TestClimber no está suscrito al rocódromo con ID 1';
       const expectedError = new Error(errorMessage);
       const useCases = {
-        desuscribirseRocodromo: { 
-          execute: jest.fn().mockRejectedValue(expectedError) 
-        }
+        desuscribirseRocodromo: {
+          execute: jest.fn().mockRejectedValue(expectedError),
+        },
       };
       const controller = new EscaladorController(useCases);
-      const req = { 
+      const req = {
         user: { apodo: 'TestClimber' },
-        body: { idRocodromo: 1 } 
+        body: { idRocodromo: 1 },
       };
       const res = createResMock();
       const next = jest.fn();
@@ -200,7 +221,10 @@ describe('Unit: EscaladorController', () => {
     it('crearFotoPerfil responde 201 con la foto creada', async () => {
       const useCases = {
         crearFotoPerfil: {
-          execute: jest.fn().mockResolvedValue({ id: 3, urlFoto: '/uploads/fotos_perfil/foto.png' }),
+          execute: jest.fn().mockResolvedValue({
+            id: 3,
+            urlFoto: '/uploads/fotos_perfil/foto.png',
+          }),
         },
       };
       const controller = new EscaladorController(useCases);
@@ -227,7 +251,9 @@ describe('Unit: EscaladorController', () => {
 
     it('crearFotoPerfil usa next si falla el guardado y la limpieza', async () => {
       const useCases = {
-        crearFotoPerfil: { execute: jest.fn().mockRejectedValue(new Error('falló')) },
+        crearFotoPerfil: {
+          execute: jest.fn().mockRejectedValue(new Error('falló')),
+        },
       };
       const controller = new EscaladorController(useCases);
       const req = {
@@ -250,7 +276,9 @@ describe('Unit: EscaladorController', () => {
 
     it('crearFotoPerfil propaga el error original si no hay archivo para limpiar', async () => {
       const useCases = {
-        crearFotoPerfil: { execute: jest.fn().mockRejectedValue(new Error('falló')) },
+        crearFotoPerfil: {
+          execute: jest.fn().mockRejectedValue(new Error('falló')),
+        },
       };
       const controller = new EscaladorController(useCases);
       const req = {
@@ -291,7 +319,9 @@ describe('Unit: EscaladorController', () => {
 
     it('obtenerFotosPerfil responde 200 con el listado', async () => {
       const useCases = {
-        obtenerFotosPerfil: { execute: jest.fn().mockResolvedValue([{ id: 1, nombre: 'foto.png' }]) },
+        obtenerFotosPerfil: {
+          execute: jest.fn().mockResolvedValue([{ id: 1, nombre: 'foto.png' }]),
+        },
       };
       const controller = new EscaladorController(useCases);
       const req = {};
@@ -307,7 +337,10 @@ describe('Unit: EscaladorController', () => {
     it('obtenerFotoPerfil devuelve el archivo solicitado', async () => {
       const useCases = {
         obtenerFotoPerfil: {
-          execute: jest.fn().mockResolvedValue({ id: 4, urlFoto: '/uploads/fotos_perfil/foto.png' }),
+          execute: jest.fn().mockResolvedValue({
+            id: 4,
+            urlFoto: '/uploads/fotos_perfil/foto.png',
+          }),
         },
       };
       const controller = new EscaladorController(useCases);
@@ -319,7 +352,9 @@ describe('Unit: EscaladorController', () => {
       await controller.obtenerFotoPerfil(req, res, () => {});
 
       expect(useCases.obtenerFotoPerfil.execute).toHaveBeenCalledWith(4);
-      expect(res.sentFile).toBe(path.resolve(process.cwd(), 'uploads', 'fotos_perfil', 'foto.png'));
+      expect(res.sentFile).toBe(
+        path.resolve(process.cwd(), 'uploads', 'fotos_perfil', 'foto.png')
+      );
     });
 
     it('obtenerFotoPerfil responde 404 si no existe', async () => {
@@ -342,7 +377,10 @@ describe('Unit: EscaladorController', () => {
     it('obtenerFotoPerfil responde 404 si el archivo no existe', async () => {
       const useCases = {
         obtenerFotoPerfil: {
-          execute: jest.fn().mockResolvedValue({ id: 4, urlFoto: '/uploads/fotos_perfil/foto.png' }),
+          execute: jest.fn().mockResolvedValue({
+            id: 4,
+            urlFoto: '/uploads/fotos_perfil/foto.png',
+          }),
         },
       };
       const controller = new EscaladorController(useCases);
@@ -363,7 +401,11 @@ describe('Unit: EscaladorController', () => {
 
     it('actualizarFotoPerfil responde 200 con el resultado del caso de uso', async () => {
       const useCases = {
-        actualizarFotoPerfil: { execute: jest.fn().mockResolvedValue({ fotoUrl: '/uploads/fotos_perfil/foto.png' }) },
+        actualizarFotoPerfil: {
+          execute: jest
+            .fn()
+            .mockResolvedValue({ fotoUrl: '/uploads/fotos_perfil/foto.png' }),
+        },
       };
       const controller = new EscaladorController(useCases);
       const req = {
@@ -387,7 +429,9 @@ describe('Unit: EscaladorController', () => {
     it('obtenerResumenEstadisticas responde 200 con datos del escalador autenticado', async () => {
       const useCases = {
         obtenerResumenEstadisticas: {
-          execute: jest.fn().mockResolvedValue({ totalRutas: 9, totalFlash: 3 }),
+          execute: jest
+            .fn()
+            .mockResolvedValue({ totalRutas: 9, totalFlash: 3 }),
         },
       };
       const controller = new EscaladorController(useCases);
@@ -406,7 +450,9 @@ describe('Unit: EscaladorController', () => {
     it('obtenerTiposEstadisticasPublico responde 200 con datos del apodo en params', async () => {
       const useCases = {
         obtenerTiposEstadisticas: {
-          execute: jest.fn().mockResolvedValue({ totalBloques: 4, totalVias: 2 }),
+          execute: jest
+            .fn()
+            .mockResolvedValue({ totalBloques: 4, totalVias: 2 }),
         },
       };
       const controller = new EscaladorController(useCases);
@@ -473,7 +519,9 @@ describe('Unit: EscaladorController', () => {
 
       await controller.obtenerResumenEstadisticasRocodromo(req, res, () => {});
 
-      expect(useCases.obtenerResumenEstadisticasRocodromo.execute).toHaveBeenCalledWith({
+      expect(
+        useCases.obtenerResumenEstadisticasRocodromo.execute
+      ).toHaveBeenCalledWith({
         apodo: 'Tester',
         idRocodromo: 7,
       });
@@ -488,7 +536,9 @@ describe('Unit: EscaladorController', () => {
     it('obtenerTiposEstadisticasRocodromo responde 200 con datos filtrados', async () => {
       const useCases = {
         obtenerTiposEstadisticasRocodromo: {
-          execute: jest.fn().mockResolvedValue({ totalBloques: 3, totalVias: 1 }),
+          execute: jest
+            .fn()
+            .mockResolvedValue({ totalBloques: 3, totalVias: 1 }),
         },
       };
       const controller = new EscaladorController(useCases);
@@ -500,7 +550,9 @@ describe('Unit: EscaladorController', () => {
 
       await controller.obtenerTiposEstadisticasRocodromo(req, res, () => {});
 
-      expect(useCases.obtenerTiposEstadisticasRocodromo.execute).toHaveBeenCalledWith({
+      expect(
+        useCases.obtenerTiposEstadisticasRocodromo.execute
+      ).toHaveBeenCalledWith({
         apodo: 'Tester',
         idRocodromo: 7,
       });
@@ -528,7 +580,9 @@ describe('Unit: EscaladorController', () => {
 
       await controller.obtenerActividadMensualRocodromo(req, res, () => {});
 
-      expect(useCases.obtenerActividadMensualRocodromo.execute).toHaveBeenCalledWith({
+      expect(
+        useCases.obtenerActividadMensualRocodromo.execute
+      ).toHaveBeenCalledWith({
         apodo: 'Tester',
         idRocodromo: 7,
         year: 2026,
@@ -560,7 +614,9 @@ describe('Unit: EscaladorController', () => {
 
       await controller.obtenerDificultadMaximaRocodromo(req, res, () => {});
 
-      expect(useCases.obtenerDificultadMaximaRocodromo.execute).toHaveBeenCalledWith({
+      expect(
+        useCases.obtenerDificultadMaximaRocodromo.execute
+      ).toHaveBeenCalledWith({
         apodo: 'Tester',
         idRocodromo: 7,
       });
@@ -569,6 +625,52 @@ describe('Unit: EscaladorController', () => {
         maxDificultadBloque: 'V6',
         maxDificultadVia: '7a',
       });
+    });
+  });
+
+  describe('buscarEscaladores', () => {
+    it('responde 200 con la lista de escaladores excluyendo el id del usuario', async () => {
+      const mockResult = [{ id: 2, apodo: 'alex', idFotoPerfil: null }];
+      const useCases = {
+        buscarEscaladoresPorNombre: {
+          execute: jest.fn().mockResolvedValue(mockResult),
+        },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = {
+        query: { q: 'ale' },
+        user: { apodo: 'userApodo' },
+      };
+      const res = createResMock();
+
+      await controller.buscarEscaladores(req, res, () => {});
+
+      expect(useCases.buscarEscaladoresPorNombre.execute).toHaveBeenCalledWith(
+        'ale',
+        'userApodo'
+      );
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.body).toEqual(mockResult);
+    });
+
+    it('responde 500 si el caso de uso falla', async () => {
+      const expectedError = new Error('algo falló');
+      const useCases = {
+        buscarEscaladoresPorNombre: {
+          execute: jest.fn().mockRejectedValue(expectedError),
+        },
+      };
+      const controller = new EscaladorController(useCases);
+      const req = {
+        query: { q: 'ale' },
+        user: { id: 1 },
+      };
+      const res = createResMock();
+      const next = jest.fn();
+
+      await controller.buscarEscaladores(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(expectedError);
     });
   });
 });

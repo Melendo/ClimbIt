@@ -13,7 +13,12 @@ const router = express.Router();
 const container = await containerPromise;
 const { escaladorController } = container;
 
-const RASTER_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const RASTER_IMAGE_MIME_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+];
 const FOTO_PERFIL_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
 /**
@@ -27,23 +32,19 @@ const FOTO_PERFIL_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
  *
  * Respuesta esperada: @return {String} token JWT para autenticación en futuras solicitudes
  */
-const crearEscaladorValidators = [
-  body('correo')
-    .trim()
-    // .isEmail()
-    .normalizeEmail(),
-  // .isLength({ min: 5, max: 255 })
-  // .withMessage('correo debe tener entre 5 y 255 caracteres'),
-  body('contrasena')
-    .isString()
+const buildCorreoValidators = (validator) =>
+  validator('correo')
     .trim()
     .notEmpty()
-    .withMessage('contrasena es requerida'),
-  /* .isLength({ min: 8 })
-    .withMessage('contrasena debe tener mínimo 8 caracteres')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage('contrasena debe contener mayúsculas, minúsculas y números')*/
-  body('apodo')
+    .withMessage('correo es requerido')
+    .isEmail()
+    .withMessage('correo debe ser un email válido')
+    .isLength({ min: 5, max: 255 })
+    .withMessage('correo debe tener entre 5 y 255 caracteres')
+    // .normalizeEmail();
+
+const buildApodoValidators = (validator) =>
+  validator('apodo')
     .trim()
     .notEmpty()
     .withMessage('apodo es requerido')
@@ -52,7 +53,21 @@ const crearEscaladorValidators = [
     .matches(/^[a-zA-Z0-9_-]+$/)
     .withMessage(
       'apodo solo puede contener letras, números, guiones y guiones bajos'
-    ),
+    )
+    // .toLowerCase();
+
+const crearEscaladorValidators = [
+  buildCorreoValidators(body),
+  body('contrasena')
+    .isString()
+    .trim()
+    .notEmpty()
+    .withMessage('contrasena es requerida')
+    .isLength({ min: 8 })
+    .withMessage('contrasena debe tener mínimo 8 caracteres')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .withMessage('contrasena debe contener mayúsculas, minúsculas y números'),
+  buildApodoValidators(body),
 ];
 
 router.post('/create', crearEscaladorValidators, validate, (req, res, next) => {
@@ -73,7 +88,6 @@ const autenticarEscaladorValidators = [
   body('correo')
     .trim()
     .isEmail()
-    .normalizeEmail()
     .withMessage('correo debe ser un email válido')
     .notEmpty()
     .withMessage('correo es requerido'),
@@ -99,19 +113,7 @@ router.post(
  *
  * Respuesta esperada: @return {Object} { disponible: boolean }
  */
-const validarApodoValidators = [
-  param('apodo')
-    .trim()
-    .notEmpty()
-    .withMessage('apodo es requerido')
-    .isLength({ min: 1, max: 20 })
-    .withMessage('apodo debe tener entre 1 y 20 caracteres')
-    .matches(/^[a-zA-Z0-9_-]+$/)
-    .withMessage(
-      'apodo solo puede contener letras, numeros, guiones y guiones bajos'
-    )
-    .toLowerCase(),
-];
+const validarApodoValidators = [buildApodoValidators(param)];
 
 router.get(
   '/validarApodo/:apodo',
@@ -128,15 +130,7 @@ router.get(
  *
  * Respuesta esperada: @return {Object} { disponible: boolean }
  */
-const validarCorreoValidators = [
-  param('correo')
-    .trim()
-    .isEmail()
-    .normalizeEmail()
-    .withMessage('correo debe ser un email valido')
-    .notEmpty()
-    .withMessage('correo es requerido'),
-];
+const validarCorreoValidators = [buildCorreoValidators(param)];
 
 router.get(
   '/validarCorreo/:correo',
@@ -548,5 +542,34 @@ router.put(
     escaladorController.actualizarFotoPerfil(req, res, next);
   }
 );
+/**
+ * GET /escaladores/buscar
+ * Busca escaladores por similitud en el apodo
+ *
+ * Parámetros esperados (query):
+ * - q (@param {String} , requerido): Cadena a buscar en el apodo (min 2 caracteres)
+ *
+ * Requiere: Token JWT válido en header Authorization
+ *
+ * Respuesta esperada: @return {Array} Lista de escaladores ordenados por coincidencia
+ */
+const buscarEscaladoresValidators = [
+  query('q')
+    .isString()
+    .trim()
+    .notEmpty()
+    .withMessage('El parámetro de búsqueda es requerido')
+    .isLength({ min: 2 })
+    .withMessage('La búsqueda debe tener al menos 2 caracteres'),
+];
 
+router.get(
+  '/buscar',
+  verifyToken,
+  buscarEscaladoresValidators,
+  validate,
+  (req, res, next) => {
+    escaladorController.buscarEscaladores(req, res, next);
+  }
+);
 export default router;

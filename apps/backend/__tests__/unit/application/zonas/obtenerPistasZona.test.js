@@ -8,7 +8,7 @@ describe('obtenerPistasZonaUseCase', () => {
       { id: 1, idZona: 1, nombre: 'Pista 1', dificultad: '5a' },
       { id: 2, idZona: 1, nombre: 'Pista 2', dificultad: '6b' },
     ];
-    
+
     const mockRepository = {
       obtenerPistasDeZona: jest.fn(async (id, idEscalador) => mockPistas),
     };
@@ -17,14 +17,20 @@ describe('obtenerPistasZonaUseCase', () => {
       encontrarPorApodo: jest.fn(async () => null),
     };
 
-    const obtenerPistasZona = new ObtenerPistasZona(mockRepository, mockEscaladorRepository);
+    const obtenerPistasZona = new ObtenerPistasZona(
+      mockRepository,
+      mockEscaladorRepository
+    );
     const zonaId = 1;
 
     // Act
     const resultado = await obtenerPistasZona.execute(zonaId);
 
     // Assert
-    expect(mockRepository.obtenerPistasDeZona).toHaveBeenCalledWith(zonaId, null);
+    expect(mockRepository.obtenerPistasDeZona).toHaveBeenCalledWith(
+      zonaId,
+      null
+    );
     expect(resultado).toEqual(mockPistas);
   });
 
@@ -38,14 +44,20 @@ describe('obtenerPistasZonaUseCase', () => {
       encontrarPorApodo: jest.fn(async () => null),
     };
 
-    const obtenerPistasZona = new ObtenerPistasZona(mockRepository, mockEscaladorRepository);
+    const obtenerPistasZona = new ObtenerPistasZona(
+      mockRepository,
+      mockEscaladorRepository
+    );
     const zonaId = 999;
 
     // Act
     const resultado = await obtenerPistasZona.execute(zonaId);
 
     // Assert
-    expect(mockRepository.obtenerPistasDeZona).toHaveBeenCalledWith(zonaId, null);
+    expect(mockRepository.obtenerPistasDeZona).toHaveBeenCalledWith(
+      zonaId,
+      null
+    );
     expect(resultado).toBeNull();
   });
 
@@ -62,7 +74,10 @@ describe('obtenerPistasZonaUseCase', () => {
       encontrarPorApodo: jest.fn(async () => null),
     };
 
-    const obtenerPistasZona = new ObtenerPistasZona(mockRepository, mockEscaladorRepository);
+    const obtenerPistasZona = new ObtenerPistasZona(
+      mockRepository,
+      mockEscaladorRepository
+    );
     const zonaId = 1;
 
     // Act & Assert

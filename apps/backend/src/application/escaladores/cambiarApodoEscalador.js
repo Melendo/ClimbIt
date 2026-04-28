@@ -1,5 +1,6 @@
 import {
   AppError,
+  ConflictError,
   InternalServerError,
   NotFoundError,
 } from '../../domain/sharedObjects/AppError.js';
@@ -12,13 +13,31 @@ class CambiarApodoEscalador {
 
   async execute({ apodoActual, nuevoApodo, usuario }) {
     try {
+      const escaladorExistente =
+        await this.escaladorRepository.encontrarPorApodoInsensitive(
+          nuevoApodo
+        );
+
+      if (
+        escaladorExistente &&
+        escaladorExistente.apodo.toLowerCase() !== apodoActual.toLowerCase()
+      ) {
+        throw new ConflictError(
+          'El apodo ya está registrado',
+          'ESCALADOR_APODO_DUPLICADO'
+        );
+      }
+
       const escalador = await this.escaladorRepository.actualizarApodo(
         apodoActual,
         nuevoApodo
       );
 
       if (!escalador) {
-        throw new NotFoundError('Escalador no encontrado', 'ESCALADOR_NOT_FOUND');
+        throw new NotFoundError(
+          'Escalador no encontrado',
+          'ESCALADOR_NOT_FOUND'
+        );
       }
 
       usuario.apodo = escalador.apodo; // Actualiza el apodo en el payload del token
@@ -26,7 +45,9 @@ class CambiarApodoEscalador {
         apodo: usuario.apodo,
         correo: usuario.correo,
         rol: usuario.rol,
-        ...(usuario.rol === 'Gestor' ? { rocodromosGestionados: usuario.rocodromosGestionados } : {})
+        ...(usuario.rol === 'Gestor'
+          ? { rocodromosGestionados: usuario.rocodromosGestionados }
+          : {}),
       };
       const token = this.tokenService.crear(payload);
 

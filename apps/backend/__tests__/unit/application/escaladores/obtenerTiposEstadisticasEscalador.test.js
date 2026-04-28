@@ -1,11 +1,16 @@
 import { describe, it, expect, jest } from '@jest/globals';
 import ObtenerTiposEstadisticasEscalador from '../../../../src/application/escaladores/obtenerTiposEstadisticasEscalador.js';
-import { InternalServerError, NotFoundError } from '../../../../src/domain/sharedObjects/AppError.js';
+import {
+  InternalServerError,
+  NotFoundError,
+} from '../../../../src/domain/sharedObjects/AppError.js';
 
 describe('ObtenerTiposEstadisticasEscalador', () => {
   it('deberia obtener distribucion por tipo para un escalador existente', async () => {
     const mockEscaladorRepository = {
-      encontrarPorApodo: jest.fn().mockResolvedValue({ id: 3, apodo: 'Climber' }),
+      encontrarPorApodo: jest
+        .fn()
+        .mockResolvedValue({ id: 3, apodo: 'Climber' }),
     };
     const mockPistaRepository = {
       obtenerTiposEstadisticasEscalador: jest.fn().mockResolvedValue({
@@ -27,7 +32,9 @@ describe('ObtenerTiposEstadisticasEscalador', () => {
     expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(
       'Climber'
     );
-    expect(mockPistaRepository.obtenerTiposEstadisticasEscalador).toHaveBeenCalledWith(3);
+    expect(
+      mockPistaRepository.obtenerTiposEstadisticasEscalador
+    ).toHaveBeenCalledWith(3);
     expect(resultado).toEqual({
       totalBloques: 8,
       totalVias: 4,

@@ -58,14 +58,18 @@ export function renderRutaRatingSection(ratingData = {}) {
 
   return `
     <div id="ruta-rating-section" class="bg-white mt-2 px-4 py-4">
-      <div class="row g-4 align-items-end">
+      <div class="row g-4 align-items-start">
         <div class="col-12 col-md-6">
           <p class="text-muted small mb-2 text-uppercase" style="letter-spacing: 0.5px;">Valoraciones</p>
-          <p id="ruta-rating-average" class="fw-semibold mb-2" style="font-size: clamp(3rem, 8vw, 4.5rem); line-height: 1; color: #111827;">${formatAverageRating(averageRating)}</p>
-          <div id="ruta-rating-average-stars" class="d-flex align-items-center gap-1 mb-2" aria-label="Valoracion media de la ruta">
-            ${renderReadonlyStars(averageRating)}
+          <div class="d-flex align-items-start flex-wrap gap-3">
+            <p id="ruta-rating-average" class="fw-semibold mb-0" style="font-size: clamp(3rem, 8vw, 4.5rem); line-height: 0.9; color: #111827;">${formatAverageRating(averageRating)}</p>
+            <div class="d-flex flex-column align-items-start gap-1 pt-1">
+              <div id="ruta-rating-average-stars" class="d-flex align-items-center gap-1" aria-label="Valoracion media de la ruta">
+                ${renderReadonlyStars(averageRating)}
+              </div>
+              <p id="ruta-rating-count" class="mb-0 text-muted" style="font-size: 0.95rem; line-height: 1.15;">${formatNumValoraciones(numValoraciones)}</p>
+            </div>
           </div>
-          <p id="ruta-rating-count" class="mb-0 text-muted" style="font-size: 1.35rem; max-width: 100%; line-height: 1.2;">${formatNumValoraciones(numValoraciones)}</p>
         </div>
 
         <div class="col-12 col-md-6 d-flex flex-column">
@@ -93,13 +97,17 @@ export function setupRutaRatingSection(container, options = {}) {
   }
 
   const averageElement = section.querySelector('#ruta-rating-average');
-  const averageStarsElement = section.querySelector('#ruta-rating-average-stars');
+  const averageStarsElement = section.querySelector(
+    '#ruta-rating-average-stars'
+  );
   const countElement = section.querySelector('#ruta-rating-count');
   const selectorElement = section.querySelector('#ruta-rating-selector');
   const selectionLabel = section.querySelector('#ruta-rating-selection-label');
   const saveButton = section.querySelector('#ruta-rating-save-btn');
   const helpElement = section.querySelector('#ruta-rating-help');
-  const starButtons = Array.from(selectorElement?.querySelectorAll('.ruta-rating-star') || []);
+  const starButtons = Array.from(
+    selectorElement?.querySelectorAll('.ruta-rating-star') || []
+  );
 
   const onSave = typeof options?.onSave === 'function' ? options.onSave : null;
   let canRate = Boolean(options?.canRate);
@@ -145,7 +153,12 @@ export function setupRutaRatingSection(container, options = {}) {
       button.setAttribute('aria-pressed', String(fillState !== 'empty'));
       if (!icon) return;
 
-      icon.textContent = fillState === 'full' ? 'star' : fillState === 'half' ? 'star_half' : 'star_border';
+      icon.textContent =
+        fillState === 'full'
+          ? 'star'
+          : fillState === 'half'
+            ? 'star_half'
+            : 'star_border';
       icon.style.color = fillState === 'empty' ? '#cbd5e1' : '#f59e0b';
     });
   };
@@ -159,7 +172,9 @@ export function setupRutaRatingSection(container, options = {}) {
 
     if (saveButton) {
       saveButton.disabled = controlsDisabled || selectedStars < 1;
-      saveButton.textContent = isSubmitting ? 'Guardando...' : 'Guardar valoracion';
+      saveButton.textContent = isSubmitting
+        ? 'Guardando...'
+        : 'Guardar valoracion';
       saveButton.classList.toggle('d-none', !canRate || selectedStars < 1);
     }
 
@@ -194,7 +209,8 @@ export function setupRutaRatingSection(container, options = {}) {
       if (!canRate || isSubmitting) return;
 
       const rating = Number(button.dataset.ratingStars) || 0;
-      const isPointerClick = Number(event.clientX) > 0 || Number(event.clientY) > 0;
+      const isPointerClick =
+        Number(event.clientX) > 0 || Number(event.clientY) > 0;
       let isHalfSelection = false;
 
       if (isPointerClick) {
@@ -203,7 +219,9 @@ export function setupRutaRatingSection(container, options = {}) {
         isHalfSelection = clickX < buttonRect.width / 2;
       }
 
-      selectedStars = normalizeSelection(isHalfSelection ? rating - 0.5 : rating);
+      selectedStars = normalizeSelection(
+        isHalfSelection ? rating - 0.5 : rating
+      );
       paintSelectedStars();
       setSelectionText();
       updateControlState();
@@ -234,10 +252,11 @@ export function setupRutaRatingSection(container, options = {}) {
         if (result?.summary) {
           updateSummary(result.summary);
         }
-
       } catch (error) {
         if (typeof options?.onError === 'function') {
-          options.onError(error?.message || 'No se pudo guardar la valoracion.');
+          options.onError(
+            error?.message || 'No se pudo guardar la valoracion.'
+          );
         }
       } finally {
         isSubmitting = false;

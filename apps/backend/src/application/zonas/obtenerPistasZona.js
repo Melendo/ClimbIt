@@ -14,7 +14,8 @@ class ObtenerPistasZona {
       let idEscalador = null;
 
       if (escaladorApodo) {
-        const escalador = await this.escaladorRepository.encontrarPorApodo(escaladorApodo);
+        const escalador =
+          await this.escaladorRepository.encontrarPorApodo(escaladorApodo);
         if (escalador) {
           idEscalador = escalador.id;
         }

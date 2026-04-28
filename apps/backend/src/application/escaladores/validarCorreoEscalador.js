@@ -1,4 +1,7 @@
-import { AppError, InternalServerError } from '../../domain/sharedObjects/AppError.js';
+import {
+  AppError,
+  InternalServerError,
+} from '../../domain/sharedObjects/AppError.js';
 
 class ValidarCorreoEscalador {
   constructor(escaladorRepository) {
@@ -7,7 +10,8 @@ class ValidarCorreoEscalador {
 
   async execute(correo) {
     try {
-      const escalador = await this.escaladorRepository.encontrarPorCorreo(correo);
+      const escalador =
+        await this.escaladorRepository.encontrarPorCorreoInsensitive(correo);
 
       return { disponible: !escalador };
     } catch (error) {

@@ -15,11 +15,13 @@ describe('ObtenerActividadMensualRocodromoEscalador', () => {
       encontrarPorId: jest.fn().mockResolvedValue({ id: 5 }),
     };
     const mockPistaRepository = {
-      obtenerActividadMensualEscaladorPorRocodromo: jest.fn().mockResolvedValue({
-        year: 2026,
-        month: 4,
-        actividadMensual: [{ dia: 10, rutas: 2 }],
-      }),
+      obtenerActividadMensualEscaladorPorRocodromo: jest
+        .fn()
+        .mockResolvedValue({
+          year: 2026,
+          month: 4,
+          actividadMensual: [{ dia: 10, rutas: 2 }],
+        }),
     };
 
     const useCase = new ObtenerActividadMensualRocodromoEscalador(
@@ -35,7 +37,9 @@ describe('ObtenerActividadMensualRocodromoEscalador', () => {
       month: 4,
     });
 
-    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith('Tester');
+    expect(mockEscaladorRepository.encontrarPorApodo).toHaveBeenCalledWith(
+      'Tester'
+    );
     expect(mockRocodromoRepository.encontrarPorId).toHaveBeenCalledWith(5);
     expect(
       mockPistaRepository.obtenerActividadMensualEscaladorPorRocodromo
@@ -55,7 +59,12 @@ describe('ObtenerActividadMensualRocodromoEscalador', () => {
     );
 
     await expect(
-      useCase.execute({ apodo: 'NoExiste', idRocodromo: 5, year: 2026, month: 4 })
+      useCase.execute({
+        apodo: 'NoExiste',
+        idRocodromo: 5,
+        year: 2026,
+        month: 4,
+      })
     ).rejects.toBeInstanceOf(NotFoundError);
   });
 
@@ -67,7 +76,12 @@ describe('ObtenerActividadMensualRocodromoEscalador', () => {
     );
 
     await expect(
-      useCase.execute({ apodo: 'Tester', idRocodromo: 999, year: 2026, month: 4 })
+      useCase.execute({
+        apodo: 'Tester',
+        idRocodromo: 999,
+        year: 2026,
+        month: 4,
+      })
     ).rejects.toBeInstanceOf(NotFoundError);
   });
 
@@ -79,7 +93,12 @@ describe('ObtenerActividadMensualRocodromoEscalador', () => {
     );
 
     await expect(
-      useCase.execute({ apodo: 'Tester', idRocodromo: 5, year: 2026, month: 13 })
+      useCase.execute({
+        apodo: 'Tester',
+        idRocodromo: 5,
+        year: 2026,
+        month: 13,
+      })
     ).rejects.toBeInstanceOf(BadRequestError);
   });
 

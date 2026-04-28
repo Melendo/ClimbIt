@@ -12,6 +12,8 @@ import PistaRepositoryPostgres from './repositories/pistaRepositoryPostgres.js';
 import ZonaRepositoryPostgres from './repositories/zonaRepositoryPostgres.js';
 import RocodromoRepositoryPostgres from './repositories/rocodromoRepositoryPostgres.js';
 import FotosPerfilRepositoryPostgres from './repositories/fotosPerfilRepositoryPostgres.js';
+import SolicitudAmistadRepositoryPostgres from './repositories/solicitudAmistadRepositoryPostgres.js';
+import AmistadRepositoryPostgres from './repositories/amistadRepositoryPostgres.js';
 
 // Servicios de infra (Seguridad etc)
 import passwordService from './security/passwordService.js';
@@ -39,7 +41,7 @@ import ObtenerResumenEstadisticasRocodromoEscalador from '../application/escalad
 import ObtenerTiposEstadisticasRocodromoEscalador from '../application/escaladores/obtenerTiposEstadisticasRocodromoEscalador.js';
 import ObtenerActividadMensualRocodromoEscalador from '../application/escaladores/obtenerActividadMensualRocodromoEscalador.js';
 import ObtenerDificultadMaximaRocodromoEscalador from '../application/escaladores/obtenerDificultadMaximaRocodromoEscalador.js';
-
+import BuscarEscaladoresPorNombre from '../application/escaladores/buscarEscaladoresPorNombre.js';
 import CrearPista from '../application/pistas/crearPista.js';
 import ActualizarPista from '../application/pistas/actualizarPista.js';
 import ActualizarImagenPista from '../application/pistas/actualizarImagenPista.js';
@@ -62,11 +64,19 @@ import ObtenerRocodromos from '../application/rocodromos/obtenerRocodromos.js';
 import ObtenerInformacionRocodromo from '../application/rocodromos/obtenerInformacionRocodromo.js';
 import ObtenerEscalasDificultad from '../application/rocodromos/obtenerEscalasDificultad.js';
 
+import EnviarSolicitudAmistad from '../application/amistades/enviarSolicitudAmistad.js';
+import ResponderSolicitudAmistad from '../application/amistades/responderSolicitudAmistad.js';
+import ListarAmigos from '../application/amistades/listarAmigos.js';
+import ConsultarPerfilAmigo from '../application/amistades/consultarPerfilAmigo.js';
+import EliminarAmigo from '../application/amistades/eliminarAmigo.js';
+import ListarSolicitudesPendientes from '../application/amistades/listarSolicitudesPendientes.js';
+
 // Controladores (interfaces HTTP)
 import EscaladorController from '../interfaces/http/controllers/escaladorController.js';
 import PistaController from '../interfaces/http/controllers/pistaController.js';
 import ZonaController from '../interfaces/http/controllers/zonaController.js';
 import RocodromoController from '../interfaces/http/controllers/rocodromoController.js';
+import AmistadController from '../interfaces/http/controllers/amistadController.js';
 
 // --- Composición / Inyección de dependencias ---
 
@@ -80,7 +90,13 @@ async function inicializarContainer() {
   const pistaRepository = new PistaRepositoryPostgres(db.Pista);
   const zonaRepository = new ZonaRepositoryPostgres(db.Zona);
   const rocodromoRepository = new RocodromoRepositoryPostgres(db.Rocodromo);
-  const fotosPerfilRepository = new FotosPerfilRepositoryPostgres(db.FotosPerfil);
+  const fotosPerfilRepository = new FotosPerfilRepositoryPostgres(
+    db.FotosPerfil
+  );
+  const solicitudAmistadRepository = new SolicitudAmistadRepositoryPostgres(
+    db.SolicitudAmistad
+  );
+  const amistadRepository = new AmistadRepositoryPostgres(db.Amistad);
 
   // 2) Instancia del caso de uso con el repositorio inyectado
   const crearEscaladorUseCase = new CrearEscalador(
@@ -106,7 +122,9 @@ async function inicializarContainer() {
     escaladorRepository
   );
   const crearFotoPerfilUseCase = new CrearFotoPerfil(fotosPerfilRepository);
-  const obtenerFotosPerfilUseCase = new ObtenerFotosPerfil(fotosPerfilRepository);
+  const obtenerFotosPerfilUseCase = new ObtenerFotosPerfil(
+    fotosPerfilRepository
+  );
   const obtenerFotoPerfilUseCase = new ObtenerFotoPerfil(fotosPerfilRepository);
   const actualizarFotoPerfilUseCase = new ActualizarFotoPerfilEscalador(
     escaladorRepository,
@@ -126,10 +144,14 @@ async function inicializarContainer() {
       escaladorRepository,
       pistaRepository
     );
-  const obtenerTiposEstadisticasUseCase =
-    new ObtenerTiposEstadisticasEscalador(escaladorRepository, pistaRepository);
-  const obtenerActividadMensualUseCase =
-    new ObtenerActividadMensualEscalador(escaladorRepository, pistaRepository);
+  const obtenerTiposEstadisticasUseCase = new ObtenerTiposEstadisticasEscalador(
+    escaladorRepository,
+    pistaRepository
+  );
+  const obtenerActividadMensualUseCase = new ObtenerActividadMensualEscalador(
+    escaladorRepository,
+    pistaRepository
+  );
   const obtenerResumenEstadisticasRocodromoUseCase =
     new ObtenerResumenEstadisticasRocodromoEscalador(
       escaladorRepository,
@@ -154,6 +176,9 @@ async function inicializarContainer() {
       rocodromoRepository,
       pistaRepository
     );
+  const buscarEscaladoresPorNombreUseCase = new BuscarEscaladoresPorNombre(
+    escaladorRepository
+  );
 
   const crearPistaUseCase = new CrearPista(
     pistaRepository,
@@ -165,8 +190,13 @@ async function inicializarContainer() {
     db.Zona,
     rocodromoRepository
   );
-  const actualizarImagenPistaUseCase = new ActualizarImagenPista(pistaRepository);
-  const obtenerPistaPorIdUseCase = new ObtenerPistaPorId(pistaRepository, escaladorRepository);
+  const actualizarImagenPistaUseCase = new ActualizarImagenPista(
+    pistaRepository
+  );
+  const obtenerPistaPorIdUseCase = new ObtenerPistaPorId(
+    pistaRepository,
+    escaladorRepository
+  );
   const cambiarEstadoPistaUseCase = new CambiarEstadoPista(
     pistaRepository,
     escaladorRepository
@@ -175,19 +205,25 @@ async function inicializarContainer() {
     pistaRepository,
     escaladorRepository
   );
-  const obtenerValoracionTotalUseCase = new ObtenerValoracionTotal(pistaRepository);
+  const obtenerValoracionTotalUseCase = new ObtenerValoracionTotal(
+    pistaRepository
+  );
   const eliminarPistaUseCase = new EliminarPista(pistaRepository);
 
   const crearZonaUseCase = new CrearZona(zonaRepository, db.Rocodromo);
-  const obtenerPistasDeZonaUseCase = new ObtenerPistasDeZona(zonaRepository, escaladorRepository);
+  const obtenerPistasDeZonaUseCase = new ObtenerPistasDeZona(
+    zonaRepository,
+    escaladorRepository
+  );
   const actualizarMapaZonaUseCase = new ActualizarMapaZona(zonaRepository);
   const obtenerZonaPorIdUseCase = new ObtenerZonaPorId(zonaRepository);
 
   const crearRocodromoUseCase = new CrearRocodromo(rocodromoRepository);
-  const actualizarInformacionRocodromoUseCase = new ActualizarInformacionRocodromo(
-    rocodromoRepository,
-    db.EscalaDificultad
-  );
+  const actualizarInformacionRocodromoUseCase =
+    new ActualizarInformacionRocodromo(
+      rocodromoRepository,
+      db.EscalaDificultad
+    );
   const actualizarLogoRocodromoUseCase = new ActualizarLogoRocodromo(
     rocodromoRepository
   );
@@ -200,6 +236,35 @@ async function inicializarContainer() {
   );
   const obtenerEscalasDificultadUseCase = new ObtenerEscalasDificultad(
     rocodromoRepository
+  );
+  const enviarSolicitudAmistadUseCase = new EnviarSolicitudAmistad(
+    escaladorRepository,
+    solicitudAmistadRepository,
+    amistadRepository
+  );
+  const responderSolicitudAmistadUseCase = new ResponderSolicitudAmistad(
+    escaladorRepository,
+    solicitudAmistadRepository,
+    amistadRepository,
+    db.sequelize
+  );
+  const listarAmigosUseCase = new ListarAmigos(
+    escaladorRepository,
+    amistadRepository
+  );
+  const consultarPerfilAmigoUseCase = new ConsultarPerfilAmigo(
+    escaladorRepository,
+    amistadRepository
+  );
+  const eliminarAmigoUseCase = new EliminarAmigo(
+    escaladorRepository,
+    amistadRepository,
+    solicitudAmistadRepository,
+    db.sequelize
+  );
+  const listarSolicitudesPendientesUseCase = new ListarSolicitudesPendientes(
+    escaladorRepository,
+    solicitudAmistadRepository
   );
 
   // 3) Instancia del caso de uso con el repositorio inyectado
@@ -224,10 +289,9 @@ async function inicializarContainer() {
     obtenerResumenEstadisticasRocodromo:
       obtenerResumenEstadisticasRocodromoUseCase,
     obtenerTiposEstadisticasRocodromo: obtenerTiposEstadisticasRocodromoUseCase,
-    obtenerActividadMensualRocodromo:
-      obtenerActividadMensualRocodromoUseCase,
-    obtenerDificultadMaximaRocodromo:
-      obtenerDificultadMaximaRocodromoUseCase,
+    obtenerActividadMensualRocodromo: obtenerActividadMensualRocodromoUseCase,
+    obtenerDificultadMaximaRocodromo: obtenerDificultadMaximaRocodromoUseCase,
+    buscarEscaladoresPorNombre: buscarEscaladoresPorNombreUseCase,
   };
   const pistaUseCases = {
     crear: crearPistaUseCase,
@@ -254,12 +318,21 @@ async function inicializarContainer() {
     obtenerInformacion: obtenerInformacionRocodromoUseCase,
     obtenerEscalasDificultad: obtenerEscalasDificultadUseCase,
   };
+  const amistadUseCases = {
+    enviarSolicitud: enviarSolicitudAmistadUseCase,
+    responderSolicitud: responderSolicitudAmistadUseCase,
+    listarAmigos: listarAmigosUseCase,
+    consultarPerfilAmigo: consultarPerfilAmigoUseCase,
+    eliminarAmigo: eliminarAmigoUseCase,
+    listarSolicitudesPendientes: listarSolicitudesPendientesUseCase,
+  };
 
   // 4) Instancia del controlador con los casos de uso inyectados
   const escaladorController = new EscaladorController(escaladorUseCases);
   const pistaController = new PistaController(pistaUseCases);
   const zonaController = new ZonaController(zonaUseCases);
   const rocodromoController = new RocodromoController(rocodromoUseCases);
+  const amistadController = new AmistadController(amistadUseCases);
 
   // 5) Retornar las instancias que serán consumidas por las rutas
   return {
@@ -267,6 +340,7 @@ async function inicializarContainer() {
     pistaController,
     zonaController,
     rocodromoController,
+    amistadController,
   };
 }
 

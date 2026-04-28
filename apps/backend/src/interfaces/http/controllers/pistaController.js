@@ -1,6 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { BadRequestError, NotFoundError } from '../../../domain/sharedObjects/AppError.js';
+import {
+  BadRequestError,
+  NotFoundError,
+} from '../../../domain/sharedObjects/AppError.js';
 
 class PistaController {
   constructor(pistaUseCases) {
@@ -11,7 +14,18 @@ class PistaController {
     let finalPath = null;
 
     try {
-      const { idZona, nombre, dificultad, tipo, colorPresas, imagenUrl, posX, posY, fechaCreacion, fechaRetirada } = req.body;
+      const {
+        idZona,
+        nombre,
+        dificultad,
+        tipo,
+        colorPresas,
+        imagenUrl,
+        posX,
+        posY,
+        fechaCreacion,
+        fechaRetirada,
+      } = req.body;
       const hasUpload = Boolean(req.file);
 
       let nuevaPista = await this.useCases.crear.execute({
@@ -76,7 +90,10 @@ class PistaController {
     try {
       const { id } = req.params;
       const escaladorApodo = req.user ? req.user.apodo : null;
-      const pista = await this.useCases.obtenerPistaPorId.execute(id, escaladorApodo);
+      const pista = await this.useCases.obtenerPistaPorId.execute(
+        id,
+        escaladorApodo
+      );
 
       if (!pista) {
         return next(
@@ -132,7 +149,9 @@ class PistaController {
     try {
       const { id } = req.params;
 
-      const resultado = await this.useCases.obtenerValoracionTotal.execute({ idPista: id });
+      const resultado = await this.useCases.obtenerValoracionTotal.execute({
+        idPista: id,
+      });
 
       res.status(200).json(resultado);
     } catch (error) {
@@ -196,7 +215,10 @@ class PistaController {
 
       if (!req.file) {
         return next(
-          new BadRequestError('La imagen es requerida', 'PISTA_IMAGEN_REQUERIDA')
+          new BadRequestError(
+            'La imagen es requerida',
+            'PISTA_IMAGEN_REQUERIDA'
+          )
         );
       }
 
@@ -319,7 +341,11 @@ class PistaController {
     } catch (error) {
       if (error.code === 'ENOENT') {
         return next(
-          new NotFoundError('Imagen no encontrada', 'PISTA_IMAGEN_NOT_FOUND', error)
+          new NotFoundError(
+            'Imagen no encontrada',
+            'PISTA_IMAGEN_NOT_FOUND',
+            error
+          )
         );
       }
 

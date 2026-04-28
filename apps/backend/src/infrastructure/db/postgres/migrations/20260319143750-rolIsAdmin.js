@@ -2,7 +2,7 @@
 
 /** @type {import('sequelize-cli').Migration} */
 export default {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     await queryInterface.addColumn('Escaladores', 'IsAdmin', {
       type: Sequelize.BOOLEAN,
       allowNull: false,
@@ -10,7 +10,7 @@ export default {
     });
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     await queryInterface.removeColumn('Escaladores', 'IsAdmin');
-  }
+  },
 };

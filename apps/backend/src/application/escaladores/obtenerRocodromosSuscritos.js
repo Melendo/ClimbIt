@@ -1,4 +1,7 @@
-import { NotFoundError, InternalServerError } from '../../domain/sharedObjects/AppError.js';
+import {
+  NotFoundError,
+  InternalServerError,
+} from '../../domain/sharedObjects/AppError.js';
 
 class ObtenerRocodromosSuscritos {
   constructor(escaladorRepository) {
@@ -9,7 +12,10 @@ class ObtenerRocodromosSuscritos {
     try {
       const escalador = await this.escaladorRepository.encontrarPorApodo(apodo);
       if (!escalador) {
-        throw new NotFoundError('Escalador no encontrado', 'ESCALADOR_NOT_FOUND');
+        throw new NotFoundError(
+          'Escalador no encontrado',
+          'ESCALADOR_NOT_FOUND'
+        );
       }
       const rocodromosSuscritos =
         await this.escaladorRepository.obtenerRocodromosSuscritos(escalador.id);

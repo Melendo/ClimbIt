@@ -1,11 +1,20 @@
-import { renderRutaEstadoButtons, setupRutaEstadoButtons } from '../../components/rutaEstadoButtons.js';
+import {
+  renderRutaEstadoButtons,
+  setupRutaEstadoButtons,
+} from '../../components/rutaEstadoButtons.js';
 import {
   renderRutaRatingSection,
   setupRutaRatingSection,
 } from '../../components/rutaRating.js';
 import { escapeHtml } from '../../components/formHelpers.js';
-import { renderPresaColorIcon } from '../../components/rutaCardIndicators.js';
-import { renderRutaImageModal, setupRutaImageModal } from '../../components/rutaImageModal.js';
+import {
+  renderPresaColorIcon,
+  renderMedallaColorIcon,
+} from '../../components/rutaCardIndicators.js';
+import {
+  renderRutaImageModal,
+  setupRutaImageModal,
+} from '../../components/rutaImageModal.js';
 
 function toDateInputValue(value) {
   if (!value) return '';
@@ -30,15 +39,16 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
     initialValues = {},
     colorPresasOptions = [],
   } = viewData;
-  
+
   const isEditMode = mode === 'edit';
   const cardBadgeText = isEditMode ? 'Modificar ruta' : 'Nueva ruta';
   const submitText = isEditMode ? 'Guardar cambios' : 'Crear ruta';
-  
-  const backHref = (idRocodromo && idZona)
-  ? `#mapaZona?id=${idRocodromo}&zona=${idZona}`
-  : '#misRocodromos';
-  
+
+  const backHref =
+    idRocodromo && idZona
+      ? `#mapaZona?id=${idRocodromo}&zona=${idZona}`
+      : '#misRocodromos';
+
   container.innerHTML = `
   <div class="d-flex flex-column crear-ruta-card" style="height: 100dvh; overflow: hidden;">
     <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
@@ -152,11 +162,11 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
 
         <div id="form-alert" class="alert d-none" role="alert"></div>
   
-        <button type="submit" id="crear-ruta-submit" class="btn btn-primary w-100" ${contextError ? 'disabled' : ''}>${submitText}</button>
+        <button type="submit" id="crear-ruta-submit" class="btn btn-primary w-100" ${contextError ? 'disabled' : ''} data-submit-text="${submitText}">${submitText}</button>
       </form>
     </div>
   </div>`;
-  
+
   const form = container.querySelector('#form-crear-ruta');
   const nombreInput = container.querySelector('#nombre');
   const dificultadSelect = container.querySelector('#dificultad');
@@ -175,10 +185,13 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
   const coordsBadge = container.querySelector('#coordenadasSeleccionadas');
   const submitButton = container.querySelector('#crear-ruta-submit');
   const alertBox = container.querySelector('#form-alert');
-  
-  const setDificultadOptions = (options = [], placeholder = 'Sin dificultad') => {
+
+  const setDificultadOptions = (
+    options = [],
+    placeholder = 'Sin dificultad'
+  ) => {
     const safeOptions = Array.isArray(options) ? options : [];
-    
+
     dificultadSelect.innerHTML = [
       `<option value="">${escapeHtml(placeholder)}</option>`,
       ...safeOptions.map((option) => {
@@ -189,7 +202,10 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
     ].join('');
   };
 
-  const setColorPresasOptions = (options = [], placeholder = 'Sin color de presas') => {
+  const setColorPresasOptions = (
+    options = [],
+    placeholder = 'Sin color de presas'
+  ) => {
     const safeOptions = Array.isArray(options) ? options : [];
 
     colorPresasSelect.innerHTML = [
@@ -201,7 +217,7 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
       }),
     ].join('');
   };
-  
+
   if (typeof initialValues.nombre === 'string') {
     nombreInput.value = initialValues.nombre;
   }
@@ -210,16 +226,16 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
   if (typeof initialValues.colorPresas === 'string') {
     colorPresasSelect.value = initialValues.colorPresas;
   }
-  
+
   if (initialValues.tipo === 'boulder') {
     tipoBoulderInput.checked = true;
   } else if (initialValues.tipo === 'via') {
     tipoViaInput.checked = true;
   }
-  
+
   fechaCreacionInput.value = toDateInputValue(initialValues.fechaCreacion);
   fechaRetiradaInput.value = toDateInputValue(initialValues.fechaRetirada);
-  
+
   if (!fechaCreacionInput.value) {
     // Establecer fecha de creación por defecto al día actual
     const now = new Date();
@@ -228,15 +244,16 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
     const day = String(now.getDate()).padStart(2, '0');
     fechaCreacionInput.value = `${year}-${month}-${day}`;
   }
-  
+
   dificultadSelect.disabled = true;
   setDificultadOptions([], 'Selecciona tipo de ruta');
-  
   let selectedImagenFile = null;
 
   const setSelectedImagen = (file) => {
     selectedImagenFile = file || null;
-    imagenSelectedName.textContent = selectedImagenFile ? `Imagen seleccionada: ${selectedImagenFile.name}` : 'Sin imagen seleccionada';
+    imagenSelectedName.textContent = selectedImagenFile
+      ? `Imagen seleccionada: ${selectedImagenFile.name}`
+      : 'Sin imagen seleccionada';
     callbacks.onFieldChange(imagenInput, alertBox);
   };
 
@@ -262,40 +279,75 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
     handleNativeInputChange(imagenGaleriaInput);
   });
 
-  [nombreInput, dificultadSelect, colorPresasSelect, tipoBoulderInput, tipoViaInput, fechaCreacionInput, fechaRetiradaInput, imagenInput].forEach((el) => {
+  [
+    nombreInput,
+    dificultadSelect,
+    colorPresasSelect,
+    tipoBoulderInput,
+    tipoViaInput,
+    fechaCreacionInput,
+    fechaRetiradaInput,
+    imagenInput,
+  ].forEach((el) => {
     el.addEventListener('input', () => callbacks.onFieldChange(el, alertBox));
     el.addEventListener('change', () => callbacks.onFieldChange(el, alertBox));
   });
-  
+
   const handleTipoChange = () => {
     if (typeof callbacks.onTipoChange !== 'function') return;
-    
-    const selectedTipo = tipoBoulderInput.checked ? 'boulder' : tipoViaInput.checked ? 'via' : '';
+
+    const selectedTipo = tipoBoulderInput.checked
+      ? 'boulder'
+      : tipoViaInput.checked
+        ? 'via'
+        : '';
     callbacks.onTipoChange(selectedTipo, {
       dificultadSelect,
       setDificultadOptions,
       alertBox,
     });
   };
-  
+
   tipoBoulderInput.addEventListener('change', handleTipoChange);
   tipoViaInput.addEventListener('change', handleTipoChange);
-  
+
+  const setSubmitLoading = () => {
+    const originalText =
+      submitButton.dataset.submitText || submitButton.textContent.trim();
+    submitButton.dataset.submitText = originalText;
+    submitButton.disabled = true;
+    submitButton.innerHTML = `
+      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+      ${originalText}…
+    `;
+  };
+
+  const clearSubmitLoading = () => {
+    const originalText =
+      submitButton.dataset.submitText || submitButton.textContent.trim();
+    submitButton.disabled = false;
+    submitButton.textContent = originalText;
+  };
+
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    
+
     const values = {
       idRocodromo,
       idZona,
       nombre: nombreInput.value,
       dificultad: dificultadSelect.value,
       colorPresas: colorPresasSelect.value,
-      tipo: tipoBoulderInput.checked ? 'boulder' : tipoViaInput.checked ? 'via' : '',
+      tipo: tipoBoulderInput.checked
+        ? 'boulder'
+        : tipoViaInput.checked
+          ? 'via'
+          : '',
       fechaCreacion: fechaCreacionInput.value,
       fechaRetirada: fechaRetiradaInput.value,
       imagen: selectedImagenFile,
     };
-    
+
     callbacks.onSubmit(values, {
       nombreInput,
       dificultadSelect,
@@ -308,9 +360,11 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
       alertBox,
       submitButton,
       coordsBadge,
+      setSubmitLoading,
+      clearSubmitLoading,
     });
   });
-  
+
   if (typeof callbacks.onViewReady === 'function') {
     callbacks.onViewReady({
       mapaViewport,
@@ -337,17 +391,24 @@ export function renderInfoRuta(container, ruta, callbacks) {
     fechaRetirada,
     activo,
   } = ruta || {};
-  
-  const hasDificultad = typeof dificultad === 'string'
-  ? dificultad.trim().length > 0
-  : Boolean(dificultad);
+
+  const hasDificultad =
+    typeof dificultad === 'string'
+      ? dificultad.trim().length > 0
+      : Boolean(dificultad);
   const tipoLabel = formatTipo(tipo);
-  const dificultadLabel = dificultad || 'Sin dificultad';
-  const colorPresasLabel = colorPresas || 'No definido';
+  const dificultadLabel = dificultad || 'N/A';
+  const colorPresasLabel = colorPresas || 'N/A';
+  const tipoLabelSafe = escapeHtml(tipoLabel);
+  const dificultadLabelSafe = escapeHtml(dificultadLabel);
+  const colorPresasLabelSafe = escapeHtml(colorPresasLabel);
   const colorPresasRgb = ruta?.colorPresasRgb || 'rgb(158, 158, 158)';
   const fechaCreacionLabel = formatDateOnly(fechaCreacion);
   const fechaRetiradaLabel = formatDateOnly(fechaRetirada);
+  const fechaCreacionLabelSafe = escapeHtml(fechaCreacionLabel);
+  const fechaRetiradaLabelSafe = escapeHtml(fechaRetiradaLabel);
   const activoLabel = activo ? 'Activa' : 'Inactiva';
+  const activoLabelSafe = escapeHtml(activoLabel);
   const activoBadgeClass = activo ? 'text-bg-success' : 'text-bg-secondary';
   const canManage = Boolean(ruta?.canManage);
   const backHref = ruta?.backHref || '#misRocodromos';
@@ -360,7 +421,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
     numValoraciones: Number(ruta?.ratingSummary?.numValoraciones) || 0,
     canRate: Boolean(ruta?.canRateRating),
   };
-  
+
   container.innerHTML = `
 <div class="d-flex flex-column" style="min-height: 100dvh; background: #f8f9fa;">
   
@@ -379,7 +440,9 @@ export function renderInfoRuta(container, ruta, callbacks) {
       <span class="material-icons">arrow_back</span>
     </a>
   
-    ${canManage ? `
+    ${
+      canManage
+        ? `
     <div class="position-absolute top-0 end-0 m-3 d-flex gap-2" style="z-index: 3;">
       <button type="button" id="btn-modificar-ruta" class="btn btn-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(255,255,255,0.85);" aria-label="Modificar ruta" title="Modificar ruta">
         <span class="material-icons" style="font-size: 20px;">edit</span>
@@ -387,7 +450,9 @@ export function renderInfoRuta(container, ruta, callbacks) {
       <button type="button" id="eliminar-ruta-btn" class="btn btn-danger d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;" aria-label="Eliminar ruta" title="Eliminar ruta">
         <span class="material-icons" style="font-size: 20px;">delete</span>
       </button>
-    </div>` : ''}
+    </div>`
+        : ''
+    }
 
     <button
       type="button"
@@ -401,9 +466,7 @@ export function renderInfoRuta(container, ruta, callbacks) {
       <span class="material-icons" style="font-size: 20px;">zoom_in</span>
     </button>
     
-    <!-- Info sobre la imagen -->
     <div class="position-absolute bottom-0 start-0 end-0 p-4 text-white">
-      ${hasDificultad ? `<span class="badge mb-2" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); font-size: 0.9rem; padding: 6px 12px;">${dificultad}</span>` : ''}
       <h1 class="fs-4 fw-semibold mb-0">${rutaNombreSafe}</h1>
     </div>
   </div>
@@ -413,70 +476,123 @@ export function renderInfoRuta(container, ruta, callbacks) {
     
     <!-- Tu progreso y acciones -->
     <div class="bg-white px-4 py-4">
-      <div class="d-flex align-items-center justify-content-between mb-3">
-        <div>
-          <p class="text-muted small mb-1 text-uppercase" style="letter-spacing: 0.5px;">Tu progreso</p>
-          <p class="mb-0 fw-medium" id="estado-texto">Sin registrar</p>
-        </div>
-        <div id="estado-actual" class="d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: #e5e7eb;">
+      <p class="text-muted small mb-3 text-uppercase" style="letter-spacing: 0.5px;">Tu progreso</p>
+      <div class="d-flex align-items-center gap-3 rounded-4 border bg-light px-3 py-2 mb-3">
+        <div id="estado-actual" class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 48px; height: 48px; background: #e5e7eb;">
           <span class="material-icons" style="color: #6b7280; font-size: 28px;">remove</span>
         </div>
+        <div class="d-flex flex-column min-w-0">
+          <span class="small text-muted text-uppercase" style="letter-spacing: 0.4px;">Estado</span>
+          <span class="mb-0 fw-medium text-truncate" id="estado-texto">Sin registrar</span>
+        </div>
       </div>
-  
-      <p class="text-muted small mb-3 text-uppercase" style="letter-spacing: 0.5px;">Marcar como</p>
+
       <div class="row g-2">
         ${renderRutaEstadoButtons()}
+      </div>
+
+      <p class="text-muted small mt-4 mb-3 text-uppercase" style="letter-spacing: 0.5px;">Información</p>
+
+      <div class="row g-2 mb-3 flex-nowrap" style="overflow-x: auto;">
+        <div class="col-6">
+          <div class="d-flex align-items-center gap-2 rounded-4 border bg-light px-2 py-2 h-100">
+            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 40px; height: 40px; background: rgba(37, 99, 235, 0.1);">
+              ${
+                hasDificultad && ruta?.difficultyIsColor
+                  ? `
+                ${renderMedallaColorIcon({
+                  color: ruta.difficultyColorRgb || 'rgb(158, 158, 158)',
+                  size: 24,
+                  title: `Dificultad: ${dificultadLabelSafe}`,
+                  ariaLabel: `Dificultad ${dificultadLabelSafe}`,
+                })}
+              `
+                  : `
+                <span class="badge bg-primary shadow-sm border border-light">${dificultadLabelSafe}</span>
+              `
+              }
+            </div>
+            <div class="d-flex flex-column min-w-0">
+              <span class="small text-muted text-uppercase" style="letter-spacing: 0.4px; font-size: 0.68rem;">Dificultad</span>
+              <span class="mb-0 fw-medium text-truncate" style="font-size: 0.9rem; line-height: 1.15;">${dificultadLabelSafe}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6">
+          <div class="d-flex align-items-center gap-2 rounded-4 border bg-light px-2 py-2 h-100">
+            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 40px; height: 40px; background: rgba(16, 185, 129, 0.1);">
+              ${renderPresaColorIcon({
+                color: colorPresasRgb,
+                size: 24,
+                inset: 2,
+                withOutline: true,
+                title: `Color de presas: ${colorPresasLabelSafe}`,
+                ariaLabel: `Color de presas ${colorPresasLabelSafe}`,
+              })}
+            </div>
+            <div class="d-flex flex-column min-w-0">
+              <span class="small text-muted text-uppercase" style="letter-spacing: 0.4px; font-size: 0.68rem;">Color de presas</span>
+              <span class="mb-0 fw-medium text-truncate" style="font-size: 0.9rem; line-height: 1.15;">${colorPresasLabelSafe}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-2 mb-3 flex-nowrap" style="overflow-x: auto;">
+        <div class="col-6">
+          <div class="d-flex align-items-center gap-2 rounded-4 border bg-light px-2 py-2 h-100">
+            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 40px; height: 40px; background: rgba(37, 99, 235, 0.1);">
+              <span class="material-icons" style="font-size: 20px; color: #1d4ed8;">alt_route</span>
+            </div>
+            <div class="d-flex flex-column min-w-0">
+              <span class="small text-muted text-uppercase" style="letter-spacing: 0.4px; font-size: 0.68rem;">Tipo de ruta</span>
+              <span class="mb-0 fw-medium text-truncate" style="font-size: 0.9rem; line-height: 1.15;">${tipoLabelSafe}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6">
+          <div class="d-flex align-items-center gap-2 rounded-4 border bg-light px-2 py-2 h-100">
+            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 40px; height: 40px; background: rgba(34, 197, 94, 0.12);">
+              <span class="material-icons" style="font-size: 20px; color: #15803d;">flag</span>
+            </div>
+            <div class="d-flex flex-column min-w-0">
+              <span class="small text-muted text-uppercase" style="letter-spacing: 0.4px; font-size: 0.68rem;">Estado de ruta</span>
+              <span class="badge ${activoBadgeClass} mt-1" style="width: fit-content;">${activoLabelSafe}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-2 mb-3 flex-nowrap" style="overflow-x: auto;">
+        <div class="col-6">
+          <div class="d-flex align-items-center gap-2 rounded-4 border bg-light px-2 py-2 h-100">
+            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 40px; height: 40px; background: rgba(59, 130, 246, 0.12);">
+              <span class="material-icons" style="font-size: 20px; color: #1d4ed8;">event_available</span>
+            </div>
+            <div class="d-flex flex-column min-w-0">
+              <span class="small text-muted text-uppercase" style="letter-spacing: 0.4px; font-size: 0.68rem;">Fecha de creación</span>
+              <span class="mb-0 fw-medium text-truncate" style="font-size: 0.82rem; line-height: 1.1;">${fechaCreacionLabelSafe}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6">
+          <div class="d-flex align-items-center gap-2 rounded-4 border bg-light px-2 py-2 h-100">
+            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 40px; height: 40px; background: rgba(248, 113, 113, 0.12);">
+              <span class="material-icons" style="font-size: 20px; color: #b91c1c;">event_busy</span>
+            </div>
+            <div class="d-flex flex-column min-w-0">
+              <span class="small text-muted text-uppercase" style="letter-spacing: 0.4px; font-size: 0.68rem;">Fecha de retirada</span>
+              <span class="mb-0 fw-medium text-truncate" style="font-size: 0.82rem; line-height: 1.1;">${fechaRetiradaLabelSafe}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
     ${renderRutaRatingSection(ratingSummary)}
-  
-    <!-- Detalles de la ruta -->
-    <div class="bg-white mt-2 px-4 py-4">
-      <p class="text-muted small mb-3 text-uppercase" style="letter-spacing: 0.5px;">Detalles de la ruta</p>
-  
-      <div class="row g-3">
-        <div class="col-6">
-          <div class="small text-muted text-uppercase">Tipo de ruta</div>
-          <div class="mt-1">
-            <span class="badge bg-primary">${tipoLabel}</span>
-          </div>
-        </div>
-        <div class="col-6">
-          <div class="small text-muted text-uppercase">Estado de ruta</div>
-          <div class="mt-1">
-            <span class="badge ${activoBadgeClass}">${activoLabel}</span>
-          </div>
-        </div>
-        <div class="col-6">
-          <div class="small text-muted text-uppercase">Color de presas</div>
-          <div class="d-inline-flex align-items-center justify-content-center rounded-3 mt-1" style="width: 38px; height: 38px; background: #f3f4f6;">
-            ${renderPresaColorIcon({
-              color: colorPresasRgb,
-              size: 28,
-              inset: 2,
-              withOutline: true,
-              title: `Color de presas: ${colorPresasLabel}`,
-              ariaLabel: `Color de presas ${colorPresasLabel}`,
-            })}
-          </div>
-        </div>
-        <div class="col-6">
-          <div class="small text-muted text-uppercase">Dificultad</div>
-          <div class="mt-1">
-            <span class="badge bg-primary shadow-sm border border-light">${escapeHtml(dificultadLabel)}</span>
-          </div>
-        </div>
-        <div class="col-6">
-          <div class="small text-muted text-uppercase">Fecha de creación</div>
-          <div class="fw-medium">${fechaCreacionLabel}</div>
-        </div>
-        <div class="col-6">
-          <div class="small text-muted text-uppercase">Fecha de retirada</div>
-          <div class="fw-medium">${fechaRetiradaLabel}</div>
-        </div>
-      </div>
-    </div>
   
   </div>
 </div>
@@ -487,7 +603,6 @@ ${renderRutaImageModal({
   imageSrc: rutaImageSrc,
   imageAlt: `Imagen ampliada de la ruta ${rutaNombre}`,
 })}`;
-  
   setupRutaEstadoButtons(container, callbacks.onEstadoChange);
   const ratingSectionController = setupRutaRatingSection(container, {
     canRate: ratingSummary.canRate,
@@ -496,44 +611,45 @@ ${renderRutaImageModal({
     onError: callbacks.onRatingError,
   });
 
-  if (ratingSectionController && typeof callbacks.onRatingReady === 'function') {
+  if (
+    ratingSectionController &&
+    typeof callbacks.onRatingReady === 'function'
+  ) {
     callbacks.onRatingReady(ratingSectionController);
   }
-  
+
   const editButton = container.querySelector('#btn-modificar-ruta');
   if (editButton && typeof callbacks.onEdit === 'function') {
     editButton.addEventListener('click', callbacks.onEdit);
   }
-    const eliminarRutaBtn = container.querySelector('#eliminar-ruta-btn');
-    if (eliminarRutaBtn && typeof callbacks.onDeleteRoute === 'function') {
-      eliminarRutaBtn.addEventListener('click', () => {
-        callbacks.onDeleteRoute(ruta, eliminarRutaBtn);
-      });
-    }
-
-  setupRutaImageModal(container, { modalId: rutaImageModalId });
-  }
-
-  
-  // Función auxiliar para formatear una fecha a día, mes y año o mostrar un texto de fallback si no es válida
-  function formatDateOnly(value) {
-    if (!value) return 'No definida';
-
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) return 'No definida';
-
-    return parsed.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
+  const eliminarRutaBtn = container.querySelector('#eliminar-ruta-btn');
+  if (eliminarRutaBtn && typeof callbacks.onDeleteRoute === 'function') {
+    eliminarRutaBtn.addEventListener('click', () => {
+      callbacks.onDeleteRoute(ruta, eliminarRutaBtn);
     });
   }
-  
-  // Función auxiliar para formatear el tipo de ruta a un texto legible
-  function formatTipo(tipo) {
-    if (!tipo) return 'No definido';
-    if (tipo === 'via') return 'Vía';
-    if (tipo === 'boulder') return 'Bloque';
-    return tipo;
-  }
-  
+
+  setupRutaImageModal(container, { modalId: rutaImageModalId });
+}
+
+// Función auxiliar para formatear una fecha a día, mes y año o mostrar un texto de fallback si no es válida
+function formatDateOnly(value) {
+  if (!value) return 'N/A';
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return 'N/A';
+
+  return parsed.toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
+
+// Función auxiliar para formatear el tipo de ruta a un texto legible
+function formatTipo(tipo) {
+  if (!tipo) return 'No definido';
+  if (tipo === 'via') return 'Vía';
+  if (tipo === 'boulder') return 'Bloque';
+  return tipo;
+}
