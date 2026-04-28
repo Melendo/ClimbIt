@@ -247,7 +247,6 @@ export function renderCrearRuta(container, callbacks, viewData = {}) {
 
   dificultadSelect.disabled = true;
   setDificultadOptions([], 'Selecciona tipo de ruta');
-
   let selectedImagenFile = null;
 
   const setSelectedImagen = (file) => {
@@ -604,7 +603,6 @@ ${renderRutaImageModal({
   imageSrc: rutaImageSrc,
   imageAlt: `Imagen ampliada de la ruta ${rutaNombre}`,
 })}`;
-
   setupRutaEstadoButtons(container, callbacks.onEstadoChange);
   const ratingSectionController = setupRutaRatingSection(container, {
     canRate: ratingSummary.canRate,

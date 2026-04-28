@@ -80,7 +80,6 @@ class CrearPista {
           'PISTA_POSICION_OCUPADA'
         );
       }
-
       const nuevaPista = new Pista(
         null,
         data.idZona,
