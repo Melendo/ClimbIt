@@ -106,10 +106,6 @@ export async function handleNavigation() {
       const id = obtenerParametroDesdeHash('id');
       const idZona = obtenerParametroDesdeHash('zona');
       await mapaZonaCmd(mainContainer, id, idZona);
-    } else if (hash.startsWith('#mapaRocodromo')) {
-      // Redirección para compatibilidad hacia atras
-      const id = obtenerParametroDesdeHash('id');
-      window.location.hash = `#mapaZona?id=${id}`;
     } else if (hash === '#perfil') {
       await perfilCmd(mainContainer);
     } else if (hash === '#editarPerfil') {
