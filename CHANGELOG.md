@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-04-28
+
+### Añadido
+
+#### Funcionalidades Sociales
+- **Gestión de Amigos**: Implementada la posibilidad de buscar, añadir y eliminar amigos para conectar con otros escaladores.
+- **Perfiles Públicos**: Visualización detallada de los perfiles de amigos para consultar sus logros y estadísticas.
+- **Leaderboard**: Sistema de clasificación social entre amigos basado en el número de rutas completadas y días de actividad mensual.
+
+#### Funcionalidades Usuario
+- **Onboarding**: Añadido un tutorial interactivo tras el registro para guiar a los nuevos usuarios en sus primeros pasos.
+- **Rutas**: Implementada la funcionalidad de visualizar fotos de ruta a pantalla completa.
+
+### Modificado
+
+#### Funcionalidades Usuario
+- **Rutas**: Refactorización integral de la vista de información de las rutas para mejorar la disposición de los datos y el rendimiento visual.
+
+- **Registro**: Mejorado el proceso de registro del escalador con una validación en tiempo real de correo y apodo. Mejorada seguridad de contraseña.
+
+#### Infraestructura
+- **Offline First**: Reestructurada la arquitectura de la aplicación para soportar una estrategia *offline first*, garantizando una experiencia fluida incluso sin conexión a internet en el rocódromo.
+
+### Arreglado
+
+#### Funcionalidades Usuario
+- **Perfil**: Corregidos errores críticos que afectaban a la actualización y guardado de la imagen de perfil.
+
 ## [0.2.2] - 2026-04-23
 
 ### Arreglado
