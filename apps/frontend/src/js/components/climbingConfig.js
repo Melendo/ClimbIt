@@ -10,6 +10,7 @@ const DEFAULT_COLOR_SCALE_MAP = Object.freeze({
   gris: '#9e9e9e',
   negro: '#212121',
   marron: '#8d6e63',
+  celeste: '#7afbfb',
 });
 
 export const ESTADOS_CONFIG = Object.freeze({

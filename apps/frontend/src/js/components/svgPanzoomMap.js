@@ -1,5 +1,3 @@
-import panzoom from 'panzoom';
-
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const DEFAULT_SVG_SIZE = 1000;
 const DEFAULT_CLICK_THRESHOLD = 10;
@@ -54,7 +52,7 @@ export function createSvgPanzoomMap(options) {
     throw new Error('createSvgPanzoomMap requiere un viewport valido');
   }
 
-  let panzoomInstance = null;
+  let viewBoxController = null;
   let selectionLayer = null;
   let selectedPoint = null;
   let markersDetailedMode = null;
@@ -122,17 +120,15 @@ export function createSvgPanzoomMap(options) {
   const getSelectedPoint = () => selectedPoint;
 
   const reset = () => {
-    if (!panzoomInstance) return;
-
-    panzoomInstance.moveTo(0, 0);
-    panzoomInstance.zoomAbs(0, 0, 1);
+    if (!viewBoxController) return;
+    viewBoxController.reset();
   };
 
   const dispose = () => {
-    if (!panzoomInstance) return;
+    if (!viewBoxController) return;
 
-    panzoomInstance.dispose();
-    panzoomInstance = null;
+    viewBoxController.dispose();
+    viewBoxController = null;
   };
 
   const renderMarkers = async (items = []) => {
@@ -149,6 +145,10 @@ export function createSvgPanzoomMap(options) {
         throw new Error('El archivo SVG base no tiene un nodo SVG valido');
       }
 
+      if (!svgElement.getAttribute('viewBox')) {
+        svgElement.setAttribute('viewBox', `0 0 ${svgSize} ${svgSize}`);
+      }
+
       svgElement.removeAttribute('width');
       svgElement.removeAttribute('height');
       svgElement.classList.add('roco-svg');
@@ -163,15 +163,14 @@ export function createSvgPanzoomMap(options) {
       let mapStartY = 0;
 
       const getMapPointFromEvent = (event) => {
-        const ctm = svgElement.getScreenCTM();
-        if (!ctm) return null;
-
-        const point = svgElement.createSVGPoint();
-        point.x = event.clientX;
-        point.y = event.clientY;
-
-        const transformedPoint = point.matrixTransform(ctm.inverse());
-        return normalizePoint(transformedPoint);
+        const viewBox = parseViewBoxAttribute(svgElement, svgSize);
+        const point = mapClientToSvgPoint(
+          svgElement,
+          event.clientX,
+          event.clientY,
+          viewBox
+        );
+        return normalizePoint(point);
       };
 
       const updateMarkerScale = (currentScale = 1) => {
@@ -440,57 +439,21 @@ export function createSvgPanzoomMap(options) {
 
       viewport.replaceChildren(svgElement);
 
-      panzoomInstance = panzoom(svgElement, {
-        maxZoom: 6,
+      viewBoxController = createViewBoxPanZoom(svgElement, {
         minZoom: 0.8,
+        maxZoom: 6,
         zoomSpeed: 0.08,
-        smoothScroll: false,
-        bounds: true,
-        boundsPadding: 0.1,
       });
 
-      const clampPanToViewport = () => {
-        const transform = panzoomInstance.getTransform();
-        const viewportRect = viewport.getBoundingClientRect();
-
-        const scaledWidth = viewportRect.width * transform.scale;
-        const scaledHeight = viewportRect.height * transform.scale;
-
-        let minX = viewportRect.width - scaledWidth;
-        let maxX = 0;
-        let minY = viewportRect.height - scaledHeight;
-        let maxY = 0;
-
-        if (scaledWidth <= viewportRect.width) {
-          minX = maxX = (viewportRect.width - scaledWidth) / 2;
-        }
-
-        if (scaledHeight <= viewportRect.height) {
-          minY = maxY = (viewportRect.height - scaledHeight) / 2;
-        }
-
-        const nextX = clamp(transform.x, minX, maxX);
-        const nextY = clamp(transform.y, minY, maxY);
-
-        if (nextX !== transform.x || nextY !== transform.y) {
-          panzoomInstance.moveTo(nextX, nextY);
-        }
-      };
-
-      updateMarkerScale(panzoomInstance.getTransform().scale);
-      updateMarkerDetailMode(panzoomInstance.getTransform().scale);
-      clampPanToViewport();
-
-      panzoomInstance.on('pan', () => {
-        clampPanToViewport();
-      });
-
-      panzoomInstance.on('zoom', () => {
-        const { scale } = panzoomInstance.getTransform();
+      const syncMarkerVisualState = () => {
+        const { scale } = viewBoxController.getTransform();
         updateMarkerScale(scale);
         updateMarkerDetailMode(scale);
-        clampPanToViewport();
-      });
+      };
+
+      syncMarkerVisualState();
+      viewBoxController.on('pan', syncMarkerVisualState);
+      viewBoxController.on('zoom', syncMarkerVisualState);
     } catch (err) {
       console.error('Error al renderizar mapa interactivo:', err);
       viewport.innerHTML = `
@@ -520,6 +483,389 @@ function clamp(value, min, max) {
 function toNumberOrNull(value) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseViewBoxAttribute(svgElement, fallbackSize = DEFAULT_SVG_SIZE) {
+  const vbAttr = svgElement.getAttribute('viewBox');
+  if (!vbAttr) {
+    return { x: 0, y: 0, width: fallbackSize, height: fallbackSize };
+  }
+
+  const parts = vbAttr.trim().split(/[,\s]+/).map(Number);
+  if (parts.length !== 4 || !parts.every(Number.isFinite)) {
+    return { x: 0, y: 0, width: fallbackSize, height: fallbackSize };
+  }
+
+  return {
+    x: parts[0],
+    y: parts[1],
+    width: parts[2] > 0 ? parts[2] : fallbackSize,
+    height: parts[3] > 0 ? parts[3] : fallbackSize,
+  };
+}
+
+function mapClientToSvgPoint(svgElement, clientX, clientY, viewBox) {
+  const rect = svgElement.getBoundingClientRect();
+  if (!rect || rect.width <= 0 || rect.height <= 0) {
+    return null;
+  }
+
+  const preserve =
+    (svgElement.getAttribute('preserveAspectRatio') || 'xMidYMid meet')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+
+  const align = preserve[0] || 'xMidYMid';
+  const meetOrSlice = preserve[1] || 'meet';
+
+  if (align === 'none') {
+    const relX = (clientX - rect.left) / rect.width;
+    const relY = (clientY - rect.top) / rect.height;
+    return {
+      x: viewBox.x + relX * viewBox.width,
+      y: viewBox.y + relY * viewBox.height,
+    };
+  }
+
+  const scaleX = rect.width / viewBox.width;
+  const scaleY = rect.height / viewBox.height;
+  const contentScale =
+    meetOrSlice === 'slice' ? Math.max(scaleX, scaleY) : Math.min(scaleX, scaleY);
+
+  const renderedWidth = viewBox.width * contentScale;
+  const renderedHeight = viewBox.height * contentScale;
+
+  let offsetX = 0;
+  let offsetY = 0;
+
+  if (align.includes('xMid')) {
+    offsetX = (rect.width - renderedWidth) / 2;
+  } else if (align.includes('xMax')) {
+    offsetX = rect.width - renderedWidth;
+  }
+
+  if (align.includes('YMid')) {
+    offsetY = (rect.height - renderedHeight) / 2;
+  } else if (align.includes('YMax')) {
+    offsetY = rect.height - renderedHeight;
+  }
+
+  return {
+    x: viewBox.x + (clientX - rect.left - offsetX) / contentScale,
+    y: viewBox.y + (clientY - rect.top - offsetY) / contentScale,
+  };
+}
+
+function createViewBoxPanZoom(svgElement, options = {}) {
+  const minZoom = Number.isFinite(options.minZoom) ? options.minZoom : 0.8;
+  const maxZoom = Number.isFinite(options.maxZoom) ? options.maxZoom : 6;
+  const zoomSpeed = Number.isFinite(options.zoomSpeed) ? options.zoomSpeed : 0.08;
+
+  const listeners = {
+    pan: new Set(),
+    zoom: new Set(),
+  };
+
+  const baseViewBox = parseViewBoxAttribute(svgElement, DEFAULT_SVG_SIZE);
+  const state = {
+    x: baseViewBox.x,
+    y: baseViewBox.y,
+    width: baseViewBox.width,
+    height: baseViewBox.height,
+    scale: 1,
+  };
+
+  const emit = (eventName) => {
+    if (!listeners[eventName]) return;
+    listeners[eventName].forEach((handler) => {
+      try {
+        handler();
+      } catch {
+        // Ignorar errores en listeners para no romper la interacción.
+      }
+    });
+  };
+
+  const applyViewBox = () => {
+    svgElement.setAttribute(
+      'viewBox',
+      `${state.x} ${state.y} ${state.width} ${state.height}`
+    );
+  };
+
+  const clampViewBoxPosition = (nextX, nextY, width, height) => {
+    const minX = baseViewBox.x;
+    const maxX = baseViewBox.x + baseViewBox.width - width;
+    const minY = baseViewBox.y;
+    const maxY = baseViewBox.y + baseViewBox.height - height;
+
+    return {
+      x: clamp(nextX, minX, maxX),
+      y: clamp(nextY, minY, maxY),
+    };
+  };
+
+  const clientPointToSvg = (clientX, clientY) => {
+    return mapClientToSvgPoint(svgElement, clientX, clientY, {
+      x: state.x,
+      y: state.y,
+      width: state.width,
+      height: state.height,
+    });
+  };
+
+  const setScale = (nextScale, anchorClient = null) => {
+    const clampedScale = clamp(nextScale, minZoom, maxZoom);
+    const nextWidth = baseViewBox.width / clampedScale;
+    const nextHeight = baseViewBox.height / clampedScale;
+
+    let anchor = null;
+    if (anchorClient && Number.isFinite(anchorClient.clientX) && Number.isFinite(anchorClient.clientY)) {
+      anchor = clientPointToSvg(anchorClient.clientX, anchorClient.clientY);
+    }
+
+    if (!anchor) {
+      anchor = {
+        x: state.x + state.width / 2,
+        y: state.y + state.height / 2,
+      };
+    }
+
+    const anchorRatioX = state.width > 0 ? (anchor.x - state.x) / state.width : 0.5;
+    const anchorRatioY = state.height > 0 ? (anchor.y - state.y) / state.height : 0.5;
+
+    const unclampedX = anchor.x - anchorRatioX * nextWidth;
+    const unclampedY = anchor.y - anchorRatioY * nextHeight;
+    const clampedPosition = clampViewBoxPosition(
+      unclampedX,
+      unclampedY,
+      nextWidth,
+      nextHeight
+    );
+
+    const changed =
+      clampedScale !== state.scale ||
+      clampedPosition.x !== state.x ||
+      clampedPosition.y !== state.y;
+
+    state.scale = clampedScale;
+    state.width = nextWidth;
+    state.height = nextHeight;
+    state.x = clampedPosition.x;
+    state.y = clampedPosition.y;
+
+    if (changed) {
+      applyViewBox();
+      emit('zoom');
+    }
+  };
+
+  const panByClientDelta = (deltaClientX, deltaClientY) => {
+    const rect = svgElement.getBoundingClientRect();
+    if (!rect || rect.width <= 0 || rect.height <= 0) {
+      return;
+    }
+
+    const deltaSvgX = (deltaClientX / rect.width) * state.width;
+    const deltaSvgY = (deltaClientY / rect.height) * state.height;
+
+    const clampedPosition = clampViewBoxPosition(
+      state.x - deltaSvgX,
+      state.y - deltaSvgY,
+      state.width,
+      state.height
+    );
+
+    if (clampedPosition.x === state.x && clampedPosition.y === state.y) {
+      return;
+    }
+
+    state.x = clampedPosition.x;
+    state.y = clampedPosition.y;
+    applyViewBox();
+    emit('pan');
+  };
+
+  const interactionState = {
+    pointerId: null,
+    lastX: 0,
+    lastY: 0,
+    pinchStartDistance: null,
+    pinchStartScale: null,
+  };
+
+  const getTouchDistance = (touchA, touchB) => {
+    return Math.hypot(touchB.clientX - touchA.clientX, touchB.clientY - touchA.clientY);
+  };
+
+  const handlePointerDown = (event) => {
+    if (interactionState.pointerId !== null) {
+      return;
+    }
+
+    const isMarkerTarget =
+      typeof event.target?.closest === 'function' &&
+      event.target.closest('.ruta-marker');
+    if (isMarkerTarget) {
+      return;
+    }
+
+    interactionState.pointerId = event.pointerId;
+    interactionState.lastX = event.clientX;
+    interactionState.lastY = event.clientY;
+  };
+
+  const handlePointerMove = (event) => {
+    if (interactionState.pointerId !== event.pointerId) {
+      return;
+    }
+
+    const deltaX = event.clientX - interactionState.lastX;
+    const deltaY = event.clientY - interactionState.lastY;
+    interactionState.lastX = event.clientX;
+    interactionState.lastY = event.clientY;
+
+    if (deltaX === 0 && deltaY === 0) {
+      return;
+    }
+
+    panByClientDelta(deltaX, deltaY);
+  };
+
+  const handlePointerUp = (event) => {
+    if (interactionState.pointerId === event.pointerId) {
+      interactionState.pointerId = null;
+    }
+  };
+
+  const handleWheel = (event) => {
+    event.preventDefault();
+    const factor = Math.exp(-event.deltaY * zoomSpeed * 0.01);
+    setScale(state.scale * factor, {
+      clientX: event.clientX,
+      clientY: event.clientY,
+    });
+  };
+
+  const handleTouchStart = (event) => {
+    if (event.touches.length !== 2) {
+      interactionState.pinchStartDistance = null;
+      interactionState.pinchStartScale = null;
+      return;
+    }
+
+    interactionState.pinchStartDistance = getTouchDistance(
+      event.touches[0],
+      event.touches[1]
+    );
+    interactionState.pinchStartScale = state.scale;
+  };
+
+  const handleTouchMove = (event) => {
+    if (event.touches.length !== 2) {
+      return;
+    }
+
+    if (!interactionState.pinchStartDistance || !interactionState.pinchStartScale) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const nextDistance = getTouchDistance(event.touches[0], event.touches[1]);
+    if (!Number.isFinite(nextDistance) || nextDistance <= 0) {
+      return;
+    }
+
+    const ratio = nextDistance / interactionState.pinchStartDistance;
+    const midpointX = (event.touches[0].clientX + event.touches[1].clientX) / 2;
+    const midpointY = (event.touches[0].clientY + event.touches[1].clientY) / 2;
+
+    setScale(interactionState.pinchStartScale * ratio, {
+      clientX: midpointX,
+      clientY: midpointY,
+    });
+  };
+
+  const handleTouchEnd = (event) => {
+    if (event.touches.length < 2) {
+      interactionState.pinchStartDistance = null;
+      interactionState.pinchStartScale = null;
+    }
+  };
+
+  svgElement.addEventListener('pointerdown', handlePointerDown);
+  svgElement.addEventListener('pointermove', handlePointerMove);
+  svgElement.addEventListener('pointerup', handlePointerUp);
+  svgElement.addEventListener('pointercancel', handlePointerUp);
+  svgElement.addEventListener('wheel', handleWheel, { passive: false });
+  svgElement.addEventListener('touchstart', handleTouchStart, { passive: true });
+  svgElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+  svgElement.addEventListener('touchend', handleTouchEnd);
+  svgElement.addEventListener('touchcancel', handleTouchEnd);
+
+  const reset = () => {
+    state.x = baseViewBox.x;
+    state.y = baseViewBox.y;
+    state.width = baseViewBox.width;
+    state.height = baseViewBox.height;
+    state.scale = 1;
+    applyViewBox();
+    emit('pan');
+    emit('zoom');
+  };
+
+  return {
+    moveTo(nextX, nextY) {
+      const clampedPosition = clampViewBoxPosition(
+        toNumberOrNull(nextX) ?? state.x,
+        toNumberOrNull(nextY) ?? state.y,
+        state.width,
+        state.height
+      );
+
+      if (clampedPosition.x === state.x && clampedPosition.y === state.y) {
+        return;
+      }
+
+      state.x = clampedPosition.x;
+      state.y = clampedPosition.y;
+      applyViewBox();
+      emit('pan');
+    },
+    zoomAbs(clientX, clientY, nextScale) {
+      setScale(toNumberOrNull(nextScale) ?? state.scale, { clientX, clientY });
+    },
+    getTransform() {
+      return {
+        x: state.x,
+        y: state.y,
+        scale: state.scale,
+      };
+    },
+    on(eventName, handler) {
+      if (!listeners[eventName] || typeof handler !== 'function') {
+        return;
+      }
+      listeners[eventName].add(handler);
+    },
+    reset,
+    dispose() {
+      svgElement.removeEventListener('pointerdown', handlePointerDown);
+      svgElement.removeEventListener('pointermove', handlePointerMove);
+      svgElement.removeEventListener('pointerup', handlePointerUp);
+      svgElement.removeEventListener('pointercancel', handlePointerUp);
+      svgElement.removeEventListener('wheel', handleWheel);
+      svgElement.removeEventListener('touchstart', handleTouchStart);
+      svgElement.removeEventListener('touchmove', handleTouchMove);
+      svgElement.removeEventListener('touchend', handleTouchEnd);
+      svgElement.removeEventListener('touchcancel', handleTouchEnd);
+
+      listeners.pan.clear();
+      listeners.zoom.clear();
+    },
+  };
 }
 // Función auxiliar para cargar un SVG desde una URL con caching
 async function loadSvg(svgAssetUrl) {
