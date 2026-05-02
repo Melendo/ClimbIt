@@ -92,6 +92,18 @@ export function renderPerfil(container, escalador, callbacks) {
                 <span>Tutorial</span>
               </a>
             </li>
+            <li>
+              <a
+                class="dropdown-item d-flex align-items-center gap-2"
+                href="https://www.iubenda.com/privacy-policy/86624965"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Abrir politica de privacidad"
+              >
+                <span class="material-icons" style="font-size: 18px;">policy</span>
+                <span>Politica de privacidad</span>
+              </a>
+            </li>
             <li><hr class="dropdown-divider"></li>
             <li>
               <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="#" id="header-logout-btn">
