@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-05-02
+
+### Añadido
+
+#### Política de Privacidad
+- Se ha añadido una nueva sección de Política de Privacidad para informar a los usuarios accesible desde el menú desplegable de su perfil.
+
+#### Rutas
+- Añadido color Azul Celeste a la paleta de colores de selección de color de presas de una ruta.
+
+### Modificado
+
+#### Funcionalidad Social
+- **Social**: Mejorada la interfaz del leaderboard social para mostrar mejor las tarjetas de cada amigo y sus estadísticas.
+
+### Arreglado
+
+#### Funcionalidades Escalador
+- **Social**: Corregido error que impedía la actualización de la lista de amigos y de solicitudes de amistad.
+
+#### Funcionalidades de Gestor de Rocódromo
+- **Mapa dinámico**: Arreglado fallo que impedia desde IOS seleccionar los puntos del mapa sobre donde se quería crear o modificar una ruta.
+
+## [Unreleased]
+
 ## [1.0.0] - 2026-04-28
 
 ### Añadido
