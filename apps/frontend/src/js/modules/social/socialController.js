@@ -109,6 +109,11 @@ async function safeGetArray(endpoint, warningMessage) {
   }
 }
 
+function withCacheBust(endpoint) {
+  const separator = endpoint.includes('?') ? '&' : '?';
+  return `${endpoint}${separator}ts=${Date.now()}`;
+}
+
 async function responderSolicitud(idSolicitud, respuesta) {
   const res = await fetchClient('/amistades/responder', {
     method: 'POST',
@@ -194,7 +199,7 @@ function buildSocialCallbacks(amigosConFoto) {
     },
     onRefreshFriends: async () => {
       const nuevosAmigos = await safeGetArray(
-        '/amistades/mis-amigos',
+        withCacheBust('/amistades/mis-amigos'),
         'No se pudo refrescar la lista de amigos'
       );
       if (!nuevosAmigos.length) {
@@ -213,11 +218,11 @@ export async function socialCmd(container) {
   try {
     const [amigos, solicitudes, escaladorActual] = await Promise.all([
       safeGetArray(
-        '/amistades/mis-amigos',
+        withCacheBust('/amistades/mis-amigos'),
         'No se pudo cargar la lista de amigos'
       ),
       safeGetArray(
-        '/amistades/solicitudes-pendientes',
+        withCacheBust('/amistades/solicitudes-pendientes'),
         'No se pudo cargar el buzón de solicitudes'
       ),
       resolverEscaladorActual(),
