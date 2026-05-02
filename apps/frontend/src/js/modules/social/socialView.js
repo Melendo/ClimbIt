@@ -137,7 +137,7 @@ export function renderSocialView(
 
   const rankingMetricMap = {
     rutas: { key: 'rutasEsteMes', label: 'Rutas' },
-    dias: { key: 'diasActivos', label: 'Días activos' },
+    dias: { key: 'diasActivo', label: 'Días activo' },
   };
 
   const getMetricValue = (item, metricKey) => {
@@ -304,8 +304,8 @@ export function renderSocialView(
     const updateStickyPlacement = () => {
       const listRect = rankingList.getBoundingClientRect();
       const cardRect = selfCard.getBoundingClientRect();
-      const isAbove = cardRect.bottom < listRect.top + 4;
-      const isBelow = cardRect.top > listRect.bottom - 4;
+      const isAbove = cardRect.top < listRect.top;
+      const isBelow = cardRect.bottom > listRect.bottom;
 
       if (!isAbove && !isBelow) {
         stickyContainer.classList.add('d-none');
